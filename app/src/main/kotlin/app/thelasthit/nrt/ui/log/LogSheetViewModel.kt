@@ -9,11 +9,14 @@ import app.thelasthit.nrt.data.repo.LogResult
 import app.thelasthit.nrt.domain.dose.Dose
 import app.thelasthit.nrt.domain.log.Entry
 import app.thelasthit.nrt.domain.log.EntryKind
+import app.thelasthit.nrt.domain.log.EntrySource
 import app.thelasthit.nrt.domain.log.LabelWarning
 import app.thelasthit.nrt.domain.log.LogTime
 import app.thelasthit.nrt.domain.log.QuickTime
 import app.thelasthit.nrt.domain.log.TagGroup
 import app.thelasthit.nrt.domain.log.TagOrder
+import app.thelasthit.nrt.domain.matcher.LogLinkParser
+import app.thelasthit.nrt.domain.matcher.LogLinkRequest
 import app.thelasthit.nrt.domain.product.UserProduct
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -48,15 +51,23 @@ data class LogForm(
     val showOtherProducts: Boolean = false,
     val timeInFuture: Boolean = false,
     val duplicate: Entry? = null,
+    /** Where the sheet was opened from, which a new dose records. */
+    val source: EntrySource = EntrySource.APP,
+    /**
+     * The products a link could mean, in its order, each with the amount the link asks for in
+     * that product's unit. Empty unless a link was unclear. Until one is picked, none is.
+     */
+    val choices: Map<String, Int> = emptyMap(),
 )
 
 data class TagChips(val group: TagGroup, val tags: List<TagEntity>)
 
 data class LogSheetState(
     val form: LogForm,
-    /** Quick-log products first, in their order, then the rest of the user's products. */
+    /** A link's choices or the quick log's products first, in their order, then the rest of the user's products. */
     val products: List<UserProduct>,
-    val quickLogCount: Int,
+    /** How many of [products] show before "More": a link's choices, or the quick log. */
+    val leadingCount: Int,
     val tagGroups: List<TagChips>,
     val todayTotal: Dose,
     val now: Instant,
@@ -64,6 +75,7 @@ data class LogSheetState(
     val product: UserProduct? get() = products.firstOrNull { it.id == form.productId }
     val dose: Dose get() = product?.perUnit?.times(form.quantity) ?: Dose.ZERO
     val canSave: Boolean get() = product != null
+    val isChoosing: Boolean get() = form.choices.isNotEmpty()
 }
 
 /** A finished save, for Today's snackbar and label note. */
@@ -106,12 +118,15 @@ class LogSheetViewModel(
         openedAt,
     ) { form, (quick, all), groups, total, now ->
         val quickIds = quick.map { it.id }.toSet()
-        val products = quick + all.filter { it.id !in quickIds }
-        val productId = form.productId ?: products.firstOrNull()?.id
+        val usual = quick + all.filter { it.id !in quickIds }
+        val chosen = form.choices.keys.mapNotNull { id -> usual.firstOrNull { it.id == id } }
+        val products = chosen + usual.filter { it !in chosen }
+        // A link that was unclear waits for a pick rather than guessing.
+        val productId = form.productId ?: if (form.choices.isEmpty()) products.firstOrNull()?.id else null
         LogSheetState(
             form = form.copy(productId = productId),
             products = products,
-            quickLogCount = quick.size,
+            leadingCount = if (form.choices.isEmpty()) quick.size else chosen.size,
             tagGroups = groups,
             todayTotal = total,
             now = now,
@@ -119,10 +134,27 @@ class LogSheetViewModel(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Starts a fresh dose, optionally with a product picked, such as from a long press on a pill. */
-    fun openNew(productId: String? = null) {
+    fun openNew(productId: String? = null, source: EntrySource = EntrySource.APP) {
         openedAt.value = graph.clock.instant()
         editingProduct.value = null
-        form.value = LogForm(productId = productId)
+        form.value = LogForm(productId = productId, source = source)
+    }
+
+    /**
+     * Starts a dose from a link: a blank sheet for `lasthit://log`, or, when the link's product
+     * could be several, those [choices] to pick from, with the link's amount, time and tags.
+     */
+    fun openFromLink(source: EntrySource, choices: List<LogLinkRequest> = emptyList()) {
+        val first = choices.firstOrNull() ?: return openNew(source = source)
+        openedAt.value = graph.clock.instant()
+        editingProduct.value = null
+        form.value = LogForm(
+            quantity = first.quantity,
+            time = first.at?.let { TimeChoice.At(it) } ?: TimeChoice.Quick(QuickTime.NOW),
+            tags = first.tagKeys,
+            source = source,
+            choices = choices.associate { it.product.id to it.quantity },
+        )
     }
 
     /** Opens an existing entry for editing. */
@@ -143,11 +175,13 @@ class LogSheetViewModel(
         )
     }
 
-    fun pickProduct(id: String) = form.update { it.copy(productId = id) }
+    /** A link's choice brings the amount the link asks for in that product's unit. */
+    fun pickProduct(id: String) = form.update { it.copy(productId = id, quantity = it.choices[id] ?: it.quantity) }
 
     fun showOtherProducts() = form.update { it.copy(showOtherProducts = true) }
 
-    fun changeQuantity(by: Int) = form.update { it.copy(quantity = (it.quantity + by).coerceIn(1, MAX_QUANTITY)) }
+    /** Stops where a link does, so there's one limit. */
+    fun changeQuantity(by: Int) = form.update { it.copy(quantity = (it.quantity + by).coerceIn(1, LogLinkParser.MAX_QUANTITY)) }
 
     /** A picked time in the future is flagged straight away rather than on save. */
     fun pickTime(time: TimeChoice) = form.update {
@@ -187,6 +221,7 @@ class LogSheetViewModel(
             cravingStrength = current.form.strength,
             tagKeys = current.form.tags,
             note = current.form.note.trim().ifBlank { null },
+            source = current.form.source,
             allowDuplicate = allowDuplicate,
         )
         viewModelScope.launch {
@@ -205,7 +240,6 @@ class LogSheetViewModel(
     }
 
     private companion object {
-        const val MAX_QUANTITY = 99
         const val MAX_NOTE = 500
     }
 }

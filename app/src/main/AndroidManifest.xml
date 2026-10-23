@@ -14,13 +14,36 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TheLastHit">
 
+        <!--
+            singleTask, so a link from Tasker or an NFC sticker reaches the app's one screen, through
+            onNewIntent when it's already open, rather than stacking a second copy in another app's task.
+        -->
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- lasthit://log?product=…&qty=…&at=…&tags=…, from Routines, Tasker or a shortcut. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="lasthit" />
+                <data android:host="log" />
+            </intent-filter>
+            <!-- The same link written to an NFC sticker. Reading it needs no NFC permission. -->
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="lasthit" />
+                <data android:host="log" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
     </application>
 

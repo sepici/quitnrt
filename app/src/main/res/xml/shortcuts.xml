@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    "Log a dose", there from the moment the app is installed. It opens lasthit://log, which opens
+    the log sheet. The quick log's products are dynamic shortcuts, from QuickLogShortcuts.
+-->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="log"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_log"
+        android:shortcutShortLabel="@string/shortcut_log"
+        android:shortcutLongLabel="@string/shortcut_log">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="lasthit://log"
+            android:targetPackage="app.thelasthit.nrt"
+            android:targetClass="app.thelasthit.nrt.MainActivity">
+            <extra
+                android:name="app.thelasthit.nrt.extra.SOURCE"
+                android:value="shortcut" />
+        </intent>
+    </shortcut>
+</shortcuts>

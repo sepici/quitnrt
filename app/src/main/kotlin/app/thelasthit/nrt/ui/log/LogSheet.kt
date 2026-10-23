@@ -95,7 +95,8 @@ private const val FOLDED_TAGS = 4
 
 /**
  * The log sheet: product, amount, time, planned or craving, strength, tags and a note, with Save
- * pinned to the bottom. Call [LogSheetViewModel.openNew] or [LogSheetViewModel.openEdit] first.
+ * pinned to the bottom. Call [LogSheetViewModel.openNew], [LogSheetViewModel.openFromLink] or
+ * [LogSheetViewModel.openEdit] first.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -213,8 +214,16 @@ private fun ProductField(state: LogSheetState, viewModel: LogSheetViewModel) {
             )
             return@Field
         }
-        val others = state.products.size > state.quickLogCount && state.quickLogCount > 0
-        val shown = if (state.form.showOtherProducts || !others) state.products else state.products.take(state.quickLogCount)
+        if (state.isChoosing) {
+            Text(
+                stringResource(R.string.log_choose_product),
+                style = LastHit.type.body,
+                color = LastHit.colors.text,
+                modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 12.dp),
+            )
+        }
+        val others = state.products.size > state.leadingCount && state.leadingCount > 0
+        val shown = if (state.form.showOtherProducts || !others) state.products else state.products.take(state.leadingCount)
         // Tiles in a row share the tallest one's height, so a long name doesn't leave a ragged edge.
         // The row scrolls under the sheet's edges, with its padding inside the scroll.
         Row(
@@ -538,7 +547,8 @@ private fun SaveBar(state: LogSheetState, viewModel: LogSheetViewModel, onSave: 
                 style = LastHit.type.title.copy(fontSize = 18.sp, fontWeight = FontWeight.ExtraBold),
                 color = content,
             )
-            if (!editing) {
+            // Nothing to sum until a product is picked, as when a link's product could be several.
+            if (!editing && state.product != null) {
                 Text(
                     stringResource(R.string.log_save_detail, state.dose.mgText(), time),
                     style = LastHit.type.label.copy(fontSize = 15.sp),

@@ -1,5 +1,6 @@
 package app.thelasthit.nrt.ui.format
 
+import android.content.res.Resources
 import android.text.format.DateFormat
 import androidx.annotation.DrawableRes
 import androidx.annotation.PluralsRes
@@ -86,9 +87,12 @@ fun elapsedSpoken(elapsed: Elapsed): String {
 }
 
 @Composable
-fun pillLabelText(label: PillLabel): String = when (label) {
-    is PillLabel.ByForm -> stringResource(R.string.pill_label, stringResource(label.word.text), label.strength.mgText())
-    is PillLabel.ByName -> stringResource(R.string.pill_label, label.name, label.strength.mgText())
+fun pillLabelText(label: PillLabel): String = LocalResources.current.pillLabelText(label)
+
+/** [pillLabelText] outside Compose, such as for a shortcut. */
+fun Resources.pillLabelText(label: PillLabel): String = when (label) {
+    is PillLabel.ByForm -> getString(R.string.pill_label, getString(label.word.text), label.strength.mgText())
+    is PillLabel.ByName -> getString(R.string.pill_label, label.name, label.strength.mgText())
 }
 
 @get:StringRes
@@ -189,3 +193,6 @@ fun tagText(tag: TagEntity): String = tag.customName ?: tagText(tag.key)
 
 @Composable
 fun tagText(key: String): String = builtInTagText[key]?.let { stringResource(it) } ?: key
+
+/** A built-in tag's own name, whatever the user has renamed it to, or null for the user's own tags. */
+fun Resources.builtInTagName(key: String): String? = builtInTagText[key]?.let(::getString)
