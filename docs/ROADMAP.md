@@ -7,6 +7,8 @@ PLAN says what each phase delivers; this says how it's cut up and what each slic
 - **Owner** marks a decision that needs a yes before the slice that uses it. Each has a recommendation.
 - **Needs you** marks a step only the owner can do: a device in hand, an account, a sign-off.
 
+**Approved on 23 October:** every recommendation below, G1 and G2 included. One change: **Wear OS (phase 8) is built after release**, so the order is phases 2 to 7, then 9, then 8.
+
 ## Running unattended
 
 The owner plans to let the work run for long stretches. These rules keep that safe.
@@ -151,9 +153,9 @@ Ready for Gemini when Google opens it up. PLAN §12.
 
 **Needs you:** connect your Android 16 phone for the adb run, and register for the Early Access Programme.
 
-## Phase 8: Wear OS
+## Phase 8: Wear OS (after release)
 
-Logging from your wrist. PLAN §14.
+Logging from your wrist. PLAN §14. The owner moved this phase after phase 9.
 
 1. **The watch module.** A `:wear` module (minSdk 30) with the same app ID and signing. The watch message types go in the domain: an ID and the original time, so a message sent twice counts once. With tests.
 2. **The phone side.** A Data Layer listener that applies each watch log once and sends back the day's summary and the favourites.

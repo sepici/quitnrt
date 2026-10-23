@@ -9,13 +9,15 @@ Last updated: 23 October 2026, after the phase 1 screens were built and reviewed
 | 0. Foundation and direction | Done. Gradle set-up, CI, copy lint, style guide, design direction chosen, first creature signed off |
 | 1. Logging | **Done.** Domain rules, catalogue, data layer, backup, theme, sprites, plus **onboarding, Today, the log sheet, History, Settings and the lair**, reviewed, with the owner's calls on the reviews applied. |
 | 2. Insights | **In progress.** The stats are in `core/domain` (`domain/insights`), with tests. Insights has its filters and the daily chart; the heat maps, triggers, habits, by product and the History filter are next. |
-| 3 to 9 | Not started. Each is cut into slices in `docs/ROADMAP.md`, with the decisions it needs. |
+| 3 to 9 | Not started. Each is cut into slices in `docs/ROADMAP.md`, with the decisions it needs, all approved. Wear OS (8) comes after release. |
 
 The full check passes locally: copy rules, 93 domain tests, 28 data tests, 74 app UI, screenshot and format tests, debug APK, Android lint.
 
 ## Waiting for the owner
 
-- The Owner decisions in `docs/ROADMAP.md`, phases 3 to 9, and the two rules for working unattended (G1 and G2).
+- Sign-off on the batched mockups for phase 3 (the Plan tab) and phase 5 (advice), once they're made.
+
+The roadmap's decisions were all approved on 23 October, with Wear OS moved to after release.
 
 ## Decisions made since `docs/PLAN.md` was written
 
