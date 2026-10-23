@@ -1,5 +1,7 @@
 package app.thelasthit.nrt.domain.game
 
+import app.thelasthit.nrt.domain.creature.Creature
+import app.thelasthit.nrt.domain.creature.SpriteSheet
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -31,11 +33,11 @@ class PixelIconsTest {
             for (key in sheet.keys) {
                 val icon = sheet[key]!!
                 assertTrue(icon.colours.size <= 8, "$key uses ${icon.colours.size} colours")
-                assertTrue(palette.letters.containsAll(icon.colours), "$key stays in the palette")
                 val pixels = icon.argbPixels()
                 assertEquals(16 * 16, pixels.size)
-                val allowed = icon.colours.map { palette[it] }.toSet()
-                assertTrue(pixels.filter { it != 0 }.all { it in allowed }, "$key draws only its own colours")
+                val drawn = pixels.filter { it != 0 }.toSet()
+                assertTrue(drawn.size <= 8, "$key draws ${drawn.size} colours")
+                assertTrue(drawn.all { it in palette }, "$key draws only master palette colours")
                 assertTrue(pixels.any { it == 0 }, "$key has a transparent background")
                 assertTrue(pixels.count { it != 0 } > 30, "$key has a body")
             }
@@ -43,9 +45,14 @@ class PixelIconsTest {
     }
 
     @Test
-    fun `the master palette has about 24 colours, all different`() {
-        assertTrue(palette.size in 20..24, "${palette.size} colours")
-        assertEquals(palette.size, palette.letters.map { palette[it] }.toSet().size)
+    fun `one master palette holds the dragon's colours and the signed-off wooden sword's wood`() {
+        assertEquals(palette.ramps.values.sumOf { it.size }, palette.size, "no colour is in two ramps")
+        val dragon = requireNotNull(SpriteSheet.bundled(Creature.DRAGON))
+        for (variant in dragon.variantNames) {
+            assertTrue(dragon.palette(variant).all { it in palette }, "the dragon's $variant colours")
+        }
+        val wood = listOf(0xFF6B4423, 0xFFB07A43, 0xFFD9A866).map { it.toInt() }
+        assertEquals(wood, palette.ramps["wood"], "the signed-off wooden sword's wood, dark to light")
     }
 
     @Test
@@ -74,11 +81,11 @@ class PixelIconsTest {
     fun `badges in a group share their frame, so they read as a set`() {
         for (group in Achievement.Group.entries) {
             val shapes = Achievement.entries.filter { it.group == group }
-                .map { badges.icon(it).silhouettePixels(1).toList() }
+                .map { outline(badges.icon(it)) }
             assertTrue(shapes.all { it == shapes.first() }, "${group.key} badges share one outline")
         }
         val frames = Achievement.Group.entries.map { group ->
-            badges.icon(Achievement.entries.first { it.group == group }).silhouettePixels(1).toList()
+            outline(badges.icon(Achievement.entries.first { it.group == group }))
         }
         assertEquals(frames.size, frames.toSet().size, "each group has a frame of its own")
     }
@@ -93,27 +100,30 @@ class PixelIconsTest {
     }
 
     @Test
-    fun `a locked badge is its outline in one colour`() {
-        val icon = badges.icon(Achievement.DEMON_DEFEATED)
-        val shade = 0xFF3F3829.toInt()
-        val locked = icon.silhouettePixels(shade)
-        assertEquals(icon.argbPixels().map { it == 0 }, locked.map { it == 0 })
-        assertTrue(locked.filter { it != 0 }.all { it == shade })
-    }
-
-    @Test
     fun `broken icon files are refused`() {
-        val small = MasterPalette.parse("""{"colours":{"k":"#000000","a":"#111111","b":"#222222","c":"#333333",
-            "d":"#444444","e":"#555555","f":"#666666","g":"#777777","h":"#888888"}}""")
-        fun sheet(rows: List<String>, groups: String = "{}") =
-            """{"size":8,"groups":$groups,"icons":{"x":${rows.joinToString(",", "[", "]") { "\"$it\"" }}}}"""
+        val small = MasterPalette.parse(
+            """{"ramps":{"grey":["#000000","#111111","#222222","#333333","#444444","#555555","#666666","#777777","#888888"],
+            "red":["#ff0000"]}}""",
+        )
+        val key = """{"k":"#000000","a":"#111111","b":"#222222","c":"#333333","d":"#444444","e":"#555555",
+            "f":"#666666","g":"#777777","h":"#888888"}"""
+        fun sheet(rows: List<String>, groups: String = "{}", colours: String = key) =
+            """{"size":8,"colours":$colours,"groups":$groups,"icons":{"x":${rows.joinToString(",", "[", "]") { "\"$it\"" }}}}"""
         val good = List(8) { "kkkk...." }
-        IconSheet.parse(sheet(good), small)
+        assertEquals(0xFF000000.toInt(), IconSheet.parse(sheet(good), small)["x"]!!.argbPixels().first())
+        assertEquals(0xFFFF0000.toInt(), IconSheet.parse(sheet(good, colours = """{"k":"#FF0000"}"""), small)["x"]!!.argbPixels().first())
         assertThrows<IllegalArgumentException> { IconSheet.parse(sheet(good.drop(1)), small) }
         assertThrows<IllegalArgumentException> { IconSheet.parse(sheet(List(8) { "kkkk..." }), small) }
         assertThrows<IllegalArgumentException> { IconSheet.parse(sheet(List(8) { "kkkz...." }), small) }
         assertThrows<IllegalArgumentException> { IconSheet.parse(sheet(listOf("kabcdefg", "h.......") + List(6) { "........" }), small) }
         assertThrows<IllegalArgumentException> { IconSheet.parse(sheet(good, """{"g":["missing"]}"""), small) }
-        assertThrows<IllegalArgumentException> { MasterPalette.parse("""{"colours":{"k":"black"}}""") }
+        assertThrows<IllegalArgumentException>("a colour outside the master palette") {
+            IconSheet.parse(sheet(good, colours = """{"k":"#00ff00"}"""), small)
+        }
+        assertThrows<IllegalArgumentException> { MasterPalette.parse("""{"ramps":{"grey":["black"]}}""") }
+        assertThrows<IllegalArgumentException> { MasterPalette.parse("""{"ramps":{}}""") }
     }
+
+    /** Which pixels a badge covers, whatever their colours. */
+    private fun outline(icon: PixelIcon): List<Boolean> = icon.argbPixels().map { it != 0 }
 }

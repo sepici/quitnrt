@@ -5,70 +5,31 @@ import kotlinx.serialization.json.Json
 
 private val json = Json { ignoreUnknownKeys = true }
 
-private fun resource(path: String): String =
-    requireNotNull(MasterPalette::class.java.getResourceAsStream(path)) { "No resource $path" }
-        .bufferedReader().use { it.readText() }
-
-private fun parseColour(hex: String): Int {
-    require(Regex("#[0-9a-fA-F]{6}").matches(hex)) { "Colour $hex isn't #rrggbb" }
-    return (0xFF000000 or hex.substring(1).toLong(16)).toInt()
-}
-
 /**
- * The game layer's master palette, one letter per colour, built to match the app's colours.
- * Written by `art/tools/icons.py` to `icons/palette.json`.
- */
-class MasterPalette private constructor(private val colours: Map<Char, Int>) {
-    val letters: Set<Char> get() = colours.keys
-
-    val size: Int get() = colours.size
-
-    /** The ARGB colour of [letter], or null if the palette has no such letter. */
-    operator fun get(letter: Char): Int? = colours[letter]
-
-    companion object {
-        fun bundled(): MasterPalette = parse(resource("/icons/palette.json"))
-
-        fun parse(text: String): MasterPalette {
-            val file = json.decodeFromString(PaletteFile.serializer(), text)
-            val colours = file.colours.entries.associate { (key, hex) ->
-                require(key.length == 1 && key != ".") { "Palette letter '$key' must be one character other than '.'" }
-                key[0] to parseColour(hex)
-            }
-            return MasterPalette(colours)
-        }
-    }
-
-    @Serializable
-    private data class PaletteFile(val colours: Map<String, String>)
-}
-
-/**
- * A square pixel icon in the master palette, at most [IconSheet.MAX_COLOURS] colours, drawn with
+ * A square pixel icon, at most [IconSheet.MAX_COLOURS] colours from the master palette, drawn with
  * no smoothing like the sprites.
  */
 class PixelIcon internal constructor(
     val key: String,
     val size: Int,
-    /** Palette letters, row by row, with '.' for transparent. */
+    /** Colour key letters, row by row, with '.' for transparent. */
     private val letters: CharArray,
-    private val palette: MasterPalette,
+    /** The sheet's colour key: letter to ARGB. */
+    private val colourKey: Map<Char, Int>,
 ) {
-    /** The palette letters the icon uses. */
+    /** The colour key letters the icon uses. */
     val colours: Set<Char> = letters.filterTo(mutableSetOf()) { it != '.' }
 
     /** ARGB pixels, row by row, ready to turn into a bitmap. Transparent pixels are 0. */
     fun argbPixels(): IntArray = IntArray(letters.size) { i ->
-        letters[i].let { if (it == '.') 0 else palette[it]!! }
+        letters[i].let { if (it == '.') 0 else colourKey.getValue(it) }
     }
-
-    /** The icon's shape in one colour, for a badge that isn't unlocked yet. */
-    fun silhouettePixels(argb: Int): IntArray = IntArray(letters.size) { i -> if (letters[i] == '.') 0 else argb }
 }
 
 /**
- * A set of icons, the gear or the badges, from `icons/gear.json` or `icons/badges.json`. Each is
- * rows of master palette letters, written by `art/tools/icons.py`.
+ * A set of icons, the gear or the badges, from `icons/gear.json` or `icons/badges.json`, written
+ * by `art/tools/icons.py`. Each file has a colour key, one letter per colour, and every colour in
+ * it must be in the [MasterPalette]. Icons are rows of those letters.
  */
 class IconSheet private constructor(
     val size: Int,
@@ -91,23 +52,29 @@ class IconSheet private constructor(
         const val MAX_COLOURS = 8
 
         fun bundled(kind: Kind, palette: MasterPalette = MasterPalette.bundled()): IconSheet =
-            parse(resource("/icons/${kind.file}.json"), palette)
+            parse(resourceText("/icons/${kind.file}.json"), palette)
 
         fun parse(text: String, palette: MasterPalette): IconSheet {
             val file = json.decodeFromString(IconFile.serializer(), text)
             val size = file.size
             require(size in 8..64) { "Icon size $size is out of range" }
+            val colourKey = file.colours.entries.associate { (letter, hex) ->
+                require(letter.length == 1 && letter != ".") { "Colour key '$letter' must be one character other than '.'" }
+                val argb = parseColour(hex)
+                require(argb in palette) { "Colour $hex for '$letter' isn't in the master palette" }
+                letter[0] to argb
+            }
             val icons = file.icons.mapValues { (key, rows) ->
                 require(rows.size == size) { "Icon $key has ${rows.size} rows, expected $size" }
                 val letters = CharArray(size * size)
                 rows.forEachIndexed { y, row ->
                     require(row.length == size) { "Icon $key row $y is ${row.length} wide, expected $size" }
                     row.forEachIndexed { x, ch ->
-                        require(ch == '.' || palette[ch] != null) { "Icon $key uses '$ch', which isn't in the palette" }
+                        require(ch == '.' || ch in colourKey) { "Icon $key uses '$ch', which isn't in the colour key" }
                         letters[y * size + x] = ch
                     }
                 }
-                PixelIcon(key, size, letters, palette).also {
+                PixelIcon(key, size, letters, colourKey).also {
                     require(it.colours.size <= MAX_COLOURS) { "Icon $key uses ${it.colours.size} colours, at most $MAX_COLOURS" }
                 }
             }
@@ -121,6 +88,7 @@ class IconSheet private constructor(
     @Serializable
     private data class IconFile(
         val size: Int,
+        val colours: Map<String, String>,
         val icons: Map<String, List<String>>,
         val groups: Map<String, List<String>> = emptyMap(),
     )

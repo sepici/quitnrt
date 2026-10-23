@@ -3,12 +3,15 @@
 Usage: python -I icons.py
        python -I icons.py zoom OUT.png KEY [KEY ...]    a close-up of some icons with a pixel grid
 
-Needs only Python 3 (pixelfont.py writes the PNGs). It writes:
-  core/domain/src/main/resources/icons/palette.json   the master palette, one letter per colour
+Needs only Python 3 (pixelfont.py writes the PNGs). It reads the one master palette for creatures,
+gear and badges, core/domain/src/main/resources/palette.json (ramps of colours, shared with the
+creature tools), and writes:
   core/domain/src/main/resources/icons/gear.json      8 gear icons, in unlock order
   core/domain/src/main/resources/icons/badges.json    a badge for each achievement in PLAN 8.1
   art/previews/icons-gear.png, icons-badges.png       preview sheets at 8x, light and dark
   art/previews/icons-3x.png                           every icon at 3x, about its size on a phone
+Each icon file carries the colour key below, one letter per master palette colour, as the sprite
+sheets carry their slot colours.
 
 Each icon is drawn as fills only, and the ink outline is added round the outside, as the signed-off
 wooden sword was (docs/design/fieldbook-v2/tools/build.py). Badges are a group frame with a glyph
@@ -28,44 +31,54 @@ sys.path.insert(0, HERE)
 from pixelfont import Image, text_width  # noqa: E402
 
 ROOT = os.path.normpath(os.path.join(HERE, '..', '..'))
-OUT = os.path.join(ROOT, 'core', 'domain', 'src', 'main', 'resources', 'icons')
+RESOURCES = os.path.join(ROOT, 'core', 'domain', 'src', 'main', 'resources')
+MASTER = os.path.join(RESOURCES, 'palette.json')
+OUT = os.path.join(RESOURCES, 'icons')
 PREVIEWS = os.path.join(ROOT, 'art', 'previews')
 SIZE = 16
 MAX_COLOURS = 8
 
-# ---------------------------------------------------------------- the master palette
-# Built from the forest dragon, the signed-off wooden sword and the app's tokens, with the
-# dragon's ember and frost variants for fire and ice. 23 colours; any icon uses 8 at most.
-PALETTE = {
-    'k': ('#0B2017', 'ink, every outline'),
-    'G': ('#124F39', 'forest dark'),
-    'g': ('#1F7A50', 'forest'),
-    'v': ('#4FAE70', 'leaf'),
-    'u': ('#9A6508', 'marigold dark'),
-    'y': ('#F2A922', 'marigold'),
-    'Y': ('#FFE27A', 'gold light'),
-    'w': ('#6B4423', 'wood dark'),
-    'W': ('#B07A43', 'wood'),
-    't': ('#D9A866', 'wood light'),
-    'c': ('#F3E4B6', 'cream'),
-    'h': ('#FBF8E8', 'highlight'),
-    's': ('#3C3A30', 'stone dark'),
-    'S': ('#6F6C62', 'stone'),
-    'e': ('#A6A398', 'stone light'),
-    'E': ('#D5D2C5', 'stone pale'),
-    'r': ('#6B2B2D', 'ember dark'),
-    'R': ('#A3453A', 'ember'),
-    'f': ('#CF7A4F', 'ember light'),
-    'n': ('#2E4466', 'frost dark'),
-    'b': ('#4A6F98', 'frost'),
-    'i': ('#86ACC7', 'frost light'),
-    'I': ('#CFDCD9', 'frost pale'),
+# ---------------------------------------------------------------- the colour key
+# The icons draw from the master palette through this key, one letter per colour: the forest
+# dragon's greens and its ember and frost ramps, the signed-off wooden sword's wood, stone for
+# steel, and the app's marigold and cream. Every colour must be in palette.json; any icon uses 8
+# at most.
+KEY = {
+    'k': ('#0b2017', 'ink, every outline'),
+    'G': ('#124f39', 'forest dark'),
+    'g': ('#1f7a50', 'forest'),
+    'v': ('#4fae70', 'leaf'),
+    'u': ('#9a6508', 'marigold dark'),
+    'y': ('#f2a922', 'marigold'),
+    'Y': ('#ffe27a', 'gold light'),
+    'w': ('#6b4423', 'wood dark'),
+    'W': ('#b07a43', 'wood'),
+    't': ('#d9a866', 'wood light'),
+    'c': ('#f3e4b6', 'cream'),
+    'h': ('#fbf8e8', 'highlight'),
+    's': ('#3c3a30', 'stone dark'),
+    'S': ('#6f6c62', 'stone'),
+    'e': ('#a6a398', 'stone light'),
+    'E': ('#d5d2c5', 'stone pale'),
+    'r': ('#6b2b2d', 'ember dark'),
+    'R': ('#a3453a', 'ember'),
+    'f': ('#cf7a4f', 'ember light'),
+    'n': ('#2e4466', 'frost dark'),
+    'b': ('#4a6f98', 'frost'),
+    'i': ('#86acc7', 'frost light'),
+    'I': ('#cfdcd9', 'frost pale'),
 }
 OUTLINE = 'k'
 
 
+def master_colours():
+    """Every colour in the master palette, lower case."""
+    with open(MASTER, encoding='utf-8') as f:
+        return {c.lower() for ramp in json.load(f)['ramps'].values() for c in ramp}
+
+
 def rgb(letter):
-    h = PALETTE[letter][0]
+    h = KEY[letter][0]
     return tuple(int(h[i:i + 2], 16) for i in (1, 3, 5))
 
 
@@ -275,25 +288,26 @@ GEAR['war_hammer'] = [
     "................",
 ]
 
-# A forked staff with a flame held between its prongs. Not a ball on a stick, which reads as a
-# match.
+# A staff with a forked head, the flame held up between its two prongs. Not a ball on a stick,
+# which reads as a match, and the prongs are in the light woods so the fork still shows on the
+# dark page, where the ink outline disappears.
 GEAR['fire_staff'] = [
     "................",
-    ".............f..",
-    "..........w.fy..",
-    ".........t.yYf..",
-    ".........tfYy...",
-    ".........t.R.w..",
-    ".........tWWW...",
+    "...........f....",
+    "..........fy....",
+    "........t.fYf.W.",
+    "........t.yYy.t.",
+    "........tW.R.tW.",
+    ".........tWWtW..",
+    "..........tW....",
+    ".........tW.....",
     "........tW......",
-    ".......tw.......",
+    ".......tW.......",
     "......tW........",
     ".....tW.........",
-    "....tw..........",
+    "....tW..........",
     "...tW...........",
-    "..tW............",
-    "..w.............",
-    "................",
+    "...W............",
 ]
 
 # A wooden bow with its string drawn bare, loosing a lightning bolt.
@@ -515,15 +529,34 @@ TAG = [
     "...111111",
 ]
 
+NO_SHADOW = {'shadow': False}
+
+
+def exploded(main, wedge, dx=1, dy=-1):
+    """A pie chart: `main` with `wedge` pulled out by (dx, dy), both drawn on the same square."""
+    n = len(main)
+    g = [['.'] * (n + dx) for _ in range(n - dy)]
+    for part, (ox, oy) in ((main, (0, -dy)), (wedge, (dx, 0))):
+        for y, row in enumerate(part):
+            for x, ch in enumerate(row):
+                if ch != '.':
+                    g[oy + y][ox + x] = ch
+    return [''.join(r) for r in g]
+
+
 GLYPHS = {
+    # A yellow pencil: grey ferrule, cream cone and a dark point. Drawn without the drop shadow,
+    # which in the page's grey ran into the ferrule. (Brown with a red end read as a cigar.)
     'pencil': [
-        ".....33",
-        "....3t3",
-        "...111.",
-        "..111..",
-        ".111...",
-        "c11....",
-        "1c.....",
+        "......111.",
+        ".....1eee1",
+        "....1yyee1",
+        "...1yyuu1.",
+        "..1yyuu1..",
+        ".1hyuu1...",
+        "1hhhh1....",
+        "1khh1.....",
+        "1111......",
     ],
     'ruler': [
         "11111111111",
@@ -532,18 +565,23 @@ GLYPHS = {
         "1.........1",
         "11111111111",
     ],
+    # The History tab's icon: a clock whose ring turns back, its arrowhead at the top left, with
+    # the hands at 12 and 3. (Hands on the diagonal read as a no-entry sign.)
     'history': [
-        "..1111..",
-        ".1....1.",
-        "1..1...1",
-        "1..1...1",
-        "1...11.1",
-        "11.....1",
-        "111...1.",
-        "...111..",
+        ".1..11111..",
+        ".1.1.....1.",
+        ".111..1...1",
+        "......1...1",
+        "..1...11..1",
+        "..1.......1",
+        "..1.......1",
+        "...1.....1.",
+        "....11111..",
     ],
     'tag': TAG,
-    'tags': overlay(overlay(['..' + r for r in TAG], ['.' + r for r in TAG], 0, 2), TAG, 0, 4),
+    # Two tags, the one behind in wood so each keeps its point and hole. (Three cream tags read as
+    # a stack of paper.)
+    'tags': overlay([r.replace('c', 'W') for r in TAG], ['..' + r for r in TAG], 0, 4),
     'rebound': [
         "11.....1111",
         ".11.....111",
@@ -595,23 +633,31 @@ GLYPHS = {
         ".1.1.1.1..",
         ".1.111.1.1",
     ],
+    # The medal's glyphs fill its whole box (12 x 9) so they sit exactly: the dashed guide stays
+    # inside the face, clear of the rim. Five days in columns under the guide, like Today's week.
     'chart5': [
-        "11.11.11.",
-        ".........",
-        ".........",
-        "..1...1..",
-        "1.1...1.1",
-        "1.1.1.1.1",
-        "1.1.1.1.1",
+        "............",
+        "............",
+        "..11.11.11..",
+        "............",
+        "..1...1.....",
+        "..1.1.1.1...",
+        "..1.1.1.1.1.",
+        "............",
+        "............",
     ],
-    # Three in a row. (A bare 3 on a medal read as third place, and columns on the round medal read
-    # as a face.)
-    'chevrons': [
-        "11.11.11..",
-        ".11.11.11.",
-        "..11.11.11",
-        ".11.11.11.",
-        "11.11.11..",
+    # Three weeks as wide bars, each lower than the last, under the guide. (A bare 3 on a medal read
+    # as third place, and chevrons merged into a lattice.)
+    'bars3': [
+        "............",
+        "............",
+        "...111111...",
+        "............",
+        "..11........",
+        "..11.11.....",
+        "..11.11.11..",
+        "..11.11.11..",
+        "............",
     ],
     'clock': [
         "..111..",
@@ -622,30 +668,45 @@ GLYPHS = {
         ".1....1.",
         "..1111..",
     ],
+    # Two doses, the gold marks, with a long arrow between them. (Bars at the ends read as a
+    # dumbbell.)
     'gap': [
-        "1........1",
-        "1.1....1.1",
-        "1111111111",
-        "1.1....1.1",
-        "1........1",
+        "..1.....1..",
+        ".1.......1.",
+        "31111111113",
+        ".1.......1.",
+        "..1.....1..",
     ],
-    # A share with a third taken out, its old place outlined. (A tag with an arrow read as a fish.)
-    'pie': [
-        "..11333..",
-        ".1113..3.",
-        "11113...3",
-        "11113...3",
-        "11111...3",
-        "1111113.3",
-        "111111113",
-        ".1111111.",
-        "..11111..",
-    ],
+    # A pie chart with a third pulled out in gold. (An outlined quarter read as a moon, and a tag
+    # with an arrow as a fish.)
+    'pie': exploded(
+        [
+            "..11....",
+            ".111....",
+            "1111....",
+            "1111....",
+            "11111...",
+            "1111111.",
+            ".111111.",
+            "..1111..",
+        ],
+        [
+            "....33..",
+            "....333.",
+            "....3333",
+            "....3333",
+            ".....333",
+            ".......3",
+            "........",
+            "........",
+        ],
+    ),
 }
 
-# The achievements of PLAN 8.1, in its order: (key, group, glyph). Tiers show their number.
+# The achievements of PLAN 8.1, in its order: (key, group, glyph[, options for badge_icon]). Tiers
+# show their number.
 BADGES = [
-    ('first_entry', 'logging', GLYPHS['pencil']),
+    ('first_entry', 'logging', GLYPHS['pencil'], NO_SHADOW),
     ('logged_days_3', 'logging', number(3)),
     ('logged_days_7', 'logging', number(7)),
     ('logged_days_14', 'logging', number(14)),
@@ -670,10 +731,10 @@ BADGES = [
     ('final_taper_week', 'matching', GLYPHS['pennant']),
     ('week_under_by_10', 'beating', GLYPHS['percent10']),
     ('five_days_under', 'beating', GLYPHS['chart5']),
-    ('three_weeks_under', 'beating', GLYPHS['chevrons']),
+    ('three_weeks_under', 'beating', GLYPHS['bars3']),
     ('later_first_dose', 'habits', GLYPHS['clock']),
     ('longer_gaps', 'habits', GLYPHS['gap']),
-    ('top_trigger_down', 'habits', GLYPHS['pie']),
+    ('top_trigger_down', 'habits', GLYPHS['pie'], NO_SHADOW),
     ('breathing_1', 'habits', breaths(1)),
     ('breathing_10', 'habits', breaths(10)),
     ('breathing_25', 'habits', breaths(25)),
@@ -702,15 +763,18 @@ GROUPS = [('logging', 'Logging'), ('matching', 'Matching the plan'), ('beating',
           ('habits', 'Habits'), ('end', 'The end')]
 
 
-def badge_icon(key, group, art):
+def badge_icon(key, group, art, opts=()):
+    """The group's frame with `art` stamped in it. `opts`, if given, is one dict: 'shadow': False
+    for a glyph drawn without the drop shadow, and glyph keys that override the frame's ink."""
     if group == 'end':
         return rows_of(outline(grid(THE_END)))
     frame = FRAMES[group]
+    opts = dict(opts[0]) if opts else {}
     g = outline(grid(frame['fill']))
-    if frame.get('shadow', True) and not any('2' in r for r in art):
+    if opts.pop('shadow', frame.get('shadow', True)) and not any('2' in r for r in art):
         art = with_shadow(art)
     x, y = centred(art, frame['box'])
-    stamp(g, art, x, y, frame['ink'])
+    stamp(g, art, x, y, {**frame['ink'], **opts})
     return rows_of(g)
 
 
@@ -722,9 +786,9 @@ def check(kind, icons):
         if len(rows) != SIZE or any(len(r) != SIZE for r in rows):
             problems.append(f"{kind} {key} isn't {SIZE} x {SIZE}")
         used = {c for r in rows for c in r} - {'.'}
-        unknown = used - set(PALETTE)
+        unknown = used - set(KEY)
         if unknown:
-            problems.append(f"{kind} {key} uses letters outside the palette: {sorted(unknown)}")
+            problems.append(f"{kind} {key} uses letters outside the colour key: {sorted(unknown)}")
         if len(used) > MAX_COLOURS:
             problems.append(f"{kind} {key} uses {len(used)} colours: {''.join(sorted(used))}")
     return problems
@@ -759,18 +823,19 @@ def write(name, text):
 
 def build():
     gear = {key: gear_icon(key) for key in GEAR}
-    badges = {key: badge_icon(key, group, art) for key, group, art in BADGES}
+    badges = {key: badge_icon(key, group, art, opts) for key, group, art, *opts in BADGES}
     problems = check('gear', gear) + check('badge', badges)
-    palette = {
-        'about': 'The master palette for the game layer\'s icons. Each icon uses 8 colours at most.',
-        'colours': {k: v[0] for k, v in PALETTE.items()},
-        'names': {k: v[1] for k, v in PALETTE.items()},
-    }
-    write('palette.json', json.dumps(palette, indent=2) + '\n')
-    write('gear.json', dump({'size': SIZE, 'icons': gear}))
+    master = master_colours()
+    problems += [f"key {k} is {v[0]}, which isn't in palette.json" for k, v in KEY.items() if v[0] not in master]
+
+    def key_for(icons):
+        used = {c for rows in icons.values() for r in rows for c in r} - {'.'}
+        return {k: v[0] for k, v in KEY.items() if k in used}
+    write('gear.json', dump({'size': SIZE, 'colours': key_for(gear), 'icons': gear}))
     write('badges.json', dump({
         'size': SIZE,
-        'groups': {g: [k for k, grp, _ in BADGES if grp == g] for g, _ in GROUPS},
+        'colours': key_for(badges),
+        'groups': {g: [k for k, grp, *_ in BADGES if grp == g] for g, _ in GROUPS},
         'icons': badges,
     }))
     return gear, badges, problems
@@ -845,8 +910,8 @@ def sheet(title, items, path, per_row, big=8, swatches=False):
                 blit(img, rows, cx + small + 22, ty + 6, 3)
             y += n_rows * (item_h + gap)
         if swatches:
-            img.text(pad, y, 'Master palette', theme['text'], 2)
-            for i, (letter, (_, name)) in enumerate(PALETTE.items()):
+            img.text(pad, y, 'Colour key, all from the master palette', theme['text'], 2)
+            for i, (letter, (_, name)) in enumerate(KEY.items()):
                 sx = pad + i * 44
                 img.rect(sx, y + 28, 36, 36, rgb(letter))
                 img.text(sx + 14, y + 70, letter, theme['text2'], 1)
@@ -857,7 +922,7 @@ def strip(path, gear, badges):
     """Every icon at 3x in one block, on each tile colour: how a shelf of them reads."""
     pad, step = 16, SIZE * 3 + 8
     per_row = 14
-    keys = [('g', k) for k in gear] + [('b', k) for k, _, _ in BADGES]
+    keys = [('g', k) for k in gear] + [('b', k) for k, *_ in BADGES]
     rows_n = (len(keys) + per_row - 1) // per_row
     block_h = rows_n * step + pad
     themes = [LIGHT['page'], LIGHT['tile'], DARK['page'], DARK['tile']]
@@ -875,7 +940,7 @@ def previews(gear, badges):
     os.makedirs(PREVIEWS, exist_ok=True)
     sheet('Gear at 8x, in unlock order', [(None, [(GEAR_NAMES[k], v) for k, v in gear.items()])],
           os.path.join(PREVIEWS, 'icons-gear.png'), per_row=8, swatches=True)
-    sections = [(name, [(BADGE_NAMES[k], badges[k]) for k, grp, _ in BADGES if grp == g]) for g, name in GROUPS]
+    sections = [(name, [(BADGE_NAMES[k], badges[k]) for k, grp, *_ in BADGES if grp == g]) for g, name in GROUPS]
     sheet('Badges at 8x', sections, os.path.join(PREVIEWS, 'icons-badges.png'), per_row=7)
     strip(os.path.join(PREVIEWS, 'icons-3x.png'), gear, badges)
 
