@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=412">
+<title>Fieldbook, Today</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="status"><span class="num">15:05</span>
+  <svg width="52" height="14" viewBox="0 0 52 14" fill="currentColor"><path d="M1 13h2v-3H1zM5 13h2V7H5zM9 13h2V4H9zM13 13h2V1h-2z"/><rect x="30.5" y="2.5" width="17" height="9" rx="2" fill="none" stroke="currentColor"/><rect x="32" y="4" width="11" height="6"/><rect x="49" y="5" width="2" height="4"/></svg>
+</div>
+
+<header class="appbar">
+  <div><div class="eyebrow">Friday 23 October</div><h1>Today</h1></div>
+  <a class="iconbtn" aria-label="Settings"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h9M18 7h2M4 17h3M12 17h8"/><rect x="13" y="5" width="5" height="4" rx="1"/><rect x="7" y="15" width="5" height="4" rx="1"/></svg></a>
+</header>
+
+<main>
+  <section>
+    <div class="lab">Daily guide</div>
+    <div class="hero">
+      <div><span class="big num">8</span><span class="of">of 14&nbsp;mg</span></div>
+      <div class="cap" style="text-align:right;font-size:14px;line-height:20px">6&nbsp;mg under so far<br>Down from 16&nbsp;mg last week</div>
+    </div>
+    <div class="ruler" role="img" aria-label="8 of 14 mg today">
+      <div class="track"><div class="fill"></div></div>
+      <div class="ticks"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="tlabels"><span>0</span><span>7</span><span>14&nbsp;mg</span></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="head" style="margin-bottom:6px"><h2>This week</h2><span class="lab">Week 4 of 12</span></div>
+    <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:10px"><span class="num" style="font-size:28px;line-height:28px;font-weight:600">61</span><span class="cap" style="font-size:15px">of 98&nbsp;mg, 37&nbsp;mg left</span></div>
+    <div class="cells" role="img" aria-label="Mon 14, Tue 13, Wed 12, Thu 14, Fri 8 mg so far. Guide 14 mg a day">
+      <div class="cell"><div class="bar"><i style="height:100%"></i></div><span>M</span></div>
+      <div class="cell"><div class="bar"><i style="height:92.9%"></i></div><span>T</span></div>
+      <div class="cell"><div class="bar"><i style="height:85.7%"></i></div><span>W</span></div>
+      <div class="cell"><div class="bar"><i style="height:100%"></i></div><span>T</span></div>
+      <div class="cell now"><div class="bar"><i style="height:57.1%"></i></div><span>F</span></div>
+      <div class="cell"><div class="bar"></div><span>S</span></div>
+      <div class="cell"><div class="bar"></div><span>S</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="head"><h2>Quick log</h2><a class="link" style="font-size:14px">Edit</a></div>
+    <div class="chips">
+      <button class="chip">Nicorette gum <b>2&nbsp;mg</b></button>
+      <button class="chip">Nicorette gum <b>4&nbsp;mg</b></button>
+      <button class="chip">QuickMist <b>1&nbsp;mg</b></button>
+      <button class="chip">NiQuitin patch <b>14&nbsp;mg</b></button>
+    </div>
+    <button class="primary">Log</button>
+  </section>
+
+  <section class="card">
+    <div class="lab">Last dose</div>
+    <div class="since">1&nbsp;h 25&nbsp;min ago</div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="num" style="color:var(--text2)">13:40, Nicorette gum 2&nbsp;mg</span><span class="tag">After a meal</span></div>
+  </section>
+
+  <section>
+    <div class="head"><h2>Today's entries</h2><span class="lab">3&nbsp;entries, 8&nbsp;mg</span></div>
+    <ul class="entries">
+      <li><span class="tm num">13:40</span><span class="what">Nicorette gum<em>After a meal</em></span><span class="mg num">2&nbsp;mg</span></li>
+      <li><span class="tm num">10:55</span><span class="what">Nicorette gum<em>Work break</em></span><span class="mg num">2&nbsp;mg</span></li>
+      <li><span class="tm num">08:10</span><span class="what">Nicorette gum<em>Morning coffee</em></span><span class="mg num">4&nbsp;mg</span></li>
+    </ul>
+  </section>
+
+  <a class="specimen" aria-label="Gary, 100 of 120 HP, 1 hit ready. Open the lair">
+    <div class="frame"><div class="sprite-slot"><img src="creature.png" alt="Gary" width="64" height="64" style="image-rendering:pixelated" onerror="this.style.visibility='hidden'"></div></div>
+    <div>
+      <div class="name">Gary</div>
+      <div class="lab" style="font-size:13px;line-height:16px">Dragon</div>
+      <div class="hp" aria-hidden="true"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i></div>
+      <div class="px">100/120&nbsp;HP</div>
+    </div>
+    <span class="ready">1&nbsp;hit ready</span>
+  </a>
+
+  <section class="advice">
+    <div class="lab">Advice</div>
+    <p>After a meal is your top trigger this fortnight. Try having your dose at 12:30, before lunch.</p>
+    <a class="link">More advice</a>
+  </section>
+</main>
+
+<nav>
+  <a class="on"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/><rect x="11" y="13" width="3" height="3" rx=".5"/></svg><span>Today</span></a>
+  <a><svg class="i" viewBox="0 0 24 24"><path d="M9 7h11M9 12h11M9 17h11M4 7h1M4 12h1M4 17h1"/></svg><span>History</span></a>
+  <a><svg class="i" viewBox="0 0 24 24"><path d="M4 20h16M7 16v-5M12 16V6M17 16V9"/></svg><span>Insights</span></a>
+  <a><svg class="i" viewBox="0 0 24 24"><path d="M3 6h5v5h5v5h8"/></svg><span>Plan</span></a>
+  <a><svg class="i" viewBox="0 0 24 24"><path d="M3 20h18M5 20v-6a7 7 0 0 1 14 0v6M10 20v-3a2 2 0 0 1 4 0v3"/></svg><span>Lair</span><b class="n">1</b></a>
+</nav>
+</body>
+</html>

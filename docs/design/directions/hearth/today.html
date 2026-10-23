@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=412">
+<title>Hearth, Today</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="status"><span class="num">15:05</span>
+  <svg width="52" height="14" viewBox="0 0 52 14" fill="currentColor"><path d="M1 13h2v-3H1zM5 13h2V7H5zM9 13h2V4H9zM13 13h2V1h-2z"/><rect x="30.5" y="2.5" width="17" height="9" rx="2" fill="none" stroke="currentColor"/><rect x="32" y="4" width="11" height="6"/><rect x="49" y="5" width="2" height="4"/></svg>
+</div>
+
+<header class="appbar">
+  <div><h1>Today</h1><div class="sub">Friday 23 October</div></div>
+  <a class="iconbtn" aria-label="Settings"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h9M18 7h2M4 17h3M12 17h8"/><rect x="13" y="5" width="5" height="4" rx="1"/><rect x="7" y="15" width="5" height="4" rx="1"/></svg></a>
+</header>
+
+<main>
+  <section class="card">
+    <div class="hero">
+      <div class="ring" role="img" aria-label="8 of 14 mg today">
+        <svg viewBox="0 0 132 132" width="132" height="132">
+          <circle cx="66" cy="66" r="58" fill="none" stroke="var(--track)" stroke-width="12"/>
+          <circle cx="66" cy="66" r="58" fill="none" stroke="var(--accent)" stroke-width="12" stroke-dasharray="208.24 364.42"/>
+        </svg>
+        <div class="in"><span class="big">8</span><span class="of">of 14&nbsp;mg</span></div>
+      </div>
+      <div>
+        <div class="label">Daily guide</div>
+        <h3>6&nbsp;mg under so far</h3>
+        <p>Down from 16&nbsp;mg a day last week.</p>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="weekrow"><span class="label">This week</span><span><b class="num">61</b> <span class="cap" style="font-size:14px">of 98&nbsp;mg</span></span></div>
+    <div class="weekbar" role="img" aria-label="61 of 98 mg this week">
+      <span><i style="width:100%"></i></span><span><i style="width:100%"></i></span><span><i style="width:100%"></i></span><span><i style="width:100%"></i></span><span><i style="width:35.7%"></i></span><span></span><span></span>
+    </div>
+    <div class="weekrow cap"><span>Week 4 of 12, day 5</span><span>37&nbsp;mg left this week</span></div>
+  </section>
+
+  <div class="sechead"><h2>Quick log</h2><button class="textbtn">Edit</button></div>
+  <div class="tiles" style="margin-top:-8px">
+    <button class="tile"><small>Nicorette gum</small><strong>2&nbsp;mg</strong></button>
+    <button class="tile"><small>Nicorette gum</small><strong>4&nbsp;mg</strong></button>
+    <button class="tile"><small>QuickMist</small><strong>1&nbsp;mg</strong></button>
+    <button class="tile"><small>NiQuitin patch</small><strong>14&nbsp;mg</strong></button>
+  </div>
+  <button class="primary"><svg class="i" viewBox="0 0 24 24" style="width:20px;height:20px;stroke-width:2.2"><path d="M12 5v14M5 12h14"/></svg>Log</button>
+
+  <section class="card">
+    <div class="label" style="margin-bottom:8px">Last dose</div>
+    <div class="last">
+      <span class="t num">13:40</span>
+      <span class="since">1&nbsp;h 25&nbsp;min ago</span>
+      <span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="color:var(--text2)">Nicorette gum 2&nbsp;mg</span><span class="tag">After a meal</span></span>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="sechead" style="padding:0 0 8px"><h2>Today's entries</h2><span class="cap" style="font-size:13px">3&nbsp;entries, 8&nbsp;mg</span></div>
+    <ul class="entries">
+      <li><span class="tm num">13:40</span><span class="what">Nicorette gum<span class="tagq">After a meal</span></span><span class="mg num">2&nbsp;mg</span></li>
+      <li><span class="tm num">10:55</span><span class="what">Nicorette gum<span class="tagq">Work break</span></span><span class="mg num">2&nbsp;mg</span></li>
+      <li><span class="tm num">08:10</span><span class="what">Nicorette gum<span class="tagq">Morning coffee</span></span><span class="mg num">4&nbsp;mg</span></li>
+    </ul>
+  </section>
+
+  <a class="strip" aria-label="Gary, 100 of 120 HP, 1 hit ready. Open the lair">
+    <div class="ministage">
+      <div class="sprite-slot"><img src="creature.png" alt="Gary" width="48" height="48" style="image-rendering:pixelated" onerror="this.style.visibility='hidden'"></div>
+    </div>
+    <div>
+      <div class="name">Gary</div>
+      <div class="hp" aria-hidden="true"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i></div>
+      <div class="pxn">100/120&nbsp;HP</div>
+    </div>
+    <span class="badge">1&nbsp;hit ready</span>
+  </a>
+
+  <section class="card advice">
+    <div class="label">Advice</div>
+    <p>After a meal is your top trigger this fortnight. Try having your dose at 12:30, before lunch.</p>
+    <button class="textbtn">More advice</button>
+  </section>
+</main>
+
+<nav>
+  <a class="on"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/><rect x="11" y="13" width="3" height="3" rx=".5"/></svg>Today</a>
+  <a><svg class="i" viewBox="0 0 24 24"><path d="M9 7h11M9 12h11M9 17h11M4 7h1M4 12h1M4 17h1"/></svg>History</a>
+  <a><svg class="i" viewBox="0 0 24 24"><path d="M4 20h16M7 16v-5M12 16V6M17 16V9"/></svg>Insights</a>
+  <a><svg class="i" viewBox="0 0 24 24"><path d="M3 6h5v5h5v5h8"/></svg>Plan</a>
+  <a><svg class="i" viewBox="0 0 24 24"><path d="M3 20h18M5 20v-6a7 7 0 0 1 14 0v6M10 20v-3a2 2 0 0 1 4 0v3"/></svg>Lair<span class="dot"></span></a>
+</nav>
+</body>
+</html>

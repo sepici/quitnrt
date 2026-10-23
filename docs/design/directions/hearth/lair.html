@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=412">
+<title>Hearth, Lair</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="status"><span class="num">15:05</span>
+  <svg width="52" height="14" viewBox="0 0 52 14" fill="currentColor"><path d="M1 13h2v-3H1zM5 13h2V7H5zM9 13h2V4H9zM13 13h2V1h-2z"/><rect x="30.5" y="2.5" width="17" height="9" rx="2" fill="none" stroke="currentColor"/><rect x="32" y="4" width="11" height="6"/><rect x="49" y="5" width="2" height="4"/></svg>
+</div>
+
+<header class="appbar">
+  <div><h1>Lair</h1><div class="sub">Week 4 of 12</div></div>
+  <a class="iconbtn" aria-label="Settings"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h9M18 7h2M4 17h3M12 17h8"/><rect x="13" y="5" width="5" height="4" rx="1"/><rect x="7" y="15" width="5" height="4" rx="1"/></svg></a>
+</header>
+
+<main>
+  <section>
+    <div class="nameplate">
+      <h2>Gary</h2>
+      <span class="pxn">100/120&nbsp;HP</span>
+    </div>
+    <div class="hp big" role="img" aria-label="100 of 120 HP"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i></div>
+  </section>
+
+  <div class="stage">
+    <picture>
+      <source srcset="backdrop-dark.svg" media="(prefers-color-scheme: dark)">
+      <img src="backdrop-light.svg" alt="">
+    </picture>
+    <div class="sprite-slot"><img src="creature.png" alt="Gary, a dragon" width="192" height="192" style="image-rendering:pixelated" onerror="this.style.visibility='hidden'"></div>
+  </div>
+  <p class="flavour">Gary eyes you from the rocks.</p>
+
+  <div class="stats">
+    <div class="stat">
+      <span class="label">Banked hits</span>
+      <span class="pxbig">1</span>
+    </div>
+    <a class="stat" aria-label="Gear: wooden sword. Change">
+      <span class="label">Gear</span>
+      <span class="gear"><img src="gear-wooden-sword.svg" alt="">Wooden sword<svg class="i chev" viewBox="0 0 24 24" style="width:20px;height:20px"><path d="M9 6l6 6-6 6"/></svg></span>
+    </a>
+  </div>
+
+  <div class="actions">
+    <button class="primary hit">Hit</button>
+    <button class="disabled" disabled aria-describedby="why">5× attack<span id="why">Needs 5&nbsp;hits</span></button>
+    <p class="cap" style="text-align:center;margin-top:4px">Each hit does 10 damage. Every week that meets the plan earns 1.</p>
+  </div>
+</main>
+
+<nav>
+  <a><svg class="i" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/><rect x="11" y="13" width="3" height="3" rx=".5"/></svg>Today</a>
+  <a><svg class="i" viewBox="0 0 24 24"><path d="M9 7h11M9 12h11M9 17h11M4 7h1M4 12h1M4 17h1"/></svg>History</a>
+  <a><svg class="i" viewBox="0 0 24 24"><path d="M4 20h16M7 16v-5M12 16V6M17 16V9"/></svg>Insights</a>
+  <a><svg class="i" viewBox="0 0 24 24"><path d="M3 6h5v5h5v5h8"/></svg>Plan</a>
+  <a class="on"><svg class="i" viewBox="0 0 24 24"><path d="M3 20h18M5 20v-6a7 7 0 0 1 14 0v6M10 20v-3a2 2 0 0 1 4 0v3"/></svg>Lair</a>
+</nav>
+</body>
+</html>
