@@ -153,31 +153,46 @@ A scheduled dose is the **planned** toggle on the entry rather than a tag.
 ## 6. The programme
 
 ### 6.1 Baseline
-- 7 days of logging as normal, with at least 5 days that have entries. The baseline is the **average daily mg on days with entries**. It's shown to you to confirm or edit, because a day with no entries is usually a day you forgot to log.
-- **Skip option:** type in your usual daily amount and start straight away.
+- 7 days of logging as normal, with at least 5 days that have entries. The baseline is your **usual day**: how many of each product you use on a day with entries, on average, rounded to whole units. For example, "8 pieces of 4 mg gum and 3 sprays", which is 35 mg. It's shown to you to confirm or edit, because a day with no entries is usually a day you forgot to log.
+- If the last 7 full days already have 5 days with entries, they can be used straight away.
+- **Skip option:** say what a usual day is, product by product, and start straight away.
+
+The plan needs the mix of products, not only the total, because it steps down through them (owner, 24 October).
 
 ### 6.2 Building the plan
 - Pick a length of 8, **12** (default), 16 or 24 weeks. **The last 2 weeks are always NRT-free**, so a 12-week programme has 10 taper weeks and then 2 weeks at zero.
-- The taper drops in whole units of your main product, spread evenly over the taper weeks. Where it doesn't divide evenly, the extra units come off early, when they're a smaller share of the dose. Allowances never go up.
-- Each week has a **weekly allowance**, which is the target, and a **daily guide** (allowance ÷ 7) for pacing on the Today screen.
-- You can edit any taper week before it starts.
+- **The taper follows your usual day.** It's a ladder of steps from your usual day down to one unit of your weakest product. Each step does one thing:
+  - **One fewer** piece, lozenge, spray or inhalator session a day, taken from the kind of product that makes up the most mg of your day. A tie goes to the stronger unit.
+  - **A lower strength,** once switching wouldn't mean more pieces a day of that kind than you started with: 4 pieces of 4 mg gum become 8 pieces of 2 mg. This is the step-down the gum makers describe: fewer of the strong pieces first, then the lower strength more often, then fewer of those.
+  - **Patches** step down one strength at a time (21, 14, then 7 mg), then come off.
+- The steps are spread evenly over the taper weeks. Where they don't divide evenly, the extra steps come early, when they're a smaller share of the dose. With more weeks than steps, a step lasts more than one week. Allowances never go up.
+- Lower strengths come from the catalogue (the same brand and kind) or your own products. A product the plan switches you to is added to your products when the plan starts.
+- Each week has a **daily mix** ("5 pieces of 4 mg gum"), a **daily guide** (the mix's mg) for pacing on the Today screen, and a **weekly allowance** (7 × the guide), which is the target. A week is judged on mg alone, so how you stay within it is up to you.
+- You can edit any taper week before it starts, by moving it up or down the ladder. It can't go above the week before, and later weeks move down with it if they'd be above it.
 
-Example: baseline 24 mg a day of 2 mg gum, 12 weeks.
+Example 1: baseline 12 pieces of 2 mg gum (24 mg), 12 weeks.
 
 | Week | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Daily guide (mg) | 20 | 18 | 16 | 14 | 12 | 10 | 8 | 6 | 4 | 2 | **0** | **0** |
 | Weekly allowance (mg) | 140 | 126 | 112 | 98 | 84 | 70 | 56 | 42 | 28 | 14 | **0** | **0** |
 
-The exact formula is covered by unit tests in `:core:domain`.
+Example 2: baseline 8 pieces of 4 mg gum (32 mg), 12 weeks. The ladder has 12 steps for 10 taper weeks, so weeks 1 and 2 take two steps each.
+
+| Week | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Daily mix | 6 × 4 mg | 4 × 4 mg | 8 × 2 mg | 7 × 2 mg | 6 × 2 mg | 5 × 2 mg | 4 × 2 mg | 3 × 2 mg | 2 × 2 mg | 1 × 2 mg | none | none |
+| Daily guide (mg) | 24 | 16 | 16 | 14 | 12 | 10 | 8 | 6 | 4 | 2 | **0** | **0** |
+| Weekly allowance (mg) | 168 | 112 | 112 | 98 | 84 | 70 | 56 | 42 | 28 | 14 | **0** | **0** |
+
+The step for week *w* of *T* taper weeks, on a ladder of *k* steps: with *k* ≥ *T*, every week takes *k* div *T* steps and the first *k* mod *T* weeks take one more; with *k* < *T*, week *w* is at step ⌈*k* × *w* ÷ *T*⌉. The exact rules are covered by unit tests in `:core:domain`.
 
 ### 6.3 Optional extra goals per week (off by default)
 - **Most units per day.**
 - **Minimum gap between doses**, e.g. 90 minutes.
 - **First dose not before** a set time, moving about 15 minutes later each week. How soon you reach for nicotine after waking is a strong sign of dependence.
-- **Strength hint:** for example, a suggestion to switch from 4 mg to 2 mg gum once the allowance makes that practical.
 
-These goals show in your stats and advice. They don't affect whether a week is met.
+The strength hint that was here is now part of the plan itself (§6.2). These goals show in your stats and advice. They don't affect whether a week is met.
 
 ### 6.4 Weekly results
 - A week is **met** when its total is at or under the weekly allowance. For the NRT-free weeks that means zero.
@@ -515,10 +530,12 @@ entry_tags(entryId, tagId)
 
 programmes(id, status (BASELINE|ACTIVE|OVERTIME|COMPLETE|ABANDONED), baselineStart, baselineEnd,
            baselineDailyMg, baselineSource (MEASURED|MANUAL), lengthWeeks, nrtFreeWeeks (2),
-           mainProductId, startDate, createdAt)
-programme_weeks(id, programmeId, index, startDate, endDate, dailyGuideMg, weeklyAllowanceMg,
+           startDate, createdAt)
+baseline_units(programmeId, productId, unitsPerDay)          -- the usual day
+programme_weeks(id, programmeId, index, startDate, endDate, ladderStep, dailyGuideMg, weeklyAllowanceMg,
                 isNrtFree, isExtension, maxUnits?, minGapMinutes?, firstDoseNotBefore?,
                 result (PENDING|MET|MISSED|CAUGHT_UP), resultAt?)
+programme_week_units(weekId, productId, unitsPerDay)         -- the week's daily mix
 
 demons(id, programmeId, name, creature, colourVariant, maxHp, createdAt, defeatedAt?)
 hit_ledger(id, programmeId, weekId?, kind (WEEK_MET|CATCH_UP|HIT|COMBO), hits (+ earned, − spent),

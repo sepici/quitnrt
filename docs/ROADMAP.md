@@ -9,6 +9,10 @@ PLAN says what each phase delivers; this says how it's cut up and what each slic
 
 **Approved on 23 October:** every recommendation below, G1 and G2 included. One change: **Wear OS (phase 8) is built after release**, so the order is phases 2 to 7, then 9, then 8.
 
+**24 October:** the owner gave the batched mockups (phase 3 and phase 5) a green light, and asked for the build to run on through phase 9 to a build ready for testing. They also changed the taper: it now follows the mix of products in a usual day, not whole units of one main product (PLAN §6.1 and §6.2). So **P3-5 is replaced by P3-6** below, and the Plan mockups are updated for the mix before they're built.
+
+**How the rest is built:** in waves of parallel slices, each in its own worktree, reviewed and fixed, then merged one at a time with the full check. One data slice adds every table phases 3 to 5 need in a single migration from version 1, so the screens of phases 3, 4 and 5 can then be built side by side.
+
 ## Running unattended
 
 The owner plans to let the work run for long stretches. These rules keep that safe.
@@ -60,7 +64,8 @@ The taper itself: a baseline, a plan built from it, and weekly results. PLAN §6
 - **P3-2 Week boundaries.** Programme weeks run from the start day you pick (tomorrow by default), not from Mondays. Once a plan runs, Today's week columns follow programme weeks. Recommended.
 - **P3-3 When results arrive.** Work them out whenever the app looks, since they only depend on the time and the logs. The weekly-result notification arrives with reminders in phase 6. Recommended.
 - **P3-4 Hits before the battle.** Earned hits go into the ledger from phase 3, so none are lost. Spending them waits for phase 4. Recommended.
-- **P3-5 Main product.** The product with the most mg in the baseline, changeable before you start. Recommended.
+- **P3-5 Main product.** Replaced by P3-6 on 24 October.
+- **P3-6 The taper follows your mix** (the owner's rule, 24 October). The baseline is a usual day of whole units per product. The plan is a ladder from it: one fewer unit of the kind that makes up the most mg, a switch to the lower strength once that wouldn't mean more pieces than you started with, patches a strength at a time. PLAN §6.2 has the rule and two worked examples.
 
 **Needs you:** sign off the Plan tab mockups (see G1). Today's meter is already in the signed-off `today.html`.
 

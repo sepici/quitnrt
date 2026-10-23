@@ -15,9 +15,22 @@ The full check passes locally: copy rules, 93 domain tests, 28 data tests, 74 ap
 
 ## Waiting for the owner
 
-- Sign-off on the batched mockups for phase 3 (the Plan tab) and phase 5 (advice), once they're made.
+Nothing blocks the build. These are worth a look when you're next in:
 
-The roadmap's decisions were all approved on 23 October, with Wear OS moved to after release.
+- **Calls made while running unattended (24 October).** The designers raised these with the mockups. Each recommendation was taken so building could go on; say if any should change.
+  - **Plan tab:**
+    - A baseline that ends with fewer than 5 days with doses runs on a day at a time until 5 of the last 7 have doses, and the screen says so.
+    - The missed-week choice is a sheet when the result comes in, with "Carry on" chosen. Closing it counts as Carry on, and the choice can be changed on the Plan tab until the end of that day.
+  - **Advice:**
+    - The tip after logging is a card under Today's hero until it's dismissed or the day ends. The snackbar keeps only the logged amount and Undo.
+    - Today's advice line gets two links under it: "How to do it" and "All advice". Insights uses the same pair.
+    - Advice uses the last 14 days everywhere, labelled "From your last 14 days", whatever range Insights shows.
+    - A breathing session counts towards the badges when it runs to the end, in whole rounds. Pausing is fine.
+    - The screen stays on while a timer runs. The delay timer keeps counting from its start if you leave, and buzzes at the end. There's no ongoing notification until phase 6.
+    - The breathing animation sits on the hero green block, not the success green.
+- **Before release:** review the advice content (P5-1), the creature, gear and badge sheets (P4-1), and the sounds and haptics on your phone.
+
+The roadmap's decisions were all approved on 23 October, with Wear OS moved to after release. On 24 October the owner gave the phase 3 and phase 5 mockups a green light, asked for the build to run on to a build ready for testing, and changed the taper to follow the mix of products (PLAN §6.2, ROADMAP P3-6).
 
 ## Decisions made since `docs/PLAN.md` was written
 
