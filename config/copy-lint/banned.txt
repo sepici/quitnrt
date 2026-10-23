@@ -1,0 +1,27 @@
+# Words and phrases app text must not use. One per line, matched as whole words, any case.
+# The reasons are in docs/STYLE.md.
+journey
+unlock your
+empower
+seamless
+seamlessly
+dive in
+elevate
+game-changer
+game changer
+let's
+embark
+delve
+unleash
+supercharge
+effortless
+effortlessly
+harness
+leverage
+revolutionise
+revolutionize
+tapestry
+crush it
+you've got this
+we're here for you
+in today's

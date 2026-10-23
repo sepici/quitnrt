@@ -17,7 +17,7 @@ at a time. The final week's hit is the last hit.
 | Topic | Decision |
 |---|---|
 | Name | **The Last Hit: Quit NRT** in the store (22 characters, under Play's 30). **The Last Hit** under the icon. |
-| App ID | Working ID **`app.thelasthit.nrt`**. It assumes the `thelasthit.app` domain, and other apps in the family would follow the same pattern. It's easy to change any time before the first Play upload, and permanent after that. |
+| App ID | **`app.thelasthit.nrt`**, from the `thelasthit.app` domain (registered). Other apps in the family follow the same pattern, e.g. `app.thelasthit.<habit>`. |
 | Audience | People who already quit smoking or vaping using NRT and now want off the NRT. **No vape logging.** Nicotine pouches are allowed as a hidden extra because they're close to pure nicotine. |
 | Voice and AI logging | **On-device first.** Widget, Quick Settings tile, app shortcuts and deep links now, plus **Android AppFunctions** (Android's on-device version of MCP) so Gemini can log once Google opens it to all apps. No server, and data never leaves the phone. |
 | Audience | **Personal first, ready for the Play Store later.** APK built by CI and installed by hand, with disclaimers, privacy and structure kept clean for a later release. |
@@ -102,6 +102,7 @@ Most people use more than one product, often from more than one brand, so the ca
 
 Dose maths:
 - `mgTotal = quantity × mgPerUnit`, saved on the entry at the time of logging.
+- **Mouth spray** (QuickMist and others): 1 mg per spray. It's logged as sprays, and "puff" is accepted as another word for a spray, including by voice.
 - **Inhalator:** the UK leaflet gives no puffs per cartridge. It says one 15 mg cartridge gives about eight 5-minute sessions. So by default the inhalator logs **sessions** (an eighth of a cartridge, about 1.9 mg labelled) or **whole cartridges**. Puffs are available if you set your own puffs per cartridge.
 - **Patch:** the full labelled dose counts on the day it went on. An optional **removed early** setting scales it by hours worn.
 - **Estimated absorbed** (optional, off by default): a rough per-form factor shown as "about x mg absorbed". The factors come from product labelling and are shown with a disclaimer. Goals never use them.
@@ -181,9 +182,9 @@ These goals show in your stats and advice. They don't affect whether a week is m
 ### 6.4 Weekly results
 - A week is **met** when its total is at or under the weekly allowance. For the NRT-free weeks that means zero.
 - Results come in **24 hours after the week ends**, so late logs still count. Once a result is in, editing old entries doesn't change it.
-- **The schedule stays fixed.** Missing a week doesn't push the plan back.
-- **Catch-up:** meet a later week's target and you get the hits for any weeks missed since your last met week too, because you're back in step with the plan.
-- **Extend by a week** is an option if you want a gentler pace. It adds a taper week and therefore **10 HP to the demon**, and the app says so before you confirm.
+- **After a missed week**, you pick one of two options:
+  - **Carry on** (the default). Next week has its planned, lower target. Meet it and you get the hits for both weeks, because you've reached that level now. The same goes for any other missed weeks since your last met one.
+  - **Repeat this week.** Next week keeps the same target, which extends the programme by a week and adds **10 HP to the demon**. The app says so before you confirm. Meeting the repeat pays back the missed week too, so the hits on offer always match the demon's HP.
 - **Overtime:** if the final NRT-free week is missed, the programme runs on with NRT-free weeks until one is met. That week pays back everything missed, and the demon falls.
 - Tone stays supportive. Nothing resets and nothing shames. The app is clear that NRT for longer is far safer than going back to smoking.
 
@@ -410,7 +411,7 @@ The bottom bar has **Today, History, Insights, Plan and Lair**. Advice sits insi
   - this week's allowance and progress
   - the full schedule with met, missed and caught-up marks
   - extra goals
-  - extend by a week
+  - repeat a missed week
   - start a new programme
 - **Lair:** the battle screen, gear, the trophy shelf, and renaming or restyling the demon.
 - **Settings:**
@@ -573,7 +574,7 @@ Each phase ends with a working build you can install and a short checklist to tr
 | **0. Foundation and direction** | Multi-module Gradle set-up, version catalogue, CI (build, unit tests, APK downloads), `:core:domain` with logical days and dose maths plus tests, the strings lint. **Design agents:** 2 or 3 style directions for you to pick from, the design system, and one creature sprite for sign-off. | An APK that opens, a chosen look, and a first demon |
 | **1. Logging** | Seeded products, the log sheet (backdating, tags, craving strength, planned flag), Today, History with edit, delete and undo, Settings (products, tags, day start), onboarding and disclaimer, export and import | **An everyday logging app** |
 | **2. Insights** | Daily chart with ranges and rolling average, both heat maps, triggers, habits | Stats from your first day of logging |
-| **3. Programme** | Baseline, plan builder with 2 NRT-free weeks, daily guide and weekly allowance, weekly results, catch-up, extend, overtime | The taper running |
+| **3. Programme** | Baseline, plan builder with 2 NRT-free weeks, daily guide and weekly allowance, weekly results, catch-up, repeat a week, overtime | The taper running |
 | **4. Demon and achievements** | Naming and creature choice, all 8 creatures with variants, the lair, hits and 5× attacks, animations, sound, defeat sequence, achievement rules, badges, gear, trophy shelf | **The game** |
 | **5. Advice** | Content library, matching, your top triggers, timing tips, breathing and delay timers, tips after logging | Advice for your own triggers |
 | **6. Quick-log and reminders** | Widget, tile, shortcuts, deep links, the plain-language matcher, all reminders | One-tap logging and nudges |
@@ -605,10 +606,6 @@ Each phase ends with a working build you can install and a short checklist to tr
 
 ---
 
-## 21. Open questions (defaults in brackets)
+## 21. Open questions
 
-1. **Domain.** Check availability at a registrar. If `thelasthit.app` is free, it keeps the working app ID `app.thelasthit.nrt` as is. [Register `thelasthit.app` before the first Play upload]
-2. **Catch-up across several missed weeks.** [Meeting a week pays back every missed week since your last met one]
-3. **Creature list.** [Dragon, Demon, Bear, Kraken, Goblin, Slime, Wraith, Serpent]
-4. **Evening check-in time.** [21:30]
-5. **Default programme length.** [12 weeks, including the 2 NRT-free weeks]
+None at the moment. Confirmed: the creature list, evening check-in at 21:30, day start at 04:00, a 12-week default programme including the 2 NRT-free weeks, and the `thelasthit.app` domain.
