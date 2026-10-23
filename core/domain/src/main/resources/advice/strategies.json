@@ -1,0 +1,1193 @@
+{
+ "version": 1,
+ "strategies": [
+  {
+   "key": "four_ds",
+   "title": "The 4 Ds",
+   "body": "Most urges pass within 3 to 5\u00a0minutes. These 4 steps help you get through one.",
+   "steps": [
+    "Delay. Give it 5\u00a0minutes before you decide anything.",
+    "Deep breaths. Take 20 slow ones.",
+    "Drink water. Sip a cold glass slowly.",
+    "Do something else. Step outside, call someone or climb the stairs."
+   ],
+   "tags": [
+    "strong_craving",
+    "withdrawal",
+    "after_exercise"
+   ],
+   "groups": [
+    "FEELINGS",
+    "ROUTINE",
+    "PEOPLE",
+    "BODY",
+    "HABIT"
+   ],
+   "sources": [
+    {
+     "publisher": "HSE Ireland",
+     "title": "Cravings and withdrawal when you stop smoking",
+     "url": "https://www2.hse.ie/living-well/quit-smoking/get-help-to-quit/cravings-withdrawal/",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "Quit, Cancer Council Victoria",
+     "title": "I can't survive without my first smoke or vape",
+     "url": "https://www.quit.org.au/how-to-quit/i-cant-survive-without-my-first-smoke-or-vape",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "delay_timer",
+   "title": "Wait it out",
+   "body": "An urge rises, peaks and fades, usually within a few minutes. Start the timer and leave the decision until it ends.",
+   "steps": [
+    "Choose 5 to 10\u00a0minutes and start the timer.",
+    "Keep your hands busy while it runs.",
+    "When it ends, check how strong the urge is now.",
+    "If it's still there, give it another 5\u00a0minutes."
+   ],
+   "tags": [
+    "strong_craving",
+    "withdrawal",
+    "autopilot"
+   ],
+   "groups": [
+    "FEELINGS",
+    "ROUTINE",
+    "PEOPLE",
+    "BODY",
+    "HABIT"
+   ],
+   "interactive": "DELAY_TIMER",
+   "sources": [
+    {
+     "publisher": "CDC",
+     "title": "Tips for quitting",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/tips-for-quitting/index.html",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "Quit, Cancer Council Victoria",
+     "title": "I can't survive without my first smoke or vape",
+     "url": "https://www.quit.org.au/how-to-quit/i-cant-survive-without-my-first-smoke-or-vape",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "ride_the_wave",
+   "title": "Ride out the urge",
+   "body": "Treat an urge like a wave: don't fight it and don't act on it. Most fade within a few minutes, and they get weaker over time.",
+   "steps": [
+    "Notice the urge and say what you feel, like “I want a dose and my chest feels tight.”",
+    "Stay with the feeling without doing anything about it.",
+    "Remind yourself it will pass."
+   ],
+   "tags": [
+    "stressed",
+    "anxious",
+    "angry",
+    "after_argument",
+    "strong_craving",
+    "withdrawal"
+   ],
+   "groups": [
+    "BODY"
+   ],
+   "sources": [
+    {
+     "publisher": "CDC",
+     "title": "Tips for quitting",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/tips-for-quitting/index.html",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "talk_back",
+   "title": "Answer the urge back",
+   "body": "Urges come with thoughts like “I deserve one” or “one more won't matter”. Once you've spotted them, they're easier to answer.",
+   "steps": [
+    "Notice the thought that comes just before or during an urge.",
+    "Answer it with your own reason for cutting down.",
+    "If it's stress talking, take a break to breathe instead.",
+    "Write down 2 thoughts that catch you out, with an answer for each."
+   ],
+   "tags": [
+    "strong_craving",
+    "stressed",
+    "autopilot"
+   ],
+   "groups": [
+    "FEELINGS",
+    "HABIT"
+   ],
+   "sources": [
+    {
+     "publisher": "CDC",
+     "title": "Tips for quitting",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/tips-for-quitting/index.html",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "reasons_list",
+   "title": "Write down your reasons",
+   "body": "When an urge comes, it helps to see, in your own words, why you're coming off NRT.",
+   "steps": [
+    "Write 3 reasons you want to stop using NRT.",
+    "Keep them where you'll see them, like your lock screen or the fridge.",
+    "Read them when an urge starts."
+   ],
+   "tags": [
+    "low",
+    "strong_craving",
+    "withdrawal"
+   ],
+   "groups": [
+    "FEELINGS",
+    "ROUTINE",
+    "PEOPLE",
+    "BODY",
+    "HABIT"
+   ],
+   "sources": [
+    {
+     "publisher": "NHS Better Health",
+     "title": "Managing nicotine withdrawal symptoms",
+     "url": "https://www.nhs.uk/better-health/quit-smoking/staying-smoke-free/managing-nicotine-withdrawal-symptoms/",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "CDC",
+     "title": "7 common withdrawal symptoms",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/7-common-withdrawal-symptoms/index.html",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "after_a_slip",
+   "title": "After a slip",
+   "body": "Going over the guide, or smoking or vaping again, doesn't undo what you've done. It shows you where the hard moments are.",
+   "steps": [
+    "Treat a one-off as a one-off and carry on with the plan.",
+    "Think about what set it off: stress, other people or a feeling.",
+    "Write down how you'll handle it next time, and keep the note where you'll see it.",
+    "If you're smoking or vaping regularly again, a stop smoking service can help you set a new quit date."
+   ],
+   "tags": [
+    "low"
+   ],
+   "groups": [],
+   "sources": [
+    {
+     "publisher": "NHS Better Health",
+     "title": "Getting back on track after a smoking relapse",
+     "url": "https://www.nhs.uk/better-health/quit-smoking/staying-smoke-free/get-back-on-track-after-a-smoking-relapse/",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "quit_coach",
+   "title": "Talk to a quit coach",
+   "body": "Stop smoking services and quitlines are free. Their advisers know NRT well and can help with urges, triggers and how you use your products.",
+   "steps": [
+    "Call your local quitline or stop smoking service.",
+    "Say you've stopped smoking or vaping and you're cutting down NRT.",
+    "Ask about the pace of your plan, and what helps on hard days."
+   ],
+   "tags": [
+    "withdrawal",
+    "strong_craving",
+    "low"
+   ],
+   "groups": [
+    "FEELINGS",
+    "ROUTINE",
+    "PEOPLE",
+    "BODY",
+    "HABIT"
+   ],
+   "sources": [
+    {
+     "publisher": "NHS",
+     "title": "NHS stop smoking services help you quit",
+     "url": "https://www.nhs.uk/live-well/quit-smoking/nhs-stop-smoking-services-help-you-quit/",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "CDC",
+     "title": "Six quick tips for using quit smoking medicines",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/quit-smoking-medications/six-quick-tips.html",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "breathing_timer",
+   "title": "Slow your breathing",
+   "body": "Slow, counted breathing can calm you when stress pushes you towards a dose. Follow the timer for 1 to 3\u00a0minutes.",
+   "steps": [
+    "Sit or stand with your feet flat on the floor and your shoulders loose.",
+    "Box breathing: in for 4, hold for 4, out for 4, hold for 4.",
+    "4-7-8 breathing: in through your nose for 4, hold for 7, out through your mouth for 8.",
+    "If 4-7-8 feels too long, use box breathing instead."
+   ],
+   "tags": [
+    "stressed",
+    "anxious",
+    "angry",
+    "after_argument",
+    "strong_craving",
+    "before_bed"
+   ],
+   "groups": [],
+   "interactive": "BREATHING_TIMER",
+   "sources": [
+    {
+     "publisher": "Royal National Orthopaedic Hospital NHS Trust",
+     "title": "Breathing techniques",
+     "url": "https://www.rnoh.nhs.uk/patients-and-visitors/patient-information-guides/breathing-techniques",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "NHS",
+     "title": "Breathing exercises for stress",
+     "url": "https://www.nhs.uk/mental-health/self-help/guides-tools-and-activities/breathing-exercises-for-stress/",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "short_walk",
+   "title": "Move for 5\u00a0minutes",
+   "body": "A quick burst of activity uses up restless energy and gives an urge time to pass.",
+   "steps": [
+    "Walk briskly, outside if you can.",
+    "If you can't get out, climb the stairs or do 10 squats.",
+    "Notice how strong the urge is when you stop."
+   ],
+   "tags": [
+    "stressed",
+    "anxious",
+    "angry",
+    "after_argument",
+    "after_meal",
+    "coffee_tea",
+    "work_break",
+    "withdrawal",
+    "bored",
+    "cant_focus"
+   ],
+   "groups": [],
+   "sources": [
+    {
+     "publisher": "NHS Better Health",
+     "title": "Managing nicotine withdrawal symptoms",
+     "url": "https://www.nhs.uk/better-health/quit-smoking/staying-smoke-free/managing-nicotine-withdrawal-symptoms/",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "CDC",
+     "title": "7 common withdrawal symptoms",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/7-common-withdrawal-symptoms/index.html",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "muscle_relaxation",
+   "title": "Relax your muscles one by one",
+   "body": "Tensing and then letting go of each part of your body in turn eases tension. It also helps you notice when you're tensing up.",
+   "steps": [
+    "Lie down or sit somewhere comfortable.",
+    "Breathe in and tense one area, like your right hand and arm, for a few seconds.",
+    "Breathe out and let it go.",
+    "Work through your arms, legs, stomach, chest, back, shoulders, neck and face. Skip any part that hurts."
+   ],
+   "tags": [
+    "stressed",
+    "anxious",
+    "angry",
+    "after_argument",
+    "before_bed"
+   ],
+   "groups": [],
+   "sources": [
+    {
+     "publisher": "NHS inform",
+     "title": "Progressive muscle relaxation",
+     "url": "https://www.nhsinform.scot/healthy-living/mental-wellbeing/breathing-and-relaxation-exercises/progressive-muscle-relaxation/",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "low_mood",
+   "title": "Look after yourself when you're low",
+   "body": "Mood can dip for a while as your body adjusts. A dose may seem to help, but it only eases withdrawal for a while.",
+   "steps": [
+    "Get outside and move, even for a few minutes.",
+    "Plan your day, with something you enjoy in it.",
+    "Talk to someone you trust every day.",
+    "If you don't feel better in 2\u00a0weeks, or it feels like too much, talk to a GP.",
+    "If you feel you might harm yourself, call your local emergency number now."
+   ],
+   "tags": [
+    "low",
+    "lonely",
+    "alone"
+   ],
+   "groups": [],
+   "sources": [
+    {
+     "publisher": "CDC",
+     "title": "7 common withdrawal symptoms",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/7-common-withdrawal-symptoms/index.html",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "NHS",
+     "title": "Stopping smoking for your mental health",
+     "url": "https://www.nhs.uk/live-well/quit-smoking/stopping-smoking-mental-health-benefits/",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "another_treat",
+   "title": "Pick another treat",
+   "body": "If a dose is how you mark a good moment, find something else that feels like a reward.",
+   "steps": [
+    "Make a short list of small treats: a favourite snack, a song, a film or time outside.",
+    "When you'd usually celebrate with a dose, have one of those instead."
+   ],
+   "tags": [
+    "happy",
+    "excited",
+    "celebrating",
+    "relieved"
+   ],
+   "groups": [],
+   "sources": [
+    {
+     "publisher": "CDC",
+     "title": "7 common withdrawal symptoms",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/7-common-withdrawal-symptoms/index.html",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "Smokefree.gov, National Cancer Institute",
+     "title": "How to stay smokefree",
+     "url": "https://smokefree.gov/challenges-when-quitting/stick-with-it/how-to-stay-smokefree",
+     "read": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "key": "milestone_treats",
+   "title": "Tie treats to milestones",
+   "body": "Cutting down is worth marking. Spending what you save on NRT gives each week something to show for it.",
+   "steps": [
+    "Work out what a week of NRT costs you.",
+    "Each week you cut down, spend some of the difference on a small treat.",
+    "Save the rest for something bigger when the plan ends."
+   ],
+   "tags": [
+    "happy",
+    "excited",
+    "celebrating",
+    "relieved"
+   ],
+   "groups": [],
+   "sources": [
+    {
+     "publisher": "Smokefree Veterans, National Cancer Institute",
+     "title": "Celebrate successes",
+     "url": "https://veterans.smokefree.gov/quit-smoking-vet/celebrate-successes",
+     "read": "2026-10-24"
+    },
+    {
+     "publisher": "Quit, Cancer Council Victoria",
+     "title": "Your quit-for-good checklist",
+     "url": "https://www.quit.org.au/en/staying-quit/your-quit-for-good-checklist",
+     "read": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "key": "dose_decision",
+   "title": "Make each dose a decision",
+   "body": "On autopilot, a dose can happen before you've noticed. A short pause turns it back into a choice.",
+   "steps": [
+    "Keep your NRT in one place, not in every pocket and bag.",
+    "Before each dose, rate the urge from 1 to 5.",
+    "If it's a 1 or 2, wait 5\u00a0minutes first.",
+    "Add a tag when you log it, so you can see the pattern later."
+   ],
+   "tags": [
+    "autopilot",
+    "bored",
+    "screen_time",
+    "on_call"
+   ],
+   "groups": [
+    "HABIT"
+   ],
+   "sources": [
+    {
+     "publisher": "CDC",
+     "title": "Tips for quitting",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/tips-for-quitting/index.html",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "busy_hands",
+   "title": "Give your hands something to do",
+   "body": "Holding something breaks the habit of reaching for NRT, especially on calls, in front of a screen or when you're bored.",
+   "steps": [
+    "Keep a squeeze ball, a pen to doodle with or a fidget toy where you'd usually reach for NRT.",
+    "Try a few now, before you need them, to find one that works."
+   ],
+   "tags": [
+    "bored",
+    "on_call",
+    "screen_time",
+    "autopilot"
+   ],
+   "groups": [],
+   "sources": [
+    {
+     "publisher": "CDC",
+     "title": "Tips for quitting",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/tips-for-quitting/index.html",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "NHS Better Health",
+     "title": "Understand your smoking triggers and cravings",
+     "url": "https://www.nhs.uk/better-health/quit-smoking/staying-smoke-free/understand-your-smoking-triggers-and-cravings/",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "distraction_list",
+   "title": "Keep a list of distractions",
+   "body": "Urges fade faster when your mind is busy. A list made in advance means you don't have to think of something in the moment.",
+   "steps": [
+    "Write down 5 quick things you enjoy, like a song, a puzzle, a call or a funny video.",
+    "Try each one this week to see what works.",
+    "Keep the list on your phone and pick one as soon as an urge starts."
+   ],
+   "tags": [
+    "bored",
+    "screen_time",
+    "alone",
+    "lonely",
+    "strong_craving"
+   ],
+   "groups": [],
+   "sources": [
+    {
+     "publisher": "CDC",
+     "title": "Tips for quitting",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/tips-for-quitting/index.html",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "NHS Better Health",
+     "title": "Understand your smoking triggers and cravings",
+     "url": "https://www.nhs.uk/better-health/quit-smoking/staying-smoke-free/understand-your-smoking-triggers-and-cravings/",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "change_rooms",
+   "title": "Change rooms",
+   "body": "Urges are tied to places and routines. Moving, even to another room, breaks the pattern long enough for an urge to pass.",
+   "steps": [
+    "Get up and go somewhere else, or step outside for fresh air.",
+    "Do something there that needs your hands.",
+    "Come back once the urge has faded."
+   ],
+   "tags": [
+    "bored",
+    "screen_time",
+    "autopilot",
+    "alone"
+   ],
+   "groups": [],
+   "sources": [
+    {
+     "publisher": "CDC",
+     "title": "7 common withdrawal symptoms",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/7-common-withdrawal-symptoms/index.html",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "HSE Ireland",
+     "title": "Cravings and withdrawal when you stop smoking",
+     "url": "https://www2.hse.ie/living-well/quit-smoking/get-help-to-quit/cravings-withdrawal/",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "dose_before_meal",
+   "title": "Move the dose to before the meal",
+   "body": "If a dose follows every meal, the meal becomes the cue. Having that dose before you eat breaks the link without adding one.",
+   "steps": [
+    "Have your usual after-meal dose before the meal instead.",
+    "Time it so it's finished before you start eating. Gum and lozenges work less well with food and drink.",
+    "When the meal ends, get up from the table."
+   ],
+   "tags": [
+    "after_meal"
+   ],
+   "groups": [],
+   "sources": [
+    {
+     "publisher": "CDC",
+     "title": "How to use nicotine gum",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/quit-smoking-medications/how-to-use-quit-smoking-medicines/how-to-use-nicotine-gum.html",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "NHS Better Health",
+     "title": "Understand your smoking triggers and cravings",
+     "url": "https://www.nhs.uk/better-health/quit-smoking/staying-smoke-free/understand-your-smoking-triggers-and-cravings/",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "leave_the_table",
+   "title": "Get up from the table",
+   "body": "The end of a meal, or of a coffee or tea, is a common cue. Doing something different straight away breaks it.",
+   "steps": [
+    "Get up as soon as you've finished.",
+    "Brush your teeth or chew ordinary sugar-free gum.",
+    "Clear the table, wash up or go for a short walk."
+   ],
+   "tags": [
+    "after_meal",
+    "coffee_tea"
+   ],
+   "groups": [],
+   "sources": [
+    {
+     "publisher": "NHS Better Health",
+     "title": "Understand your smoking triggers and cravings",
+     "url": "https://www.nhs.uk/better-health/quit-smoking/staying-smoke-free/understand-your-smoking-triggers-and-cravings/",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "gum_and_drinks",
+   "title": "Time drinks around gum and lozenges",
+   "body": "Coffee, fizzy drinks and other acidic food and drink can stop gum and lozenges working as well, so each one does less for the urge.",
+   "steps": [
+    "Don't eat or drink for 15\u00a0minutes before a piece of gum or a lozenge.",
+    "Don't eat or drink while it's in your mouth."
+   ],
+   "tags": [
+    "coffee_tea",
+    "drink",
+    "after_meal"
+   ],
+   "groups": [],
+   "forms": [
+    "GUM",
+    "LOZENGE",
+    "MINI_LOZENGE"
+   ],
+   "sources": [
+    {
+     "publisher": "CDC",
+     "title": "How to use nicotine gum",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/quit-smoking-medications/how-to-use-quit-smoking-medicines/how-to-use-nicotine-gum.html",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "CDC",
+     "title": "How to use nicotine lozenges",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/quit-smoking-medications/how-to-use-quit-smoking-medicines/how-to-use-the-nicotine-lozenge.html",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "swap_drink",
+   "title": "Swap the drink for a while",
+   "body": "If coffee or tea and a dose go together, the drink becomes the cue. Swapping it for a few weeks loosens the link.",
+   "steps": [
+    "Try juice, or hot water with lemon.",
+    "Have it somewhere different from usual."
+   ],
+   "tags": [
+    "coffee_tea",
+    "woke_up"
+   ],
+   "groups": [],
+   "sources": [
+    {
+     "publisher": "NHS Better Health",
+     "title": "Understand your smoking triggers and cravings",
+     "url": "https://www.nhs.uk/better-health/quit-smoking/staying-smoke-free/understand-your-smoking-triggers-and-cravings/",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "Quit, Cancer Council Victoria",
+     "title": "I can't survive without my first smoke or vape",
+     "url": "https://www.quit.org.au/how-to-quit/i-cant-survive-without-my-first-smoke-or-vape",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "busy_mouth",
+   "title": "Keep your mouth busy",
+   "body": "When you can't get up and leave, like when you're driving or at a table, something to chew or sip helps.",
+   "steps": [
+    "Carry sugar-free mints or ordinary sugar-free gum.",
+    "Try a toothpick, a straw or a cinnamon stick.",
+    "Snack on carrot or celery sticks."
+   ],
+   "tags": [
+    "commuting",
+    "after_meal",
+    "hungry",
+    "screen_time"
+   ],
+   "groups": [],
+   "sources": [
+    {
+     "publisher": "CDC",
+     "title": "Tips for quitting",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/tips-for-quitting/index.html",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "NHS Better Health",
+     "title": "Managing nicotine withdrawal symptoms",
+     "url": "https://www.nhs.uk/better-health/quit-smoking/staying-smoke-free/managing-nicotine-withdrawal-symptoms/",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "morning_routine",
+   "title": "Start the day with something else",
+   "body": "The first dose of the day is often the hardest to move. Putting something else first makes the morning less about NRT.",
+   "steps": [
+    "Have a glass of water, a shower or breakfast before anything else.",
+    "Then check how strong the urge is.",
+    "Each week, try to have the first dose a little later."
+   ],
+   "tags": [
+    "woke_up"
+   ],
+   "groups": [],
+   "sources": [
+    {
+     "publisher": "Quit, Cancer Council Victoria",
+     "title": "I can't survive without my first smoke or vape",
+     "url": "https://www.quit.org.au/how-to-quit/i-cant-survive-without-my-first-smoke-or-vape",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "wind_down",
+   "title": "Wind down without a dose",
+   "body": "A dose late in the evening can become part of going to bed, and nicotine can affect sleep. A calmer last hour makes it easier to go without.",
+   "steps": [
+    "Skip caffeine from late afternoon.",
+    "Put your phone away once you're in bed.",
+    "Read or have a bath to relax.",
+    "Keep the same bedtime and wake-up time, even at weekends."
+   ],
+   "tags": [
+    "before_bed",
+    "tired"
+   ],
+   "groups": [],
+   "sources": [
+    {
+     "publisher": "CDC",
+     "title": "7 common withdrawal symptoms",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/7-common-withdrawal-symptoms/index.html",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "HSE Ireland",
+     "title": "Cravings and withdrawal when you stop smoking",
+     "url": "https://www2.hse.ie/living-well/quit-smoking/get-help-to-quit/cravings-withdrawal/",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "change_commute",
+   "title": "Change the commute",
+   "body": "Driving, walking the same way and waiting for transport are common cues. A small change to the routine weakens them.",
+   "steps": [
+    "Take a different route for a while.",
+    "Put on new music or a podcast.",
+    "Keep something to chew or hold in the car or your bag."
+   ],
+   "tags": [
+    "commuting"
+   ],
+   "groups": [],
+   "sources": [
+    {
+     "publisher": "NHS Better Health",
+     "title": "Understand your smoking triggers and cravings",
+     "url": "https://www.nhs.uk/better-health/quit-smoking/staying-smoke-free/understand-your-smoking-triggers-and-cravings/",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "CDC",
+     "title": "Tips for quitting",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/tips-for-quitting/index.html",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "change_breaks",
+   "title": "Change your breaks",
+   "body": "If a break usually means a dose, the break itself becomes the cue.",
+   "steps": [
+    "Take your break at a different time.",
+    "Spend it walking, or with colleagues who don't smoke or vape.",
+    "Have water or a snack instead."
+   ],
+   "tags": [
+    "work_break"
+   ],
+   "groups": [],
+   "sources": [
+    {
+     "publisher": "NHS Better Health",
+     "title": "Understand your smoking triggers and cravings",
+     "url": "https://www.nhs.uk/better-health/quit-smoking/staying-smoke-free/understand-your-smoking-triggers-and-cravings/",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "after_exercise",
+   "title": "Cool down with water first",
+   "body": "If a dose usually follows a workout, fill those minutes with water and a stretch instead.",
+   "steps": [
+    "Drink a full glass of water straight after.",
+    "Stretch for about 5\u00a0minutes to cool down.",
+    "Then check whether the urge is still there."
+   ],
+   "tags": [
+    "after_exercise"
+   ],
+   "groups": [],
+   "sources": [
+    {
+     "publisher": "NHS",
+     "title": "How to stretch after exercising",
+     "url": "https://www.nhs.uk/live-well/exercise/how-to-stretch-after-exercising/",
+     "read": "2026-10-24"
+    },
+    {
+     "publisher": "NHS",
+     "title": "Self-help tips to fight tiredness",
+     "url": "https://www.nhs.uk/live-well/sleep-and-tiredness/self-help-tips-to-fight-fatigue/",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "HSE Ireland",
+     "title": "Cravings and withdrawal when you stop smoking",
+     "url": "https://www2.hse.ie/living-well/quit-smoking/get-help-to-quit/cravings-withdrawal/",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "drinks_limit",
+   "title": "Decide your limit before you go out",
+   "body": "Drinking and nights out are common cues. Deciding before you go takes the choice out of the moment.",
+   "steps": [
+    "Before you go, decide how many doses fit tonight.",
+    "Log each one as you go, so you can keep count.",
+    "Have a soft drink between alcoholic ones, or go alcohol-free.",
+    "Have a line ready in case someone offers you a cigarette or vape."
+   ],
+   "tags": [
+    "drink",
+    "socialising",
+    "celebrating",
+    "excited"
+   ],
+   "groups": [],
+   "sources": [
+    {
+     "publisher": "NHS Better Health",
+     "title": "Understand your smoking triggers and cravings",
+     "url": "https://www.nhs.uk/better-health/quit-smoking/staying-smoke-free/understand-your-smoking-triggers-and-cravings/",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "CDC",
+     "title": "Tips for quitting",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/tips-for-quitting/index.html",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "ready_line",
+   "title": "Have a line ready",
+   "body": "Being around people who smoke or vape, or being offered one, is easier when you've already decided what to say.",
+   "steps": [
+    "Pick a short line, like “No thanks, I've stopped.”",
+    "Ask friends who smoke or vape not to offer, and not to do it right next to you.",
+    "For the first few weeks, meet them somewhere smoking isn't allowed."
+   ],
+   "tags": [
+    "nicotine_users",
+    "socialising",
+    "drink"
+   ],
+   "groups": [],
+   "sources": [
+    {
+     "publisher": "NHS Better Health",
+     "title": "Understand your smoking triggers and cravings",
+     "url": "https://www.nhs.uk/better-health/quit-smoking/staying-smoke-free/understand-your-smoking-triggers-and-cravings/",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "CDC",
+     "title": "Tips for quitting",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/tips-for-quitting/index.html",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "tell_someone",
+   "title": "Tell someone you're cutting down",
+   "body": "People who know what you're doing can help in the moment. A call or a message is often enough to get past an urge.",
+   "steps": [
+    "Tell a friend or someone at home about your plan.",
+    "Ask if you can message them when an urge is strong.",
+    "Let them know you might be short-tempered for a while, and ask for patience."
+   ],
+   "tags": [
+    "lonely",
+    "alone",
+    "low",
+    "angry"
+   ],
+   "groups": [
+    "PEOPLE"
+   ],
+   "sources": [
+    {
+     "publisher": "NHS Better Health",
+     "title": "Understand your smoking triggers and cravings",
+     "url": "https://www.nhs.uk/better-health/quit-smoking/staying-smoke-free/understand-your-smoking-triggers-and-cravings/",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "HSE Ireland",
+     "title": "Cravings and withdrawal when you stop smoking",
+     "url": "https://www2.hse.ie/living-well/quit-smoking/get-help-to-quit/cravings-withdrawal/",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "withdrawal_passes",
+   "title": "Remember withdrawal passes",
+   "body": "Withdrawal is uncomfortable, but it can't hurt you. It's usually strongest in the first week and fades over 3 to 4\u00a0weeks. Cutting down can bring some of it back for a while.",
+   "steps": [
+    "Remind yourself the feeling is temporary.",
+    "Use the 4 Ds when an urge hits.",
+    "Give yourself credit for each one you get through."
+   ],
+   "tags": [
+    "withdrawal",
+    "strong_craving",
+    "angry"
+   ],
+   "groups": [
+    "BODY"
+   ],
+   "sources": [
+    {
+     "publisher": "NHS Better Health",
+     "title": "Managing nicotine withdrawal symptoms",
+     "url": "https://www.nhs.uk/better-health/quit-smoking/staying-smoke-free/managing-nicotine-withdrawal-symptoms/",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "CDC",
+     "title": "7 common withdrawal symptoms",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/7-common-withdrawal-symptoms/index.html",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "ask_about_pace",
+   "title": "Ask about slowing the plan",
+   "body": "Using NRT for longer is far safer than going back to smoking. If withdrawal is strong or keeps coming back, a pharmacist or GP can help you set a slower pace.",
+   "steps": [
+    "Note when the urges are worst and how strong they get.",
+    "Show a pharmacist or GP your last few weeks in the app.",
+    "Ask whether a slower taper would suit you."
+   ],
+   "tags": [
+    "withdrawal",
+    "strong_craving"
+   ],
+   "groups": [],
+   "sources": [
+    {
+     "publisher": "NHS Better Health",
+     "title": "Find the best stop-smoking products for you",
+     "url": "https://www.nhs.uk/better-health/quit-smoking/ready-to-quit-smoking/find-the-best-stop-smoking-products-for-you/",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "NHS Better Health",
+     "title": "Quit smoking with nicotine replacement therapies (NRTs)",
+     "url": "https://www.nhs.uk/better-health/quit-smoking/ready-to-quit-smoking/quit-with-nicotine-replacement-therapies-nrt/",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "use_it_right",
+   "title": "Use each dose the way the pack says",
+   "body": "Nicotine gum and lozenges work differently from ordinary gum and sweets. Used properly, each one does more for the urge.",
+   "steps": [
+    "Gum: bite slowly until it tingles, then park it between your cheek and gum for about a minute. Repeat until the tingling stops, usually about 30\u00a0minutes.",
+    "Lozenge: let it dissolve slowly between your cheek and gum. Don't chew or swallow it.",
+    "Sprays, inhalators and other forms: follow the leaflet in your pack."
+   ],
+   "tags": [
+    "strong_craving",
+    "withdrawal"
+   ],
+   "groups": [],
+   "sources": [
+    {
+     "publisher": "CDC",
+     "title": "Six quick tips for using quit smoking medicines",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/quit-smoking-medications/six-quick-tips.html",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "CDC",
+     "title": "How to use nicotine gum",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/quit-smoking-medications/how-to-use-quit-smoking-medicines/how-to-use-nicotine-gum.html",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "CDC",
+     "title": "How to use nicotine lozenges",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/quit-smoking-medications/how-to-use-quit-smoking-medicines/how-to-use-the-nicotine-lozenge.html",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "hunger_check",
+   "title": "Check if it's hunger",
+   "body": "Hunger and an urge for nicotine can feel alike, so it's easy to mistake one for the other.",
+   "steps": [
+    "Eat 3 meals a day, with a snack every 3 to 4\u00a0hours if you need one.",
+    "Keep fruit, carrot sticks or celery to hand.",
+    "If it's been a while since you ate, eat first and see if the urge is still there."
+   ],
+   "tags": [
+    "hungry"
+   ],
+   "groups": [],
+   "sources": [
+    {
+     "publisher": "HSE Ireland",
+     "title": "Cravings and withdrawal when you stop smoking",
+     "url": "https://www2.hse.ie/living-well/quit-smoking/get-help-to-quit/cravings-withdrawal/",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "CDC",
+     "title": "7 common withdrawal symptoms",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/7-common-withdrawal-symptoms/index.html",
+     "read": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "key": "foggy_day",
+   "title": "Go easy on a foggy day",
+   "body": "Feeling tired or foggy is common while your body adjusts to less nicotine, and it usually passes.",
+   "steps": [
+    "Drink a glass of water, and eat if it's been 3 to 4\u00a0hours.",
+    "Walk for a few minutes, outside if you can.",
+    "Save the hardest tasks for when you feel sharpest.",
+    "If you're tired all the time and rest doesn't help, see a GP."
+   ],
+   "tags": [
+    "tired",
+    "cant_focus"
+   ],
+   "groups": [],
+   "sources": [
+    {
+     "publisher": "NHS",
+     "title": "Self-help tips to fight tiredness",
+     "url": "https://www.nhs.uk/live-well/sleep-and-tiredness/self-help-tips-to-fight-fatigue/",
+     "read": "2026-10-23"
+    },
+    {
+     "publisher": "CDC",
+     "title": "7 common withdrawal symptoms",
+     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/7-common-withdrawal-symptoms/index.html",
+     "read": "2026-10-23"
+    }
+   ]
+  }
+ ],
+ "quitlines": [
+  {
+   "country": "GB",
+   "region": "England",
+   "name": "Smokefree National Helpline",
+   "phone": "0300 123 1044",
+   "web": null,
+   "source": {
+    "publisher": "NHS",
+    "title": "NHS stop smoking services help you quit",
+    "url": "https://www.nhs.uk/live-well/quit-smoking/nhs-stop-smoking-services-help-you-quit/",
+    "read": "2026-10-23"
+   }
+  },
+  {
+   "country": "GB",
+   "region": "Scotland",
+   "name": "Quit Your Way Scotland",
+   "phone": "0800 84 84 84",
+   "web": null,
+   "source": {
+    "publisher": "NHS",
+    "title": "NHS stop smoking services help you quit",
+    "url": "https://www.nhs.uk/live-well/quit-smoking/nhs-stop-smoking-services-help-you-quit/",
+    "read": "2026-10-23"
+   }
+  },
+  {
+   "country": "GB",
+   "region": "Wales",
+   "name": "Help Me Quit",
+   "phone": "0800 085 2219",
+   "web": null,
+   "source": {
+    "publisher": "NHS",
+    "title": "NHS stop smoking services help you quit",
+    "url": "https://www.nhs.uk/live-well/quit-smoking/nhs-stop-smoking-services-help-you-quit/",
+    "read": "2026-10-23"
+   }
+  },
+  {
+   "country": "GB",
+   "region": "Northern Ireland",
+   "name": "Local stop smoking services",
+   "phone": null,
+   "web": "https://www.stopsmokingni.info/ways-quit/local-help-and-support",
+   "source": {
+    "publisher": "NHS",
+    "title": "NHS stop smoking services help you quit",
+    "url": "https://www.nhs.uk/live-well/quit-smoking/nhs-stop-smoking-services-help-you-quit/",
+    "read": "2026-10-23"
+   }
+  },
+  {
+   "country": "IE",
+   "region": null,
+   "name": "HSE QUIT",
+   "phone": "1800 201 203",
+   "web": null,
+   "source": {
+    "publisher": "HSE Ireland",
+    "title": "Contact the Quit team to stop smoking",
+    "url": "https://www2.hse.ie/living-well/quit-smoking/contact/",
+    "read": "2026-10-23"
+   }
+  },
+  {
+   "country": "US",
+   "region": null,
+   "name": "1-800-QUIT-NOW",
+   "phone": "1-800-784-8669",
+   "web": null,
+   "source": {
+    "publisher": "CDC",
+    "title": "Tips for quitting",
+    "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/tips-for-quitting/index.html",
+    "read": "2026-10-23"
+   }
+  },
+  {
+   "country": "CA",
+   "region": null,
+   "name": "Quitline",
+   "phone": "1-866-366-3667",
+   "web": null,
+   "source": {
+    "publisher": "Health Canada",
+    "title": "Quitting smoking: provincial and territorial services",
+    "url": "https://www.canada.ca/en/health-canada/services/smoking-tobacco/quit-smoking/provincial-territorial-services.html",
+    "read": "2026-10-23"
+   }
+  },
+  {
+   "country": "AU",
+   "region": null,
+   "name": "Quitline",
+   "phone": "13 7848",
+   "web": null,
+   "source": {
+    "publisher": "Quit, Cancer Council Victoria",
+    "title": "Ways to get in touch",
+    "url": "https://www.quit.org.au/en/support-and-resources/ways-to-get-in-touch",
+    "read": "2026-10-23"
+   }
+  },
+  {
+   "country": "NZ",
+   "region": null,
+   "name": "Quitline",
+   "phone": "0800 778 778",
+   "web": null,
+   "source": {
+    "publisher": "Health New Zealand",
+    "title": "Stopping smoking",
+    "url": "https://www.healthnz.govt.nz/services-support/alcohol-and-drug-services/quitting-smoking",
+    "read": "2026-10-23"
+   }
+  }
+ ]
+}

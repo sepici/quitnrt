@@ -27,3 +27,10 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+// The advice tests hold the bundled text to the same banned phrases as checkCopy.
+tasks.processTestResources {
+    from(rootProject.layout.projectDirectory.file("config/copy-lint/banned.txt")) {
+        into("copy-lint")
+    }
+}
