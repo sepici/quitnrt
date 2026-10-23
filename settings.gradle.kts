@@ -35,5 +35,6 @@ include(":core:domain")
 if (providers.gradleProperty("jvmOnly").isPresent) {
     rootProject.buildFileName = "build-jvm.gradle.kts"
 } else {
+    include(":core:data")
     include(":app")
 }
