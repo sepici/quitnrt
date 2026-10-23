@@ -56,8 +56,14 @@ def tentacle(points, r0, r1):
     return shape
 
 
-def build(arms='raised', eyes='open', mantle_dy=0, squash=0, lost_tip=False):
+# the right back tentacle, hurt: it no longer curls up but hangs down over the rock
+WILTED = [(21, 17), (26, 15), (29, 16), (30, 19), (29, 22)]
+
+
+def build(arms='raised', eyes='open', mantle_dy=0, squash=0, lost_tip=False, wilted=False):
     left, right = ARMS[arms]
+    if wilted:
+        right = WILTED
     if lost_tip:
         left = left[:-2]
     parts = [
@@ -99,7 +105,7 @@ def rough_marks(g):
 
 
 def frames():
-    rough = build(arms='raised', lost_tip=True)
+    rough = build(arms='raised', lost_tip=True, wilted=True)
     rough_marks(rough)
     barely = build(arms='limp', eyes='heavy', mantle_dy=2, lost_tip=True)
     rough_marks_low = barely

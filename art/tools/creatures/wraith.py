@@ -75,17 +75,32 @@ def hurt():
     return g
 
 
+# the hood's peak knocked over to the right, its tip hanging past the shoulder (x 10 to 25)
+BENT_PEAK = [
+    "________________",
+    "___oooo_________",
+    "__oolllmooo_____",
+    "_olmmmmmmdddoo__",
+    "olmmmmmmddoddddo",
+    "            oooo",
+]
+
+
 def tatters(g):
-    """The hood ripped, a strip of the hem torn away, the lantern glass cracked."""
-    patch(g, 17, 2, ["o", "do", "_do"])
+    """The hood's peak bent over, a rent in the robe, a strip of the hem torn away and a
+    finger of the bony hand gone."""
+    patch(g, 10, 0, BENT_PEAK)
+    # the rent, dark inside like the hood
+    patch(g, 13, 19, ["oo", "ooo", " ooo", "  oo", "  o"])
     clear(g, 9, 29, 11, 31)
     put(g, 9, 28, 'oo')
+    clear(g, 3, 18, 3, 20)
 
 
 def rough():
     g = grid(BASE)
     tatters(g)
-    patch(g, 25, 21, ["oaoaao", "oahoao"])
+    patch(g, 25, 21, ["oaoaao", "oahoao"])    # the lantern glass cracked
     g[8][17] = 'o'                    # one eye guttering
     return g
 

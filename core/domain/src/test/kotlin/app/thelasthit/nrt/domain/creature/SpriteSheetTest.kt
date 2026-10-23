@@ -10,6 +10,9 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import kotlin.math.abs
+import kotlin.math.cbrt
+import kotlin.math.pow
 
 class SpriteSheetTest {
 
@@ -131,10 +134,52 @@ class SpriteSheetTest {
         val eyes = 0xFFF5B12B.toInt()
         for ((creature, sheet) in sheets) {
             val silhouette = sheet.silhouettePixels(SpriteFrame.IDLE_1, shape, eyes)
-            val eyePixels = silhouette.indices.filter { silhouette[it] == eyes }
-            assertTrue(eyePixels.size in 1..16, "$creature has ${eyePixels.size} eye pixels")
-            assertTrue(eyePixels.all { it / 32 < 20 }, "$creature's eyes are up in its head")
+            val pair = clusters(silhouette.indices.filter { silhouette[it] == eyes }.toSet(), sheet.size)
+            assertEquals(2, pair.size, "$creature has ${pair.size} separate eyes")
+            val rows = silhouette.indices.filter { silhouette[it] != 0 }.map { it / sheet.size }
+            val middle = (rows.min() + rows.max()) / 2.0
+            for (eye in pair) {
+                assertTrue(eye.all { it / sheet.size < middle }, "$creature's eyes are in the upper half of its body")
+            }
         }
+    }
+
+    @Test
+    fun `clusters keep apart pixels that only touch at a corner`() {
+        // . e . .
+        // e e . e
+        // . . e .
+        assertEquals(listOf(3, 1, 1), clusters(setOf(1, 4, 5, 7, 10), size = 4).map { it.size })
+        // a pixel at the end of a row doesn't join the start of the next
+        assertEquals(2, clusters(setOf(3, 4), size = 4).size)
+    }
+
+    @Test
+    fun `the hit and each condition show at a glance`() {
+        for ((creature, sheet) in sheets) {
+            for ((from, to) in listOf(
+                SpriteFrame.IDLE_1 to SpriteFrame.HURT,
+                SpriteFrame.IDLE_1 to SpriteFrame.ROUGH,
+                SpriteFrame.ROUGH to SpriteFrame.BARELY,
+            )) {
+                val changed = visibleChanges(sheet.argbPixels(from), sheet.argbPixels(to))
+                assertTrue(changed >= 40, "$creature's $to differs from $from in only $changed pixels you'd notice")
+            }
+        }
+    }
+
+    @Test
+    fun `a step along a colour ramp isn't a visible change, and a step out of the shadow is`() {
+        val forest = dragon.palette("forest")
+        val outline = forest[0]
+        val dark = forest[1]
+        val mid = forest[2]
+        val light = forest[3]
+        val belly = forest[4]
+        assertEquals(0, visibleChanges(intArrayOf(outline, dark, mid), intArrayOf(dark, mid, light)))
+        assertEquals(3, visibleChanges(intArrayOf(dark, mid, light), intArrayOf(light, belly, 0)))
+        // outline against nothing shows on the light sky, though not on the dark one
+        assertEquals(1, visibleChanges(intArrayOf(outline), intArrayOf(0)))
     }
 
     @Test
@@ -166,5 +211,50 @@ class SpriteSheetTest {
             assertTrue(frame.filter { it != 0 }.all { it in ember })
         }
         assertEquals(dragon.argbPixels(SpriteFrame.DEFEAT_1).toList(), dragon.defeatPixels().first().toList())
+    }
+
+    /** [pixels], as indices into a [size] x [size] frame, grouped into 4-connected clusters. */
+    private fun clusters(pixels: Set<Int>, size: Int): List<Set<Int>> {
+        val left = pixels.toMutableSet()
+        val found = mutableListOf<Set<Int>>()
+        while (left.isNotEmpty()) {
+            val start = left.first().also { left.remove(it) }
+            val cluster = mutableSetOf(start)
+            val queue = ArrayDeque(listOf(start))
+            while (queue.isNotEmpty()) {
+                val p = queue.removeFirst()
+                val x = p % size
+                for (n in listOfNotNull((p - 1).takeIf { x > 0 }, (p + 1).takeIf { x < size - 1 }, p - size, p + size)) {
+                    if (left.remove(n)) {
+                        cluster += n
+                        queue += n
+                    }
+                }
+            }
+            found += cluster
+        }
+        return found
+    }
+
+    /**
+     * How many pixels change between two frames in a way you'd notice at the lair's size: a
+     * lightness change of at least 20 in CIE L*, with transparent pixels taking the lair's light or
+     * dark sky (the theme's stageSky), whichever shows the change. One step along a creature's
+     * colour ramp, outline to dark, dark to mid or mid to light, is less than that.
+     */
+    private fun visibleChanges(a: IntArray, b: IntArray): Int = a.indices.count { i ->
+        a[i] != b[i] && SKIES.any { sky ->
+            abs(lightness(if (a[i] == 0) sky else a[i]) - lightness(if (b[i] == 0) sky else b[i])) >= 20
+        }
+    }
+
+    private fun lightness(argb: Int): Double {
+        fun linear(channel: Int): Double = (channel / 255.0).let { if (it <= 0.04045) it / 12.92 else ((it + 0.055) / 1.055).pow(2.4) }
+        val y = 0.2126 * linear(argb shr 16 and 0xFF) + 0.7152 * linear(argb shr 8 and 0xFF) + 0.0722 * linear(argb and 0xFF)
+        return if (y <= 216.0 / 24389) y * 24389 / 27 else 116 * cbrt(y) - 16
+    }
+
+    private companion object {
+        val SKIES = listOf(0xFFFBEFD0.toInt(), 0xFF16120C.toInt())
     }
 }

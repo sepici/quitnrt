@@ -279,6 +279,8 @@ def defeat1():
     segs(g, {10: [(10, 'oo')]})
     for _ in range(3):
         spritekit.sink(g, 26)
+    # the sink takes the outline off the top of the tail where it leaves the body: close it
+    segs(g, {26: [(27, 'oo')]})
     return g
 
 

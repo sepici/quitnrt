@@ -95,7 +95,8 @@ def chip_horn(g):
 
 
 def black_eye(g, dy=0):
-    segs(g, {9 + dy: [(11, 'dd')], 10 + dy: [(11, 'd')], 11 + dy: [(11, 'd')], 12 + dy: [(11, 'ddd')]})
+    """A dark ring round the left eye, swollen half shut."""
+    segs(g, {9 + dy: [(11, 'dd')], 10 + dy: [(11, 'doo')], 11 + dy: [(11, 'd')], 12 + dy: [(11, 'ddd')]})
 
 
 def broken_fork(g):
@@ -106,11 +107,21 @@ def broken_fork(g):
     ])
 
 
+def claw_marks(g, dy=0):
+    """Three scratches raked across the belly."""
+    for x0, y0 in ((18, 19), (20, 20), (22, 21)):
+        for i in range(4):
+            x, y = x0 - i, y0 + dy + i
+            if g[y][x] == 'b':
+                g[y][x] = 'm'
+
+
 def rough():
     g = grid(BASE)
     chip_horn(g)
     black_eye(g)
     broken_fork(g)
+    claw_marks(g)
     g[15][15] = 'o'           # a tooth knocked out
     # the spade droops
     move(g, 25, 13, 31, 18, 0, 1)

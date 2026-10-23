@@ -62,35 +62,70 @@ def idle2():
     return g
 
 
+# the right ear, which shows round both sides of the club
+RIGHT_EAR = {(24, 9), (24, 10), (28, 8), (29, 8), (30, 8), (29, 9), (30, 9), (31, 9), (29, 10), (30, 10), (29, 11)}
+
+
 def hurt():
+    """The head snaps back: it jolts up 2 px on a stretched neck, eyes screwed shut and mouth
+    wide open in a yelp. The club stays where it is."""
     g = grid(BASE)
-    # eyes screwed shut, mouth open in a yelp
-    segs(g, {9: [(12, 'mo'), (17, 'om')], 10: [(13, 'oo'), (18, 'oo')],
-             13: [(9, 'ooooooooo')], 14: [(10, 'loooooomddo')]})
+    move(g, 0, 3, 22, 15, 0, -2, mask=lambda x, y: not (x == 22 and y <= 4))
+    ear = [(x, y, g[y][x]) for x, y in RIGHT_EAR]
+    for x, y, _ in ear:
+        g[y][x] = '.' if (x, y) not in ((28, 8),) else 'o'
+    for x, y, c in ear:
+        if g[y - 2][x] in '.o':
+            g[y - 2][x] = c
+    # the neck, stretched
+    patch(g, 13, 14, ["lmmmmd", "lmmmmd"])
+    # eyes screwed shut
+    for x, y in ((13, 7), (14, 8), (13, 9), (20, 7), (19, 8), (20, 9)):
+        g[y][x] = 'o'
+    # the mouth wide open, the fangs at its corners
+    patch(g, 11, 10, ["ohoooho", "ooooooo", " ooooo "])
     return g
 
 
-def nick_ear(g):
-    patch(g, 2, 5, ["_o", "o_o", " o"])
+def torn_ear(g):
+    """The big ear's tip torn off, leaving a ragged end."""
+    clear(g, 0, 3, 3, 6)
+    clear(g, 4, 5, 4, 5)
+
+
+def lump(g, dy=0):
+    """A lump raised on the top of the head."""
+    patch(g, 14, 2 + dy, [" oo ", "ollo", "llmm"])
 
 
 def black_eye(g, dy=0):
-    for x, y in ((13, 9), (13, 10), (13, 11), (14, 11), (15, 11)):
+    """The left eye swollen shut in a dark ring."""
+    for x, y in ((13, 9), (13, 10), (13, 11), (14, 11), (15, 11), (12, 10), (15, 10)):
         if g[y + dy][x] in 'lm':
             g[y + dy][x] = 'd'
+    g[10 + dy][14] = 'o'
 
 
 def damage(g, dy=0):
-    nick_ear(g)
+    torn_ear(g)
+    lump(g, dy)
     black_eye(g, dy)
     g[12 + dy][12] = 'm'      # a tusk snapped off
+    g[10 + dy][6] = 'm'       # the earring torn out
 
 
 def rough():
+    """Roughed up: the ear torn, a lump on the head, a black eye, a tusk and the earring gone,
+    and the club split with a chunk knocked out of it."""
     g = grid(BASE)
     damage(g)
-    # a split down the club
+    move(g, 0, 3, 7, 9, 0, 1)         # the torn ear sags
     for x, y in ((27, 1), (27, 2), (26, 3), (26, 4)):
+        g[y][x] = 'o'
+    clear(g, 28, 0, 30, 1)
+    clear(g, 29, 2, 30, 2)
+    # the loincloth ripped
+    for x, y in ((14, 21), (15, 22), (15, 23), (16, 24)):
         g[y][x] = 'o'
     return g
 
@@ -120,8 +155,8 @@ def slumped(drop):
 
 def barely():
     g = slumped(2)
-    # lids down, mouth slack
-    segs(g, {11: [(14, 'o'), (19, 'o')], 12: [(14, 'e'), (19, 'e')]})
+    # the good eye's lid down (the other is still swollen shut), mouth slack
+    segs(g, {11: [(19, 'o')], 12: [(19, 'e')]})
     return g
 
 

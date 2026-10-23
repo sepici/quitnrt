@@ -56,6 +56,7 @@ MOUTHS = {
     'yelp': {0: [(3, 'ooooo')], 1: [(2, 'ooooooo')], 2: [(2, 'ooooooo')], 3: [(3, 'ooooo')]},
     'wobble': {1: [(1, 'oo'), (5, 'oo'), (9, 'o')], 2: [(3, 'oo'), (7, 'oo')]},
     'flat': {1: [(2, 'ooooooo')]},
+    'grimace': {0: [(1, 'ooooooooo')], 1: [(1, 'ohhhhhhho')], 2: [(1, 'ooooooooo')]},
 }
 
 
@@ -91,24 +92,58 @@ def drips(g, dy=0):
                 g[y][x] = 'd'
 
 
+def bite(g, dy=0):
+    """A round bite out of the top of the dome; the jelly shows paler along the cut."""
+    gone = ellipse(20, 10 + dy, 3, 3)
+    for x, y in gone:
+        g[y][x] = '.'
+    seal(g)
+    for x, y in gone:
+        if g[y][x] == 'o':
+            for nx, ny in ((x - 1, y), (x, y + 1), (x + 1, y)):
+                if (nx, ny) not in gone and at(g, nx, ny) in 'mdh':
+                    g[ny][nx] = 'l'
+
+
+def split(g, dy=0):
+    """A split down the left side, dark with a pale edge."""
+    for x, y in ((8, 12), (7, 13), (7, 14), (6, 15), (6, 16), (7, 17), (6, 18), (5, 19), (5, 20)):
+        y += dy
+        if g[y][x] in 'lmdhb':
+            g[y][x] = 'o'
+            if g[y][x + 1] in 'mdb':
+                g[y][x + 1] = 'l'
+
+
 def rough():
-    g = slime()
-    # a bite out of the top right
-    patch(g, 21, 11, ["o___", "ldoo_", "mmdo"])
+    """Roughed up: a bite out of the top, a split down the side, one eye swollen half shut,
+    and the grin gone to gritted teeth."""
+    g = slime(mouth='grimace')
+    bite(g)
+    split(g)
+    patch(g, 18, 15, ["ooooo", "odddo", "ooooo", "ooeeo"])
     drips(g)
     return g
 
 
+def barely():
+    g = slime(squash=2, eyes='heavy', mouth='wobble')
+    bite(g, 3)
+    split(g, 3)
+    drips(g, 3)
+    return g
+
+
 def frames():
-    barely = slime(squash=2, eyes='heavy', mouth='wobble')
-    drips(barely, 3)
     ko = slime(squash=4, eyes='shut', mouth='flat')
+    bite(ko, 6)
+    split(ko, 5)
     d2, d3, d4 = breakup(ko, seed=KEY)
     return {
         "idle1": slime(),
         "idle2": slime(squash=1),
         "hurt": slime(squash=1, eyes='squeeze', mouth='yelp'),
         "rough": rough(),
-        "barely": barely,
+        "barely": barely(),
         "defeat1": ko, "defeat2": d2, "defeat3": d3, "defeat4": d4,
     }

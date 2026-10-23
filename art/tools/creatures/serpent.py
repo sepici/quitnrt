@@ -98,11 +98,21 @@ def coils(neck=True):
     return g
 
 
-def build(head_rows=None, head_dx=0, head_dy=0, hood_dy=0):
+def build(head_rows=None, head_dx=0, head_dy=0, hood_dy=0, hood=None):
     g = coils()
-    patch(g, 4, 3 + hood_dy, HOOD)
+    patch(g, 4, 3 + hood_dy, hood or HOOD)
     patch(g, 11 + head_dx, 1 + head_dy, head_rows or HEAD)
     return g
+
+
+def torn_hood():
+    """The hood after a beating: the right flap ripped down from its tip, and a notch torn out
+    of its edge. The outline closes round the gaps when the frame is sealed."""
+    rows = [list(r) for r in HOOD]
+    for y, x0, x1 in ((0, 16, 23), (1, 16, 23), (2, 18, 23), (3, 21, 23), (5, 21, 23), (6, 20, 23), (7, 21, 23)):
+        for x in range(x0, x1 + 1):
+            rows[y][x] = ' '
+    return [''.join(r) for r in rows]
 
 
 # knocked out: the hood folds, and the head falls sideways on to the coils, jaw open
@@ -126,29 +136,37 @@ def knocked_out():
     return g
 
 
-def rough_marks(g):
-    # a tear in the hood, a fang snapped, scratches down the coils
-    for x, y in ((23, 6), (24, 7), (25, 8)):
-        g[y][x] = '.'
-    g[7][24] = 'o'
-    g[9][19] = 'o'
-    for x, y in ((8, 26), (9, 27), (20, 26), (21, 27)):
-        g[y][x] = 'o'
+# a fang snapped off
+HEAD_CHIPPED = {8: "  ohoooo  "}
+
+
+def scuffs(g, dy=0):
+    """Claw scratches raked pale across the coils."""
+    for x0, y0, n in ((7, 25, 2), (9, 25, 2), (8, 28, 3), (10, 28, 3), (19, 28, 3), (21, 28, 3), (21, 25, 2), (23, 25, 2)):
+        for i in range(n):
+            x, y = x0 + i, y0 + dy + i
+            if g[y][x] in 'dm':
+                g[y][x] = 'l'
+
+
+def rough():
+    """Roughed up: the head dips, the hood hangs torn, a fang is gone and the coils are scuffed."""
+    g = build(head(HEAD_CHIPPED), head_dy=1, hood_dy=1, hood=torn_hood())
+    scuffs(g)
+    return g
 
 
 def frames():
-    rough = build()
-    rough_marks(rough)
-    barely = build(head(HEAD_TIRED), head_dy=4, hood_dy=2)
-    for x, y in ((8, 26), (9, 27), (20, 26), (21, 27)):
-        barely[y][x] = 'o'
+    # barely standing: the head hangs lower still, tongue out, and the damage stays
+    barely = build(head({**HEAD_TIRED, **HEAD_CHIPPED}), head_dy=4, hood_dy=2, hood=torn_hood())
+    scuffs(barely)
     ko = knocked_out()
     d2, d3, d4 = breakup(ko, seed=KEY)
     return {
         "idle1": build(),
         "idle2": build(head(TONGUE_OUT)),
         "hurt": build(head(HEAD_HURT), head_dx=1),
-        "rough": rough,
+        "rough": rough(),
         "barely": barely,
         "defeat1": ko, "defeat2": d2, "defeat3": d3, "defeat4": d4,
     }
