@@ -1,6 +1,8 @@
 package app.thelasthit.nrt.domain.programme
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -59,5 +61,37 @@ class HitsTest {
         assertEquals(100, after.hp(2))
         assertThrows<IllegalArgumentException> { after.hp(3) }
         assertThrows<IllegalArgumentException> { after.hp(-1) }
+    }
+
+    @Test
+    fun `the ledger's sums give the banked hits and the HP`() {
+        val balance = HitBalance(maxHp = 120, earned = 4, spent = 1)
+        assertEquals(3, balance.banked)
+        assertEquals(110, balance.hp)
+        assertEquals(HitBalance(120, 4, 2), balance.spending(1))
+    }
+
+    @Test
+    fun `no more hits can be spent than are banked`() {
+        val balance = HitBalance(maxHp = 120, earned = 4, spent = 0)
+        assertTrue(balance.canSpend(4))
+        assertFalse(balance.canSpend(COMBO_HITS))
+        assertFalse(balance.canSpend(0))
+        assertThrows<IllegalArgumentException> { balance.spending(5) }
+        assertThrows<IllegalArgumentException> { HitBalance(maxHp = 120, earned = 1, spent = 2) }
+    }
+
+    @Test
+    fun `the 5x attack needs five banked hits and never takes the demon below 0`() {
+        assertTrue(HitBalance(maxHp = 120, earned = 5, spent = 0).canSpend(COMBO_HITS))
+        assertEquals(0, HitBalance(maxHp = 50, earned = 5, spent = 0).spending(COMBO_HITS).hp)
+        // Hits on offer always match the HP, but a ledger out of step still can't go below 0.
+        assertFalse(HitBalance(maxHp = 30, earned = 5, spent = 0).canSpend(COMBO_HITS))
+    }
+
+    @Test
+    fun `ledger rows earn one hit for a result and spend one or five`() {
+        assertEquals(listOf(1, 1, -1, -5), LedgerKind.entries.map { it.hits })
+        assertEquals(LedgerKind.CATCH_UP, LedgerKind.of(EarnedHit.Kind.CATCH_UP))
     }
 }
