@@ -8,7 +8,8 @@ Last updated: 23 October 2026, after the phase 1 screens were built and reviewed
 |---|---|
 | 0. Foundation and direction | Done. Gradle set-up, CI, copy lint, style guide, design direction chosen, first creature signed off |
 | 1. Logging | **Done.** Domain rules, catalogue, data layer, backup, theme, sprites, plus **onboarding, Today, the log sheet, History, Settings and the lair**, reviewed, with the owner's calls on the reviews applied. |
-| 2 to 9 | Not started |
+| 2. Insights | **In progress.** The stats are in `core/domain` (`domain/insights`), with tests. The screens wait for the mockups. |
+| 3 to 9 | Not started |
 
 The full check passes locally: copy rules, 93 domain tests, 28 data tests, 74 app UI, screenshot and format tests, debug APK, Android lint.
 
@@ -55,7 +56,7 @@ The plan has most of these already; this list is the quick reference.
   7. History leaves out the guide ticks and the filter button until phase 3 and phase 2.
   8. Pills keep the form rule, "Mouth spray 1 mg", where the mockups say "QuickMist 1 mg".
 
-## Next: the rest of phase 1 (the screens)
+## Phase 1: the screens
 
 Build against the B mockups. All strings go in `strings.xml` and pass `checkCopy`.
 
@@ -140,6 +141,45 @@ The copy agent read `strings.xml` against `docs/STYLE.md`. The fresh-eyes review
 4. **The lurking demon in dark mode** looks like a cut-out, with a 1 dp rim finer than its pixels. Recommended: leave it to the phase 4 sprite renderer, which was going to redo the rim anyway.
 5. **Today's settings icon** is sliders, which usually means filters. Recommended: a gear.
 6. **"Demon"** is both what you name and one of the eight creatures. Recommended: rename that creature "Imp".
+
+## Phase 2: Insights
+
+From PLAN §10 and §19, agreed with the owner on 23 October.
+
+**In phase 2:**
+- The 7, 30, 60 and 90 day ranges.
+- Daily intake with a 7-day rolling average.
+- The hour-by-weekday and calendar heat maps.
+- Triggers, habits and by product.
+- The History filter by product or tag.
+
+**Waits for phase 3, because it needs a plan:** the guide line, the weekly view, calendar shading against the guide, and "days within the guide". Advice cards wait for phase 5.
+
+**The owner's calls:**
+1. Charts are drawn with Compose Canvas, not Vico, like the heat maps and Today's week.
+2. A product-type filter scopes every chart, in place of bars stacked by type. Nicotine has to stay neutral, so stacked types couldn't be told apart by colour.
+3. "Minutes after waking" waits for the wake-time setting, with reminders in phase 6. Habits show the first dose's clock time.
+
+**Rules,** each in `core/domain/.../insights` with tests:
+- **Ranges:** 7 days is always on; 30 needs more than 7 days of history, 60 more than 30, and 90 more than 60. A window never starts before the first logged day (`InsightRange.window`).
+- **Rolling average:** up to 7 days, never before the first day. Today is left out until it's over, and is left out of the average a day too (`DailyIntake`).
+- **Hour heat map:** rows start at the day start's hour and columns are the logical day, so a Friday 01:30 dose sits at the bottom of Friday. Hours are read off the dose's own clock, and patches are left out (`HourHeatMap`).
+- **Calendar:** days in the range before the first dose have no data, not zero (`CalendarHeat`).
+- **Heat shading:** an empty step plus 5 shades of one ramp (`HeatScale`).
+- **Times of day:** morning from 05:00, afternoon from 12:00, evening from 17:00, night from 22:00, on the dose's own clock (`TimeOfDay`).
+- **Triggers:** shares are of doses, so they don't add up to 100%. A dose counts once for its group, and patches are left out (`Triggers`).
+- **Habits:** gaps count within a day, so sleep is never one, and patches are left out of every habit. The first dose is averaged in minutes from the day start, so it works across midnight (`Habits`).
+- **Comparisons:** a change against the previous period only shows when that period is fully logged (`InsightWindow.hasFullPrevious`).
+- **By product:** shares of mg, with patches included, and units a day across the whole period (`ByProduct`).
+
+**Slices:**
+1. Domain stats and tests. Done.
+2. Mockups for Insights and the History filter, by the designer agent. In progress.
+3. The Insights screen and daily chart.
+4. Both heat maps.
+5. Triggers, habits and by product.
+6. The History filter.
+7. Copy and fresh-eyes reviews.
 
 ## How design and copy are reviewed
 

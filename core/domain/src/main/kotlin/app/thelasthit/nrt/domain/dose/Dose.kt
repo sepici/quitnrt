@@ -53,3 +53,6 @@ value class Dose(val micrograms: Long) : Comparable<Dose> {
 }
 
 fun Iterable<Dose>.sum(): Dose = fold(Dose.ZERO, Dose::plus)
+
+/** The mean, rounded to the nearest microgram in whole numbers like every sum, or null when empty. */
+fun List<Dose>.average(): Dose? = if (isEmpty()) null else Dose((sum().micrograms * 2 + size) / (2L * size))

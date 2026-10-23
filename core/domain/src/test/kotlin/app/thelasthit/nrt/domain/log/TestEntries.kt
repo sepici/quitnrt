@@ -12,6 +12,7 @@ internal val LONDON: ZoneId = ZoneId.of("Europe/London")
 
 internal fun london(text: String): Instant = LocalDateTime.parse(text).atZone(LONDON).toInstant()
 
+/** A dose taken at [at] on the clock in [zone], counted toward its day with a 04:00 day start. */
 internal fun entry(
     at: String,
     productId: String = "nicorette-gum-uk-2mg",
@@ -19,8 +20,10 @@ internal fun entry(
     perUnit: Dose = Dose.mg(2),
     quantity: Int = 1,
     source: EntrySource = EntrySource.APP,
+    tags: Set<String> = emptySet(),
+    zone: ZoneId = LONDON,
 ): Entry {
-    val instant = london(at)
+    val instant = LocalDateTime.parse(at).atZone(zone).toInstant()
     return Entry(
         id = UUID.randomUUID().toString(),
         productId = productId,
@@ -31,8 +34,9 @@ internal fun entry(
         quantity = quantity,
         total = perUnit * quantity,
         occurredAt = instant,
-        zone = LONDON,
-        logicalDate = DayBoundary().logicalDate(instant, LONDON),
+        zone = zone,
+        logicalDate = DayBoundary().logicalDate(instant, zone),
+        tagKeys = tags,
         source = source,
     )
 }
