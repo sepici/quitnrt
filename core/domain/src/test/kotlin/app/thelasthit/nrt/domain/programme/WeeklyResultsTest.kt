@@ -93,6 +93,22 @@ class WeeklyResultsTest {
     }
 
     @Test
+    fun `a result counts the entries it's given, so it's settled before a later write`() {
+        // Three days after week 1's result was due, a dose is added to its Tuesday.
+        val onTime = listOf(dose("2026-10-26T09:00", Dose.mg(140)))
+        val backdated = dose("2026-10-27T10:00", Dose.mg(10))
+        val later = clockAt("2026-11-04T12:00")
+        // Passed in with the rest, it would still count.
+        assertEquals(WeekResult.MISSED, programme.settle(onTime + backdated, later).programme.week(1).result)
+        // Settled before the write, the result is in and stays as it was.
+        val settledFirst = programme.settle(onTime, later).programme
+        val afterWrite = settledFirst.settle(onTime + backdated, later)
+        assertEquals(WeekResult.MET, afterWrite.programme.week(1).result)
+        assertEquals(due.now, afterWrite.programme.week(1).resultAt)
+        assertEquals(emptyList<EarnedHit>(), afterWrite.newHits)
+    }
+
+    @Test
     fun `weeks come in one at a time, in order`() {
         val entries = listOf(dose("2026-10-26T09:00", Dose.mg(10)))
         val settled = programme.settle(entries, clockAt("2026-11-08T03:59")).programme

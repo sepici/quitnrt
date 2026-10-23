@@ -9,7 +9,8 @@ import java.time.ZoneId
 /**
  * The moment the app looks at a programme: the time now, the phone's zone and the day start.
  * Weeks and results are worked out from this and the logs alone, so they come out the same
- * whenever the app looks.
+ * whenever the app looks, as long as the logs are settled before they change: see
+ * [Programme.settle].
  */
 class ProgrammeClock(
     val now: Instant,

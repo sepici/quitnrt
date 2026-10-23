@@ -2,6 +2,7 @@ package app.thelasthit.nrt.domain.programme
 
 import app.thelasthit.nrt.domain.dose.Dose
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -55,8 +56,27 @@ class PlanBuilderTest {
     }
 
     @Test
-    fun `a single unit has nothing to step down through`() {
-        assertEquals(List(12) { Dose.ZERO }, guides(21.0, 21.0))
+    fun `a baseline of a single unit is refused, since it has nothing to step down through`() {
+        // One 21 mg patch a day, and a patch with a little gum: both come to one patch.
+        // One 4 mg lozenge a day is one lozenge.
+        for ((baseline, unit) in listOf(Dose.mg(21) to Dose.mg(21), Dose.mg(25) to Dose.mg(21), Dose.mg(4) to Dose.mg(4))) {
+            assertEquals(1, PlanBuilder.units(baseline, unit))
+            assertFalse(PlanBuilder.canStepDown(baseline, unit))
+            assertThrows<IllegalArgumentException> { PlanBuilder.targets(baseline, unit, ProgrammeLength.WEEKS_12) }
+            assertThrows<IllegalArgumentException> { Programme.create(Baseline.typed(baseline), ProgrammeLength.WEEKS_12, unit, START) }
+        }
+        assertFalse(PlanBuilder.canStepDown(Dose.mg(1.5), Dose.mg(4)))
+        assertFalse(PlanBuilder.canStepDown(Dose.ZERO, Dose.mg(2)))
+        assertFalse(PlanBuilder.canStepDown(Dose.mg(24), Dose.ZERO))
+        // A smaller product steps them down: the patches in 7 mg ones, the lozenge in 2 mg ones.
+        assertTrue(PlanBuilder.canStepDown(Dose.mg(21), Dose.mg(7)))
+        assertEquals(mg(14, 14, 14, 14, 14, 7, 7, 7, 7, 7, 0, 0), guides(21.0, 7.0))
+        assertTrue(PlanBuilder.canStepDown(Dose.mg(25), Dose.mg(7)))
+        assertEquals(mg(21, 21, 21, 14, 14, 14, 7, 7, 7, 7, 0, 0), guides(25.0, 7.0))
+        assertTrue(PlanBuilder.canStepDown(Dose.mg(4), Dose.mg(2)))
+        assertEquals(mg(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0), guides(4.0, 2.0))
+        // A unit and a half rounds up to two.
+        assertTrue(PlanBuilder.canStepDown(Dose.mg(6), Dose.mg(4)))
     }
 
     @Test
@@ -64,8 +84,8 @@ class PlanBuilderTest {
         assertEquals(13, PlanBuilder.units(Dose.mg(25), Dose.mg(2)))
         assertEquals(12, PlanBuilder.units(Dose(24_999), Dose.mg(2)))
         assertEquals(Dose.mg(22), guides(25.0, 2.0).first())
-        // At least one, so even a tiny baseline has a unit to drop.
-        assertEquals(1, PlanBuilder.units(Dose.mg(0.5), Dose.mg(4)))
+        // Under half a unit is none at all.
+        assertEquals(0, PlanBuilder.units(Dose.mg(1.5), Dose.mg(4)))
         // An inhalator session is an eighth of a 15 mg cartridge.
         assertEquals(8, PlanBuilder.units(Dose.mg(15), Dose(1875)))
     }
@@ -81,12 +101,16 @@ class PlanBuilderTest {
     }
 
     @Test
-    fun `allowances never go up, and the first week is under the baseline`() {
+    fun `allowances never go up, the first week is under the baseline, and the taper keeps some nicotine`() {
         val units = listOf(Dose.mg(1), Dose.mg(1.5), Dose(1875), Dose.mg(2), Dose.mg(4), Dose.mg(7), Dose.mg(14), Dose.mg(21), Dose.mg(25))
         val baselines = (1..80).flatMap { mg -> listOf(Dose.mg(mg), Dose(mg * 1000L + 333)) }
         for (length in ProgrammeLength.entries) {
             for (unit in units) {
                 for (baseline in baselines) {
+                    if (!PlanBuilder.canStepDown(baseline, unit)) {
+                        assertThrows<IllegalArgumentException>("$baseline of $unit") { PlanBuilder.targets(baseline, unit, length) }
+                        continue
+                    }
                     val targets = PlanBuilder.targets(baseline, unit, length)
                     val allowances = targets.map { it.weeklyAllowance }
                     val case = "$baseline of $unit over ${length.weeks} weeks: $allowances"
@@ -96,7 +120,7 @@ class PlanBuilderTest {
                     assertTrue(targets.all { it.dailyGuide.micrograms % unit.micrograms == 0L }, case)
                     assertTrue(targets.all { it.dailyGuide * WeekTarget.DAYS == it.weeklyAllowance }, case)
                     assertEquals(listOf(Dose.ZERO, Dose.ZERO), allowances.takeLast(2), case)
-                    if (PlanBuilder.units(baseline, unit) >= 2) assertTrue(allowances[length.taperWeeks - 1] > Dose.ZERO, case)
+                    assertTrue(allowances[length.taperWeeks - 1] > Dose.ZERO, case)
                 }
             }
         }

@@ -148,9 +148,13 @@ data class Programme(
     // Results.
 
     /**
-     * Brings in every result that's due by [clock]: each week 24 hours after it ends, counting
-     * everything logged on its days by then. Results already in stay as they are, so editing old
-     * entries never changes them.
+     * Brings in every result that's due by [clock]: each week 24 hours after it ends. Results
+     * already in stay as they are, so editing old entries never changes them.
+     *
+     * A result counts every one of [entries] on its week's days. An entry doesn't say when it was
+     * written, so [entries] have to be the logs as they stood when each result came due. The
+     * caller makes sure of that by settling before it writes any entry (a log, an edit, a delete,
+     * an import or a sync), so nothing written after a result is due can reach it.
      *
      * A met week pays back every missed week since the last met one. A missed final week starts
      * overtime: NRT-free weeks, one after another, until one is met.
@@ -253,7 +257,10 @@ data class Programme(
         /** Programme weeks run from the start day picked, tomorrow unless the user says otherwise. */
         fun defaultStart(today: LocalDate): LocalDate = today.plusDays(1)
 
-        /** A new programme, built from [baseline] in whole units of the main product, [mainUnit] each. */
+        /**
+         * A new programme, built from [baseline] in whole units of the main product, [mainUnit]
+         * each. It needs a baseline [PlanBuilder.canStepDown] through with that unit.
+         */
         fun create(
             baseline: Baseline,
             length: ProgrammeLength,
