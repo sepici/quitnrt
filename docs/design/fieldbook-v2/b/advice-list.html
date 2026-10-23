@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=412">
+<title>Fieldbook v2 B, All advice</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="screens.css">
+<link rel="stylesheet" href="advice.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5.5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></symbol>
+  <symbol id="i-chevl" viewBox="0 0 24 24"><path d="M14.5 6l-6 6 6 6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.7v.1"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="6.5" y="3" width="11" height="18" rx="2.5"/><path d="M10.5 17.5h3"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></symbol>
+  <symbol id="i-gum" viewBox="0 0 24 24"><rect x="3.5" y="7" width="17" height="10" rx="4"/><path d="M7.5 10.5c1.5-.8 3-.8 4.5 0"/></symbol>
+  <symbol id="i-spray" viewBox="0 0 24 24"><rect x="7" y="9" width="8" height="12" rx="2"/><path d="M9 9V6.5h4V9M13 6.5h2.5"/><path d="M18.5 4.5h.01M20 7h.01M18.5 9h.01"/></symbol>
+  <symbol id="i-patch" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4.5"/><rect x="8.5" y="8.5" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-loz" viewBox="0 0 24 24"><rect x="6.6" y="6.6" width="10.8" height="10.8" rx="2.6" transform="rotate(45 12 12)"/></symbol>
+  <symbol id="i-inh" viewBox="0 0 24 24"><rect x="3" y="9.5" width="18" height="5" rx="2.5"/><path d="M15.5 9.5v5"/></symbol>
+  <symbol id="i-nasal" viewBox="0 0 24 24"><rect x="7" y="11" width="10" height="10" rx="2.5"/><path d="M10.5 11V5.5a1.5 1.5 0 0 1 3 0V11"/></symbol>
+  <symbol id="i-tab" viewBox="0 0 24 24"><ellipse cx="12" cy="10" rx="7" ry="3.5"/><path d="M5 10v3.5c0 1.9 3.1 3.5 7 3.5s7-1.6 7-3.5V10"/></symbol>
+  <symbol id="i-tune" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6.5h16M7 12h10M10 17.5h4"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10.5 11v5.5M13.5 11v5.5"/></symbol>
+  <symbol id="i-grip" viewBox="0 0 24 24"><path d="M9 6.5h.01M15 6.5h.01M9 12h.01M15 12h.01M9 17.5h.01M15 17.5h.01"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></symbol>
+  <symbol id="i-eyeoff" viewBox="0 0 24 24"><path d="M4.5 8.5C3.2 10.2 2.5 12 2.5 12S6 18.5 12 18.5c1.6 0 3-.4 4.2-1M9 6c.9-.3 1.9-.5 3-.5 6 0 9.5 6.5 9.5 6.5s-.7 1.4-2 3M4 4l16 16"/></symbol>
+  <symbol id="i-export" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14"/></symbol>
+  <symbol id="i-restore" viewBox="0 0 24 24"><path d="M12 15V4M7.5 8.5L12 4l4.5 4.5M5 19.5h14"/></symbol>
+  <symbol id="i-table" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2.5"/><path d="M4 10h16M4 14.5h16M10 10v9"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M7 3.5h7l4 4v13H7z"/><path d="M14 3.5v4h4"/></symbol>
+  <symbol id="i-remove" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8 12h8"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.4 5.4 3.4 8.5s-1 6.1-3.4 8.5c-2.4-2.4-3.4-5.4-3.4-8.5s1-6.1 3.4-8.5z"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M14.5 5.5l4 4M4 20l1-5L15.5 4.5a2 2 0 0 1 2.8 0l1.2 1.2a2 2 0 0 1 0 2.8L9 19z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4.5l3 1.5"/></symbol>
+  <symbol id="i-today" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v3.5H8"/><path d="M12 8.5V12l2.5 2"/></symbol>
+  <symbol id="i-insights" viewBox="0 0 24 24"><path d="M5 20v-7M12 20V5M19 20v-10"/></symbol>
+  <symbol id="i-plan" viewBox="0 0 24 24"><path d="M3.5 6.5h5v5h5v5h7"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5.5M6.5 11L12 5.5l5.5 5.5"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v13.5M6.5 13l5.5 5.5 5.5-5.5"/></symbol>
+  <symbol id="i-same" viewBox="0 0 24 24"><path d="M6 12h12"/></symbol>
+  <symbol id="i-lair" viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M5 20v-7a7 7 0 0 1 14 0v7"/><path d="M10 20v-3a2 2 0 0 1 4 0v3"/></symbol>
+  <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.5 1.1 1.3 1.1 2.2h5c0-.9.4-1.7 1.1-2.2A6 6 0 0 0 12 3z"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><path d="M10.39,5.29L10.55,2.81A9.3,9.3 0 0 1 13.45,2.81L13.61,5.29A6.9,6.9 0 0 1 15.61,6.12L17.47,4.48A9.3,9.3 0 0 1 19.52,6.53L17.88,8.39A6.9,6.9 0 0 1 18.71,10.39L21.19,10.55A9.3,9.3 0 0 1 21.19,13.45L18.71,13.61A6.9,6.9 0 0 1 17.88,15.61L19.52,17.47A9.3,9.3 0 0 1 17.47,19.52L15.61,17.88A6.9,6.9 0 0 1 13.61,18.71L13.45,21.19A9.3,9.3 0 0 1 10.55,21.19L10.39,18.71A6.9,6.9 0 0 1 8.39,17.88L6.53,19.52A9.3,9.3 0 0 1 4.48,17.47L6.12,15.61A6.9,6.9 0 0 1 5.29,13.61L2.81,13.45A9.3,9.3 0 0 1 2.81,10.55L5.29,10.39A6.9,6.9 0 0 1 6.12,8.39L4.48,6.53A9.3,9.3 0 0 1 6.53,4.48L8.39,6.12A6.9,6.9 0 0 1 10.39,5.29Z"/><path d="M14.9,12a2.9,2.9 0 1 1 -5.8,0a2.9,2.9 0 1 1 5.8,0z"/></symbol>
+  <symbol id="i-wind" viewBox="0 0 24 24"><path d="M3.5 8.5H13a2.5 2.5 0 1 0-2.5-2.5"/><path d="M3.5 12.5h14a2.5 2.5 0 1 1-2.5 2.5"/><path d="M3.5 16.5h6"/></symbol>
+  <symbol id="i-timer" viewBox="0 0 24 24"><path d="M6.5 3.5h11M6.5 20.5h11"/><path d="M8 3.5v2.2c0 2.6 4 4.3 4 6.3s-4 3.7-4 6.3v2.2M16 3.5v2.2c0 2.6-4 4.3-4 6.3s4 3.7 4 6.3v2.2"/></symbol>
+  <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3.5s-6 6.6-6 10.8a6 6 0 0 0 12 0C18 10.1 12 3.5 12 3.5z"/></symbol>
+  <symbol id="i-swap" viewBox="0 0 24 24"><path d="M4 7.5h13M14 4l3.5 3.5L14 11"/><path d="M20 16.5H7M10 13l-3.5 3.5L10 20"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 6v12M15 6v12"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10-6.5z"/></symbol>
+  <symbol id="i-vibrate" viewBox="0 0 24 24"><rect x="7.5" y="4" width="9" height="16" rx="2"/><path d="M4.5 9v6M19.5 9v6"/></symbol>
+</svg>
+<div class="status"><span class="num">15:05</span>
+  <svg width="52" height="14" viewBox="0 0 52 14" fill="currentColor" aria-hidden="true"><path d="M1 13h2v-3H1zM5 13h2V7H5zM9 13h2V4H9zM13 13h2V1h-2z"/><rect x="30.5" y="2.5" width="17" height="9" rx="2" fill="none" stroke="currentColor"/><rect x="32" y="4" width="11" height="6"/><rect x="49" y="5" width="2" height="4"/></svg>
+</div>
+<div class="backbar">
+  <button class="iconbtn" aria-label="Back"><svg class="i"><use href="#i-back"/></svg></button>
+  <h1>Advice</h1>
+</div>
+<p class="adv-intro">Ways to handle a craving without a dose, from NHS and CDC guidance. Your own top triggers come first.</p>
+
+<section class="adv-sec" aria-label="Your top triggers">
+  <h2>Your top triggers</h2>
+  <p>From the last 14 days, by share of doses.</p>
+</section>
+<div class="trig"><h3>After a meal</h3><span>27% of doses</span></div>
+<ul class="slist">
+  <li class="srow"><span class="body"><span class="ttl">Have your dose before the meal</span><span class="sub mine"><em>From your logs:</em> try <span class="num">12:30</span>, before lunch</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+  <li class="srow"><span class="body"><span class="ttl">Get up from the table</span><span class="sub">Leave as soon as you finish eating</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+  <li class="srow"><span class="body"><span class="ttl">Brush your teeth</span><span class="sub">It marks the meal as over</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+</ul>
+<div class="trig"><h3>Just woke up</h3><span>15% of doses</span></div>
+<ul class="slist">
+  <li class="srow"><span class="body"><span class="ttl">Push the first dose later</span><span class="sub mine"><em>From your logs:</em> try <span class="num">09:15</span> this week, 15 minutes later</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+  <li class="srow"><span class="body"><span class="ttl">Water or breakfast first</span><span class="sub">Start the day with something that isn’t nicotine</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+</ul>
+<div class="trig"><h3>With coffee or tea</h3><span>10% of doses</span></div>
+<ul class="slist">
+  <li class="srow"><span class="body"><span class="ttl">Leave a gap after coffee</span><span class="sub">Coffee and fizzy drinks stop gum and lozenges working as well</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+</ul>
+
+<section class="ds ds-after" aria-label="The 4 Ds">
+  <div class="ds-hd"><h2>The 4 Ds</h2><p>For any craving, wherever you are.</p></div>
+  <ul class="slist" style="border:0">
+    <li class="srow"><span class="lead"><svg class="i"><use href="#i-timer"/></svg></span><span class="body"><span class="ttl">Delay<span class="tagline">Timer</span></span><span class="sub">Wait 5 to 10 minutes while it peaks and passes</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+    <li class="srow"><span class="lead"><svg class="i"><use href="#i-wind"/></svg></span><span class="body"><span class="ttl">Deep breaths<span class="tagline">Timer</span></span><span class="sub">Box breathing or 4-7-8, for 1 to 3 minutes</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+    <li class="srow"><span class="lead"><svg class="i"><use href="#i-drop"/></svg></span><span class="body"><span class="ttl">Drink water</span><span class="sub">A full glass, sipped slowly</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+    <li class="srow"><span class="lead"><svg class="i"><use href="#i-swap"/></svg></span><span class="body"><span class="ttl">Do something else</span><span class="sub">Move, change rooms or keep your hands busy</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+  </ul>
+</section>
+
+<section class="adv-sec" aria-label="Every strategy">
+  <h2>Every strategy</h2>
+  <p>By the kind of trigger they suit.</p>
+</section>
+<h3 class="shd">Feelings</h3>
+<ul class="slist">
+  <li class="srow"><span class="body"><span class="ttl">Deep breaths<span class="tagline">Timer</span></span><span class="sub">Stressed, Anxious, Angry</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+  <li class="srow"><span class="body"><span class="ttl">A 5-minute walk</span><span class="sub">Stressed, Angry, After an argument</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+  <li class="srow"><span class="body"><span class="ttl">Tense and relax</span><span class="sub">Stressed, Anxious</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+  <li class="srow"><span class="body"><span class="ttl">Ride out the urge</span><span class="sub">Stressed, Strong craving</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+  <li class="srow"><span class="body"><span class="ttl">Talk to someone</span><span class="sub">Low, Lonely</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+  <li class="srow"><span class="body"><span class="ttl">Pick another treat</span><span class="sub">Happy, Excited, Celebrating</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+</ul>
+<h3 class="shd">Routine</h3>
+<ul class="slist">
+  <li class="srow"><span class="body"><span class="ttl">Have your dose before the meal</span><span class="sub">After a meal</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+  <li class="srow"><span class="body"><span class="ttl">Leave a gap after coffee</span><span class="sub">With coffee or tea</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+  <li class="srow"><span class="body"><span class="ttl">Push the first dose later</span><span class="sub">Just woke up</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+  <li class="srow"><span class="body"><span class="ttl">Keep your hands busy</span><span class="sub">Screen time, On a call, Bored</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+  <li class="srow"><span class="body"><span class="ttl">Change rooms</span><span class="sub">Work break, Screen time, Bored</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+</ul>
+<h3 class="shd">People</h3>
+<ul class="slist">
+  <li class="srow"><span class="body"><span class="ttl">Decide your limit before you go</span><span class="sub">With a drink, Out socialising</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+  <li class="srow"><span class="body"><span class="ttl">Step away for a few minutes</span><span class="sub">Around smokers or vapers</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+</ul>
+<h3 class="shd">Body</h3>
+<ul class="slist">
+  <li class="srow"><span class="body"><span class="ttl">Ask a pharmacist about the pace</span><span class="sub">Withdrawal, Strong craving</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+  <li class="srow"><span class="body"><span class="ttl">Eat something small</span><span class="sub">Hungry</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+  <li class="srow"><span class="body"><span class="ttl">Get some fresh air</span><span class="sub">Tired, Can’t focus</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+</ul>
+<h3 class="shd">Habit</h3>
+<ul class="slist">
+  <li class="srow"><span class="body"><span class="ttl">Make each dose a decision</span><span class="sub">On autopilot</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+</ul>
+
+<section class="help" aria-label="Free help">
+  <h2>Free help</h2>
+  <p>A pharmacist or your local NHS stop smoking service can help you plan the pace of coming off NRT.</p>
+  <div class="call"><span class="lead"><svg class="i"><use href="#i-phone"/></svg></span><span class="body"><b>NHS Smokefree helpline</b><span class="num">0300 123 1044</span></span><a class="link">Call</a></div>
+</section>
+<p class="fineprint">General information, not medical advice. If cravings are strong or keep coming back, talk to a pharmacist or your GP.</p>
+<div style="height:32px"></div>
+</body>
+</html>

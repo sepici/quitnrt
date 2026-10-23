@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=412">
+<title>Fieldbook v2 B, Plan, week 4 of 12</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="screens.css">
+<link rel="stylesheet" href="plan.css">
+<style>/* the app bundles a true Bold since 23 October, so 700 uses it here */
+@font-face{font-family:'Schibsted Grotesk';src:url('../../../../app/src/main/res/font/schibsted_grotesk_bold.ttf') format('truetype');font-weight:700;font-style:normal;font-display:block}</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5.5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></symbol>
+  <symbol id="i-chevl" viewBox="0 0 24 24"><path d="M14.5 6l-6 6 6 6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.7v.1"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="6.5" y="3" width="11" height="18" rx="2.5"/><path d="M10.5 17.5h3"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></symbol>
+  <symbol id="i-gum" viewBox="0 0 24 24"><rect x="3.5" y="7" width="17" height="10" rx="4"/><path d="M7.5 10.5c1.5-.8 3-.8 4.5 0"/></symbol>
+  <symbol id="i-spray" viewBox="0 0 24 24"><rect x="7" y="9" width="8" height="12" rx="2"/><path d="M9 9V6.5h4V9M13 6.5h2.5"/><path d="M18.5 4.5h.01M20 7h.01M18.5 9h.01"/></symbol>
+  <symbol id="i-patch" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4.5"/><rect x="8.5" y="8.5" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-loz" viewBox="0 0 24 24"><rect x="6.6" y="6.6" width="10.8" height="10.8" rx="2.6" transform="rotate(45 12 12)"/></symbol>
+  <symbol id="i-inh" viewBox="0 0 24 24"><rect x="3" y="9.5" width="18" height="5" rx="2.5"/><path d="M15.5 9.5v5"/></symbol>
+  <symbol id="i-nasal" viewBox="0 0 24 24"><rect x="7" y="11" width="10" height="10" rx="2.5"/><path d="M10.5 11V5.5a1.5 1.5 0 0 1 3 0V11"/></symbol>
+  <symbol id="i-tab" viewBox="0 0 24 24"><ellipse cx="12" cy="10" rx="7" ry="3.5"/><path d="M5 10v3.5c0 1.9 3.1 3.5 7 3.5s7-1.6 7-3.5V10"/></symbol>
+  <symbol id="i-tune" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6.5h16M7 12h10M10 17.5h4"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10.5 11v5.5M13.5 11v5.5"/></symbol>
+  <symbol id="i-grip" viewBox="0 0 24 24"><path d="M9 6.5h.01M15 6.5h.01M9 12h.01M15 12h.01M9 17.5h.01M15 17.5h.01"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></symbol>
+  <symbol id="i-eyeoff" viewBox="0 0 24 24"><path d="M4.5 8.5C3.2 10.2 2.5 12 2.5 12S6 18.5 12 18.5c1.6 0 3-.4 4.2-1M9 6c.9-.3 1.9-.5 3-.5 6 0 9.5 6.5 9.5 6.5s-.7 1.4-2 3M4 4l16 16"/></symbol>
+  <symbol id="i-export" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14"/></symbol>
+  <symbol id="i-restore" viewBox="0 0 24 24"><path d="M12 15V4M7.5 8.5L12 4l4.5 4.5M5 19.5h14"/></symbol>
+  <symbol id="i-table" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2.5"/><path d="M4 10h16M4 14.5h16M10 10v9"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M7 3.5h7l4 4v13H7z"/><path d="M14 3.5v4h4"/></symbol>
+  <symbol id="i-remove" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8 12h8"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.4 5.4 3.4 8.5s-1 6.1-3.4 8.5c-2.4-2.4-3.4-5.4-3.4-8.5s1-6.1 3.4-8.5z"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M14.5 5.5l4 4M4 20l1-5L15.5 4.5a2 2 0 0 1 2.8 0l1.2 1.2a2 2 0 0 1 0 2.8L9 19z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4.5l3 1.5"/></symbol>
+  <symbol id="i-today" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v3.5H8"/><path d="M12 8.5V12l2.5 2"/></symbol>
+  <symbol id="i-insights" viewBox="0 0 24 24"><path d="M5 20v-7M12 20V5M19 20v-10"/></symbol>
+  <symbol id="i-plan" viewBox="0 0 24 24"><path d="M3.5 6.5h5v5h5v5h7"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5.5M6.5 11L12 5.5l5.5 5.5"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v13.5M6.5 13l5.5 5.5 5.5-5.5"/></symbol>
+  <symbol id="i-same" viewBox="0 0 24 24"><path d="M6 12h12"/></symbol>
+  <symbol id="i-lair" viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M5 20v-7a7 7 0 0 1 14 0v7"/><path d="M10 20v-3a2 2 0 0 1 4 0v3"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/><path d="M8.5 14h.01M12 14h.01M15.5 14h.01M8.5 17h.01"/></symbol>
+  <symbol id="i-back-arc" viewBox="0 0 24 24"><path d="M9 7.5H14a5 5 0 0 1 0 10H8"/><path d="M11.5 4L8 7.5l3.5 3.5"/></symbol>
+  <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M5 11V9.5A3.5 3.5 0 0 1 8.5 6H18M15 3l3 3-3 3"/><path d="M19 13v1.5a3.5 3.5 0 0 1-3.5 3.5H6M9 21l-3-3 3-3"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4.5 12H19M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M6 21V4"/><path d="M6 4.5h11l-2.5 4 2.5 4H6"/></symbol>
+  <symbol id="i-gap" viewBox="0 0 24 24"><path d="M5 5v14M19 5v14"/><path d="M8.5 12h7M8.5 12l2-2M8.5 12l2 2M15.5 12l-2-2M15.5 12l-2 2"/></symbol>
+  <symbol id="i-sunrise" viewBox="0 0 24 24"><path d="M3 18h18M7 18a5 5 0 0 1 10 0"/><path d="M12 4v4M5.6 9.6l1.4 1.4M18.4 9.6L17 11"/></symbol>
+  <symbol id="i-count" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 9v6M12 9v6M15 9v6"/></symbol>
+  <symbol id="i-steps" viewBox="0 0 24 24"><path d="M4 6h5v4h5v4h6"/><path d="M4 19h16"/></symbol>
+</svg>
+<div class="status"><span class="num">15:05</span>
+  <svg width="52" height="14" viewBox="0 0 52 14" fill="currentColor" aria-hidden="true"><path d="M1 13h2v-3H1zM5 13h2V7H5zM9 13h2V4H9zM13 13h2V1h-2z"/><rect x="30.5" y="2.5" width="17" height="9" rx="2" fill="none" stroke="currentColor"/><rect x="32" y="4" width="11" height="6"/><rect x="49" y="5" width="2" height="4"/></svg>
+</div>
+<div class="topbar"><h1>Plan<span class="date">Week 4 of 12</span></h1></div>
+
+<section class="pl-sec" style="padding-top:12px" aria-label="This week">
+  <div class="pl-fig"><span class="n num">36</span><span class="of">of 56&nbsp;mg this week</span></div>
+  <div class="pl-meter" role="img" aria-label="36 mg used of the 56 mg allowance. 20 mg left this week.">
+    <div class="track"></div>
+    <div class="used" style="width:51.4%"></div>
+    <div class="mark" style="left:80%"></div>
+    <div class="mark-l" style="left:80%">56&nbsp;mg allowance</div>
+    <div class="left"><span class="ok"><svg class="i"><use href="#i-check"/></svg></span>20&nbsp;mg left this week</div>
+  </div>
+  <p class="pl-meta">Daily guide <b>8&nbsp;mg</b>. Day 5 of 7, with today, Thursday and Friday left.</p>
+  <p class="pl-meta">Meet this week and you get week 3’s hit back too.</p>
+  <div class="pl-cols" role="img" aria-label="Saturday 9 mg, Sunday 8, Monday 7 and Tuesday 8 at or under the 8 mg guide. Wednesday 4 so far.">
+  <div class="pl-guide" style="top:29.3px"></div>
+  <div class="pl-day"><span class="pl-bar"><i style="height:75.0%"><b class="pl-v">9</b></i></span><span class="pl-d">S</span></div>
+  <div class="pl-day"><span class="pl-bar"><i style="height:66.7%"><b class="pl-v">8</b></i></span><span class="pl-d ok">S</span></div>
+  <div class="pl-day"><span class="pl-bar"><i style="height:58.3%"><b class="pl-v">7</b></i></span><span class="pl-d ok">M</span></div>
+  <div class="pl-day"><span class="pl-bar"><i style="height:66.7%"><b class="pl-v">8</b></i></span><span class="pl-d ok">T</span></div>
+  <div class="pl-day pl-today"><span class="pl-bar"><i style="height:33.3%"><b class="pl-v">4</b></i></span><span class="pl-d now">W</span></div>
+  <div class="pl-day"><span class="pl-bar pl-blank"></span><span class="pl-d">T</span></div>
+  <div class="pl-day"><span class="pl-bar pl-blank"></span><span class="pl-d">F</span></div>
+</div>
+  <div class="pl-key" aria-hidden="true"><span><i class="ku"></i>Used</span><span><i class="kg"></i>8&nbsp;mg guide</span><span><i class="kok"></i>At or under the guide</span></div>
+</section>
+
+<a class="band" aria-label="Gary, 110 of 120 HP, 1 hit ready. Opens the lair">
+  <picture><source srcset="band-dark.png" media="(prefers-color-scheme: dark)"><img class="art pixelated" src="band-light.png" alt=""></picture>
+  <div class="info">
+    <div class="nm"><b>Gary</b><span class="ready">1 hit ready</span></div>
+    <div class="hp" aria-hidden="true"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i></i></div>
+    <div class="hpn"><span class="px">110/120</span><span class="u">HP</span></div>
+  </div>
+</a>
+
+<section class="pl-sec" aria-label="Schedule">
+  <h2>Schedule</h2>
+  <p class="in-meta">12 weeks, Saturday 24 October to Friday 15 January.</p>
+  <ol class="pl-sched">
+    <li><span class="mk back" aria-hidden="true"><svg class="i"><use href="#i-back-arc"/></svg></span><span class="body"><b>Week 1</b><span>24 to 30 October</span></span><span class="amt"><b>86 of 84 mg</b><span>Caught up in week 2</span></span></li>
+    <li><span class="mk ok" aria-hidden="true"><svg class="i"><use href="#i-check"/></svg></span><span class="body"><b>Week 2</b><span>31 October to 6 November</span></span><span class="amt"><b><span class="hits" aria-hidden="true"><i></i><i></i></span>80 of 84 mg</b><span>Met, paid back week 1</span></span></li>
+    <li><span class="mk miss" aria-hidden="true"><svg class="i"><use href="#i-minus"/></svg></span><span class="body"><b>Week 3</b><span>7 to 13 November</span></span><span class="amt"><b>85 of 84 mg</b><span>Missed, back if week 4 is met</span></span></li>
+    <li class="now"><span class="mk now" aria-hidden="true"></span><span class="body"><b>Week 4</b><span>14 to 20 November</span></span><span class="amt"><b>36 of 56 mg</b><span>This week, so far</span></span></li>
+    <li class="later edit"><button class="pl-srow" aria-label="Week 5, 21 to 27 November: 8 mg a day, 56 mg for the week. Change it"><span class="mk up" aria-hidden="true"></span><span class="body"><b>Week 5</b><span>21 to 27 November</span></span><span class="amt"><b>56 mg</b><span>8 mg a day</span></span><span class="pen" aria-hidden="true"><svg class="i"><use href="#i-pencil"/></svg></span></button></li>
+    <li class="later edit"><button class="pl-srow" aria-label="Week 6, 28 November to 4 December: 8 mg a day, 56 mg for the week. Change it"><span class="mk up" aria-hidden="true"></span><span class="body"><b>Week 6</b><span>28 November to 4 December</span></span><span class="amt"><b>56 mg</b><span>8 mg a day</span></span><span class="pen" aria-hidden="true"><svg class="i"><use href="#i-pencil"/></svg></span></button></li>
+    <li class="later edit"><button class="pl-srow" aria-label="Week 7, 5 to 11 December: 4 mg a day, 28 mg for the week. Change it"><span class="mk up" aria-hidden="true"></span><span class="body"><b>Week 7</b><span>5 to 11 December</span></span><span class="amt"><b>28 mg</b><span>4 mg a day</span></span><span class="pen" aria-hidden="true"><svg class="i"><use href="#i-pencil"/></svg></span></button></li>
+    <li class="later edit"><button class="pl-srow" aria-label="Week 8, 12 to 18 December: 4 mg a day, 28 mg for the week. Change it"><span class="mk up" aria-hidden="true"></span><span class="body"><b>Week 8</b><span>12 to 18 December</span></span><span class="amt"><b>28 mg</b><span>4 mg a day</span></span><span class="pen" aria-hidden="true"><svg class="i"><use href="#i-pencil"/></svg></span></button></li>
+    <li class="later edit"><button class="pl-srow" aria-label="Week 9, 19 to 25 December: 4 mg a day, 28 mg for the week. Change it"><span class="mk up" aria-hidden="true"></span><span class="body"><b>Week 9</b><span>19 to 25 December</span></span><span class="amt"><b>28 mg</b><span>4 mg a day</span></span><span class="pen" aria-hidden="true"><svg class="i"><use href="#i-pencil"/></svg></span></button></li>
+    <li class="later edit"><button class="pl-srow" aria-label="Week 10, 26 December to 1 January: 4 mg a day, 28 mg for the week. Change it"><span class="mk up" aria-hidden="true"></span><span class="body"><b>Week 10</b><span>26 December to 1 January</span></span><span class="amt"><b>28 mg</b><span>4 mg a day</span></span><span class="pen" aria-hidden="true"><svg class="i"><use href="#i-pencil"/></svg></span></button></li>
+    <li class="later"><span class="mk up" aria-hidden="true"></span><span class="body"><b>Week 11</b><span>2 to 8 January</span></span><span class="amt"><b>0 mg</b><span>NRT-free</span></span><span class="pen" aria-hidden="true"></span></li>
+    <li class="later"><span class="mk up" aria-hidden="true"></span><span class="body"><b>Week 12</b><span>9 to 15 January</span></span><span class="amt"><b>0 mg</b><span>NRT-free</span></span><span class="pen" aria-hidden="true"></span></li>
+  </ol>
+  <div class="pl-key" aria-hidden="true"><span><i class="kmet"><svg class="i"><use href="#i-check"/></svg></i>Met</span><span><i class="kmiss"><svg class="i"><use href="#i-minus"/></svg></i>Missed</span><span><i class="kback"><svg class="i"><use href="#i-back-arc"/></svg></i>Missed, then caught up</span><span><i class="khit"></i>A hit for Gary</span></div>
+</section>
+
+<ul class="pl-rows" style="margin-top:24px">
+  <li class="srow"><span class="lead"><svg class="i"><use href="#i-flag"/></svg></span><span class="body"><span class="ttl">Extra goals</span><span class="sub">All off</span></span><svg class="i chev"><use href="#i-chev"/></svg></li>
+</ul>
+<div style="height:24px"></div>
+<nav class="tabs">
+  <a><span class="ind"><svg class="i"><use href="#i-today"/></svg></span>Today</a>
+  <a><span class="ind"><svg class="i"><use href="#i-history"/></svg></span>History</a>
+  <a><span class="ind"><svg class="i"><use href="#i-insights"/></svg></span>Insights</a>
+  <a class="on"><span class="ind"><svg class="i"><use href="#i-plan"/></svg></span>Plan</a>
+  <a><span class="ind"><svg class="i"><use href="#i-lair"/></svg></span>Lair<b class="badge">1</b></a>
+</nav>
+</body>
+</html>

@@ -1,0 +1,257 @@
+/* ==========================================================================
+   Phase 3: the Plan tab and the programme (plan-*.html)
+   Loads after tokens.css, app.css and screens.css and only adds to them. Every class here is new
+   and starts with pl-, so nothing on another page changes.
+
+   Colour rules, as CLAUDE.md:
+   - nicotine used is --used, never green or marigold
+   - the guide and the allowance are a line or a marker, never a fill
+   - green (--success) only marks "at or under": a day under its guide, a week met
+   - a missed week, or one caught up later, stays neutral
+   - marigold is the game layer only: hits and the demon's chips
+   ========================================================================== */
+
+/* ---------- page pieces ---------- */
+.intro,.hint,.note p,.pl-meta,.pl-line,.pl-prose p,.pl-small,.sfoot,.opt .sub,.pl-cap span{text-wrap:pretty}
+.pl-sec{padding:28px 20px 0}
+.pl-sec > h2{font:800 24px/30px var(--font-display);letter-spacing:-.6px}
+.pl-sec > .in-meta{margin-top:4px}
+.pl-kicker{display:block;font:700 14px/20px var(--font-ui);color:var(--text2)}
+.pl-fig{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:4px}
+.pl-fig .n{font:800 44px/48px var(--font-display);letter-spacing:-2px}
+.pl-fig .of{font:600 17px/24px var(--font-ui);color:var(--text2)}
+.pl-meta{font:500 14px/20px var(--font-ui);color:var(--text2);margin-top:4px}
+.pl-meta b{font-weight:700;color:var(--text)}
+.pl-line{font:500 14px/20px var(--font-ui);color:var(--text2);margin-top:18px}
+.pl-line b{font-weight:700;color:var(--text)}
+.pl-sec .note{margin-top:20px}
+.pl-sec .note p + p{margin-top:8px}
+.pl-sec .btn-line{margin-top:20px}
+.pl-prose p{font:400 16px/24px var(--font-ui);margin-top:10px}
+.pl-prose p:first-child{margin-top:8px}
+.pl-foot{padding:24px 20px 24px;display:flex;flex-direction:column;gap:12px;margin-top:auto}
+.pl-foot .btn-line{width:100%;height:56px;border-radius:28px}
+.pl-foot .foot-note{margin-top:-2px}
+
+/* ---------- the offer card on the empty Plan tab ---------- */
+/* B's surface card, as .dayline and .tile: the 20 px gutter and r-md, not the hero's inset frame */
+.pl-card{margin:20px 20px 0;padding:18px 16px 16px;background:var(--surface);border-radius:var(--r-md);box-shadow:inset 0 0 0 1px var(--line);--colbg:var(--surface)}
+.pl-card .btn-primary{margin-top:20px}
+.pl-card .pl-cols{margin-top:30px}
+
+/* ---------- the week as columns (variant A's columns, in B's type) ---------- */
+.pl-cols{--colbg:var(--bg);position:relative;display:grid;grid-template-columns:repeat(7,1fr);margin-top:40px}
+.pl-card .pl-cols{--colbg:var(--surface)}
+.pl-cols .pl-day{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center}
+.pl-cols .pl-bar{position:relative;width:26px;height:88px;border-bottom:1px solid var(--lineStrong)}
+.pl-cols .pl-bar i{position:absolute;left:0;right:0;bottom:0;background:var(--used);border-radius:7px 7px 2px 2px}
+.pl-cols .pl-bar.pl-blank{border-bottom-style:dashed}
+.pl-cols .pl-v{position:absolute;left:50%;bottom:100%;transform:translateX(-50%);margin-bottom:3px;padding:0 4px;background:var(--colbg);font:700 13px/18px var(--font-ui);color:var(--text2);white-space:nowrap}
+.pl-cols .pl-d{margin-top:10px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font:600 13px/1 var(--font-ui);color:var(--text2)}
+.pl-cols .pl-d.ok{background:var(--success);color:var(--onSuccess);font-weight:700}
+.pl-cols .pl-d.now{box-shadow:inset 0 0 0 2px var(--text);color:var(--text);font-weight:800}
+.pl-cols .pl-d.none{color:var(--text3)}
+.pl-cols .pl-today .pl-v{color:var(--text);font-weight:800}
+.pl-cols .pl-guide{position:absolute;left:4px;right:4px;border-top:1.5px dashed var(--guide);z-index:0}
+.pl-cols.pl-mini .pl-bar{width:22px;height:60px}
+/* an NRT-free week: everything is 0, so no bars and no guide line, just each day's 0 over its mark */
+.pl-cols.pl-nobar{margin-top:24px}
+.pl-cols.pl-nobar .pl-v0{height:18px;font:700 13px/18px var(--font-ui);color:var(--text2)}
+.pl-cols.pl-nobar .pl-today .pl-v0{color:var(--text);font-weight:800}
+.pl-cols.pl-nobar .pl-d{margin-top:6px}
+.pl-cols.pl-mini .pl-v{font-size:12px;line-height:16px}
+.pl-cols.pl-mini .pl-d{width:24px;height:24px;margin-top:8px;font-size:12px}
+.pl-key{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:14px;font:500 13px/18px var(--font-ui);color:var(--text2)}
+.pl-key > span{display:inline-flex;align-items:center;gap:6px}
+.pl-key i{display:inline-block;flex:none}
+.pl-key .ku{width:10px;height:10px;border-radius:3px;background:var(--used)}
+.pl-key .kg{width:16px;height:0;border-top:1.5px dashed var(--guide)}
+.pl-key .kok{width:12px;height:12px;border-radius:50%;background:var(--success)}
+.pl-key .knone{width:16px;height:0;border-top:1.5px dashed var(--lineStrong)}
+.pl-key .kmiss{width:16px;height:16px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--lineStrong);color:var(--text2);display:grid;place-items:center}
+.pl-key .kmiss svg.i{width:10px;height:10px;stroke-width:3}
+.pl-key .kmet{width:16px;height:16px;border-radius:50%;background:var(--success);color:var(--bg);display:grid;place-items:center}
+.pl-key .kmet svg.i{width:11px;height:11px;stroke-width:3.4}
+.pl-key .kwait{width:16px;height:16px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--lineStrong);color:var(--text2);display:grid;place-items:center}
+.pl-key .kwait svg.i{width:12px;height:12px;stroke-width:2.4}
+.pl-key .kback{width:16px;height:16px;border-radius:50%;background:var(--sunk);color:var(--text);display:grid;place-items:center}
+.pl-key .kback svg.i{width:11px;height:11px;stroke-width:2.6}
+.pl-key .khit{width:10px;height:10px;background:var(--marigold);box-shadow:inset 0 0 0 1.5px var(--marigoldEdge)}
+
+/* ---------- the week against its allowance: the hero meter, on the page ---------- */
+.pl-meter{position:relative;height:52px;margin-top:18px}
+/* the track is an outline, as B's week strip slots, so the used fill sits on the page (3:1 or more in both modes) */
+.pl-meter .track{position:absolute;left:0;right:0;top:6px;height:14px;border-radius:7px;box-shadow:inset 0 0 0 1.5px var(--lineStrong)}
+.pl-meter .used{position:absolute;left:0;top:6px;height:14px;border-radius:7px;background:var(--used)}
+.pl-meter .mark{position:absolute;top:0;width:4px;height:26px;margin-left:-2px;border-radius:2px;background:var(--text);box-shadow:0 0 0 2px var(--bg)}
+.pl-meter .mark-l{position:absolute;top:32px;transform:translateX(-50%);font:600 13px/18px var(--font-ui);color:var(--text2);white-space:nowrap}
+.pl-meter .left{position:absolute;left:0;top:30px;display:flex;align-items:center;gap:6px;font:700 15px/22px var(--font-ui)}
+.pl-meter .left .ok{width:18px;height:18px}
+.pl-meter .left .ok svg{width:12px;height:12px}
+
+/* ---------- the demon band on the Plan tab: as Today's, plus a lurking line ---------- */
+.band .cap{display:block;font:500 14px/20px var(--font-ui);color:var(--stageText2);margin-top:2px}
+.band .lurkhp{display:flex;align-items:baseline;gap:6px;margin-top:6px}
+.band .lurkhp .px{font-size:24px;line-height:24px;letter-spacing:-3px;color:var(--stageText)}
+.band .lurkhp .u{font:700 12px/16px var(--font-ui);color:var(--stageText2)}
+
+/* ---------- rows that open something: Plan's own, so Settings' rows stay as they are ---------- */
+.pl-rows{list-style:none;margin-top:8px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.pl-rows .srow{padding-left:20px}
+.pl-rows .srow + .srow{border-top:1px solid var(--line)}
+.pl-rows .lead{width:40px;height:40px}
+.pl-rows .lead svg.i{width:22px;height:22px}
+.pl-shd{padding:28px 20px 0;font:700 14px/20px var(--font-ui);color:var(--text2)}
+
+/* ---------- baseline days ---------- */
+.pl-days{list-style:none;margin-top:14px}
+.pl-days li{display:flex;align-items:baseline;justify-content:space-between;gap:16px;min-height:48px;padding:13px 0;border-top:1px solid var(--line);font:400 16px/22px var(--font-ui)}
+.pl-days li:first-child{border-top:0}
+.pl-days li b{font:800 18px/22px var(--font-ui);letter-spacing:-.3px;white-space:nowrap}
+.pl-days li.off span:first-child{color:var(--text2)}
+.pl-days li.off .tagline{font-size:13px;line-height:18px;padding:2px 8px}
+.pl-days li .nil{display:inline-flex;align-items:center;gap:8px;font:500 15px/20px var(--font-ui);color:var(--text2);white-space:nowrap}
+
+/* ---------- building the plan ---------- */
+.pl-field{padding:24px 20px 0}
+.pl-field > .label{margin-bottom:10px}
+.pl-field .seg button{font-size:15px}
+.pl-field .hint{margin-top:10px}
+.pl-pick{display:flex;align-items:center;gap:14px;min-height:76px;padding:12px 8px 12px 16px;background:var(--surface);border-radius:var(--r-md);box-shadow:inset 0 0 0 1px var(--line)}
+.pl-pick .lead{width:40px;height:40px}
+.pl-pick .lead svg.i{width:22px;height:22px}
+.pl-pick .body{flex:1;min-width:0}
+.pl-pick .ttl{display:block;font:700 16px/22px var(--font-ui)}
+.pl-pick .sub{display:block;font:400 14px/20px var(--font-ui);color:var(--text2)}
+.pl-pick .link{font-size:15px}
+.pl-hp{display:flex;align-items:center;gap:12px;margin-top:14px;padding:10px 14px;background:var(--stageSky);color:var(--stageText);font:600 14px/20px var(--font-ui)}
+.pl-hp .hp{width:120px;flex:none;gap:2px}
+.pl-hp .hp i{height:10px}
+.pl-hp .hp i.f{box-shadow:inset 0 2px 0 var(--hpHi)}
+
+/* the daily guide across the weeks: a stepped line over the baseline, never a fill */
+.pl-steps{margin-top:16px}
+.pl-steps svg{display:block;overflow:visible}
+.pl-steps .grid{stroke:var(--line);stroke-width:1}
+.pl-steps .axis{stroke:var(--lineStrong);stroke-width:1}
+.pl-steps .base{stroke:var(--lineStrong);stroke-width:1.5;stroke-dasharray:4 4}
+.pl-steps .halo{fill:none;stroke:var(--bg);stroke-width:7;stroke-linejoin:round;stroke-linecap:round}
+.pl-steps .gl{fill:none;stroke:var(--guide);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.pl-steps .gl.free{stroke-dasharray:1 5}
+.pl-steps .t{font:500 12px/1 var(--font-ui);fill:var(--text3);font-variant-numeric:tabular-nums}
+.pl-steps .t.b{fill:var(--text2);font-variant-numeric:normal}
+.pl-steps .lv{font:800 13px/1 var(--font-ui);fill:var(--text)}
+.pl-steps .lvbg{fill:var(--bg)}
+
+/* week by week, as a table */
+/* a taper week is one button, the whole 60 px row; the pencil only shows that it opens */
+.pl-th,.pl-wkb{display:grid;grid-template-columns:1fr 76px 76px 40px;align-items:center;column-gap:4px}
+.pl-th{margin-top:22px;padding-bottom:6px;font:600 12px/16px var(--font-ui);color:var(--text2);border-bottom:1px solid var(--line)}
+.pl-th span:nth-child(2),.pl-th span:nth-child(3){text-align:right}
+.pl-weeks{list-style:none}
+.pl-wk{border-bottom:1px solid var(--line)}
+.pl-wkb{width:calc(100% + 40px);min-height:60px;margin:0 -20px;padding:6px 20px;text-align:left}
+.pl-wk .w b{display:block;font:700 16px/22px var(--font-ui)}
+.pl-wk .w span{display:block;font:400 13px/18px var(--font-ui);color:var(--text2)}
+.pl-wk .g,.pl-wk .a{text-align:right;font:700 16px/22px var(--font-ui);font-variant-numeric:lining-nums;white-space:nowrap}
+.pl-wk .a{font-weight:800}
+.pen{display:grid;place-items:center;justify-self:end;width:24px;height:24px;color:var(--text2)}
+.pen svg.i{width:20px;height:20px}
+.pl-wk.free .g,.pl-wk.free .a{color:var(--text2)}
+.pl-wk.edited .w span b{font-weight:700;color:var(--text)}
+.pl-wk .w .pl-free{display:inline-block;font:600 12px/16px var(--font-ui);color:var(--text2);padding:1px 7px;border-radius:var(--r-xs);background:var(--sunk);margin-left:6px;vertical-align:1px}
+.pl-start{margin-top:28px;border-top:1px solid var(--line);padding:14px 20px 24px;background:var(--bg)}
+.pl-start .sum{font:500 14px/20px var(--font-ui);color:var(--text2);text-align:center;margin-bottom:12px}
+
+/* editing a week: the stepper with a ceiling */
+.stepper .ctl button[disabled]{background:var(--disabledBg);color:var(--disabledText);box-shadow:none;opacity:.7}
+.pl-cap{display:flex;gap:10px;align-items:flex-start;margin-top:12px;font:500 14px/20px var(--font-ui);color:var(--text2)}
+.pl-cap svg.i{width:20px;height:20px;margin-top:0;color:var(--text2)}
+.pl-cap b{font-weight:700;color:var(--text)}
+.pl-was{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font:500 14px/20px var(--font-ui);color:var(--text2)}
+.pl-was b{font-weight:700;color:var(--text)}
+/* lowering a week below the ones after it: they come down with it */
+.pl-knock{margin-top:16px;padding:14px 16px;background:var(--sunk);border-radius:var(--r-md)}
+.pl-knock > p{display:flex;gap:10px;align-items:flex-start;font:500 14px/20px var(--font-ui);color:var(--text)}
+.pl-knock > p svg.i{width:20px;height:20px;color:var(--text2)}
+.pl-knock b{font-weight:700}
+.pl-knock ul{list-style:none;margin:10px 0 0 30px}
+.pl-knock li{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--line);font:500 14px/20px var(--font-ui);color:var(--text2)}
+.pl-knock li b{color:var(--text)}
+.pl-knock .rest{margin:8px 0 0 30px;padding-top:8px;border-top:1px solid var(--line);font:500 13px/18px var(--font-ui);color:var(--text2)}
+
+/* ---------- the schedule during a programme ---------- */
+.pl-sched{list-style:none;margin-top:14px}
+.pl-sched li{display:flex;align-items:center;gap:12px;min-height:64px;padding:10px 0;border-top:1px solid var(--line)}
+.pl-sched li:first-child{border-top:0}
+.pl-sched .body{flex:1;min-width:0}
+.pl-sched .body b{display:block;font:700 16px/22px var(--font-ui)}
+.pl-sched .body span{display:block;font:400 13px/18px var(--font-ui);color:var(--text2)}
+.pl-sched .amt{text-align:right}
+.pl-sched .amt b{display:flex;align-items:center;justify-content:flex-end;gap:8px;font:800 16px/22px var(--font-ui);font-variant-numeric:lining-nums;white-space:nowrap}
+.pl-sched .amt span{display:flex;align-items:center;justify-content:flex-end;gap:6px;font:500 13px/18px var(--font-ui);color:var(--text2);white-space:nowrap}
+.pl-sched li.now{margin:4px -12px;padding:10px 12px;border-radius:var(--r-md);background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--lineStrong);border-top:0}
+.pl-sched li.now + li{border-top:0}
+/* a taper week that hasn't started: the whole row is the button, with the builder's pencil */
+.pl-sched li.edit{padding:0}
+.pl-sched .pl-srow{display:flex;align-items:center;gap:12px;width:calc(100% + 40px);min-height:64px;margin:0 -20px;padding:10px 20px;text-align:left}
+.pl-sched .pl-srow .pen{margin-left:-2px}
+.pl-sched li.later .body b,.pl-sched li.later .amt b{font-weight:600}
+.pl-sched li.later .amt b{color:var(--text)}
+.pl-more{display:flex;justify-content:center;margin-top:8px}
+
+/* status marks: green only for a week met; missed and caught up stay neutral */
+.mk{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;flex:none;color:var(--text2)}
+.mk svg.i{width:16px;height:16px;stroke-width:2.6}
+.mk.ok{background:var(--success);color:var(--bg)}
+.mk.ok svg.i{stroke-width:3.2}
+.mk.miss{box-shadow:inset 0 0 0 1.5px var(--lineStrong)}
+.mk.back{background:var(--sunk);color:var(--text)}
+.mk.back svg.i{width:18px;height:18px;stroke-width:2.2}
+.mk.wait{box-shadow:inset 0 0 0 1.5px var(--lineStrong)}
+.mk.wait svg.i{width:18px;height:18px;stroke-width:2.2}
+.mk.now{box-shadow:inset 0 0 0 2px var(--text)}
+.mk.now::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--text)}
+.mk.up{box-shadow:inset 0 0 0 1.5px var(--line)}
+.mk.up::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--lineStrong)}
+.hits{display:inline-flex;gap:3px}
+.hits i{width:10px;height:10px;background:var(--marigold);box-shadow:inset 0 0 0 1.5px var(--marigoldEdge)}
+
+/* ---------- the choice after a missed week ---------- */
+.pl-choice{padding:16px 20px 0}
+.pl-choice .opts{border-radius:var(--r-md)}
+/* B's .opts as in settings-restore: the radio on the right, no ring round the chosen row */
+.pl-choice .opt{align-items:flex-start;padding:16px}
+.pl-choice .opt .radio{margin-top:-1px}
+.pl-choice .opt .sub{margin-top:2px}
+.pl-cost{display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 12px;background:var(--stageSky);color:var(--stageText);font:600 13px/18px var(--font-ui)}
+.pl-cost .hp{flex:1;grid-template-columns:repeat(13,1fr);gap:2px}
+.pl-cost .hp i{height:10px}
+.pl-cost .hp i.f{box-shadow:inset 0 2px 0 var(--hpHi)}
+.pl-cost .hp i.add{background:var(--hpFull);box-shadow:inset 0 2px 0 var(--hpHi),0 0 0 2px var(--marigold)}
+.pl-cost .num{display:flex;align-items:baseline;gap:4px;white-space:nowrap}
+.pl-cost .px{font-size:16px;line-height:16px;letter-spacing:-2px}
+.pl-cost small{font:700 11px/14px var(--font-ui);color:var(--stageText2)}
+.pl-small{padding:14px 20px 0;font:500 14px/20px var(--font-ui);color:var(--text2)}
+
+/* ---------- the end of the programme ---------- */
+.pl-done .summary{margin-top:12px}
+.pl-done .summary li span{white-space:nowrap}
+.pl-done .summary li b{text-wrap:balance}
+.band .hpn.zero .px{color:var(--stageText2)}
+
+/* ---------- extra goals ---------- */
+.pl-goals{list-style:none;margin-top:16px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.pl-goal{padding:14px 12px 16px 20px}
+.pl-goals .pl-goal + .pl-goal{border-top:1px solid var(--line)}
+/* the whole top row is the switch, as B's .toggle-row; .switch is only the picture of it */
+.pl-goal .top{display:flex;align-items:flex-start;gap:14px;min-height:48px;cursor:pointer}
+.pl-goal .lead{width:40px;height:40px;margin-top:2px}
+.pl-goal .lead svg.i{width:22px;height:22px}
+.pl-goal .body{flex:1;min-width:0}
+.pl-goal .ttl{display:block;font:700 16px/22px var(--font-ui)}
+.pl-goal .sub{display:block;font:400 14px/20px var(--font-ui);color:var(--text2)}
+.pl-goal .switch{margin-top:6px}
+.pl-goal .more{margin:14px 8px 0 54px}
+.pl-goal .more .hint{margin-top:10px}
+.pl-goal.off .lead{background:var(--sunk);color:var(--text3)}
