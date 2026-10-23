@@ -1,45 +1,78 @@
 package app.thelasthit.nrt.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
+import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.ui.unit.dp
 
-// Placeholder palette until a design direction is chosen. Dynamic colour stays off on purpose,
-// so the app always matches its pixel art.
+// Dynamic colour stays off on purpose, so the app always matches its pixel art.
 
-private val LightColors = lightColorScheme(
-    primary = Color(0xFF2B4A44),
-    onPrimary = Color(0xFFFFFFFF),
-    primaryContainer = Color(0xFFD5E5E0),
-    onPrimaryContainer = Color(0xFF0F2420),
-    secondary = Color(0xFF9A5A22),
-    onSecondary = Color(0xFFFFFFFF),
-    background = Color(0xFFF6F3EC),
-    onBackground = Color(0xFF1B1D21),
-    surface = Color(0xFFF6F3EC),
-    onSurface = Color(0xFF1B1D21),
-    surfaceVariant = Color(0xFFE6E1D6),
-    onSurfaceVariant = Color(0xFF4A4A45),
-    outline = Color(0xFF7A776E),
+private fun materialScheme(c: LastHitColors, dark: Boolean) = if (dark) {
+    darkColorScheme(
+        primary = c.primary, onPrimary = c.onPrimary,
+        primaryContainer = c.hero, onPrimaryContainer = c.onHero,
+        secondary = c.link, onSecondary = c.onPrimary,
+        secondaryContainer = c.iconTile, onSecondaryContainer = c.onIconTile,
+        tertiary = c.marigold, onTertiary = c.onMarigold,
+        tertiaryContainer = c.marigoldSoft, onTertiaryContainer = c.onMarigoldSoft,
+        background = c.bg, onBackground = c.text,
+        surface = c.bg, onSurface = c.text,
+        surfaceVariant = c.sunk, onSurfaceVariant = c.text2,
+        surfaceContainerLowest = c.bg, surfaceContainerLow = c.surface, surfaceContainer = c.bg,
+        surfaceContainerHigh = c.surface, surfaceContainerHighest = c.sunk,
+        outline = c.lineStrong, outlineVariant = c.line,
+        error = c.error, onError = c.onError,
+        scrim = c.scrim,
+    )
+} else {
+    lightColorScheme(
+        primary = c.primary, onPrimary = c.onPrimary,
+        primaryContainer = c.hero, onPrimaryContainer = c.onHero,
+        secondary = c.link, onSecondary = c.onPrimary,
+        secondaryContainer = c.iconTile, onSecondaryContainer = c.onIconTile,
+        tertiary = c.marigold, onTertiary = c.onMarigold,
+        tertiaryContainer = c.marigoldSoft, onTertiaryContainer = c.onMarigoldSoft,
+        background = c.bg, onBackground = c.text,
+        surface = c.bg, onSurface = c.text,
+        surfaceVariant = c.sunk, onSurfaceVariant = c.text2,
+        surfaceContainerLowest = c.surface, surfaceContainerLow = c.surface, surfaceContainer = c.bg,
+        surfaceContainerHigh = c.surface, surfaceContainerHighest = c.sunk,
+        outline = c.lineStrong, outlineVariant = c.line,
+        error = c.error, onError = c.onError,
+        scrim = c.scrim,
+    )
+}
+
+private fun materialType(t: LastHitType) = Typography(
+    displayLarge = t.hero,
+    displayMedium = t.display,
+    headlineLarge = t.headline.copy(fontSize = t.headline.fontSize * 1.08f),
+    headlineMedium = t.headline,
+    headlineSmall = t.headline.copy(fontSize = t.headline.fontSize * 0.92f),
+    titleLarge = t.title.copy(fontSize = t.title.fontSize * 1.25f),
+    titleMedium = t.title,
+    titleSmall = t.label.copy(fontWeight = t.title.fontWeight),
+    bodyLarge = t.body,
+    bodyMedium = t.label.copy(fontWeight = t.body.fontWeight),
+    bodySmall = t.caption.copy(fontWeight = t.body.fontWeight),
+    labelLarge = t.label,
+    labelMedium = t.caption,
+    labelSmall = t.caption,
 )
 
-private val DarkColors = darkColorScheme(
-    primary = Color(0xFF9CC7BC),
-    onPrimary = Color(0xFF0F2420),
-    primaryContainer = Color(0xFF2B4A44),
-    onPrimaryContainer = Color(0xFFD5E5E0),
-    secondary = Color(0xFFE0A56B),
-    onSecondary = Color(0xFF2E1A08),
-    background = Color(0xFF14161A),
-    onBackground = Color(0xFFE6E2D9),
-    surface = Color(0xFF14161A),
-    onSurface = Color(0xFFE6E2D9),
-    surfaceVariant = Color(0xFF2A2D33),
-    onSurfaceVariant = Color(0xFFC2BEB4),
-    outline = Color(0xFF8C887F),
+private val LastHitShapes = Shapes(
+    extraSmall = RoundedCornerShape(6.dp),
+    small = RoundedCornerShape(10.dp),
+    medium = RoundedCornerShape(16.dp),
+    large = RoundedCornerShape(24.dp),
+    extraLarge = RoundedCornerShape(28.dp),
 )
 
 @Composable
@@ -47,8 +80,25 @@ fun LastHitTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    MaterialTheme(
-        colorScheme = if (darkTheme) DarkColors else LightColors,
-        content = content,
-    )
+    val colors = if (darkTheme) DarkColors else LightColors
+    CompositionLocalProvider(
+        LocalLastHitColors provides colors,
+        LocalLastHitType provides LastHitTypography,
+    ) {
+        MaterialTheme(
+            colorScheme = materialScheme(colors, darkTheme),
+            typography = materialType(LastHitTypography),
+            shapes = LastHitShapes,
+            content = content,
+        )
+    }
+}
+
+/** Shorthand for the app's own tokens: `LastHit.colors.used`, `LastHit.type.hero`. */
+object LastHit {
+    val colors: LastHitColors
+        @Composable @ReadOnlyComposable get() = LocalLastHitColors.current
+
+    val type: LastHitType
+        @Composable @ReadOnlyComposable get() = LocalLastHitType.current
 }

@@ -3,11 +3,12 @@
   "size": 32,
   "slots": {"o": "outline", "d": "dark", "m": "mid", "l": "light", "b": "belly", "a": "accent (horns, spikes, claws)", "e": "eye", "h": "highlight"},
   "variants": {
+    "forest": {"o": "#0b2017", "d": "#124f39", "m": "#1f7a50", "l": "#4fae70", "b": "#f3e4b6", "a": "#f2a922", "e": "#ffe27a", "h": "#fbf8e8"},
     "ember": {"o": "#2a1519", "d": "#6b2b2d", "m": "#a3453a", "l": "#cf7a4f", "b": "#e6c48c", "a": "#efe3c6", "e": "#f2cd55", "h": "#fff7e6"},
     "moss": {"o": "#16201a", "d": "#2f4a33", "m": "#4d7347", "l": "#87a35e", "b": "#dcc99a", "a": "#ece4c8", "e": "#e8a33d", "h": "#f8f6e6"},
     "frost": {"o": "#161b2b", "d": "#2e4466", "m": "#4a6f98", "l": "#86acc7", "b": "#cfdcd9", "a": "#f1ede2", "e": "#f0b44c", "h": "#fbfbf6"}
   },
-  "defaultVariant": "ember",
+  "defaultVariant": "forest",
   "frames": {
     "idle1": [
       ".............oo..............o..",

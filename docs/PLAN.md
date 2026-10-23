@@ -214,7 +214,7 @@ During the baseline week the creature **lurks**: shown in silhouette with HP "??
 
 ### 7.3 Battle screen ("The lair")
 - **Header:** the creature in the middle on a simple pixel backdrop, its name, an HP bar in 10 HP blocks, banked hits, and your equipped gear.
-- **Condition:** the sprite changes with HP. Fresh above 66%, roughed up from 66% to 34%, barely standing at 33% and below.
+- **Condition:** the sprite changes with HP. Fresh above two thirds, roughed up above one third, barely standing at a third and below.
 - **Idle animation:** 2 to 4 frames (breathing, blinking, a flicker of flame for the dragon).
 - **A hit:** wind-up, impact flash, sprite knock-back, a pixel damage number ("−10"), small particles and a haptic tick.
 - **5× attack:** five quick strikes, then a heavier finisher, a screen shake and "−50".

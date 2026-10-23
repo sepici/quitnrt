@@ -1,5 +1,6 @@
 package app.thelasthit.nrt.data
 
+import app.thelasthit.nrt.domain.creature.Creature
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -41,11 +42,15 @@ class SettingsStoreTest {
         data.settings.setCountry("gb")
         data.settings.acceptDisclaimer(data.clock.now)
         data.settings.completeOnboarding()
+        data.settings.setDemon("  Gary ", Creature.DRAGON, "ember")
 
         val settings = data.settings.current()
         assertEquals(LocalTime.of(3, 30), settings.dayStart)
         assertEquals("GB", settings.country)
         assertEquals(data.clock.now, settings.disclaimerAcceptedAt)
         assertTrue(settings.onboardingComplete)
+        assertEquals("Gary", settings.demonName)
+        assertEquals(Creature.DRAGON, settings.demonCreature)
+        assertEquals("ember", settings.demonVariant)
     }
 }

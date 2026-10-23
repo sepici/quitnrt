@@ -7,7 +7,8 @@ import json
 import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, '..', 'dragon.json')
+# The app reads sprites from the domain module's resources, so that's the one copy.
+OUT = os.path.join(HERE, '..', '..', 'core', 'domain', 'src', 'main', 'resources', 'creatures', 'dragon.json')
 
 BASE = [
     ".............oo..............o..",
@@ -45,6 +46,9 @@ BASE = [
 ]
 
 VARIANTS = {
+    # The app's own palette (docs/design/fieldbook-v2/b/tokens.json): forest greens, marigold horns.
+    "forest": {"o": "#0b2017", "d": "#124f39", "m": "#1f7a50", "l": "#4fae70",
+               "b": "#f3e4b6", "a": "#f2a922", "e": "#ffe27a", "h": "#fbf8e8"},
     "ember": {"o": "#2a1519", "d": "#6b2b2d", "m": "#a3453a", "l": "#cf7a4f",
               "b": "#e6c48c", "a": "#efe3c6", "e": "#f2cd55", "h": "#fff7e6"},
     "moss":  {"o": "#16201a", "d": "#2f4a33", "m": "#4d7347", "l": "#87a35e",
@@ -283,7 +287,7 @@ def build():
         "slots": {"o": "outline", "d": "dark", "m": "mid", "l": "light", "b": "belly",
                   "a": "accent (horns, spikes, claws)", "e": "eye", "h": "highlight"},
         "variants": VARIANTS,
-        "defaultVariant": "ember",
+        "defaultVariant": "forest",
         "frames": frames,
     }
     with open(OUT, 'w') as f:

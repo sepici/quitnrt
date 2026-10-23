@@ -206,7 +206,7 @@ def idle_gif(data, path):
 
 def main(argv):
     here = os.path.dirname(os.path.abspath(__file__))
-    path = argv[1] if len(argv) > 1 else os.path.join(here, "dragon.json")
+    path = argv[1] if len(argv) > 1 else os.path.join(here, "..", "..", "core", "domain", "src", "main", "resources", "creatures", "dragon.json")
     with open(path) as f:
         data = json.load(f)
     try:

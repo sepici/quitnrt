@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
+import app.thelasthit.nrt.domain.creature.Creature
 import app.thelasthit.nrt.domain.time.DayBoundary
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -26,6 +27,13 @@ data class Settings(
     /** When the user stopped smoking or vaping, for the gentle "most courses run 8 to 12 weeks" note. */
     val stoppedSmokingOn: LocalDate? = null,
     val onboardingComplete: Boolean = false,
+    /**
+     * The demon picked in onboarding. It lives here until the programme starts, when it gets its
+     * HP and moves into the database.
+     */
+    val demonName: String? = null,
+    val demonCreature: Creature = Creature.DRAGON,
+    val demonVariant: String? = null,
 ) {
     val dayBoundary: DayBoundary get() = DayBoundary(dayStart)
 }
@@ -39,6 +47,9 @@ class SettingsStore(private val store: DataStore<Preferences>) {
             disclaimerAcceptedAt = prefs[DISCLAIMER_ACCEPTED_AT]?.let(Instant::ofEpochMilli),
             stoppedSmokingOn = prefs[STOPPED_SMOKING_ON]?.let(LocalDate::ofEpochDay),
             onboardingComplete = prefs[ONBOARDING_COMPLETE] ?: false,
+            demonName = prefs[DEMON_NAME],
+            demonCreature = Creature.fromKey(prefs[DEMON_CREATURE]),
+            demonVariant = prefs[DEMON_VARIANT],
         )
     }
 
@@ -61,12 +72,21 @@ class SettingsStore(private val store: DataStore<Preferences>) {
 
     suspend fun completeOnboarding() = store.edit { it[ONBOARDING_COMPLETE] = true }
 
+    suspend fun setDemon(name: String, creature: Creature, variant: String) = store.edit { prefs ->
+        prefs[DEMON_NAME] = name.trim()
+        prefs[DEMON_CREATURE] = creature.key
+        prefs[DEMON_VARIANT] = variant
+    }
+
     companion object {
         private val DAY_START_MINUTES = intPreferencesKey("day_start_minutes")
         private val COUNTRY = stringPreferencesKey("country")
         private val DISCLAIMER_ACCEPTED_AT = longPreferencesKey("disclaimer_accepted_at")
         private val STOPPED_SMOKING_ON = longPreferencesKey("stopped_smoking_on")
         private val ONBOARDING_COMPLETE = booleanPreferencesKey("onboarding_complete")
+        private val DEMON_NAME = stringPreferencesKey("demon_name")
+        private val DEMON_CREATURE = stringPreferencesKey("demon_creature")
+        private val DEMON_VARIANT = stringPreferencesKey("demon_variant")
 
         /** Only one DataStore may exist per file, so the app creates this once. */
         fun createDataStore(context: Context): DataStore<Preferences> =
