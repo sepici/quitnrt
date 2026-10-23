@@ -2,4 +2,7 @@
 <resources>
     <!-- Placeholder until a design direction is chosen. -->
     <color name="ic_launcher_background">#FF2B4A44</color>
+    <!-- Launcher shortcuts log a dose, so they use the stone tile of dose rows (sunk and text2), never green. -->
+    <color name="shortcut_tile">#FFECE9DE</color>
+    <color name="shortcut_glyph">#FF4C5A52</color>
 </resources>

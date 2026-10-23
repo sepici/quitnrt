@@ -3,9 +3,13 @@ package app.thelasthit.nrt.ui.log
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
 import app.thelasthit.nrt.GUM_2
+import app.thelasthit.nrt.GUM_4
 import app.thelasthit.nrt.QUICKMIST
 import app.thelasthit.nrt.TestApp
+import app.thelasthit.nrt.domain.log.EntrySource
 import app.thelasthit.nrt.domain.log.QuickTime
+import app.thelasthit.nrt.domain.matcher.LogLinkParser
+import app.thelasthit.nrt.domain.matcher.LogLinkRequest
 import app.thelasthit.nrt.setUp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,6 +21,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.After
 import org.junit.Before
@@ -90,5 +95,46 @@ class LogSheetViewModelTest {
         viewModel.pickTime(TimeChoice.Quick(QuickTime.HOUR_AGO))
         assertFalse(awaitState { true }.form.timeInFuture)
         assertNotNull(awaitState { true }.product)
+    }
+
+    @Test
+    fun `a link's choices wait for a pick, and each brings the link's amount`() {
+        val gum2 = requireNotNull(runBlocking { app.graph.products.get(GUM_2) })
+        val gum4 = requireNotNull(runBlocking { app.graph.products.get(GUM_4) })
+        val at = TestApp.london("2026-10-23T14:30")
+        viewModel.openFromLink(
+            EntrySource.DEEP_LINK,
+            listOf(LogLinkRequest(gum4, 2, at, setOf("stressed")), LogLinkRequest(gum2, 3, at, setOf("stressed"))),
+        )
+
+        val choosing = awaitState { it.isChoosing && it.products.isNotEmpty() }
+        assertNull(choosing.product)
+        assertFalse(choosing.canSave)
+        assertEquals(listOf(GUM_4, GUM_2), choosing.products.take(choosing.leadingCount).map { it.id })
+        assertEquals(TimeChoice.At(at), choosing.form.time)
+
+        viewModel.pickProduct(GUM_2)
+        assertEquals(3, awaitState { it.form.productId == GUM_2 }.form.quantity)
+        viewModel.pickProduct(GUM_4)
+        assertEquals(2, awaitState { it.form.productId == GUM_4 }.form.quantity)
+
+        var saved: SavedDose? = null
+        viewModel.save { saved = it }
+        idleUntil { saved != null }
+
+        val entry = entriesOn("2026-10-23").single()
+        assertEquals(GUM_4, entry.productId)
+        assertEquals(2, entry.quantity)
+        assertEquals(at, entry.occurredAt)
+        assertEquals(setOf("stressed"), entry.tagKeys)
+        assertEquals(EntrySource.DEEP_LINK, entry.source)
+    }
+
+    @Test
+    fun `the stepper stops where a link does`() {
+        viewModel.openNew()
+        awaitState { it.product != null }
+        repeat(LogLinkParser.MAX_QUANTITY + 5) { viewModel.changeQuantity(1) }
+        assertEquals(LogLinkParser.MAX_QUANTITY, awaitState { true }.form.quantity)
     }
 }

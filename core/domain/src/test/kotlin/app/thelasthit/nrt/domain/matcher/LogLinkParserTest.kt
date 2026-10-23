@@ -2,12 +2,13 @@ package app.thelasthit.nrt.domain.matcher
 
 import app.thelasthit.nrt.domain.catalogue.Catalogue
 import app.thelasthit.nrt.domain.log.BuiltInTags
-import app.thelasthit.nrt.domain.matcher.LogLinkError.AmbiguousProduct
+import app.thelasthit.nrt.domain.product.DoseUnit
 import app.thelasthit.nrt.domain.matcher.LogLinkError.AmbiguousTags
 import app.thelasthit.nrt.domain.matcher.LogLinkError.BadEncoding
 import app.thelasthit.nrt.domain.matcher.LogLinkError.BadQuantity
 import app.thelasthit.nrt.domain.matcher.LogLinkError.BadTime
 import app.thelasthit.nrt.domain.matcher.LogLinkError.ConflictingQuantity
+import app.thelasthit.nrt.domain.matcher.LogLinkError.HiddenProduct
 import app.thelasthit.nrt.domain.matcher.LogLinkError.MissingProduct
 import app.thelasthit.nrt.domain.matcher.LogLinkError.NotALogLink
 import app.thelasthit.nrt.domain.matcher.LogLinkError.RepeatedParameter
@@ -101,7 +102,10 @@ class LogLinkParserTest {
         assertEquals(LogLinkResult.Valid(LogLinkRequest(patch, 2, null, emptySet())), read("lasthit://log?product=21-patch&qty=2"))
         // A number before a unit is how many, so this asks which strength.
         assertEquals(
-            LogLinkResult.Invalid(AmbiguousProduct("nicorette gum 2 pieces", listOf(gum2, gum4))),
+            LogLinkResult.Ambiguous(
+                "nicorette gum 2 pieces",
+                listOf(LogLinkRequest(gum2, 2, null, emptySet()), LogLinkRequest(gum4, 2, null, emptySet())),
+            ),
             read("lasthit://log?product=nicorette%20gum%202%20pieces"),
         )
         assertEquals(
@@ -118,7 +122,7 @@ class LogLinkParserTest {
         val cartridges = valid("lasthit://log?product=inhalator-cartridge&qty=2")
         assertEquals(inhalator, cartridges.product)
         assertEquals(16, cartridges.quantity)
-        assertEquals(TooMany(104), refused("lasthit://log?product=inhalator-cartridge&qty=13"))
+        assertEquals(TooMany(104, DoseUnit.SESSION), refused("lasthit://log?product=inhalator-cartridge&qty=13"))
         assertEquals(2, valid("lasthit://log?product=two-4mg-gums&qty=2").quantity)
         assertEquals(ConflictingQuantity(inProduct = 2, qty = 3), refused("lasthit://log?product=two-4mg-gums&qty=3"))
     }
@@ -136,13 +140,58 @@ class LogLinkParserTest {
     }
 
     @Test
-    fun `products that aren't one of yours, or could be several`() {
-        assertEquals(MissingProduct, refused("lasthit://log"))
+    fun `nothing after log opens the sheet`() {
+        listOf("lasthit://log", "lasthit://log/", "lasthit://log?", "LastHit://LOG?&&", "lasthit://log#from-nfc").forEach {
+            assertEquals(LogLinkResult.Blank, parse(it), it)
+        }
+    }
+
+    @Test
+    fun `products that aren't one of yours`() {
         assertEquals(MissingProduct, refused("lasthit://log?product=&qty=1"))
         assertEquals(MissingProduct, refused("lasthit://log?qty=1"))
+        assertEquals(MissingProduct, refused("lasthit://log?tags="))
         assertEquals(UnknownProduct("nicorette-gum-6mg"), refused("lasthit://log?product=nicorette-gum-6mg"))
-        assertEquals(UnknownProduct("niquitin-clear-patch-uk-21mg"), refused("lasthit://log?product=niquitin-clear-patch-uk-21mg"))
-        assertEquals(AmbiguousProduct("nicorette gum", listOf(gum2, gum4)), refused("lasthit://log?product=nicorette+gum"))
+        // Words only match products in use, but a hidden one's exact ID says which it is.
+        assertEquals(UnknownProduct("niquitin 21mg patch"), refused("lasthit://log?product=niquitin+21mg+patch"))
+        assertEquals(HiddenProduct(hiddenPatch), refused("lasthit://log?product=niquitin-clear-patch-uk-21mg"))
+        assertEquals(HiddenProduct(hiddenPatch), refused("lasthit://log?product=NiQuitin-Clear-Patch-UK-21mg&qty=2"))
+    }
+
+    @Test
+    fun `a product that could be several asks, keeping the rest of the link`() {
+        assertEquals(
+            LogLinkResult.Ambiguous("nicorette gum", listOf(LogLinkRequest(gum2, 1, null, emptySet()), LogLinkRequest(gum4, 1, null, emptySet()))),
+            parse("lasthit://log?product=nicorette+gum"),
+        )
+        val at = Instant.parse("2026-10-23T14:00:00Z")
+        assertEquals(
+            LogLinkResult.Ambiguous(
+                "nicorette gum",
+                listOf(LogLinkRequest(gum2, 2, at, setOf("stressed")), LogLinkRequest(gum4, 2, at, setOf("stressed"))),
+            ),
+            parse("lasthit://log?product=nicorette+gum&qty=2&at=2026-10-23T15:00&tags=stressed"),
+        )
+    }
+
+    @Test
+    fun `a broken link is refused before it asks which product`() {
+        assertEquals(BadQuantity("0"), refused("lasthit://log?product=nicorette+gum&qty=0"))
+        assertEquals(ConflictingQuantity(inProduct = 2, qty = 3), refused("lasthit://log?product=two-nicorette-gums&qty=3"))
+        assertEquals(TimeInFuture(LocalDateTime.parse("2026-10-24T09:00")), refused("lasthit://log?product=nicorette+gum&at=2026-10-24T09:00"))
+        assertEquals(UnknownTags(listOf("vaping")), refused("lasthit://log?product=nicorette+gum&tags=vaping"))
+    }
+
+    @Test
+    fun `each choice counts in its own unit`() {
+        // The same inhalator twice, one logged by session and one by cartridge.
+        val byCartridge = inhalator.copy(id = "own-inhalator", unit = DoseUnit.CARTRIDGE, perUnit = inhalator.cartridge!!)
+        val parser = LogLinkParser(ProductMatcher(listOf(inhalator, byCartridge), catalogue), TagMatcher.builtIns())
+
+        val result = parser.parse("lasthit://log?product=inhalator-cartridge&qty=2", now, london) as LogLinkResult.Ambiguous
+        assertEquals(mapOf(inhalator.id to 16, byCartridge.id to 2), result.choices.associate { it.product.id to it.quantity })
+        // Too many of either is too many.
+        assertEquals(LogLinkResult.Invalid(TooMany(104, DoseUnit.SESSION)), parser.parse("lasthit://log?product=inhalator-cartridge&qty=13", now, london))
     }
 
     @Test

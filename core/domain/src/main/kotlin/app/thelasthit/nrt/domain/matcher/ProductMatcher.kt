@@ -43,9 +43,9 @@ import java.util.Locale
  * When several products fit equally well the phrase is ambiguous, and the candidates come back in
  * quick-log order, then by name, so an agent can ask which one was meant.
  *
- * Hidden products are left out, as they are on the log sheet. [catalogue] adds each catalogue
- * product's brand, line and flavours to its words, such as "Rapid Relief" for Nicotinell spray and
- * "Icy White" for Nicorette gum.
+ * Hidden products are left out, as they are on the log sheet, but [hidden] finds one by its ID.
+ * [catalogue] adds each catalogue product's brand, line and flavours to its words, such as "Rapid
+ * Relief" for Nicotinell spray and "Icy White" for Nicorette gum.
  */
 class ProductMatcher(products: List<UserProduct>, catalogue: Catalogue? = null) {
 
@@ -53,7 +53,19 @@ class ProductMatcher(products: List<UserProduct>, catalogue: Catalogue? = null) 
         Profile(product, product.catalogueId?.let { id -> catalogue?.find(id) })
     }
 
+    private val hiddenProducts = products.filter { it.isHidden }
+
     private val vocabulary: Set<String> = profiles.flatMapTo(HashSet()) { it.words }
+
+    /**
+     * The hidden product [id] is the exact ID (or catalogue ID) of, or null. A hidden product
+     * matches nothing, but a link or a pinned shortcut made before it was hidden still names it,
+     * and that deserves a better answer than "no product matches".
+     */
+    fun hidden(id: String): UserProduct? {
+        val text = id.trim()
+        return hiddenProducts.firstOrNull { it.id.equals(text, ignoreCase = true) || it.catalogueId.equals(text, ignoreCase = true) }
+    }
 
     fun match(description: String): ProductMatch {
         val id = description.trim()

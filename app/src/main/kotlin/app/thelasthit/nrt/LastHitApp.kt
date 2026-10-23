@@ -2,6 +2,7 @@ package app.thelasthit.nrt
 
 import android.app.Application
 import app.thelasthit.nrt.data.DataGraph
+import app.thelasthit.nrt.link.QuickLogShortcuts
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -23,5 +24,7 @@ open class LastHitApp : Application() {
             graph.tags.ensureBuiltIns()
             graph.entries.purgeDeleted()
         }
+        // The quick log only changes while the app runs, so its shortcuts follow it from here.
+        startupScope.launch { QuickLogShortcuts(this@LastHitApp).follow(graph.products.quickLog) }
     }
 }

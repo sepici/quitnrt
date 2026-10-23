@@ -664,6 +664,31 @@
     <string name="log_duplicate_body">The same product was logged at %1$s. If you\'re logging that dose again, discard this one.</string>
     <string name="log_duplicate_keep">Keep both</string>
     <string name="log_duplicate_discard">Discard this one</string>
+    <string name="log_choose_product">The link fits more than one of your products. Pick the one you meant.</string>
+
+    <!-- Links and shortcuts: lasthit://log from Routines, Tasker, an NFC sticker or the app's own shortcuts. -->
+    <string name="shortcut_log">Log a dose</string>
+    <string name="link_not_log">That isn\'t a log link. Log links start with lasthit://log.</string>
+    <string name="link_bad_encoding">Part of the link couldn\'t be read. Check how it\'s encoded.</string>
+    <string name="link_unknown_parameter">Links don\'t use “%1$s”. They take product, qty, at and tags.</string>
+    <string name="link_repeated_parameter">The link gives “%1$s” twice. Give it once.</string>
+    <string name="link_missing_product">The link doesn\'t say which product to log.</string>
+    <string name="link_unknown_product">None of your products in use matches “%1$s”.</string>
+    <string name="link_bad_quantity">The link\'s qty needs to be a whole number from 1 to %1$d.</string>
+    <string name="link_conflicting_quantity">The link says %1$d in the product and %2$d in qty. Give the number once.</string>
+    <string name="link_too_many">That\'s %1$s, and a link logs up to %2$d at a time.</string>
+    <!-- The example is the format a link takes, so its hyphens stay. -->
+    <string xmlns:tools="http://schemas.android.com/tools" name="link_bad_time" tools:ignore="TypographyDashes">The link\'s time needs to look like 2026-10-23T15:00.</string>
+    <string name="link_time_in_future">The link\'s time is %1$s at %2$s, which hasn\'t come yet.</string>
+    <plurals name="link_unknown_tags">
+        <item quantity="one">None of your tags matches “%1$s”.</item>
+        <item quantity="other">None of your tags matches these: %1$s.</item>
+    </plurals>
+    <string name="link_ambiguous_tag">More than one of your tags is called “%1$s”. Rename one in Settings.</string>
+    <!-- A pinned shortcut, or a link, for a product that was hidden later. %1$s is the product and its strength. -->
+    <string name="link_hidden_product">%1$s is hidden. To log it, bring it back in Settings, under Products.</string>
+    <!-- The same for a product of the user's own that's gone, such as after replacing everything with a backup. Its ID means nothing to anyone, so it isn't shown. -->
+    <string name="link_product_gone">That product isn\'t on this phone any more.</string>
 
     <!-- Insights. Plain and specific: the numbers, and what they're measured against. -->
     <string name="insights_title">Insights</string>

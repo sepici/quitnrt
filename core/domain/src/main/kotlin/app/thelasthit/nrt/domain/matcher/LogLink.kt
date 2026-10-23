@@ -1,6 +1,7 @@
 package app.thelasthit.nrt.domain.matcher
 
 import app.thelasthit.nrt.domain.log.LogTime
+import app.thelasthit.nrt.domain.product.DoseUnit
 import app.thelasthit.nrt.domain.product.UserProduct
 import java.net.URLDecoder
 import java.time.Instant
@@ -19,7 +20,9 @@ import java.util.Locale
  * - `product` (required): a product ID, or a description the [ProductMatcher] reads, with hyphens
  *   or encoded spaces between the words. A hyphen between digits before "mg" is a decimal point,
  *   as in the catalogue's IDs: `nicorette-nasal-spray-0-5mg` is the 0.5 mg spray. It has to name
- *   exactly one of the user's products.
+ *   one of the user's products that isn't hidden. The exact ID of a hidden one, such as a pinned
+ *   shortcut's, is [LogLinkError.HiddenProduct]. When it fits several equally well and the rest
+ *   of the link is fine, the result is [LogLinkResult.Ambiguous], so the app can ask which one.
  * - `qty`: a whole number from 1 to [MAX_QUANTITY], one by default. It counts what `product`
  *   names, so `product=inhalator-cartridge&qty=2` is 16 sessions on an inhalator logged by session.
  * - `at`: a local date and time, such as `2026-10-23T15:00`, read in the phone's zone. Now when
@@ -30,8 +33,13 @@ import java.util.Locale
  * A parameter the link doesn't know, or one given twice, is refused rather than ignored, since a
  * typo like `qnty=2` would otherwise log the wrong amount. When a link has several problems, the
  * first one found is reported, and tags that name nothing come before names that several tags
- * share. The result says what to log; logging it, with the duplicate check, is the normal logging
- * path's job.
+ * share. A product that could be several is only a question once everything else is known to be
+ * fine, so the app never asks which product a broken link meant.
+ *
+ * `lasthit://log` with nothing after it is [LogLinkResult.Blank], which opens the log sheet.
+ *
+ * The result says what to log; logging it, with the duplicate check, is the normal logging path's
+ * job.
  */
 class LogLinkParser(private val products: ProductMatcher, private val tags: TagMatcher) {
 
@@ -49,15 +57,17 @@ class LogLinkParser(private val products: ProductMatcher, private val tags: TagM
             if (params.put(key, value) != null) return invalid(LogLinkError.RepeatedParameter(key))
             if (key == TAGS) rawTags = raw
         }
+        if (params.isEmpty()) return LogLinkResult.Blank
 
         val productText = params[PRODUCT]?.trim().orEmpty()
         if (productText.isEmpty()) return invalid(LogLinkError.MissingProduct)
-        val found = when (val match = products.match(productText)) {
-            is ProductMatch.Found -> match
-            is ProductMatch.Ambiguous -> {
-                return invalid(LogLinkError.AmbiguousProduct(productText, match.candidates.map { it.product }))
-            }
-            ProductMatch.Unknown -> return invalid(LogLinkError.UnknownProduct(productText))
+        val match = products.match(productText)
+        val candidates = when (match) {
+            is ProductMatch.Found -> listOf(match.candidate)
+            is ProductMatch.Ambiguous -> match.candidates
+            ProductMatch.Unknown -> return invalid(
+                products.hidden(productText)?.let { LogLinkError.HiddenProduct(it) } ?: LogLinkError.UnknownProduct(productText),
+            )
         }
 
         val qtyText = params[QTY]?.trim()
@@ -65,12 +75,15 @@ class LogLinkParser(private val products: ProductMatcher, private val tags: TagM
             text.takeIf { QTY_DIGITS.matches(it) }?.toInt()?.takeIf { it in 1..MAX_QUANTITY }
                 ?: return invalid(LogLinkError.BadQuantity(text))
         }
-        val inProduct = found.count
+        val inProduct = match.count
         if (qty != null && inProduct != null && qty != inProduct) {
             return invalid(LogLinkError.ConflictingQuantity(inProduct = inProduct, qty = qty))
         }
-        val quantity = found.candidate.quantityFor(qty ?: inProduct ?: 1)
-        if (quantity > MAX_QUANTITY) return invalid(LogLinkError.TooMany(quantity))
+        // Each candidate in its own unit. A cartridge is 8 on an inhalator logged by session.
+        val quantities = candidates.map { it.quantityFor(qty ?: inProduct ?: 1) }
+        candidates.zip(quantities).firstOrNull { (_, quantity) -> quantity > MAX_QUANTITY }?.let { (candidate, quantity) ->
+            return invalid(LogLinkError.TooMany(quantity, candidate.product.unit))
+        }
 
         val at = params[AT]?.trim()?.let { text ->
             val local = localTime(text) ?: return invalid(LogLinkError.BadTime(text))
@@ -95,7 +108,8 @@ class LogLinkParser(private val products: ProductMatcher, private val tags: TagM
         if (unknownTags.isNotEmpty()) return invalid(LogLinkError.UnknownTags(unknownTags))
         if (ambiguousTags.isNotEmpty()) return invalid(LogLinkError.AmbiguousTags(ambiguousTags))
 
-        return LogLinkResult.Valid(LogLinkRequest(found.product, quantity, at, tagKeys))
+        val requests = candidates.zip(quantities) { candidate, quantity -> LogLinkRequest(candidate.product, quantity, at, tagKeys) }
+        return requests.singleOrNull()?.let { LogLinkResult.Valid(it) } ?: LogLinkResult.Ambiguous(productText, requests)
     }
 
     private fun invalid(error: LogLinkError) = LogLinkResult.Invalid(error)
@@ -135,7 +149,7 @@ class LogLinkParser(private val products: ProductMatcher, private val tags: TagM
         const val SCHEME = "lasthit"
         const val HOST = "log"
 
-        /** The most one link logs, in the product's own unit. The log sheet's stepper stops at 99 too. */
+        /** The most one link logs, in the product's own unit. The log sheet's stepper stops here too. */
         const val MAX_QUANTITY = 99
 
         private const val PRODUCT = "product"
@@ -157,6 +171,17 @@ data class LogLinkRequest(
 
 sealed interface LogLinkResult {
     data class Valid(val request: LogLinkRequest) : LogLinkResult
+
+    /** `lasthit://log` with nothing after it, which opens the log sheet. */
+    data object Blank : LogLinkResult
+
+    /**
+     * Several of the user's products fit [text] equally well, and the rest of the link is fine.
+     * Each choice is what the link logs if that product is the one meant, most likely first, so
+     * the app can ask. Choices differ only in the product and, for an inhalator, the quantity.
+     */
+    data class Ambiguous(val text: String, val choices: List<LogLinkRequest>) : LogLinkResult
+
     data class Invalid(val error: LogLinkError) : LogLinkResult
 }
 
@@ -176,8 +201,12 @@ sealed interface LogLinkError {
 
     data class UnknownProduct(val text: String) : LogLinkError
 
-    /** Several of the user's products fit, most likely first. */
-    data class AmbiguousProduct(val text: String, val candidates: List<UserProduct>) : LogLinkError
+    /**
+     * `product` is the exact ID of one of the user's products that's hidden, as a pinned shortcut
+     * made before it was hidden is. Hidden products aren't logged from links, as they aren't from
+     * the log sheet, so the app can say how to bring it back.
+     */
+    data class HiddenProduct(val product: UserProduct) : LogLinkError
 
     /** `qty` isn't a whole number from 1 to [LogLinkParser.MAX_QUANTITY]. */
     data class BadQuantity(val text: String) : LogLinkError
@@ -185,8 +214,11 @@ sealed interface LogLinkError {
     /** `product` gives a number of its own ("two gums") that isn't `qty`. */
     data class ConflictingQuantity(val inProduct: Int, val qty: Int) : LogLinkError
 
-    /** More than [LogLinkParser.MAX_QUANTITY] of the product's units, such as 13 cartridges logged by session. */
-    data class TooMany(val quantity: Int) : LogLinkError
+    /**
+     * More than [LogLinkParser.MAX_QUANTITY] of the product's units, such as 13 cartridges on an
+     * inhalator logged by session: [quantity] is then 104 and [unit] is sessions.
+     */
+    data class TooMany(val quantity: Int, val unit: DoseUnit) : LogLinkError
 
     /** `at` isn't a date and time like 2026-10-23T15:00. */
     data class BadTime(val text: String) : LogLinkError

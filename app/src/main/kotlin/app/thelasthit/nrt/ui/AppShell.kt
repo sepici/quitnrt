@@ -46,6 +46,7 @@ import app.thelasthit.nrt.R
 import app.thelasthit.nrt.ui.history.HistoryScreen
 import app.thelasthit.nrt.ui.insights.InsightsScreen
 import app.thelasthit.nrt.ui.lair.LairScreen
+import app.thelasthit.nrt.ui.link.LinkHost
 import app.thelasthit.nrt.ui.settings.AboutScreen
 import app.thelasthit.nrt.ui.settings.CatalogueScreen
 import app.thelasthit.nrt.ui.settings.DayStartScreen
@@ -142,6 +143,8 @@ fun AppShell() {
             composable(TopLevelDestination.Lair.route) { LairScreen() }
             settings(navController, snackbars, showMessage)
         }
+        // Links and shortcuts show their snackbar, question or sheet over whichever page is open.
+        LinkHost(snackbars)
     }
 }
 

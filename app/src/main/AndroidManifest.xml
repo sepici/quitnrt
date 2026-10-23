@@ -14,13 +14,38 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TheLastHit">
 
+        <!--
+            singleTop, so a link from Tasker, an NFC sticker or a shortcut reaches the open app
+            through onNewIntent. They start it as a new task, which finds the app's own task and its
+            one screen on top. Not singleTask: that would close whatever sits above the screen when
+            the app is opened again, such as the file picker for a backup, losing the export.
+        -->
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- lasthit://log?product=…&qty=…&at=…&tags=…, from Routines, Tasker or a shortcut. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="lasthit" />
+                <data android:host="log" />
+            </intent-filter>
+            <!-- The same link written to an NFC sticker. Reading it needs no NFC permission. -->
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="lasthit" />
+                <data android:host="log" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
     </application>
 

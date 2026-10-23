@@ -1,5 +1,6 @@
 package app.thelasthit.nrt.ui.format
 
+import android.content.res.Resources
 import android.text.format.DateFormat
 import androidx.annotation.DrawableRes
 import androidx.annotation.PluralsRes
@@ -14,6 +15,7 @@ import app.thelasthit.nrt.R
 import app.thelasthit.nrt.data.db.TagEntity
 import app.thelasthit.nrt.domain.dose.Dose
 import app.thelasthit.nrt.domain.log.Elapsed
+import app.thelasthit.nrt.domain.log.LabelWarning
 import app.thelasthit.nrt.domain.log.TagGroup
 import app.thelasthit.nrt.domain.product.DoseUnit
 import app.thelasthit.nrt.domain.product.FormWord
@@ -95,9 +97,21 @@ fun elapsedSpoken(elapsed: Elapsed): String {
 }
 
 @Composable
-fun pillLabelText(label: PillLabel): String = when (label) {
-    is PillLabel.ByForm -> stringResource(R.string.pill_label, stringResource(label.word.text), label.strength.mgText())
-    is PillLabel.ByName -> stringResource(R.string.pill_label, label.name, label.strength.mgText())
+fun pillLabelText(label: PillLabel): String = LocalResources.current.pillLabelText(label)
+
+/** [pillLabelText] outside Compose, such as for a shortcut. */
+fun Resources.pillLabelText(label: PillLabel): String = when (label) {
+    is PillLabel.ByForm -> getString(R.string.pill_label, getString(label.word.text), label.strength.mgText())
+    is PillLabel.ByName -> getString(R.string.pill_label, label.name, label.strength.mgText())
+}
+
+/** The calm note for a dose over the pack's limit, on Today and after a link's dose. */
+fun Resources.labelNoteText(note: LabelWarning): String = when (note) {
+    is LabelWarning.OverDaily -> getString(R.string.today_over_daily, note.limit)
+    is LabelWarning.OverWindow -> {
+        val hours = note.limit.span.toHours().toInt().coerceAtLeast(1)
+        getQuantityString(R.plurals.today_over_window, hours, note.limit.maxUnits, hours)
+    }
 }
 
 @get:StringRes
@@ -198,3 +212,6 @@ fun tagText(tag: TagEntity): String = tag.customName ?: tagText(tag.key)
 
 @Composable
 fun tagText(key: String): String = builtInTagText[key]?.let { stringResource(it) } ?: key
+
+/** A built-in tag's own name, whatever the user has renamed it to, or null for the user's own tags. */
+fun Resources.builtInTagName(key: String): String? = builtInTagText[key]?.let(::getString)
