@@ -1,9 +1,12 @@
 package app.thelasthit.nrt.ui.history
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +16,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarDuration
@@ -33,11 +39,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
@@ -50,6 +59,7 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.thelasthit.nrt.R
+import app.thelasthit.nrt.domain.log.HistoryFilter
 import app.thelasthit.nrt.domain.log.LoggedDay
 import app.thelasthit.nrt.ui.components.Chip
 import app.thelasthit.nrt.ui.components.ChipKind
@@ -61,7 +71,9 @@ import app.thelasthit.nrt.ui.format.DayMonthYearFormatter
 import app.thelasthit.nrt.ui.format.DayTitleFormatter
 import app.thelasthit.nrt.ui.format.formatAt
 import app.thelasthit.nrt.ui.format.mgText
+import app.thelasthit.nrt.ui.format.pillLabelText
 import app.thelasthit.nrt.ui.format.rememberTimeFormatter
+import app.thelasthit.nrt.ui.format.tagText
 import app.thelasthit.nrt.ui.graphViewModel
 import app.thelasthit.nrt.ui.log.LogSheet
 import app.thelasthit.nrt.ui.log.LogSheetViewModel
@@ -74,7 +86,8 @@ import java.util.Locale
 
 /**
  * Every dose, grouped by logical day with each day's total. Tap one to edit it in the log sheet,
- * or swipe it away to delete it, with Undo.
+ * or swipe it away to delete it, with Undo. The filter in the top bar narrows it to one product
+ * or one tag: days with no match go, and each day's total counts only its matches.
  */
 @Composable
 fun HistoryScreen(
@@ -84,9 +97,17 @@ fun HistoryScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var sheetOpen by rememberSaveable { mutableStateOf(false) }
+    var filterOpen by rememberSaveable { mutableStateOf(false) }
+    val listState = rememberLazyListState()
     val resources = LocalResources.current
     val timeFormat = rememberTimeFormatter()
     val scope = rememberCoroutineScope()
+
+    /** A new filter starts from the newest day. */
+    fun applyFilter(filter: HistoryFilter?) {
+        viewModel.applyFilter(filter)
+        scope.launch { listState.scrollToItem(0) }
+    }
 
     LaunchedEffect(viewModel) {
         viewModel.deleted.collect { deleted ->
@@ -128,14 +149,15 @@ fun HistoryScreen(
         Box(Modifier.fillMaxSize())
         return
     }
-    if (current.days.isEmpty() && !current.hasEarlier) {
+    if (current.isEmpty) {
         EmptyHistory(onLog = {
             sheetViewModel.openNew()
             sheetOpen = true
         })
     } else {
-        LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
-            item { TopBar() }
+        val filtered = current.filter != null
+        LazyColumn(Modifier.fillMaxSize(), state = listState, contentPadding = PaddingValues(bottom = 24.dp)) {
+            item { TopBar(filterOn = filtered, onFilter = { filterOpen = true }) }
             item {
                 Text(
                     stringResource(R.string.history_day_start, timeFormat.format(current.dayStart)),
@@ -144,8 +166,11 @@ fun HistoryScreen(
                     modifier = Modifier.padding(horizontal = 20.dp),
                 )
             }
+            if (filtered) {
+                item(key = "filter") { FilterBar(current, onClear = { applyFilter(null) }) }
+            }
             current.days.forEach { day ->
-                item(key = "day-${day.date}") { DayHeader(day, today = current.today) }
+                item(key = "day-${day.date}") { DayHeader(day, today = current.today, filtered = filtered) }
                 items(day.entries, key = { it.id }) { entry ->
                     Column {
                         if (entry != day.entries.first()) {
@@ -184,28 +209,114 @@ fun HistoryScreen(
     if (sheetOpen) {
         LogSheet(viewModel = sheetViewModel, onDismiss = { sheetOpen = false }, onSaved = ::onSaved)
     }
+    if (filterOpen) {
+        HistoryFilterSheet(
+            options = current.options,
+            current = current.filter,
+            onShow = { filter ->
+                filterOpen = false
+                applyFilter(filter)
+            },
+            onDismiss = { filterOpen = false },
+        )
+    }
 }
 
+/** The title, and with [filterOn] set, the filter button, filled while a filter is on. */
 @Composable
-private fun TopBar() {
+private fun TopBar(filterOn: Boolean? = null, onFilter: () -> Unit = {}) {
     Row(
         Modifier
             .fillMaxWidth()
             .heightIn(min = 56.dp)
-            .padding(horizontal = 20.dp),
+            .padding(start = 20.dp, end = if (filterOn == null) 20.dp else 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             stringResource(R.string.history_title),
             style = LastHit.type.headline.copy(fontSize = 28.sp, lineHeight = 32.sp, letterSpacing = (-0.03).em),
             color = LastHit.colors.text,
-            modifier = Modifier.semantics { heading() },
+            modifier = Modifier
+                .weight(1f)
+                .semantics { heading() },
         )
+        if (filterOn != null) FilterButton(on = filterOn, onClick = onFilter)
     }
 }
 
 @Composable
-private fun DayHeader(day: LoggedDay, today: LocalDate) {
+private fun FilterButton(on: Boolean, onClick: () -> Unit) {
+    val colors = LastHit.colors
+    val description = stringResource(if (on) R.string.history_filter_on else R.string.history_filter)
+    Box(
+        Modifier
+            .size(48.dp)
+            .clip(CircleShape)
+            .background(if (on) colors.iconTile else Color.Transparent)
+            .clickable(role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = description },
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(painterResource(R.drawable.ic_filter), contentDescription = null, tint = if (on) colors.onIconTile else colors.text)
+    }
+}
+
+/** The filter as a chip that clears it, and how many doses it matches across all of History. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun FilterBar(state: HistoryState, onClear: () -> Unit) {
+    val filter = state.filter ?: return
+    val name = when (filter) {
+        is HistoryFilter.Product ->
+            state.options.labelOf(filter.productId)?.let { pillLabelText(it) } ?: state.productNames[filter.productId] ?: filter.productId
+        is HistoryFilter.Tag -> state.tags[filter.tagKey]?.let { tagText(it) } ?: tagText(filter.tagKey)
+    }
+    FlowRow(
+        Modifier
+            .fillMaxWidth()
+            .padding(start = 20.dp, end = 20.dp, top = 14.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        ClearChip(name, onClear, Modifier.align(Alignment.CenterVertically))
+        Text(
+            pluralStringResource(R.plurals.history_filter_count, state.matches, state.matches),
+            style = LastHit.type.label,
+            color = LastHit.colors.text2,
+            modifier = Modifier.align(Alignment.CenterVertically),
+        )
+    }
+}
+
+/** A picked chip with a cross. Tapping anywhere on it clears the filter. */
+@Composable
+private fun ClearChip(name: String, onClear: () -> Unit, modifier: Modifier = Modifier) {
+    val colors = LastHit.colors
+    val description = stringResource(R.string.history_filter_clear, name)
+    Row(
+        modifier
+            .heightIn(min = 48.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(colors.chipSelected)
+            .clickable(role = Role.Button, onClick = onClear)
+            .semantics { contentDescription = description }
+            .padding(start = 16.dp, end = 10.dp, top = 12.dp, bottom = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Text(
+            name,
+            style = LastHit.type.label.copy(fontSize = 15.sp, fontWeight = FontWeight.Bold),
+            color = colors.onChipSelected,
+            modifier = Modifier.clearAndSetSemantics {},
+        )
+        Icon(painterResource(R.drawable.ic_close), contentDescription = null, tint = colors.onChipSelected, modifier = Modifier.size(20.dp))
+    }
+}
+
+/** Under a filter, the day's line counts its matches against every dose it had: "1 of 5 doses". */
+@Composable
+private fun DayHeader(day: LoggedDay, today: LocalDate, filtered: Boolean) {
     val colors = LastHit.colors
     val isToday = day.date == today
     val title = if (isToday) {
@@ -220,10 +331,12 @@ private fun DayHeader(day: LoggedDay, today: LocalDate) {
     }
     val count = day.entries.size
     val total = day.total.mgText()
-    val description = if (isToday) {
-        stringResource(R.string.history_today_description, total)
-    } else {
-        stringResource(R.string.history_day_description, "$title $date", total)
+    // Under a filter, screen readers hear the day's line too, since its count isn't in the rows.
+    val description = when {
+        filtered && isToday -> pluralStringResource(R.plurals.history_today_description_filtered, day.doses, total, count, day.doses)
+        filtered -> pluralStringResource(R.plurals.history_day_description_filtered, day.doses, "$title $date", total, count, day.doses)
+        isToday -> stringResource(R.string.history_today_description, total)
+        else -> stringResource(R.string.history_day_description, "$title $date", total)
     }
     Column {
         Row(
@@ -243,7 +356,11 @@ private fun DayHeader(day: LoggedDay, today: LocalDate) {
                     color = colors.text,
                 )
                 Text(
-                    pluralStringResource(R.plurals.history_day_meta, count, date, count),
+                    if (filtered) {
+                        pluralStringResource(R.plurals.history_day_meta_filtered, day.doses, date, count, day.doses)
+                    } else {
+                        pluralStringResource(R.plurals.history_day_meta, count, date, count)
+                    },
                     style = LastHit.type.label,
                     color = colors.text2,
                 )

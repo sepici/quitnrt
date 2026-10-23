@@ -71,6 +71,23 @@ class TagRepositoryTest {
     }
 
     @Test
+    fun allUsesCountEveryLiveEntryHoweverOld() = runTest {
+        data.tags.ensureBuiltIns()
+        val gum = data.products.addFromCatalogue("nicorette-gum-uk-2mg")
+        val now = data.clock.instant()
+        suspend fun log(daysAgo: Long, vararg tags: String) =
+            data.entries.log(LogRequest(gum.id, at = now.minus(Duration.ofDays(daysAgo)), tagKeys = tags.toSet())) as LogResult.Saved
+
+        log(1, "after_meal", "bored")
+        log(400, "bored")
+        log(25_000, "bored") // in 1958, before the epoch
+        val deleted = log(3, "happy")
+        data.entries.delete(deleted.entry.id)
+
+        assertEquals(mapOf("after_meal" to 1, "bored" to 3), data.tags.observeAllUses().first())
+    }
+
+    @Test
     fun editingRenamesMovesAndHides() = runTest {
         data.tags.ensureBuiltIns()
         val coffee = data.tags.all.first().first { it.key == "coffee_tea" }

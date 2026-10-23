@@ -10,6 +10,7 @@ import app.thelasthit.nrt.domain.log.DaySummary
 import app.thelasthit.nrt.domain.log.Entry
 import app.thelasthit.nrt.domain.log.EntryKind
 import app.thelasthit.nrt.domain.log.EntrySource
+import app.thelasthit.nrt.domain.log.HistoryFilter
 import app.thelasthit.nrt.domain.log.LabelWarning
 import app.thelasthit.nrt.domain.log.LogChecks
 import app.thelasthit.nrt.domain.log.LogTime
@@ -132,6 +133,22 @@ class EntryRepository(
 
     /** The first logical day with a live entry, or null when nothing is logged. */
     fun observeFirstDay(): Flow<LocalDate?> = dao.observeFirstDay().map { day -> day?.let(LocalDate::ofEpochDay) }
+
+    /** Every live entry that [filter] matches, across all of History, newest first. */
+    fun observeMatching(filter: HistoryFilter): Flow<List<Entry>> = when (filter) {
+        is HistoryFilter.Product -> dao.observeWithProduct(filter.productId)
+        is HistoryFilter.Tag -> dao.observeWithTag(filter.tagKey)
+    }.map { list -> list.map { it.toDomain() } }
+
+    /** Product ID to its number of live entries, for the filter's choices and counts. */
+    fun observeProductUses(): Flow<Map<String, Int>> =
+        dao.observeProductUses().map { list -> list.associate { it.productId to it.uses } }
+
+    /** Each logical day from [from] to [to] with a live entry, to its number of live entries. */
+    fun observeDosesPerDay(from: LocalDate, to: LocalDate): Flow<Map<LocalDate, Int>> =
+        dao.observeDosesPerDay(from.toEpochDay(), to.toEpochDay()).map { list ->
+            list.associate { LocalDate.ofEpochDay(it.epochDay) to it.doses }
+        }
 
     /** Run after the day start changes: moves every entry to the day it now belongs to. */
     suspend fun recalculateLogicalDays(boundary: DayBoundary) {

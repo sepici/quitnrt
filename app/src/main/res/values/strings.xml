@@ -586,6 +586,41 @@
     <string name="history_empty_title">Nothing logged yet</string>
     <string name="history_empty_body">Your first dose will show up here, grouped by day with a total for each.</string>
 
+    <!-- History's filter: one product or one tag at a time -->
+    <string name="history_filter">Filter by product or tag</string>
+    <string name="history_filter_on">Filter by product or tag, on</string>
+    <string name="history_filter_title">Filter</string>
+    <string name="history_filter_intro">Show only doses with one product or tag</string>
+    <string name="history_filter_product">Product</string>
+    <string name="history_filter_tag">Tag</string>
+    <string name="history_filter_tag_note">Tags you\'ve used, most used first</string>
+    <string name="history_filter_more">More</string>
+    <plurals name="history_filter_more_description">
+        <item quantity="one">%1$d more %2$s tag</item>
+        <item quantity="other">%1$d more %2$s tags</item>
+    </plurals>
+    <plurals name="history_filter_show">
+        <item quantity="one">Show %1$d\u00A0dose</item>
+        <item quantity="other">Show %1$d\u00A0doses</item>
+    </plurals>
+    <plurals name="history_filter_count">
+        <item quantity="one">%1$d\u00A0dose</item>
+        <item quantity="other">%1$d\u00A0doses</item>
+    </plurals>
+    <string name="history_filter_clear">Filtered by %1$s. Clear filter</string>
+    <plurals name="history_day_meta_filtered">
+        <item quantity="one">%1$s, %2$d\u00A0of\u00A0%3$d\u00A0dose</item>
+        <item quantity="other">%1$s, %2$d\u00A0of\u00A0%3$d\u00A0doses</item>
+    </plurals>
+    <plurals name="history_day_description_filtered">
+        <item quantity="one">%1$s, %2$s\u00A0mg, %3$d of %4$d\u00A0dose</item>
+        <item quantity="other">%1$s, %2$s\u00A0mg, %3$d of %4$d\u00A0doses</item>
+    </plurals>
+    <plurals name="history_today_description_filtered">
+        <item quantity="one">Today, %1$s\u00A0mg so far, %2$d of %3$d\u00A0dose</item>
+        <item quantity="other">Today, %1$s\u00A0mg so far, %2$d of %3$d\u00A0doses</item>
+    </plurals>
+
     <!-- Log sheet -->
     <string name="log_title">Log a dose</string>
     <string name="log_title_edit">Edit dose</string>

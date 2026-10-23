@@ -4,8 +4,11 @@ import app.thelasthit.nrt.domain.dose.Dose
 import app.thelasthit.nrt.domain.dose.sum
 import java.time.LocalDate
 
-/** One logical day in History: its entries, newest first, and their total. */
-data class LoggedDay(val date: LocalDate, val entries: List<Entry>) {
+/**
+ * One logical day in History: its entries, newest first, and their total. Under a
+ * [HistoryFilter], [entries] holds only the matches and [doses] still counts every dose that day.
+ */
+data class LoggedDay(val date: LocalDate, val entries: List<Entry>, val doses: Int = entries.size) {
     val total: Dose get() = entries.map { it.total }.sum()
 
     companion object {
