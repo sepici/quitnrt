@@ -51,6 +51,8 @@ import app.thelasthit.nrt.ui.components.Chip
 import app.thelasthit.nrt.ui.components.ChipKind
 import app.thelasthit.nrt.ui.components.FieldLabel
 import app.thelasthit.nrt.ui.components.PrimaryButton
+import app.thelasthit.nrt.ui.components.sheetEdge
+import app.thelasthit.nrt.ui.components.sheetScrim
 import app.thelasthit.nrt.ui.format.formDetail
 import app.thelasthit.nrt.ui.format.icon
 import app.thelasthit.nrt.ui.format.mgText
@@ -231,6 +233,8 @@ private fun ProductSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = colors.surface,
+        scrimColor = sheetScrim,
+        modifier = Modifier.sheetEdge(colors),
         contentColor = colors.text,
         dragHandle = { BottomSheetDefaults.DragHandle(color = colors.lineStrong, width = 36.dp, height = 4.dp) },
     ) {

@@ -590,10 +590,10 @@
     <string name="history_filter">Filter by product or tag</string>
     <string name="history_filter_on">Filter by product or tag, on</string>
     <string name="history_filter_title">Filter</string>
-    <string name="history_filter_intro">Show only doses with one product or tag</string>
+    <string name="history_filter_intro">Show only doses with one product or tag.</string>
     <string name="history_filter_product">Product</string>
     <string name="history_filter_tag">Tag</string>
-    <string name="history_filter_tag_note">Tags you\'ve used, most used first</string>
+    <string name="history_filter_tag_note">Only tags you\'ve used</string>
     <string name="history_filter_more">More</string>
     <plurals name="history_filter_more_description">
         <item quantity="one">%1$d more %2$s tag</item>
@@ -741,12 +741,12 @@
     <string name="insights_shade_mg">mg</string>
     <string name="insights_heat_none">None</string>
     <string name="insights_heat_unit_doses">doses</string>
-    <string name="insights_when_hint">Each column is a whole day from %1$s, so a dose at %2$s on Friday sits at the bottom of Thursday.</string>
-    <string name="insights_when_hint_midnight">Each column is a whole day, from midnight to midnight.</string>
+    <string name="insights_when_hint">Each day runs from %1$s, so a dose at %2$s on Friday sits at the bottom of Thursday.</string>
+    <string name="insights_when_hint_midnight">Each day runs from midnight to midnight.</string>
     <string name="insights_tip_cell">%1$s, %2$s\u00A0mg</string>
     <string name="insights_tip_no_doses">No doses</string>
     <string name="insights_cell_when">%1$s, %2$s to %3$s</string>
-    <string name="insights_over_the">Over the %1$s</string>
+    <string name="insights_over_the">Over the last %1$s</string>
     <string name="insights_mondays">Mondays</string>
     <string name="insights_tuesdays">Tuesdays</string>
     <string name="insights_wednesdays">Wednesdays</string>
@@ -755,16 +755,17 @@
     <string name="insights_saturdays">Saturdays</string>
     <string name="insights_sundays">Sundays</string>
     <string name="insights_when_summary_doses">Doses by hour and day. Most often %1$s from %2$s, %3$s.</string>
-    <string name="insights_when_summary_mg">mg by hour and day. The most is on %1$s from %2$s, %3$s\u00A0mg.</string>
-    <string name="insights_when_summary_none">No doses by hour and day in this period.</string>
+    <string name="insights_when_summary_mg">Doses by hour and day, shaded by mg. The most is on %1$s from %2$s, %3$s\u00A0mg.</string>
+    <string name="insights_when_summary_none">Doses by hour and day. None in this period.</string>
     <string name="insights_summary_table_hours">The table button lists every hour with a dose.</string>
     <string name="insights_table_none">No doses in this period.</string>
-    <string name="insights_patch_note">The hour map, triggers and habits leave out patches, since a patch releases nicotine steadily.</string>
+    <string name="insights_patch_note">Patches release nicotine steadily, so there are no times, triggers or gaps to show for them.</string>
     <string name="insights_calendar_title">Calendar</string>
     <string name="insights_calendar_table">Show calendar as a table</string>
     <string name="insights_calendar_chart">Show calendar as a chart</string>
     <string name="insights_calendar_meta">Each day shaded by mg.</string>
-    <string name="insights_calendar_summary">Calendar of mg each day, from %1$s\u00A0mg on the lightest day with doses to %2$s\u00A0mg on the heaviest.</string>
+    <string name="insights_calendar_meta_table">Total mg each day.</string>
+    <string name="insights_calendar_summary">Calendar of mg each day, from %1$s\u00A0mg on the lowest day with doses to %2$s\u00A0mg on the highest.</string>
     <string name="insights_calendar_summary_plain">Calendar of mg each day.</string>
     <string name="insights_key_no_data">Before your first dose</string>
     <string name="insights_key_today_ring">Today, so far</string>
@@ -778,8 +779,7 @@
         <item quantity="other">%1$d points</item>
     </plurals>
     <string name="insights_patches_not_counted">Patches aren\'t counted.</string>
-    <string name="insights_changes_against">Changes against the %1$s before start on %2$s.</string>
-    <string name="insights_changes_start">Changes start on %1$s.</string>
+    <string name="insights_changes_against">From %2$s, you\'ll see changes against the %1$s before.</string>
     <string name="insights_triggers_title">Triggers</string>
     <string name="insights_triggers_meta">Share of doses with each tag, against the %1$s before.</string>
     <string name="insights_triggers_meta_plain">Share of doses with each tag.</string>
@@ -820,7 +820,7 @@
     </plurals>
     <string name="insights_all_tagged">Every dose had a tag.</string>
     <string name="insights_habits_title">Habits</string>
-    <string name="insights_habits_against">Against the %1$s before.</string>
+    <string name="insights_habits_against">First dose and gaps, against the %1$s before.</string>
     <string name="insights_habits_gaps">Gaps only count within a day.</string>
     <string name="insights_habits_gaps_patches">Gaps only count within a day, and patches aren\'t counted.</string>
     <string name="insights_first_dose">First dose</string>
@@ -840,12 +840,13 @@
     <string name="insights_shorter">%1$s shorter</string>
     <string name="insights_products_title">By product</string>
     <string name="insights_products_meta">Share of all mg, and how much a day.</string>
-    <string name="insights_products_meta_type">Share of %1$s mg, and how much a day.</string>
+    <string name="insights_products_meta_single">How much a day.</string>
+    <string name="insights_products_meta_type">Share of the mg from %1$s, and how much a day.</string>
     <string name="insights_units_a_day">%1$s\u00A0%2$s a day</string>
     <string name="insights_unit_a_day">%1$s a day</string>
     <string name="insights_units_in">%1$s in %2$s</string>
-    <string name="insights_a_day_on">%1$s a day, on %2$d of %3$s</string>
     <string name="insights_so_far_today">%1$s so far today</string>
+    <string name="insights_used_on">Used on %1$d of %2$s</string>
     <string name="insights_period_week">week</string>
     <string name="insights_noun_gum">gum</string>
     <string name="insights_noun_lozenge">lozenges</string>
@@ -853,7 +854,7 @@
     <string name="insights_noun_patch">patches</string>
     <string name="insights_noun_mouth_spray">mouth spray</string>
     <string name="insights_noun_nasal_spray">nasal spray</string>
-    <string name="insights_noun_inhalator">the inhalator</string>
+    <string name="insights_noun_inhalator">inhalator cartridges</string>
     <string name="insights_noun_microtab">microtabs</string>
     <string name="insights_noun_strip">strips</string>
     <string name="insights_noun_pouch">pouches</string>
@@ -887,7 +888,8 @@
     <string name="insights_calendar_title_type">%1$s calendar</string>
     <string name="insights_calendar_table_type">Show %1$s calendar as a table</string>
     <string name="insights_calendar_chart_type">Show %1$s calendar as a chart</string>
-    <string name="insights_calendar_meta_type">Each day shaded by %1$s mg.</string>
+    <string name="insights_calendar_meta_type">Each day shaded by mg from %1$s.</string>
+    <string name="insights_calendar_meta_table_type">Total mg from %1$s each day.</string>
     <string name="insights_products_title_type">%1$s products</string>
     <string name="insights_products_title_other">Other products</string>
 </resources>

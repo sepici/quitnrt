@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -37,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -55,6 +57,8 @@ import app.thelasthit.nrt.domain.log.HistoryFilter
 import app.thelasthit.nrt.ui.components.Chip
 import app.thelasthit.nrt.ui.components.ChipKind
 import app.thelasthit.nrt.ui.components.PrimaryButton
+import app.thelasthit.nrt.ui.components.sheetEdge
+import app.thelasthit.nrt.ui.components.sheetScrim
 import app.thelasthit.nrt.ui.format.icon
 import app.thelasthit.nrt.ui.format.pillLabelText
 import app.thelasthit.nrt.ui.format.tagText
@@ -95,6 +99,8 @@ fun HistoryFilterSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = colors.surface,
+        scrimColor = sheetScrim,
+        modifier = Modifier.sheetEdge(colors),
         contentColor = colors.text,
         dragHandle = { BottomSheetDefaults.DragHandle(color = colors.lineStrong, width = 36.dp, height = 4.dp) },
     ) {
@@ -120,23 +126,35 @@ fun HistoryFilterSheet(
     }
 }
 
+/** The title with the close button beside it, and the line under them running the sheet's full width. */
 @Composable
 private fun Header(onClose: () -> Unit) {
-    Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        Column(Modifier.weight(1f)) {
+    val titleStyle = LastHit.type.headline.copy(fontSize = 28.sp, lineHeight = 34.sp, letterSpacing = (-0.03).em)
+    val titleLine = with(LocalDensity.current) { titleStyle.lineHeight.toDp() }
+    Box(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 4.dp)) {
+        Column(Modifier.fillMaxWidth()) {
             Text(
                 stringResource(R.string.history_filter_title),
-                style = LastHit.type.headline.copy(fontSize = 28.sp, lineHeight = 34.sp, letterSpacing = (-0.03).em),
+                style = titleStyle,
                 color = LastHit.colors.text,
+                modifier = Modifier.padding(end = 48.dp),
             )
-            // Balanced, so a large font doesn't leave "tag" on a line of its own.
+            // Balanced, so a large font doesn't leave "tag." on a line of its own.
             Text(
                 stringResource(R.string.history_filter_intro),
                 style = LastHit.type.label.copy(lineBreak = LineBreak.Heading),
                 color = LastHit.colors.text2,
+                modifier = Modifier.padding(end = 12.dp),
             )
         }
-        IconButton(onClick = onClose, modifier = Modifier.size(48.dp)) {
+        // Centred on the title's line only.
+        IconButton(
+            onClick = onClose,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .offset(y = (titleLine - 48.dp) / 2)
+                .size(48.dp),
+        ) {
             Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.action_close), tint = LastHit.colors.text)
         }
     }

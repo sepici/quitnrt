@@ -1,15 +1,17 @@
 package app.thelasthit.nrt.ui.insights
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -46,6 +48,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -56,7 +59,9 @@ import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -71,10 +76,10 @@ import app.thelasthit.nrt.ui.components.Chip
 import app.thelasthit.nrt.ui.components.ChipKind
 import app.thelasthit.nrt.ui.components.IconTile
 import app.thelasthit.nrt.ui.components.PrimaryButton
-import app.thelasthit.nrt.ui.components.bleed
 import app.thelasthit.nrt.ui.format.DayMonthFormatter
 import app.thelasthit.nrt.ui.format.DayShortMonthFormatter
 import app.thelasthit.nrt.ui.format.DayTitleFormatter
+import app.thelasthit.nrt.ui.format.averageText
 import app.thelasthit.nrt.ui.format.mgText
 import app.thelasthit.nrt.ui.format.text
 import app.thelasthit.nrt.ui.graphViewModel
@@ -169,19 +174,19 @@ private fun TopBar() {
     }
 }
 
+/** The kinds of product wrap onto a second line when they don't fit, so none is ever cut off. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun Filters(state: InsightsState, onRange: (InsightRange) -> Unit, onType: (ProductType?) -> Unit) {
     Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 6.dp)) {
         RangeButtons(state, onRange)
         state.nextLocked?.let { LockNote(it, state.today) }
-        Row(
+        FlowRow(
             Modifier
                 .padding(top = 12.dp)
-                .bleed(20.dp)
-                .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
                 .selectableGroup(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Chip(stringResource(R.string.insights_all), selected = state.type == null, kind = ChipKind.Choice, onClick = { onType(null) })
             state.types.forEach { type ->
@@ -191,64 +196,84 @@ private fun Filters(state: InsightsState, onRange: (InsightRange) -> Unit, onTyp
     }
 }
 
-/** The ranges in a sunk track. A locked one is dashed and says when it opens. */
+/**
+ * The ranges in a sunk track. A locked one is dashed and says when it opens. Each label keeps
+ * [RangePadding] clear either side; when a large font leaves less, the track takes two rows of two.
+ */
 @Composable
 private fun RangeButtons(state: InsightsState, onPick: (InsightRange) -> Unit) {
     val colors = LastHit.colors
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .heightIn(min = 52.dp)
-            .clip(RoundedCornerShape(26.dp))
-            .background(colors.sunk)
-            .padding(4.dp)
-            .selectableGroup(),
-    ) {
-        state.ranges.forEach { option ->
-            val selected = option.range == state.range
-            val name = rangeName(option.range)
-            val locked = if (option.unlocked) null else stringResource(R.string.insights_range_locked, name, opensText(option.opensOn, state.today))
-            Box(
-                Modifier
-                    .weight(1f)
-                    .heightIn(min = 44.dp)
-                    .clip(RoundedCornerShape(22.dp))
-                    .background(if (selected) colors.chipSelected else colors.sunk)
-                    .then(
-                        if (locked == null) {
-                            Modifier.selectable(selected, role = Role.RadioButton, onClick = { onPick(option.range) })
-                        } else {
-                            Modifier
-                                .drawBehind {
-                                    val inset = Offset(3.dp.toPx(), 4.dp.toPx())
-                                    drawRoundRect(
-                                        colors.lineStrong,
-                                        topLeft = inset,
-                                        size = Size(size.width - inset.x * 2, size.height - inset.y * 2),
-                                        cornerRadius = CornerRadius(18.dp.toPx()),
-                                        style = Stroke(1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx()))),
-                                    )
-                                }
-                                .semantics {
-                                    contentDescription = locked
-                                    disabled()
-                                }
-                        },
-                    ),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    name,
-                    style = LastHit.type.label.copy(fontSize = 15.sp, fontWeight = if (locked == null) FontWeight.Bold else FontWeight.SemiBold),
-                    color = when {
-                        selected -> colors.onChipSelected
-                        locked == null -> colors.text2
-                        else -> colors.text3
-                    },
-                    maxLines = 1,
-                )
+    val measurer = rememberTextMeasurer()
+    val style = LastHit.type.label.copy(fontSize = 15.sp, fontWeight = FontWeight.Bold)
+    val names = state.ranges.map { rangeName(it.range) }
+    val widest = names.maxOf { measurer.measure(it, style).size.width }
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val segment = (maxWidth - 8.dp) / state.ranges.size
+        val perRow = if (with(LocalDensity.current) { widest.toDp() } + RangePadding * 2 <= segment) state.ranges.size else 2
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .heightIn(min = 52.dp)
+                .clip(RoundedCornerShape(26.dp))
+                .background(colors.sunk)
+                .padding(4.dp)
+                .selectableGroup(),
+        ) {
+            state.ranges.chunked(perRow).forEach { row ->
+                Row(Modifier.fillMaxWidth()) {
+                    row.forEach { option -> RangeButton(option, rangeName(option.range), option.range == state.range, state.today, onPick) }
+                }
             }
         }
+    }
+}
+
+private val RangePadding = 12.dp
+
+@Composable
+private fun RowScope.RangeButton(option: RangeOption, name: String, selected: Boolean, today: LocalDate, onPick: (InsightRange) -> Unit) {
+    val colors = LastHit.colors
+    val locked = if (option.unlocked) null else stringResource(R.string.insights_range_locked, name, opensText(option.opensOn, today))
+    Box(
+        Modifier
+            .weight(1f)
+            .heightIn(min = 44.dp)
+            .clip(RoundedCornerShape(22.dp))
+            .background(if (selected) colors.chipSelected else colors.sunk)
+            .then(
+                if (locked == null) {
+                    Modifier.selectable(selected, role = Role.RadioButton, onClick = { onPick(option.range) })
+                } else {
+                    Modifier
+                        .drawBehind {
+                            val inset = Offset(3.dp.toPx(), 4.dp.toPx())
+                            drawRoundRect(
+                                colors.lineStrong,
+                                topLeft = inset,
+                                size = Size(size.width - inset.x * 2, size.height - inset.y * 2),
+                                cornerRadius = CornerRadius(18.dp.toPx()),
+                                style = Stroke(1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx()))),
+                            )
+                        }
+                        .semantics {
+                            contentDescription = locked
+                            disabled()
+                        }
+                },
+            )
+            .padding(horizontal = RangePadding),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            name,
+            style = LastHit.type.label.copy(fontSize = 15.sp, fontWeight = if (locked == null) FontWeight.Bold else FontWeight.SemiBold),
+            color = when {
+                selected -> colors.onChipSelected
+                locked == null -> colors.text2
+                else -> colors.text3
+            },
+            maxLines = 1,
+        )
     }
 }
 
@@ -331,7 +356,7 @@ private fun EachDay(state: InsightsState) {
                     weeks.reversed().mapNotNull { week ->
                         week.averagePerDay?.let {
                             stringResource(R.string.insights_week_of, DayMonthFormatter.format(week.monday)) to
-                                stringResource(R.string.insights_row_mg_a_day, it.mgText())
+                                stringResource(R.string.insights_row_mg_a_day, it.averageText())
                         }
                     },
                     Modifier.padding(top = 14.dp),
@@ -358,7 +383,7 @@ private fun EachDay(state: InsightsState) {
                     tip = { index ->
                         val week = weeks[index]
                         ChartTip(
-                            stringResource(R.string.insights_tip_week, week.averagePerDay?.mgText().orEmpty()),
+                            stringResource(R.string.insights_tip_week, week.averagePerDay?.averageText().orEmpty()),
                             listOf(
                                 stringResource(R.string.insights_week_of, DayMonthFormatter.format(week.monday)),
                                 pluralStringResource(
@@ -376,6 +401,7 @@ private fun EachDay(state: InsightsState) {
                     if (weeks.any { it.monday == thisMonday && it.averagePerDay != null }) {
                         Key(BarKey(outline = true), stringResource(R.string.insights_key_this_week))
                     }
+                    if (columns.any { !it.partial && it.value == Dose.ZERO }) Key({ ZeroTickKey() }, stringResource(R.string.insights_tip_no_doses))
                 }
             }
         } else {
@@ -418,10 +444,10 @@ private fun EachDay(state: InsightsState) {
                             ChartTip(stringResource(R.string.insights_tip_today, day.total.mgText(), doses), listOf(stringResource(R.string.insights_today)))
                         } else {
                             ChartTip(
-                                stringResource(R.string.insights_tip_day, day.total.mgText(), doses),
+                                if (day.doses == 0) stringResource(R.string.insights_tip_no_doses) else stringResource(R.string.insights_tip_day, day.total.mgText(), doses),
                                 listOfNotNull(
                                     DayTitleFormatter.format(day.date),
-                                    day.average?.let { stringResource(R.string.insights_tip_average, it.mgText()) },
+                                    day.average?.let { stringResource(R.string.insights_tip_average, it.averageText()) },
                                 ),
                             )
                         }
@@ -432,6 +458,7 @@ private fun EachDay(state: InsightsState) {
                     Key(BarKey(), stringResource(R.string.insights_key_day))
                     if (line != null) Key(LineKey(), stringResource(R.string.insights_key_average))
                     days.lastOrNull { it.date == today }?.let { Key(BarKey(outline = true), stringResource(R.string.insights_key_today, it.total.mgText())) }
+                    if (columns.any { !it.partial && it.value == Dose.ZERO }) Key({ ZeroTickKey() }, stringResource(R.string.insights_tip_no_doses))
                 }
                 state.averageStarts?.let {
                     Text(
@@ -454,7 +481,7 @@ private fun Headline(state: InsightsState, intake: DailyIntake) {
     val today = intake.days.lastOrNull { it.date == state.today }
     Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
-            (average ?: today?.total ?: Dose.ZERO).mgText(),
+            average?.averageText() ?: (today?.total ?: Dose.ZERO).mgText(),
             style = LastHit.type.display.copy(lineHeight = 48.sp),
             color = colors.text,
             modifier = Modifier.alignByBaseline(),
@@ -470,16 +497,9 @@ private fun Headline(state: InsightsState, intake: DailyIntake) {
     if (average != null && previous != null) {
         val period = periodBefore(state.range)
         val change = average.micrograms - previous.micrograms
-        Row(Modifier.padding(top = 2.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(Modifier.padding(top = 2.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             // Under 0.05 mg either way rounds to no change at one decimal place.
-            if (abs(change) >= 50) {
-                Icon(
-                    painterResource(if (change < 0) R.drawable.ic_arrow_down else R.drawable.ic_arrow_up),
-                    contentDescription = null,
-                    tint = colors.text,
-                    modifier = Modifier.size(16.dp),
-                )
-            }
+            if (abs(change) >= 50) ChangeArrow(if (change < 0) R.drawable.ic_arrow_down else R.drawable.ic_arrow_up)
             Text(
                 when {
                     abs(change) < 50 -> stringResource(R.string.insights_same_as, period)
@@ -510,7 +530,7 @@ private fun summary(intake: DailyIntake, windowDays: Int, weekly: Boolean): Stri
         if (weekly) {
             add(stringResource(R.string.insights_summary_weekly, period))
         } else {
-            intake.averagePerDay?.let { add(stringResource(R.string.insights_summary_average, period, it.mgText())) }
+            intake.averagePerDay?.let { add(stringResource(R.string.insights_summary_average, period, it.averageText())) }
             highest?.let { add(stringResource(R.string.insights_summary_highest, it.total.mgText(), DayTitleFormatter.format(it.date))) }
         }
         today?.let { add(stringResource(R.string.insights_summary_today, it.total.mgText())) }
@@ -519,8 +539,8 @@ private fun summary(intake: DailyIntake, windowDays: Int, weekly: Boolean): Stri
 }
 
 @Composable
-internal fun Section(title: String, action: @Composable () -> Unit, content: @Composable ColumnScope.() -> Unit) {
-    Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 34.dp)) {
+internal fun Section(title: String, action: @Composable () -> Unit, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+    Column(modifier.padding(start = 20.dp, end = 20.dp, top = 34.dp)) {
         Row(Modifier.fillMaxWidth().heightIn(min = 40.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(
                 title,
@@ -535,6 +555,25 @@ internal fun Section(title: String, action: @Composable () -> Unit, content: @Co
         }
         content()
     }
+}
+
+/**
+ * A change's arrow, or a dash for none, in the text colour. It's sized in sp so it grows with the
+ * text beside it, and centred on that text's first [line], so it stays with it when the text wraps.
+ */
+@Composable
+internal fun ChangeArrow(@DrawableRes icon: Int, line: TextUnit = 20.sp) {
+    val density = LocalDensity.current
+    val size = with(density) { 16.sp.toDp() }
+    val top = (with(density) { line.toDp() } - size) / 2
+    Icon(
+        painterResource(icon),
+        contentDescription = null,
+        tint = LastHit.colors.text,
+        modifier = Modifier
+            .padding(top = top)
+            .size(size),
+    )
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -656,6 +695,9 @@ internal fun typeAttribute(type: ProductType): String = stringResource(
 
 /** A title or line that starts with a kind of product, "gum calendar", given its capital: "Gum calendar". */
 internal fun String.sentence(): String = replaceFirstChar { it.titlecase(Locale.UK) }
+
+/** "1 November", with a no-break space so the day and month never wrap apart. */
+internal fun keptTogether(date: LocalDate): String = DayMonthFormatter.format(date).replace(' ', ' ')
 
 /** The period a change is against, for "the week before" or "the 30 days before". */
 @Composable

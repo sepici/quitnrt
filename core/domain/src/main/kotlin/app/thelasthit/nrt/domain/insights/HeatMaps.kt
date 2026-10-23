@@ -51,8 +51,15 @@ object HeatScale {
  * moves the rows with it (04:30 to 05:30 and so on), so a dose just before it still sits at the
  * bottom of the day it counts toward. Times are read off the clock where the dose was taken.
  * Patches are left out, since they release steadily rather than answering a craving.
+ *
+ * A weekday the window hasn't reached yet, such as Saturday in a first week that began on a
+ * Monday, has no days rather than empty cells, so it never reads as a run of zeros ([daysOf]).
  */
-class HourHeatMap private constructor(val dayStart: LocalTime, private val grid: Map<Pair<DayOfWeek, Int>, Cell>) {
+class HourHeatMap private constructor(
+    val dayStart: LocalTime,
+    private val grid: Map<Pair<DayOfWeek, Int>, Cell>,
+    private val days: Map<DayOfWeek, List<LocalDate>>,
+) {
 
     /** [row] counts from 0 at the day start, and [from] is the clock time it starts at. */
     data class Cell(val day: DayOfWeek, val row: Int, val from: LocalTime, val doses: Int, val total: Dose) {
@@ -75,10 +82,17 @@ class HourHeatMap private constructor(val dayStart: LocalTime, private val grid:
     /** The cell with the most doses, then the most mg, for the chart's summary. */
     val busiest: Cell? get() = grid.values.maxWithOrNull(compareBy<Cell> { it.doses }.thenBy { it.total })
 
+    /** The window's days that fall on [day], oldest first: none for a weekday it hasn't reached. */
+    fun daysOf(day: DayOfWeek): List<LocalDate> = days[day].orEmpty()
+
     companion object {
         const val ROWS = 24
 
-        fun of(entries: List<Entry>, dayStart: LocalTime): HourHeatMap {
+        /**
+         * [dates] are the window's logical days, all of them tracked, since a window never starts
+         * before the first dose. They only feed [daysOf]: the cells count every entry given.
+         */
+        fun of(entries: List<Entry>, dayStart: LocalTime, dates: List<LocalDate> = emptyList()): HourHeatMap {
             val start = dayStart.toSecondOfDay() / 60
             val grid = entries.filterNot { it.isBackground }
                 .groupBy { entry ->
@@ -89,7 +103,7 @@ class HourHeatMap private constructor(val dayStart: LocalTime, private val grid:
                     val (day, row) = key
                     Cell(day, row, dayStart.plusHours(row.toLong()), list.size, list.map { it.total }.sum())
                 }
-            return HourHeatMap(dayStart, grid)
+            return HourHeatMap(dayStart, grid, dates.distinct().sorted().groupBy { it.dayOfWeek })
         }
     }
 }
