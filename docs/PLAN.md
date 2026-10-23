@@ -167,7 +167,7 @@ The plan needs the mix of products, not only the total, because it steps down th
   - **Patches** step down one strength at a time (21, 14, then 7 mg), then come off.
 - The steps are spread evenly over the taper weeks. Where they don't divide evenly, the extra steps come early, when they're a smaller share of the dose. With more weeks than steps, a step lasts more than one week. Allowances never go up.
 - **A switch to a lower strength gets a week of its own,** so there's a week to settle into the new strength before the count comes down: 4 pieces of 4 mg one week, 8 of 2 mg the next. A week that would take a switch and then another step stops at the switch, and the steps left are spread over the weeks after it by the same rule.
-- Lower strengths come from the catalogue (the same brand and kind) or your own products. A product the plan switches you to is added to your products when the plan starts.
+- Lower strengths come from your own products, then the catalogue: the same brand and kind, and when the brand has none (a shop's own 21 mg patch, a product added by hand), the generic line of the same kind in your market. So no pack drops from its strong unit straight to nothing. A product the plan switches you to is added to your products when the plan starts.
 - Each week has a **daily mix** ("5 pieces of 4 mg gum"), a **daily guide** (the mix's mg) for pacing on the Today screen, and a **weekly allowance** (7 × the guide), which is the target. A week is judged on mg alone, so how you stay within it is up to you.
 - You can edit any taper week before it starts, by moving it up or down the ladder. It can't go above the week before, and later weeks move down with it if they'd be above it.
 
@@ -520,7 +520,7 @@ Screenshots of real screens are rendered with Roborazzi (Compose screenshots on 
   - `androidx.appfunctions` (alpha, pinned)
   - Play Services Wearable
   - Roborazzi (screenshots)
-- **SDK levels:** `minSdk 26` (Android 8.0) on the phone and `minSdk 30` on the watch. `compileSdk` and `targetSdk` are 36.
+- **SDK levels:** `minSdk 26` (Android 8.0) on the phone and `minSdk 30` on the watch. `compileSdk` and `targetSdk` are 37, the newest AGP 9.4 supports.
 - **Gradle:** a version catalogue, Kotlin DSL, and as little build plumbing as possible.
 - **No `INTERNET` permission.** The app physically can't send data anywhere. Watch sync goes through Play Services, which doesn't need it.
 

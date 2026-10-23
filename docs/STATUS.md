@@ -9,11 +9,12 @@ Last updated: 24 October 2026, while the build runs unattended towards a testing
 | 0. Foundation and direction | Done. Gradle set-up, CI, copy lint, style guide, design direction chosen, first creature signed off |
 | 1. Logging | **Done.** Domain rules, catalogue, data layer, backup, theme, sprites, plus **onboarding, Today, the log sheet, History, Settings and the lair**, reviewed, with the owner's calls on the reviews applied. |
 | 2. Insights | **Done.** The stats, every Insights section and the History filter, reviewed by the copy agent and the fresh-eyes reviewer, with their findings fixed. Calls that touch signed-off designs wait for the owner. |
-| 3. Programme | **Slice 1 in progress.** The rules are in `domain/programme`, being reworked for the mix-based taper (P3-6). The data for phases 3 to 5 comes next, in one migration. Mockups have the owner's green light, and are being updated for the mix. |
+| 3. Programme | **Slices 1 and 2 done:** the mix-based taper (P3-6) and the data for phases 3 to 5 in one migration. The screens are being built, from mockups with the owner's green light, updated for the mix. |
 | 4. Demon and achievements | **Art and rules done.** The seven other creatures with defeat frames for all eight, the gear and badge icons (waiting for the owner's look), and the game rules in `domain/game`. |
-| 5. Advice | **Slice 1 done:** the content library. The rules are being built. Mockups have the owner's green light. |
-| 6. Quick-log | **Slice 1 done:** the matcher and the deep-link parser. Links and shortcuts are being built. |
-| 7, 9 | Not started, except the release build (phase 9), which is being built. Wear OS (8) comes after release. |
+| 5. Advice | **Slices 1 and 2 done:** the content library and the rules. The screens are being built, from mockups with the owner's green light. |
+| 6. Quick-log | **Slices 1 and 2 done:** the matcher, the deep-link parser, links and shortcuts. The widget, tile and reminders are being built. |
+| 7. AppFunctions | Being built. |
+| 9. Polish | The release build is done. The rest comes last. Wear OS (8) comes after release. |
 
 The full check passes locally on `main`.
 
@@ -49,7 +50,11 @@ Nothing blocks the build. These are worth a look when you're next in:
   - Left as they are: icons in tinted circles and centred empty states until there are pixel product icons, habit tiles, full day headers under a filter, full-bleed day rules, and the share bars' edges.
 - **Badge thresholds and gear (P4-4, tuned 24 October):** streaks are now 10, 21 and 40 days, the last weeks-met tier is 10, and "Logged on 30 days" is 28. The war hammer comes at half the programme's hits and the lightning bow when the final taper week is met, so gear keeps its order at every length. PLAN §8 has the new numbers. A week under its allowance needs every day logged, so a day with genuinely nothing can't be logged and that week won't count as under.
 - **The art (P4-1):** `art/previews/line-up.png` and the creature sheets, plus `icons-gear.png`, `icons-badges.png` and `icons-3x.png`. Once the creatures are signed off, `Creature.isDrawn` flips and onboarding offers all eight.
-- **Before release:** review the advice content (P5-1) and the sounds and haptics on your phone.
+- **Before release:**
+  - Review the advice content (P5-1), and the sounds and haptics on your phone.
+  - Make the upload key, add the four `LASTHIT_UPLOAD_*` secrets, and run `docs/RELEASE.md`'s phone checklist. Its API 37 emulator pass is still to do, since this machine has no API 37 image.
+  - Send a link while the app is open (from Tasker, or `adb shell am start -a android.intent.action.VIEW -d "lasthit://log?product=..."`), and check it reaches the open app without a second copy.
+- **Taken while running:** a pack with no lower strength from its brand or your products falls back to the catalogue's generic line of the same kind (PLAN §6.2), so no plan drops from 4 mg or 21 mg straight to nothing.
 
 The roadmap's decisions were all approved on 23 October, with Wear OS moved to after release. On 24 October the owner gave the phase 3 and phase 5 mockups a green light, asked for the build to run on to a build ready for testing, and changed the taper to follow the mix of products (PLAN §6.2, ROADMAP P3-6).
 
@@ -255,6 +260,23 @@ From PLAN §10 and §19, agreed with the owner on 23 October.
 
 ## Phases 3 to 6: built so far (24 October)
 
+- **The mix-based taper** (P3-6, `domain/programme`):
+  - `UsualDay` holds whole units per product, from logs or typed. Each product is its average a day on days with doses, rounded half up, and the product with the most mg always keeps a unit.
+  - `Ladder.build` takes one unit a step from the kind with the most mg, switches to lower strengths, and takes patches down a strength at a time. It keeps to pack limits as it walks down: a usual day over a limit comes down to it at step 1, and a switch waits until the lower strength's pieces fit their pack.
+  - Lower strengths come from the user's products, then the lines in use wherever they're sold, then other lines of the same brand and form. Discontinued packs are never offered.
+  - When both rules fit the last strong pieces, the switch wins: 3 × 4 mg gum goes 1 × 4 mg, then 2 × 2 mg, then 1 × 2 mg.
+  - Weeks follow PLAN §6.2's formula, each with its mix, a guide equal to the mix's mg and an allowance of 7 × the guide. Edits move a week along the ladder. The main product (P3-5) is gone.
+- **The data for phases 3 to 5:** Room version 2, by one migration from version 1, tested; `2.json` is committed.
+  - Tables: `programmes`, `baseline_units`, `ladder_units`, `programme_weeks` (kind, step, result, the choice after a miss, and the extra-goal columns), `programme_week_units`, `demons`, `hit_ledger`, `achievements`, `gear` and `breathing_sessions`.
+  - Repositories in `DataGraph`: `programmes` (baseline, usual day, build, start, edit, the missed-week choice, settle, end, abandon, rematch), `game` (ledger, hit and 5×, restyle, defeat, unlocks, equip) and `breathing`.
+  - Results are worked out when the app looks (P3-3): `programmes.observeCurrent()` settles when collection starts, and every entry write settles first. The day start changes through `entries.changeDayStart`, which settles under the old one first.
+  - When a plan starts, the demon moves into a `demons` row with 10 HP a week, and a repeat adds 10. Settings hold the next demon, so a rematch brings the same one back unless it's restyled first. A programme ends only once its demon is defeated.
+  - Lower strengths the plan switches to join the products list, but not the quick log.
+  - Backups are format version 2, and still read version 1. A merge never adds a second running plan, and `StoredCounts` lists everything a replace deletes.
+- **Advice rules** (`domain/advice`): `TopTriggers` over the 14 full days before today; `AdviceMatcher` in PLAN §9's table order, then narrowest first, with no repeats across the top triggers; Today's card turning daily through the top trigger's first 3; the tip after logging leading with an interactive strategy that names the tag; `after_a_slip` only when a slip is passed in; `TimingTips` moving an after-meal dose half an hour earlier (never before the day's first dose) and the first dose 15 minutes later each week.
+- **Links and shortcuts** (phase 6 slice 2): `lasthit://log?...` from cold or into the open app (singleTop), and from an NFC sticker. A link logs with source `DEEP_LINK`, or `SHORTCUT` for the app's own shortcuts, with the duplicate question and Undo over whichever page is open (`ui/link/LinkHost`). An ambiguous product opens the sheet on its candidates. Every `LogLinkError` has its own message. Shortcuts: "Log a dose", plus the first 3 quick-log products.
+- **The release build** (phase 9 slice 3): R8 and resource shrinking, `LASTHIT_UPLOAD_*` signing with a debug-key fallback (CI fails if only some secrets are set), a CI release job on `main`, and `targetSdk` 37. `docs/RELEASE.md` has the steps.
+
 - **Game rules** (`domain/game`), on the game's own inputs (`GameRecord`, `GameProgramme`, `GameWeek`, `BreathingSession`), so the programme can be mapped onto them:
   - `HitLedger`: hits for weeks met and catch-up, a hit costs 10 HP, and the 5× attack costs 5 banked hits for 50. HP is max − 10 × spent, and 0 is the defeat. Only weeks earn hits, so no achievement deals damage.
   - `AchievementRules`: a rule for every badge. `Gear.unlockedBy` and `Loadout`: only unlocked gear can be equipped.
@@ -262,7 +284,7 @@ From PLAN §10 and §19, agreed with the owner on 23 October.
   - PLAN's two 12-week runs end at exactly 0 HP.
   - For the mapping: set `endedOn` from an abandoned programme and keep every planned week; leave restored entries (`createdAt` set at restore) out of `GameRecord.loggedAt`, or a restore would unlock "Honest ledger".
 
-- **Programme rules** (`domain/programme`): the baseline, the plan builder, the clock, results with the 24-hour grace period, carry on, repeat, overtime, hits and HP. Being reworked for the mix-based taper (P3-6). The data layer must call `Programme.settle` for due results before any entry write, since the domain can't tell when an entry was written: that ordering is what keeps a result fixed once it's in.
+- **Programme rules** (`domain/programme`): the baseline, the plan builder, the clock, results with the 24-hour grace period, carry on, repeat, overtime, hits and HP. The data layer calls `Programme.settle` for due results before any entry write, since the domain can't tell when an entry was written: that ordering is what keeps a result fixed once it's in.
 - **Creatures** (`resources/creatures/`): the imp, bear, kraken, goblin, slime, wraith and serpent, each with idle1, idle2, hurt, rough, barely and defeat1 to defeat4, in the dragon's four variants. The dragon gained defeat frames; its signed-off frames are unchanged.
   - The defeat (`SpriteFrame.DEFEAT`, `SpriteSheet.defeatPixels`) is a drawn knockout, then three breakup frames that crack, burst and scatter into pixels.
   - `SpriteSheetTest` checks that every hurt and rough frame, and the step to barely, changes enough pixels to see at a glance.
