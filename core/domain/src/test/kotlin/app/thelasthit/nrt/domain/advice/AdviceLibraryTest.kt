@@ -143,6 +143,8 @@ class AdviceLibraryTest {
         assertTrue(gum.appliesTo(ProductForm.MINI_LOZENGE))
         assertFalse(gum.appliesTo(ProductForm.MOUTH_SPRAY))
         assertFalse(gum.appliesTo(ProductForm.POUCH))
+        // How to chew gum and take lozenges, with a line for other forms for someone using both.
+        assertEquals(gum.forms, library.find("use_it_right")!!.forms)
         val fourDs = library.find("four_ds")!!
         assertTrue(fourDs.forms.isEmpty())
         ProductForm.entries.forEach { assertTrue(fourDs.appliesTo(it), "$it") }
