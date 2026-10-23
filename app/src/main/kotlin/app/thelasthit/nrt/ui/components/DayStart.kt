@@ -103,7 +103,7 @@ fun DayLine(start: String, example: String, startSecond: Int, exampleSecond: Int
     ) {
         Text(
             buildAnnotatedString {
-                withStyle(SpanStyle(fontWeight = FontWeight.ExtraBold)) { append(stringResource(R.string.onboarding_day_caption)) }
+                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(stringResource(R.string.onboarding_day_caption)) }
                 append(" ")
                 append(stringResource(R.string.onboarding_day_caption_note))
             },

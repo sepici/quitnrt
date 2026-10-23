@@ -125,7 +125,7 @@ fun AboutScreen(
     val timeFormat = rememberTimeFormatter()
     SettingsPage(stringResource(R.string.about_title), stringResource(R.string.settings_back), onBack) {
         Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 8.dp)) {
-            Text(stringResource(R.string.about_app), style = LastHit.type.title.copy(fontSize = 20.sp, fontWeight = FontWeight.ExtraBold), color = colors.text)
+            Text(stringResource(R.string.about_app), style = LastHit.type.headline, color = colors.text)
             Text(stringResource(R.string.about_version, appVersion()), style = LastHit.type.label, color = colors.text2)
         }
         SectionHeading(stringResource(R.string.about_not_advice))
@@ -139,7 +139,7 @@ fun AboutScreen(
                 val restText = stringResource(rest)
                 Text(
                     buildAnnotatedString {
-                        withStyle(SpanStyle(fontWeight = FontWeight.ExtraBold)) { append(leadText) }
+                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(leadText) }
                         append(" ")
                         append(restText)
                     },

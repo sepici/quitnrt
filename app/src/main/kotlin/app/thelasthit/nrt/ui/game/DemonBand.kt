@@ -81,7 +81,7 @@ fun DemonBand(
                 Text(stringResource(R.string.demon_hp_unknown), style = LastHit.type.pixel, color = colors.stageText)
                 Text(
                     stringResource(R.string.demon_hp),
-                    style = LastHit.type.caption.copy(fontWeight = FontWeight.ExtraBold, fontSize = 12.sp),
+                    style = LastHit.type.caption.copy(fontWeight = FontWeight.Bold, fontSize = 12.sp),
                     color = colors.stageText2,
                     modifier = Modifier.padding(bottom = 2.dp),
                 )

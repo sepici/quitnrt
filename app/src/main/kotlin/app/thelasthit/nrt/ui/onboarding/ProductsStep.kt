@@ -65,7 +65,7 @@ private fun QuickLogTray(state: OnboardingState) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
             Text(
                 stringResource(R.string.onboarding_tray_title),
-                style = LastHit.type.label.copy(fontWeight = FontWeight.ExtraBold),
+                style = LastHit.type.label.copy(fontWeight = FontWeight.Bold),
                 color = colors.text2,
                 modifier = Modifier.weight(1f),
             )
@@ -103,7 +103,7 @@ private fun QuickLogTray(state: OnboardingState) {
                         horizontalArrangement = Arrangement.spacedBy(7.dp),
                     ) {
                         OrderBadge(index + 1, background = colors.heroChip, content = colors.onHero)
-                        Text(pillLabelText(label), style = LastHit.type.label.copy(fontWeight = FontWeight.ExtraBold), color = colors.onHero)
+                        Text(pillLabelText(label), style = LastHit.type.label.copy(fontWeight = FontWeight.Bold), color = colors.onHero)
                     }
                 }
             }

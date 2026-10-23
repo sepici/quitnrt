@@ -193,7 +193,7 @@ private fun Field(title: String, bleed: Boolean = false, content: @Composable ()
     Column(Modifier.fillMaxWidth().padding(start = if (bleed) 0.dp else 20.dp, end = if (bleed) 0.dp else 20.dp, top = 20.dp)) {
         Text(
             title,
-            style = LastHit.type.label.copy(fontWeight = FontWeight.ExtraBold),
+            style = LastHit.type.label.copy(fontWeight = FontWeight.Bold),
             color = LastHit.colors.text2,
             modifier = Modifier.padding(start = if (bleed) 20.dp else 0.dp, bottom = 10.dp),
         )
@@ -449,6 +449,7 @@ private fun StrengthField(state: LogSheetState, viewModel: LogSheetViewModel) {
             label = { it.toString() },
             onPick = viewModel::pickStrength,
             gap = 6,
+            numbers = true,
             describe = { stringResource(R.string.log_strength_value, it) },
         )
         Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp)) {

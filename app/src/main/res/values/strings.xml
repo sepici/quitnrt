@@ -264,7 +264,7 @@
     <string name="onboarding_creature_hint">Only the dragon is drawn so far. The others arrive in later updates.</string>
     <string name="onboarding_creature_locked">%1$s, not drawn yet</string>
     <string name="creature_dragon">Dragon</string>
-    <string name="creature_demon">Demon</string>
+    <string name="creature_imp">Imp</string>
     <string name="creature_bear">Bear</string>
     <string name="creature_kraken">Kraken</string>
     <string name="creature_goblin">Goblin</string>

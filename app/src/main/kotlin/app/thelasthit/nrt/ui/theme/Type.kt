@@ -16,6 +16,7 @@ val Grotesk = FontFamily(
     Font(R.font.schibsted_grotesk_regular, FontWeight.Normal),
     Font(R.font.schibsted_grotesk_medium, FontWeight.Medium),
     Font(R.font.schibsted_grotesk_semibold, FontWeight.SemiBold),
+    Font(R.font.schibsted_grotesk_bold, FontWeight.Bold),
     Font(R.font.schibsted_grotesk_extrabold, FontWeight.ExtraBold),
     Font(R.font.schibsted_grotesk_italic, FontWeight.Normal, FontStyle.Italic),
 )

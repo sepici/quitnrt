@@ -66,11 +66,11 @@ fun EntryRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        IconTile(entry.form.icon)
+        IconTile(entry.form.icon, dose = true)
         Column(Modifier.weight(1f)) {
             Text(
                 title,
-                style = LastHit.type.title.copy(fontWeight = FontWeight.ExtraBold),
+                style = LastHit.type.title.copy(fontWeight = FontWeight.Bold),
                 color = LastHit.colors.text,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,

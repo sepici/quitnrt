@@ -198,7 +198,7 @@ The demon is defeated and the programme closes. Logging still works. **Start a n
 ### 7.1 Set-up
 This is part of onboarding, so the game is there from day one.
 1. **Name it.** A free text name (e.g. "Gary"), with a few suggestions if you're stuck.
-2. **Pick a creature:** Dragon, Demon, Bear, Kraken, Goblin, Slime, Wraith or Serpent.
+2. **Pick a creature:** Dragon, Imp, Bear, Kraken, Goblin, Slime, Wraith or Serpent.
 3. **Pick a colour variant:** 3 palette swaps per creature, the classic 8-bit trick.
 
 During the baseline week the creature **lurks**: shown in silhouette with HP "??". When the plan starts, it steps out with full HP.

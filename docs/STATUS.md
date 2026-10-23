@@ -7,7 +7,7 @@ Last updated: 23 October 2026, after the phase 1 screens were built and reviewed
 | Phase | State |
 |---|---|
 | 0. Foundation and direction | Done. Gradle set-up, CI, copy lint, style guide, design direction chosen, first creature signed off |
-| 1. Logging | **Built and reviewed.** Domain rules, catalogue, data layer, backup, theme, sprites, plus **onboarding, Today, the log sheet, History, Settings and the lair**. Six design calls from the reviews wait on the owner (see Phase 1 reviews). |
+| 1. Logging | **Done.** Domain rules, catalogue, data layer, backup, theme, sprites, plus **onboarding, Today, the log sheet, History, Settings and the lair**, reviewed, with the owner's calls on the reviews applied. |
 | 2 to 9 | Not started |
 
 The full check passes locally: copy rules, 93 domain tests, 28 data tests, 74 app UI, screenshot and format tests, debug APK, Android lint.
@@ -24,7 +24,7 @@ The plan has most of these already; this list is the quick reference.
     - A's week chart: `docs/design/fieldbook-v2/a/today.html`
     - Comparison boards: `docs/design/fieldbook-v2/board-*.png`
 - **Theme is in code:** `app/src/main/kotlin/app/thelasthit/nrt/ui/theme/`. It holds the B tokens in light and dark, Material roles, the type scale and shapes. Material You dynamic colour is off on purpose.
-- **Fonts:** static instances cut from the variable font, in `app/src/main/res/font/`. OFL licences are in `app/src/main/assets/licences/` and must be shown in About.
+- **Fonts:** static weights (400, 500, 600, 700, 800 and italic) cut from the variable font by `docs/design/tools/cut_font.py`, in `app/src/main/res/font/`. Text the mockups set at 700 uses `FontWeight.Bold`, not ExtraBold. OFL licences are in `app/src/main/assets/licences/` and must be shown in About.
 - **Colour rules:** see `CLAUDE.md`. The independent reviewer's key finding was that nicotine use must never look like progress.
 - **Catch-up and repeat rule:** see PLAN §6.4.
   - **Carry on:** meeting a week pays back every missed week since the last met one.
@@ -39,6 +39,12 @@ The plan has most of these already; this list is the quick reference.
   - The light background is closer to white: `#FAF9F5`.
   - Dark mode's greens are lighter: the hero is `#1A6A4A`, its pills `#257556`, secondary hero text `#D6ECDF`, the hero track `#358866`, and icon tiles `#224233`.
   - Every pair in the contrast table still passes. `Color.kt`, `tokens.css`, `tokens.json` and `fieldbook-v2/tools/build.py` all match.
+- **Calls after the phase 1 reviews (23 October),** approved by the owner:
+  - Dark mode's primary buttons and selected states are the hero pills' green, `#257556`, with `#F2F4EC` text, not cream. That's 5.0:1 for the text and 3.4:1 against the page.
+  - Dose rows use the stone tile (`IconTile(dose = true)`), so nicotine used never sits on green. Other rows keep the mint tile.
+  - Settings opens from a gear on Today, not sliders.
+  - The creature that was "Demon" is now "Imp", so "demon" only means the thing you name.
+  - The lurking demon's dark-mode rim waits for the phase 4 sprite renderer (see Loose ends).
 - **Mockups for onboarding, History and Settings** are in `docs/design/fieldbook-v2/b/` (`onboarding-*`, `history*`, `settings*`). The owner signed them off with these calls:
   1. Creatures not drawn yet show as an empty dotted frame with "Only the dragon is drawn so far." No padlock.
   2. The quick log is reordered by dragging a handle, with "Move up" and "Move down" as accessibility actions.
@@ -127,7 +133,7 @@ The copy agent read `strings.xml` against `docs/STYLE.md`. The fresh-eyes review
 
 **Left alone, as they match signed-off mockups or decisions:** the undrawn creatures' dotted frames, the hero's layout, the day-start diagram, About's headings, History's amounts, and the disabled button style.
 
-**Open calls for the owner**, each with a recommendation:
+**The owner's calls:** all six recommendations were approved. Five are applied (see the decisions list), and the fourth waits for phase 4.
 1. **A true Bold.** The mockups set row titles, labels, pills and links at weight 700, but the app bundles only 400, 500, 600 and 800, so all of those render at 800 and the app reads heavier than the mockups. Cutting a 700 instance needs the variable font and fontTools downloaded. Recommended.
 2. **Dose rows' icon tiles** use the mint tile, which the reviewer reads as green on doses. Recommended: the stone tile on dose rows only.
 3. **Dark mode's primary buttons and selected chips** are cream, the brightest thing on screen at night. Recommended: the dark hero green with light text.
@@ -162,7 +168,7 @@ The owner asked for agents on UI/UX, colour, tone and copy, so nothing ends up l
 
 - **Room schema.** `core/data/schemas/` holds the generated schemas; `1.json` is committed. Commit each new version alongside its migration.
 - **Mockup fonts aren't in the repo.** The mockups only show the real fonts in the screenshots; the app bundles its own copies.
-- **Sprites in dark mode.** The mockups add a 1 px light rim around sprites in dark mode. Do this in the sprite renderer (phase 4), and watch the seam where the feet meet the rock.
+- **Sprites in dark mode.** The mockups add a 1 px light rim around sprites in dark mode. Do this in the sprite renderer (phase 4), and watch the seam where the feet meet the rock. For now the lurking silhouette gets a 1 dp rim, finer than its pixels, which the fresh-eyes reviewer read as a cut-out: draw it in whole sprite pixels instead.
 - **Scratch tools.** The design tools that rebuild mockups and boards are in `docs/design/*/tools/`. `docs/design/tools/shot.mjs` reads Playwright's location from `PLAYWRIGHT_DIR`.
 - **Pixel art in the app.** The band and lair backdrops are pixel grids in `core/domain/src/main/resources/backdrops/`, written by `art/tools/backdrops.py` from the mockups' shapes. `GameArt` and `drawPixels` in `ui/game` draw them and the sprites with no smoothing.
 - **Icons** are the mockups' SVG symbols turned into vector drawables by `docs/design/tools/svg2vector.py`.

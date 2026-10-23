@@ -238,7 +238,7 @@ private fun LineRow(
                 Column {
                     Text(
                         if (product.kind == LineKind.GENERIC) product.shortName else product.line,
-                        style = LastHit.type.title.copy(fontWeight = FontWeight.ExtraBold),
+                        style = LastHit.type.title.copy(fontWeight = FontWeight.Bold),
                         color = colors.text,
                     )
                     Text(lineDetail(product, country), style = LastHit.type.label.copy(fontWeight = FontWeight.Normal), color = colors.text2)
@@ -277,7 +277,7 @@ private fun StrengthChip(product: CatalogueProduct, picked: Boolean, order: Int?
         if (picked) PickedMark(order, background = colors.onChipSelected, content = colors.chipSelected)
         Text(
             stringResource(R.string.dose_mg, product.strength.mgText()),
-            style = LastHit.type.label.copy(fontSize = 15.sp, fontWeight = FontWeight.ExtraBold),
+            style = LastHit.type.label.copy(fontSize = 15.sp, fontWeight = FontWeight.Bold),
             color = if (picked) colors.onChipSelected else colors.text,
         )
     }
@@ -320,7 +320,7 @@ private fun ResultRow(product: CatalogueProduct, first: Boolean, picked: Boolean
             Column(Modifier.weight(1f)) {
                 Text(
                     stringResource(R.string.dose_named, product.shortName, product.strength.mgText()),
-                    style = LastHit.type.title.copy(fontWeight = FontWeight.ExtraBold),
+                    style = LastHit.type.title.copy(fontWeight = FontWeight.Bold),
                     color = colors.text,
                 )
                 Text(detail, style = LastHit.type.label.copy(fontWeight = FontWeight.Normal), color = colors.text2)
@@ -349,7 +349,7 @@ private fun ResultRow(product: CatalogueProduct, first: Boolean, picked: Boolean
                 }
                 Text(
                     stringResource(if (picked) R.string.onboarding_added else R.string.onboarding_add),
-                    style = LastHit.type.label.copy(fontSize = 15.sp, fontWeight = FontWeight.ExtraBold),
+                    style = LastHit.type.label.copy(fontSize = 15.sp, fontWeight = FontWeight.Bold),
                     color = if (picked) colors.onChipSelected else colors.text,
                 )
             }

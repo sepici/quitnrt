@@ -18,7 +18,7 @@ private fun materialScheme(c: LastHitColors, dark: Boolean) = if (dark) {
     darkColorScheme(
         primary = c.primary, onPrimary = c.onPrimary,
         primaryContainer = c.hero, onPrimaryContainer = c.onHero,
-        secondary = c.link, onSecondary = c.onPrimary,
+        secondary = c.link, onSecondary = c.bg,
         secondaryContainer = c.iconTile, onSecondaryContainer = c.onIconTile,
         tertiary = c.marigold, onTertiary = c.onMarigold,
         tertiaryContainer = c.marigoldSoft, onTertiaryContainer = c.onMarigoldSoft,

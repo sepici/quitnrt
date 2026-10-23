@@ -325,7 +325,7 @@ private fun Hero(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     Icon(painterResource(pill.product.form.icon), contentDescription = null, tint = colors.onHero, modifier = Modifier.size(22.dp))
-                    Text(label, style = LastHit.type.label.copy(fontSize = 15.sp, fontWeight = FontWeight.ExtraBold), color = colors.onHero)
+                    Text(label, style = LastHit.type.label.copy(fontSize = 15.sp, fontWeight = FontWeight.Bold), color = colors.onHero)
                 }
             }
             IconButton(

@@ -140,7 +140,7 @@ private fun StepsBar(step: OnboardingStep, onBack: (() -> Unit)?, onSkip: (() ->
         if (onSkip != null) {
             Text(
                 stringResource(R.string.onboarding_skip),
-                style = LastHit.type.title.copy(fontWeight = FontWeight.ExtraBold, fontSize = 15.sp),
+                style = LastHit.type.title.copy(fontWeight = FontWeight.Bold, fontSize = 15.sp),
                 color = colors.link,
                 modifier = Modifier
                     .heightIn(min = 48.dp)
@@ -201,7 +201,7 @@ fun SummaryRow(label: String, value: String, first: Boolean) {
             Text(label, style = LastHit.type.body, color = colors.text2)
             Text(
                 value,
-                style = LastHit.type.body.copy(fontWeight = FontWeight.ExtraBold),
+                style = LastHit.type.body.copy(fontWeight = FontWeight.Bold),
                 color = colors.text,
                 textAlign = TextAlign.End,
                 modifier = Modifier.weight(1f),

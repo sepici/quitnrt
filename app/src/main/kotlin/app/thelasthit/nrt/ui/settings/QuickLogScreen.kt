@@ -170,7 +170,7 @@ private fun Preview(state: QuickLogState) {
                 ) {
                     Icon(painterResource(product.form.icon), contentDescription = null, tint = colors.onHero, modifier = Modifier.size(22.dp))
                     state.labels[product.id]?.let { label ->
-                        Text(pillLabelText(label), style = LastHit.type.label.copy(fontSize = 15.sp, fontWeight = FontWeight.ExtraBold), color = colors.onHero)
+                        Text(pillLabelText(label), style = LastHit.type.label.copy(fontSize = 15.sp, fontWeight = FontWeight.Bold), color = colors.onHero)
                     }
                 }
             }
@@ -284,7 +284,7 @@ private fun ReorderableList(state: QuickLogState, viewModel: QuickLogViewModel) 
                         IconTile(product.form.icon, size = 40.dp)
                         Column(Modifier.weight(1f)) {
                             state.labels[product.id]?.let { label ->
-                                Text(pillLabelText(label), style = LastHit.type.title.copy(fontWeight = FontWeight.ExtraBold), color = colors.text)
+                                Text(pillLabelText(label), style = LastHit.type.title.copy(fontWeight = FontWeight.Bold), color = colors.text)
                             }
                             Text(product.shortName, style = LastHit.type.label.copy(fontWeight = FontWeight.Normal), color = colors.text2)
                         }

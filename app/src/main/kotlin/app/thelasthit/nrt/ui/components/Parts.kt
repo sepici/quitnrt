@@ -21,17 +21,21 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.thelasthit.nrt.ui.theme.LastHit
 
-/** A round tile with an icon, leading list rows. */
+/**
+ * A round tile with an icon, leading list rows. A [dose] gets the neutral stone tile rather than
+ * the mint one, since nicotine used is never shown in green.
+ */
 @Composable
-fun IconTile(@DrawableRes icon: Int, modifier: Modifier = Modifier, size: Dp = 44.dp) {
+fun IconTile(@DrawableRes icon: Int, modifier: Modifier = Modifier, size: Dp = 44.dp, dose: Boolean = false) {
+    val colors = LastHit.colors
     Box(
         modifier
             .size(size)
             .clip(CircleShape)
-            .background(LastHit.colors.iconTile),
+            .background(if (dose) colors.sunk else colors.iconTile),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(painterResource(icon), contentDescription = null, tint = LastHit.colors.onIconTile)
+        Icon(painterResource(icon), contentDescription = null, tint = if (dose) colors.text2 else colors.onIconTile)
     }
 }
 

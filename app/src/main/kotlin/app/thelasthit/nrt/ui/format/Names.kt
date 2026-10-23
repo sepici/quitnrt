@@ -51,7 +51,7 @@ fun countryShort(code: String): Int? = when (code.uppercase()) {
 @StringRes
 fun creatureName(creature: Creature): Int = when (creature) {
     Creature.DRAGON -> R.string.creature_dragon
-    Creature.DEMON -> R.string.creature_demon
+    Creature.IMP -> R.string.creature_imp
     Creature.BEAR -> R.string.creature_bear
     Creature.KRAKEN -> R.string.creature_kraken
     Creature.GOBLIN -> R.string.creature_goblin

@@ -6,7 +6,7 @@ package app.thelasthit.nrt.domain.creature
  */
 enum class Creature(val key: String, val isDrawn: Boolean) {
     DRAGON("dragon", isDrawn = true),
-    DEMON("demon", isDrawn = false),
+    IMP("imp", isDrawn = false),
     BEAR("bear", isDrawn = false),
     KRAKEN("kraken", isDrawn = false),
     GOBLIN("goblin", isDrawn = false),

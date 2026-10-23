@@ -147,7 +147,7 @@ private fun WelcomeStep(onAccept: () -> Unit) {
                 )
                 Text(
                     stringResource(R.string.onboarding_app_sub),
-                    style = LastHit.type.title.copy(fontSize = 20.sp, lineHeight = 26.sp, fontWeight = FontWeight.ExtraBold),
+                    style = LastHit.type.title.copy(fontSize = 20.sp, lineHeight = 26.sp, fontWeight = FontWeight.Bold),
                     color = colors.onHero2,
                     modifier = Modifier.padding(top = 6.dp),
                 )
@@ -393,7 +393,7 @@ private fun DoneStep(state: OnboardingState, onStart: () -> Unit) {
                     Text(stringResource(R.string.demon_hp_unknown), style = LastHit.type.pixel, color = colors.stageText)
                     Text(
                         stringResource(R.string.demon_hp),
-                        style = LastHit.type.caption.copy(fontWeight = FontWeight.ExtraBold, fontSize = 12.sp),
+                        style = LastHit.type.caption.copy(fontWeight = FontWeight.Bold, fontSize = 12.sp),
                         color = colors.stageText2,
                         modifier = Modifier.padding(bottom = 2.dp),
                     )

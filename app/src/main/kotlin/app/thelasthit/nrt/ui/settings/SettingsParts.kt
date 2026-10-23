@@ -92,7 +92,7 @@ fun Intro(text: String) {
 fun SectionHeading(text: String) {
     Text(
         text,
-        style = LastHit.type.label.copy(fontWeight = FontWeight.ExtraBold),
+        style = LastHit.type.label.copy(fontWeight = FontWeight.Bold),
         color = LastHit.colors.text2,
         modifier = Modifier
             .padding(start = 20.dp, end = 20.dp, top = 28.dp, bottom = 6.dp)
@@ -167,7 +167,7 @@ fun SettingsRow(
         Column(Modifier.weight(1f)) {
             Text(
                 title,
-                style = LastHit.type.title.copy(fontWeight = FontWeight.ExtraBold),
+                style = LastHit.type.title.copy(fontWeight = FontWeight.Bold),
                 color = if (muted) colors.text2 else colors.text,
             )
             if (detail != null) {
@@ -210,7 +210,7 @@ fun TextLink(text: String, onClick: () -> Unit, description: String? = null) {
     ) {
         Text(
             text,
-            style = LastHit.type.title.copy(fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, textDecoration = TextDecoration.Underline),
+            style = LastHit.type.title.copy(fontSize = 15.sp, fontWeight = FontWeight.Bold, textDecoration = TextDecoration.Underline),
             color = LastHit.colors.link,
         )
     }

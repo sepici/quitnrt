@@ -217,7 +217,7 @@ fun SettingsScreen(
                 },
                 confirmButton = {
                     TextButton(onClick = viewModel::confirmReplace) {
-                        Text(stringResource(R.string.replace_confirm), color = LastHit.colors.error, fontWeight = FontWeight.ExtraBold)
+                        Text(stringResource(R.string.replace_confirm), color = LastHit.colors.error, fontWeight = FontWeight.Bold)
                     }
                 },
                 dismissButton = { TextButton(onClick = viewModel::cancelReplace) { Text(stringResource(R.string.action_cancel)) } },
@@ -266,7 +266,7 @@ private fun RestoreSheet(candidate: RestoreCandidate, viewModel: SettingsViewMod
             ) {
                 Icon(painterResource(R.drawable.ic_file), contentDescription = null, tint = colors.text2)
                 Column {
-                    Text(candidate.fileName, style = LastHit.type.title.copy(fontWeight = FontWeight.ExtraBold), color = colors.text)
+                    Text(candidate.fileName, style = LastHit.type.title.copy(fontWeight = FontWeight.Bold), color = colors.text)
                     Text(
                         if (candidate.madeOn != null) {
                             stringResource(R.string.restore_file_detail, DayMonthYearFormatter.format(candidate.madeOn), doses, products)

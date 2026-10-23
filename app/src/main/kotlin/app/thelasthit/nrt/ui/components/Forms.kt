@@ -40,7 +40,7 @@ import app.thelasthit.nrt.ui.theme.LastHit
 fun FieldLabel(text: String, modifier: Modifier = Modifier) {
     Text(
         text,
-        style = LastHit.type.label.copy(fontWeight = FontWeight.ExtraBold),
+        style = LastHit.type.label.copy(fontWeight = FontWeight.Bold),
         color = LastHit.colors.text2,
         modifier = modifier.padding(bottom = 10.dp),
     )
@@ -61,7 +61,7 @@ fun NoteCard(title: String?, body: String, modifier: Modifier = Modifier, @Drawa
         Icon(painterResource(icon), contentDescription = null, tint = colors.text2, modifier = Modifier.padding(top = 1.dp))
         Column {
             if (title != null) {
-                Text(title, style = LastHit.type.title.copy(fontWeight = FontWeight.ExtraBold), color = colors.text)
+                Text(title, style = LastHit.type.title.copy(fontWeight = FontWeight.Bold), color = colors.text)
             }
             Text(body, style = LastHit.type.label.copy(fontSize = 15.sp, lineHeight = 22.sp, fontWeight = FontWeight.Normal), color = colors.text)
         }
@@ -97,7 +97,7 @@ fun <T> RadioList(options: List<RadioOption<T>>, selected: T, onPick: (T) -> Uni
             ) {
                 Column(Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(option.title, style = LastHit.type.title.copy(fontWeight = FontWeight.ExtraBold), color = colors.text)
+                        Text(option.title, style = LastHit.type.title.copy(fontWeight = FontWeight.Bold), color = colors.text)
                         if (option.tag != null) {
                             Text(
                                 option.tag,
@@ -149,7 +149,7 @@ fun SwitchRow(title: String, detail: String, checked: Boolean, onChange: (Boolea
             horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Column(Modifier.weight(1f)) {
-                Text(title, style = LastHit.type.title.copy(fontWeight = FontWeight.ExtraBold), color = colors.text)
+                Text(title, style = LastHit.type.title.copy(fontWeight = FontWeight.Bold), color = colors.text)
                 Text(detail, style = LastHit.type.label.copy(fontWeight = FontWeight.Normal), color = colors.text2)
             }
             Switch(

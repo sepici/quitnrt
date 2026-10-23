@@ -73,13 +73,16 @@ fun Chip(
         if (leading != null) Icon(painterResource(leading), contentDescription = null, tint = content, modifier = Modifier.size(20.dp))
         Text(
             text,
-            style = LastHit.type.label.copy(fontSize = 15.sp, fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.SemiBold),
+            style = LastHit.type.label.copy(fontSize = 15.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold),
             color = content,
         )
     }
 }
 
-/** A row of equal options in a sunk track, one of which can be chosen. */
+/**
+ * A row of equal options in a sunk track, one of which can be chosen. [numbers], like the craving
+ * scale, are set a size up and heavier, as the mockups have them.
+ */
 @Composable
 fun <T> Segmented(
     options: List<T>,
@@ -88,6 +91,7 @@ fun <T> Segmented(
     onPick: (T) -> Unit,
     modifier: Modifier = Modifier,
     gap: Int = 0,
+    numbers: Boolean = false,
     describe: (@Composable (T) -> String)? = null,
 ) {
     val colors = LastHit.colors
@@ -117,7 +121,10 @@ fun <T> Segmented(
             ) {
                 Text(
                     label(option),
-                    style = LastHit.type.label.copy(fontSize = 15.sp, fontWeight = FontWeight.ExtraBold),
+                    style = LastHit.type.label.copy(
+                        fontSize = if (numbers) 16.sp else 15.sp,
+                        fontWeight = if (numbers) FontWeight.ExtraBold else FontWeight.Bold,
+                    ),
                     color = if (isSelected) colors.onChipSelected else colors.text2,
                 )
             }
