@@ -16,6 +16,15 @@ class WordsTest {
     }
 
     @Test
+    fun `a hyphen between digits before mg is a decimal point, as in catalogue ids`() {
+        assertEquals(listOf("nicorette", "nasal", "spray", "0.5", "mg"), Words.split("nicorette-nasal-spray-0-5mg"))
+        assertEquals(listOf("lozenge", "1.5", "mg"), Words.split("lozenge 1-5 mg"))
+        assertEquals(listOf("niquitin", "minis", "1", "5", "uk", "1.5", "mg"), Words.split("niquitin-minis-1-5-uk-1-5mg"))
+        assertEquals(listOf("2", "1.5", "mg"), Words.split("2-1-5mg"))
+        assertEquals(listOf("24", "hour", "patch"), Words.split("24-hour patch"))
+    }
+
+    @Test
     fun `plurals stem the same way on both sides`() {
         mapOf(
             "patches" to "patch",

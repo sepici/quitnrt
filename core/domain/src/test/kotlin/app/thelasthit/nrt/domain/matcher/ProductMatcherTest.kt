@@ -30,17 +30,17 @@ class ProductMatcherTest {
     /** What a match comes to, in a form a table can state. */
     private sealed interface Expect {
         data class Found(val id: String, val quantity: Int) : Expect
-        data class Ambiguous(val ids: List<String>) : Expect
+        data class Ambiguous(val ids: List<String>, val count: Int?) : Expect
         data object Unknown : Expect
     }
 
     private fun found(id: String, quantity: Int = 1) = Expect.Found(id, quantity)
-    private fun ambiguous(vararg ids: String) = Expect.Ambiguous(ids.toList())
+    private fun ambiguous(vararg ids: String, count: Int? = null) = Expect.Ambiguous(ids.toList(), count)
     private val unknown = Expect.Unknown
 
     private fun ProductMatch.expect(): Expect = when (this) {
         is ProductMatch.Found -> Expect.Found(product.id, quantity)
-        is ProductMatch.Ambiguous -> Expect.Ambiguous(candidates.map { it.product.id })
+        is ProductMatch.Ambiguous -> Expect.Ambiguous(candidates.map { it.product.id }, count)
         ProductMatch.Unknown -> Expect.Unknown
     }
 
@@ -97,8 +97,86 @@ class ProductMatcherTest {
         "niquitin minis 4" to found(minis),
         "a 24 hour patch" to found(patch),
         "24h patch" to found(patch),
-        "twenty one mg patch" to unknown,
+        "twenty one mg patch" to found(patch),
+        "twenty-one mg patch" to found(patch),
+        "one mg spray" to found(mist),
     )
+
+    @TestFactory
+    fun `a number before a unit or a plural is how many, wherever it sits`() = table(
+        mine,
+        "nicorette gum 2 pieces" to ambiguous(gum2, gum4, count = 2),
+        "nicorette 2 gums" to ambiguous(gum2, gum4, count = 2),
+        "2mg gum 2 pieces" to found(gum2, 2),
+        "nicorette gum one piece" to ambiguous(gum2, gum4, count = 1),
+        "quickmist 2 sprays" to found(mist, 2),
+        "QuickMist, 2 sprays" to found(mist, 2),
+        "quickmist 1 spray" to found(mist),
+        "nasal 2 sprays" to found(nasal, 2),
+        "2 nasal sprays" to found(nasal, 2),
+        "inhalator 2 sessions" to found(inhalator, 2),
+        "nicorette inhalator 3 cartridges" to found(inhalator, 24),
+        "a couple of 4 gums" to found(gum4, 2),
+        "2 4 gum" to found(gum4, 2),
+    )
+
+    @TestFactory
+    fun `a digit at the start of a singular is the strength`() = table(
+        mine,
+        "21 patch" to found(patch),
+        "the 21 patch" to found(patch),
+        "21 clear patch" to found(patch),
+        "2 nicorette gum" to found(gum2),
+        "nicorette 4 gum" to found(gum4),
+        "4 gum" to found(gum4),
+        "15 inhalator" to found(inhalator),
+        "0.5 nasal spray" to found(nasal),
+        "twenty-one patch" to found(patch),
+        "3 gum" to unknown,
+        "4 gum 2 pieces" to found(gum4, 2),
+        "21 patches" to found(patch, 21),
+        "4 niquitin minis" to found(minis, 4),
+        "2 gums" to ambiguous(gum2, gum4, count = 2),
+        "two gum" to ambiguous(gum2, gum4, count = 2),
+        "1 patch" to found(patch),
+        "2 nicorette" to ambiguous(gum2, gum4, mist, inhalator, nasal, count = 2),
+    )
+
+    @TestFactory
+    fun `number words`() = table(
+        mine,
+        "twenty one sprays" to ambiguous(mist, nasal, count = 21),
+        "twenty two gums" to ambiguous(gum2, gum4, count = 22),
+        "twenty-two gums" to ambiguous(gum2, gum4, count = 22),
+        "nicotinell twenty one" to unknown,
+        "one gum" to ambiguous(gum2, gum4, count = 1),
+        "the gum one" to ambiguous(gum2, gum4),
+        "the nicorette one" to ambiguous(gum2, gum4, mist, inhalator, nasal),
+        "the 4mg one" to ambiguous(gum4, minis),
+        "the patch one" to found(patch),
+        "2mg gum twice" to found(gum2, 2),
+        "QuickMist once" to found(mist),
+        "twice 4mg gum" to found(gum4, 2),
+        "two gums twice" to unknown,
+        "2mg gum x2 twice" to unknown,
+    )
+
+    @TestFactory
+    fun `a decimal written with a hyphen, as in catalogue ids`(): List<DynamicTest> {
+        val lozenge15 = "generic-lozenge-1-5mg"
+        val lozenges = ProductMatcher(listOf(item(lozenge15), item("generic-lozenge-2mg")), catalogue)
+        return table(
+            mine,
+            "nicorette-nasal-spray-0-5mg" to found(nasal),
+            "nasal spray 0-5 mg" to found(nasal),
+        ) + table(
+            lozenges,
+            "lozenge-1-5mg" to found(lozenge15),
+            "lozenge 1-5 mg" to found(lozenge15),
+            "2 lozenge-1-5mg" to found(lozenge15, 2),
+            "lozenge" to ambiguous(lozenge15, "generic-lozenge-2mg"),
+        )
+    }
 
     @TestFactory
     fun `names, forms and their synonyms`() = table(
@@ -141,7 +219,7 @@ class ProductMatcherTest {
         mine,
         "nicorette gum" to ambiguous(gum2, gum4),
         "gum" to ambiguous(gum2, gum4),
-        "two gums" to ambiguous(gum2, gum4),
+        "two gums" to ambiguous(gum2, gum4, count = 2),
         "4mg" to ambiguous(gum4, minis),
         "spray" to ambiguous(mist, nasal),
         "nicorette spray" to ambiguous(mist, nasal),
@@ -170,6 +248,8 @@ class ProductMatcherTest {
         "1/2 gum" to unknown,
         "gum patch" to unknown,
         "2mg 4mg gum" to unknown,
+        "99999999999 gum" to unknown,
+        "2 4 6 gums" to unknown,
         "vape" to unknown,
     )
 
@@ -203,6 +283,8 @@ class ProductMatcherTest {
         "boots gum" to found(nicassist),
         "nic assist 2" to found(nicassist),
         "nicotinell 21" to found(nicotinellPatch),
+        "nicotinell twenty one" to found(nicotinellPatch),
+        "21 patch" to ambiguous(nicotinellPatch, patch),
         "clear patch" to found(patch),
         "2mg lozenge" to found(cools),
         "mini lozenge" to found(minis2),

@@ -3,6 +3,7 @@ package app.thelasthit.nrt.domain.matcher
 import app.thelasthit.nrt.domain.catalogue.Catalogue
 import app.thelasthit.nrt.domain.log.BuiltInTags
 import app.thelasthit.nrt.domain.matcher.LogLinkError.AmbiguousProduct
+import app.thelasthit.nrt.domain.matcher.LogLinkError.AmbiguousTags
 import app.thelasthit.nrt.domain.matcher.LogLinkError.BadEncoding
 import app.thelasthit.nrt.domain.matcher.LogLinkError.BadQuantity
 import app.thelasthit.nrt.domain.matcher.LogLinkError.BadTime
@@ -89,6 +90,30 @@ class LogLinkParserTest {
     }
 
     @Test
+    fun `numbers in the product are read the way the matcher reads them`() {
+        val patch = item("niquitin-clear-patch-uk-21mg")
+        val nasal = item("nicorette-nasal-spray-uk-0-5mg")
+        val parser = LogLinkParser(ProductMatcher(listOf(gum2, gum4, patch, nasal), catalogue), TagMatcher.builtIns())
+        fun read(link: String) = parser.parse(link, now, london)
+
+        // "The 21 patch" is the 21 mg patch, not 21 patches.
+        assertEquals(LogLinkResult.Valid(LogLinkRequest(patch, 1, null, emptySet())), read("lasthit://log?product=21-patch"))
+        assertEquals(LogLinkResult.Valid(LogLinkRequest(patch, 2, null, emptySet())), read("lasthit://log?product=21-patch&qty=2"))
+        // A number before a unit is how many, so this asks which strength.
+        assertEquals(
+            LogLinkResult.Invalid(AmbiguousProduct("nicorette gum 2 pieces", listOf(gum2, gum4))),
+            read("lasthit://log?product=nicorette%20gum%202%20pieces"),
+        )
+        assertEquals(
+            LogLinkResult.Invalid(ConflictingQuantity(inProduct = 2, qty = 3)),
+            read("lasthit://log?product=4mg-gum-2-pieces&qty=3"),
+        )
+        // The catalogue's way of writing 0.5 mg, with or without the country.
+        assertEquals(LogLinkResult.Valid(LogLinkRequest(nasal, 1, null, emptySet())), read("lasthit://log?product=nicorette-nasal-spray-0-5mg"))
+        assertEquals(LogLinkResult.Valid(LogLinkRequest(nasal, 1, null, emptySet())), read("lasthit://log?product=nicorette-nasal-spray-uk-0-5mg"))
+    }
+
+    @Test
     fun `qty counts what the product names`() {
         val cartridges = valid("lasthit://log?product=inhalator-cartridge&qty=2")
         assertEquals(inhalator, cartridges.product)
@@ -171,6 +196,44 @@ class LogLinkParserTest {
     @Test
     fun `unknown tags are refused, every one named`() {
         assertEquals(UnknownTags(listOf("vaping", "after meals")), refused("lasthit://log?product=gum-2&tags=stressed,vaping,after+meals"))
+    }
+
+    private val ownTags = LogLinkParser(
+        ProductMatcher(listOf(gum2), catalogue),
+        TagMatcher(
+            listOf(
+                TagName("stressed"),
+                TagName("custom_a", listOf("Gym")),
+                TagName("custom_b", listOf("gym")),
+                TagName("custom_c", listOf("Coffee, tea")),
+            ),
+        ),
+    )
+
+    @Test
+    fun `a name two tags share is refused as ambiguous, not unknown`() {
+        assertEquals(
+            LogLinkResult.Invalid(AmbiguousTags(mapOf("Gym" to listOf("custom_a", "custom_b")))),
+            ownTags.parse("lasthit://log?product=gum-2&tags=stressed,Gym", now, london),
+        )
+        // A tag that names nothing is the first problem to report.
+        assertEquals(
+            LogLinkResult.Invalid(UnknownTags(listOf("vaping"))),
+            ownTags.parse("lasthit://log?product=gum-2&tags=gym,vaping", now, london),
+        )
+    }
+
+    @Test
+    fun `a comma sent as %2C stays inside a tag's name`() {
+        assertEquals(
+            setOf("custom_c", "stressed"),
+            (ownTags.parse("lasthit://log?product=gum-2&tags=Coffee%2C%20tea,stressed", now, london) as LogLinkResult.Valid).request.tagKeys,
+        )
+        assertEquals(
+            LogLinkResult.Invalid(UnknownTags(listOf("Coffee", "tea"))),
+            ownTags.parse("lasthit://log?product=gum-2&tags=Coffee,%20tea", now, london),
+        )
+        assertEquals(LogLinkResult.Invalid(BadEncoding), ownTags.parse("lasthit://log?product=gum-2&tags=stressed,%ZZ", now, london))
     }
 
     @Test

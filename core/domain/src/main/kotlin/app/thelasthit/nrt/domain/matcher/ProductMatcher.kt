@@ -16,11 +16,18 @@ import java.util.Locale
  *
  * How a description is read:
  * - **Product IDs.** An exact product ID (or catalogue ID) is that product.
- * - **Numbers.** Digits, number words up to twenty, or "a couple". A number before "mg" is the
- *   strength, with or without a space ("2mg", "2 mg"), and one before "hour" is a patch's hours. A
- *   bare number at the start is how many ("2 gums"), and one after a name is the strength
- *   ("nicorette 4"). "x2" and "2x" are counts too. Halves and quarters aren't read, so they match
- *   nothing.
+ * - **Numbers.** Digits, number words up to twenty-nine, "a couple", "once" and "twice". A number
+ *   before "mg" is the strength, with or without a space ("2mg", "2 mg"), and one before "hour" is
+ *   a patch's hours. "x2" and "2x" are how many. Any other number is read from the words around it:
+ *   - Before a unit word or a plural it's how many, wherever it sits: "2 gums", "nicorette 2 gums",
+ *     "QuickMist, 2 sprays", "inhalator 3 cartridges".
+ *   - Two numbers together are how many, then the strength: "2 4 gums".
+ *   - At the start it's how many ("two gum", "2 nicorette"), except that a digit above 1, or a
+ *     number word above ten, is the strength when the form word is singular: "21 patch", "the 4
+ *     gum", "twenty-one patch". Nobody means 21 patches by "21 patch".
+ *   - After a name it's the strength ("nicorette 4"), but the word "one" there stands for the
+ *     product, as in "the gum one".
+ *   Halves and quarters aren't read, so they match nothing.
  * - **Form words** and their synonyms: gum, lozenge, mini, patch, spray, mouth or oral, nasal or
  *   nose, inhalator or inhaler, microtab or tablet, strip or film, and pouch. "Puff" is a mouth
  *   spray, or an inhalator puff when the inhalator is logged in puffs. A lozenge can be a mini
@@ -177,6 +184,18 @@ internal class Phrase(
     val units: Set<DoseUnit>?,
     val names: List<String>,
 ) {
+    /** A word of a description, stemmed. [plural] when stemming took a plural off; [spelled] for a number written as a word. */
+    private class Token(val word: String, val plural: Boolean = false, val spelled: Boolean = false)
+
+    /** A number with no "mg", "hour" or "x" beside it, at [index] in the description's tokens. */
+    private class Bare(val index: Int, val token: Token, val leading: Boolean)
+
+    /**
+     * What a bare number is taken for. A [sure] reading is settled by the words around it; one that
+     * isn't is a guess, and gives way to the other reading when a surer number has taken its place.
+     */
+    private class Reading(val number: String, val isCount: Boolean, val sure: Boolean)
+
     companion object {
 
         /** A product name's own words, without its numbers: "Nicorette gum 2 mg" gives nicorette and gum. */
@@ -186,20 +205,21 @@ internal class Phrase(
         /** Null when the description can't be read, or names nothing but a number. */
         fun parse(text: String, vocabulary: Set<String>): Phrase? {
             if (FRACTION.containsMatchIn(text)) return null
-            val words = joined(Words.split(text), vocabulary).map { NUMBER_WORDS[it] ?: it }
+            val words = tokens(Words.split(text), vocabulary)
 
             var count: Int? = null
             var strength: Dose? = null
             var hours: Int? = null
-            val bare = mutableListOf<Pair<String, Boolean>>()
+            val bare = mutableListOf<Bare>()
             val keywords = mutableListOf<Keyword>()
             val names = mutableListOf<String>()
             var described = false
 
             var i = 0
             while (i < words.size) {
-                val word = words[i]
-                val next = words.getOrNull(i + 1)
+                val token = words[i]
+                val word = token.word
+                val next = words.getOrNull(i + 1)?.word
                 when {
                     word in REFUSED -> return null
                     Words.isNumber(word) -> when {
@@ -220,14 +240,18 @@ internal class Phrase(
                             count = countOf(word) ?: return null
                             i++
                         }
-                        else -> bare += word to !described
+                        else -> bare += Bare(i, token, leading = !described)
                     }
-                    word in TIMES && next != null && Words.isNumber(next) && !isUnit(words.getOrNull(i + 2)) -> {
+                    word in MULTIPLIERS -> {
+                        if (count != null) return null
+                        count = MULTIPLIERS.getValue(word)
+                    }
+                    word in TIMES && next != null && Words.isNumber(next) && !isUnit(words.getOrNull(i + 2)?.word) -> {
                         if (count != null) return null
                         count = countOf(next) ?: return null
                         i++
                     }
-                    word in MG || word in TIMES || word in FILLERS -> Unit
+                    word in MG || word in TIMES -> Unit
                     else -> {
                         val keyword = KEYWORDS[word]
                         if (keyword != null) keywords += keyword else names += word
@@ -238,14 +262,21 @@ internal class Phrase(
             }
             if (!described) return null
 
-            // A bare number at the start is how many; one after a name is the strength.
-            for ((number, leading) in bare) {
-                val whole = '.' !in number
-                when {
-                    whole && leading && count == null -> count = countOf(number) ?: return null
-                    strength == null -> strength = Dose.parseMg(number) ?: return null
-                    whole && count == null -> count = countOf(number) ?: return null
-                    else -> return null
+            // The sure readings go first, so a guess gives way to them.
+            val readings = readingsOf(bare, words)?.sortedByDescending { it.sure } ?: return null
+            for (reading in readings) {
+                val isCount = when {
+                    reading.isCount && count == null -> true
+                    !reading.isCount && strength == null -> false
+                    reading.sure -> return null
+                    else -> !reading.isCount
+                }
+                if (isCount) {
+                    if (count != null) return null
+                    count = countOf(reading.number) ?: return null
+                } else {
+                    if (strength != null) return null
+                    strength = Dose.parseMg(reading.number) ?: return null
                 }
             }
 
@@ -254,26 +285,69 @@ internal class Phrase(
             return Phrase(count, strength, hours, keywords, units, names)
         }
 
-        /** Stemmed words, with two words joined when together they're a name: "quick mist" is QuickMist. */
-        private fun joined(split: List<String>, vocabulary: Set<String>): List<String> {
-            val out = mutableListOf<String>()
+        /**
+         * How each bare number reads, from the words around it (see [ProductMatcher] for the rules),
+         * leaving out a filler "one". Null when a number is too long to be either.
+         */
+        private fun readingsOf(bare: List<Bare>, words: List<Token>): List<Reading>? {
+            val positions = bare.mapTo(HashSet()) { it.index }
+            val singular = words.any { it.word in FORM_NOUNS } && words.none(::isCountable)
+            return bare.mapNotNull { number ->
+                val text = number.token.word
+                if ('.' in text) return@mapNotNull Reading(text, isCount = false, sure = true)
+                val value = text.toIntOrNull() ?: return null
+                when {
+                    number.index + 1 in positions -> Reading(text, isCount = true, sure = true)
+                    number.index - 1 in positions -> Reading(text, isCount = false, sure = true)
+                    isCountable(words.getOrNull(number.index + 1)) -> Reading(text, isCount = true, sure = true)
+                    number.token.spelled && value == 1 && !number.leading -> null
+                    number.leading -> {
+                        val strengthLike = value > 1 && singular && (!number.token.spelled || value > COUNT_WORDS_UP_TO)
+                        Reading(text, isCount = !strengthLike, sure = false)
+                    }
+                    else -> Reading(text, isCount = false, sure = false)
+                }
+            }
+        }
+
+        /**
+         * The description's words, stemmed, with two words joined when together they're a name
+         * ("quick mist" is QuickMist), number words as digits ("twenty-one" is 21), and small words
+         * like "a" and "of" left out.
+         */
+        private fun tokens(split: List<String>, vocabulary: Set<String>): List<Token> {
+            val out = mutableListOf<Token>()
             var i = 0
             while (i < split.size) {
                 val word = split[i]
                 val next = split.getOrNull(i + 1)
-                if (next != null && !Words.hasDigit(word) && !Words.hasDigit(next) && Words.stem(word + next) in vocabulary) {
-                    out += Words.stem(word + next)
-                    i += 2
-                } else {
-                    out += if (Words.hasDigit(word)) word else Words.stem(word)
-                    i++
+                val stem = Words.stem(word)
+                val ones = next?.let { ONES[Words.stem(it)] }
+                when {
+                    Words.hasDigit(word) -> out += Token(word)
+                    next != null && !Words.hasDigit(next) && Words.stem(word + next) in vocabulary -> {
+                        out += Token(Words.stem(word + next))
+                        i++
+                    }
+                    stem == TWENTY && ones != null -> {
+                        out += Token((20 + ones).toString(), spelled = true)
+                        i++
+                    }
+                    stem in NUMBER_WORDS -> out += Token(NUMBER_WORDS.getValue(stem), spelled = true)
+                    stem in FILLERS -> Unit
+                    else -> out += Token(stem, plural = stem != word)
                 }
+                i++
             }
             return out
         }
 
         /** "mg" or "hour", which make the number before them a strength or hours rather than a count. */
         private fun isUnit(word: String?): Boolean = word in MG || word in HOURS
+
+        /** A unit word ("pieces", "spray") or a plural form word ("gums"): what a number before it counts. */
+        private fun isCountable(token: Token?): Boolean =
+            token != null && (token.word in UNIT_WORDS || (token.plural && token.word in FORM_NOUNS))
 
         private fun countOf(number: String): Int? = number.toIntOrNull()?.takeIf { it in 1..MAX_COUNT }
 
@@ -294,7 +368,7 @@ internal class Phrase(
                 "chewing chew chewed dose",
         )
 
-        /** One to twenty, as digits, plus "a couple". */
+        /** One to twenty, as digits, plus "a couple". "Twenty" and one of [ONES] make 21 to 29. */
         private val NUMBER_WORDS: Map<String, String> =
             (
                 "one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen " +
@@ -303,6 +377,28 @@ internal class Phrase(
                 .split(' ')
                 .mapIndexed { index, word -> Words.stem(word) to (index + 1).toString() }
                 .toMap() + (Words.stem("couple") to "2")
+
+        private val TWENTY = Words.stem("twenty")
+
+        private val ONES: Map<String, Int> = "one two three four five six seven eight nine"
+            .split(' ')
+            .mapIndexed { index, word -> Words.stem(word) to index + 1 }
+            .toMap()
+
+        /** Counts with no number before them: "2mg gum twice". */
+        private val MULTIPLIERS: Map<String, Int> = mapOf(Words.stem("once") to 1, Words.stem("twice") to 2)
+
+        /**
+         * Number words this high or lower stay how many before a singular form word, as in "two gum".
+         * Higher ones read as the strength, the way digits do: "twenty-one patch" is the 21 mg patch.
+         */
+        private const val COUNT_WORDS_UP_TO = 10
+
+        /** Words that name what's counted, so a number before them is how many. */
+        private val UNIT_WORDS = stems("piece spray puff session cartridge")
+
+        /** Form words that are things, rather than "mouth" or "nasal" which only describe one. */
+        private val FORM_NOUNS = stems("gum lozenge mini patch inhalator inhaler microtab tablet tab strip film pouch")
 
         private val KEYWORDS: Map<String, Keyword> = buildMap {
             fun add(

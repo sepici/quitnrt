@@ -17,30 +17,37 @@ import java.util.Locale
  * ```
  *
  * - `product` (required): a product ID, or a description the [ProductMatcher] reads, with hyphens
- *   or encoded spaces between the words. It has to name exactly one of the user's products.
+ *   or encoded spaces between the words. A hyphen between digits before "mg" is a decimal point,
+ *   as in the catalogue's IDs: `nicorette-nasal-spray-0-5mg` is the 0.5 mg spray. It has to name
+ *   exactly one of the user's products.
  * - `qty`: a whole number from 1 to [MAX_QUANTITY], one by default. It counts what `product`
  *   names, so `product=inhalator-cartridge&qty=2` is 16 sessions on an inhalator logged by session.
  * - `at`: a local date and time, such as `2026-10-23T15:00`, read in the phone's zone. Now when
  *   left out. A time in the future is refused, with [LogTime]'s few minutes of leeway.
- * - `tags`: tag keys or names separated by commas. Every one has to name a tag.
+ * - `tags`: tag keys or names separated by commas. Every one has to name exactly one tag. A comma
+ *   inside a tag's name is sent as `%2C`.
  *
  * A parameter the link doesn't know, or one given twice, is refused rather than ignored, since a
  * typo like `qnty=2` would otherwise log the wrong amount. When a link has several problems, the
- * first one found is reported. The result says what to log; logging it, with the duplicate check,
- * is the normal logging path's job.
+ * first one found is reported, and tags that name nothing come before names that several tags
+ * share. The result says what to log; logging it, with the duplicate check, is the normal logging
+ * path's job.
  */
 class LogLinkParser(private val products: ProductMatcher, private val tags: TagMatcher) {
 
     fun parse(link: String, now: Instant, zone: ZoneId): LogLinkResult {
         val query = queryOf(link) ?: return invalid(LogLinkError.NotALogLink)
         val params = LinkedHashMap<String, String>()
+        var rawTags = ""
         for (part in query.split('&')) {
             if (part.isEmpty()) continue
             val name = decode(part.substringBefore('='))?.trim() ?: return invalid(LogLinkError.BadEncoding)
-            val value = decode(part.substringAfter('=', "")) ?: return invalid(LogLinkError.BadEncoding)
+            val raw = part.substringAfter('=', "")
+            val value = decode(raw) ?: return invalid(LogLinkError.BadEncoding)
             val key = name.lowercase(Locale.ROOT)
             if (key !in PARAMETERS) return invalid(LogLinkError.UnknownParameter(name))
             if (params.put(key, value) != null) return invalid(LogLinkError.RepeatedParameter(key))
+            if (key == TAGS) rawTags = raw
         }
 
         val productText = params[PRODUCT]?.trim().orEmpty()
@@ -74,13 +81,19 @@ class LogLinkParser(private val products: ProductMatcher, private val tags: TagM
 
         val tagKeys = LinkedHashSet<String>()
         val unknownTags = mutableListOf<String>()
-        params[TAGS].orEmpty().split(',').map { it.trim() }.filter { it.isNotEmpty() }.forEach { text ->
+        val ambiguousTags = LinkedHashMap<String, List<String>>()
+        // Split before decoding, so a comma sent as %2C stays inside a tag's name.
+        for (part in rawTags.split(',')) {
+            val text = decode(part)?.trim() ?: return invalid(LogLinkError.BadEncoding)
+            if (text.isEmpty()) continue
             when (val tag = tags.match(text)) {
                 is TagMatch.Found -> tagKeys += tag.key
-                is TagMatch.Ambiguous, TagMatch.Unknown -> unknownTags += text
+                is TagMatch.Ambiguous -> ambiguousTags[text] = tag.keys
+                TagMatch.Unknown -> unknownTags += text
             }
         }
         if (unknownTags.isNotEmpty()) return invalid(LogLinkError.UnknownTags(unknownTags))
+        if (ambiguousTags.isNotEmpty()) return invalid(LogLinkError.AmbiguousTags(ambiguousTags))
 
         return LogLinkResult.Valid(LogLinkRequest(found.product, quantity, at, tagKeys))
     }
@@ -101,8 +114,12 @@ class LogLinkParser(private val products: ProductMatcher, private val tags: TagM
         }
     }
 
+    /**
+     * Null for a %-escape that doesn't decode. This is the overload that names the charset as text:
+     * the one that takes a Charset is only on Android from API 33, and the app runs from 26.
+     */
     private fun decode(text: String): String? = try {
-        URLDecoder.decode(text, Charsets.UTF_8)
+        URLDecoder.decode(text, "UTF-8")
     } catch (e: IllegalArgumentException) {
         null
     }
@@ -176,6 +193,12 @@ sealed interface LogLinkError {
 
     data class TimeInFuture(val at: LocalDateTime) : LogLinkError
 
-    /** Tags that name no tag, or more than one. */
+    /** Tags that name no tag, as the link gave them. */
     data class UnknownTags(val tags: List<String>) : LogLinkError
+
+    /**
+     * Tags given by a name that more than one tag goes by, such as two of the user's own tags both
+     * called "Gym". Each comes with the keys it could mean, in the link's order.
+     */
+    data class AmbiguousTags(val tags: Map<String, List<String>>) : LogLinkError
 }
