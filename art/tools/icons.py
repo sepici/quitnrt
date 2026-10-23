@@ -704,18 +704,19 @@ GLYPHS = {
 }
 
 # The achievements of PLAN 8.1, in its order: (key, group, glyph[, options for badge_icon]). Tiers
-# show their number.
+# show their number. The streaks (10, 21, 40), the logged-days tier of 28 and the last weeks-met
+# tier (10) were tuned from PLAN's numbers by the pace test in domain/game (UnlockPaceTest).
 BADGES = [
     ('first_entry', 'logging', GLYPHS['pencil'], NO_SHADOW),
     ('logged_days_3', 'logging', number(3)),
     ('logged_days_7', 'logging', number(7)),
     ('logged_days_14', 'logging', number(14)),
-    ('logged_days_30', 'logging', number(30)),
+    ('logged_days_28', 'logging', number(28)),
     ('logged_days_60', 'logging', number(60)),
     ('logged_days_90', 'logging', number(90)),
-    ('streak_7', 'logging', shadowed_above(number(7), CHAIN)),
-    ('streak_14', 'logging', shadowed_above(number(14), CHAIN)),
-    ('streak_30', 'logging', shadowed_above(number(30), CHAIN)),
+    ('streak_10', 'logging', shadowed_above(number(10), CHAIN)),
+    ('streak_21', 'logging', shadowed_above(number(21), CHAIN)),
+    ('streak_40', 'logging', shadowed_above(number(40), CHAIN)),
     ('baseline_done', 'logging', GLYPHS['ruler']),
     ('honest_ledger', 'logging', GLYPHS['history']),
     ('tagged_25', 'logging', GLYPHS['tag']),
@@ -724,7 +725,7 @@ BADGES = [
     ('first_week_met', 'matching', number(1)),
     ('weeks_met_3', 'matching', number(3)),
     ('weeks_met_6', 'matching', number(6)),
-    ('weeks_met_9', 'matching', number(9)),
+    ('weeks_met_10', 'matching', number(10)),
     ('back_in_step', 'matching', GLYPHS['rebound']),
     ('halfway', 'matching', GLYPHS['half']),
     ('down_a_strength', 'matching', GLYPHS['down']),
@@ -743,13 +744,13 @@ BADGES = [
 
 BADGE_NAMES = {
     'first_entry': 'First entry', 'logged_days_3': 'Logged on 3 days', 'logged_days_7': 'Logged on 7 days',
-    'logged_days_14': 'Logged on 14 days', 'logged_days_30': 'Logged on 30 days',
+    'logged_days_14': 'Logged on 14 days', 'logged_days_28': 'Logged on 28 days',
     'logged_days_60': 'Logged on 60 days', 'logged_days_90': 'Logged on 90 days',
-    'streak_7': '7 days in a row', 'streak_14': '14 days in a row', 'streak_30': '30 days in a row',
+    'streak_10': '10 days in a row', 'streak_21': '21 days in a row', 'streak_40': '40 days in a row',
     'baseline_done': 'Baseline done', 'honest_ledger': 'Honest ledger',
     'tagged_25': 'Tagged 25', 'tagged_100': 'Tagged 100',
     'first_day_in_guide': 'First day in the guide', 'first_week_met': 'First week met',
-    'weeks_met_3': '3 weeks met', 'weeks_met_6': '6 weeks met', 'weeks_met_9': '9 weeks met',
+    'weeks_met_3': '3 weeks met', 'weeks_met_6': '6 weeks met', 'weeks_met_10': '10 weeks met',
     'back_in_step': 'Back in step', 'halfway': 'Halfway', 'down_a_strength': 'Down a strength',
     'final_taper_week': 'Final taper week', 'week_under_by_10': 'A week 10% under',
     'five_days_under': '5 days under in a week', 'three_weeks_under': '3 weeks under in a row',
