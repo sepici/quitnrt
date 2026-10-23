@@ -7,8 +7,9 @@ SLOTS = {"o": "outline", "d": "dark", "m": "mid", "l": "light", "b": "bubbles",
 VARIANTS = {
     "forest": {"o": "#0b2017", "d": "#124f39", "m": "#1f7a50", "l": "#4fae70",
                "b": "#f3e4b6", "a": "#f2a922", "e": "#ffe27a", "h": "#fbf8e8"},
+    # molten: bubbles that glow, and hot gold eyes
     "ember": {"o": "#2a1519", "d": "#6b2b2d", "m": "#a3453a", "l": "#cf7a4f",
-              "b": "#e6c48c", "a": "#e8a33d", "e": "#f2cd55", "h": "#fff7e6"},
+              "b": "#f0b44c", "a": "#f2a922", "e": "#ffe27a", "h": "#fff7e6"},
     "moss": {"o": "#16201a", "d": "#2f4a33", "m": "#4d7347", "l": "#87a35e",
              "b": "#dcc99a", "a": "#f2a922", "e": "#e8a33d", "h": "#f8f6e6"},
     "frost": {"o": "#161b2b", "d": "#2e4466", "m": "#4a6f98", "l": "#86acc7",
@@ -32,6 +33,11 @@ def blockout(squash=0):
     for x in range(SIZE):
         if g[30][x] in 'lmd' and g[31][x] == 'o':
             g[30][x] = 'd'
+    # light coming through the jelly: a rim along the lower right, inside the shadow
+    for y in range(17 + squash, 28):
+        edge = max((x for x in range(SIZE) if g[y][x] in 'lmd'), default=None)
+        if edge is not None and g[y][edge - 1] == 'd':
+            g[y][edge - 1] = 'l'
     # a drop that has run off on to the rock
     patch(g, 0, 28, [".o", "olo", "olo"])
     return g
