@@ -23,7 +23,6 @@ import app.thelasthit.nrt.domain.insights.CalendarHeat
 import app.thelasthit.nrt.domain.insights.HeatScale
 import app.thelasthit.nrt.domain.insights.HourHeatMap
 import app.thelasthit.nrt.domain.time.DayBoundary
-import app.thelasthit.nrt.ui.components.NoteCard
 import app.thelasthit.nrt.ui.format.DayTitleFormatter
 import app.thelasthit.nrt.ui.format.mgText
 import app.thelasthit.nrt.ui.format.rememberTimeFormatter
@@ -64,7 +63,7 @@ internal fun WhenYouUse(state: InsightsState) {
             ).joinToString(" "),
         )
         val cellWhen: @Composable (HourHeatMap.Cell) -> String = { cell ->
-            stringResource(R.string.insights_cell_when, daysName(cell.day), timeText(cell.from), timeText(cell.to))
+            stringResource(R.string.insights_cell_when, dayName(map, cell.day), timeText(cell.from), timeText(cell.to))
         }
         if (asTable) {
             val rows = (0 until 7).flatMap { column ->
@@ -92,12 +91,13 @@ internal fun WhenYouUse(state: InsightsState) {
                 tip = { cell ->
                     ChartTip(
                         if (cell.doses == 0) stringResource(R.string.insights_tip_no_doses) else cellValue(cell),
-                        listOf(
+                        listOfNotNull(
                             cellWhen(cell),
-                            if (window.days == 1) {
-                                stringResource(R.string.insights_today)
-                            } else {
-                                stringResource(R.string.insights_over_the, pluralStringResource(R.plurals.insights_days, window.days, window.days))
+                            // A weekday with one day so far is named by its date, which says it all.
+                            when {
+                                map.daysOf(cell.day).size == 1 -> null
+                                window.days == 1 -> stringResource(R.string.insights_today)
+                                else -> stringResource(R.string.insights_over_the, pluralStringResource(R.plurals.insights_days, window.days, window.days))
                             },
                         ),
                     )
@@ -117,6 +117,9 @@ internal fun WhenYouUse(state: InsightsState) {
                     tops = tops,
                     unit = stringResource(if (shade == Shade.DOSES) R.string.insights_heat_unit_doses else R.string.unit_mg),
                 )
+            }
+            if (DayOfWeek.entries.any { map.daysOf(it).isEmpty() }) {
+                Keys { Key({ NoDataKey() }, stringResource(R.string.insights_key_no_data)) }
             }
             val example = DayBoundary(state.dayStart).lateDoseExample
             Hint(
@@ -145,11 +148,11 @@ private fun hourSummary(map: HourHeatMap, shade: Shade, timeText: (LocalTime) ->
     val first = when (shade) {
         Shade.DOSES -> stringResource(
             R.string.insights_when_summary_doses,
-            daysName(busiest.day),
+            dayName(map, busiest.day),
             timeText(busiest.from),
             pluralStringResource(R.plurals.insights_doses, busiest.doses, busiest.doses),
         )
-        Shade.MG -> stringResource(R.string.insights_when_summary_mg, daysName(busiest.day), timeText(busiest.from), busiest.total.mgText())
+        Shade.MG -> stringResource(R.string.insights_when_summary_mg, dayName(map, busiest.day), timeText(busiest.from), busiest.total.mgText())
     }
     return first + " " + stringResource(R.string.insights_summary_table_hours)
 }
@@ -166,8 +169,11 @@ internal fun CalendarSection(state: InsightsState) {
     val today = state.today
     val tracked = calendar.weeks.flatten().filter { it.state == CalendarHeat.State.TRACKED }
     val attribute = state.type?.let { typeAttribute(it) }
+    val noun = state.type?.let { typeNoun(it) }
     Section(
         title = if (attribute == null) stringResource(R.string.insights_calendar_title) else stringResource(R.string.insights_calendar_title_type, attribute).sentence(),
+        // Over the section after it, so a tip under the last row is never hidden.
+        modifier = Modifier.zIndex(1f),
         action = {
             TableButton(
                 asTable,
@@ -184,7 +190,13 @@ internal fun CalendarSection(state: InsightsState) {
             ) { asTable = !asTable }
         },
     ) {
-        Meta(if (attribute == null) stringResource(R.string.insights_calendar_meta) else stringResource(R.string.insights_calendar_meta_type, attribute))
+        Meta(
+            when {
+                noun == null -> stringResource(if (asTable) R.string.insights_calendar_meta_table else R.string.insights_calendar_meta)
+                asTable -> stringResource(R.string.insights_calendar_meta_table_type, noun)
+                else -> stringResource(R.string.insights_calendar_meta_type, noun)
+            },
+        )
         if (asTable) {
             ChartTable(tracked.reversed().map { day -> dayRow(day, today) }, Modifier.padding(top = 14.dp))
         } else {
@@ -243,13 +255,17 @@ private fun calendarSummary(calendar: CalendarHeat): String {
     }.joinToString(" ")
 }
 
-/** In place of the sections that leave patches out, when the window has nothing but patches. */
+/**
+ * In place of the sections that leave patches out, when the window has nothing but patches: a
+ * plain note under the chart, saying why they have nothing to show.
+ */
 @Composable
 internal fun PatchNote() {
-    NoteCard(
-        title = null,
-        body = stringResource(R.string.insights_patch_note),
-        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 34.dp),
+    Text(
+        stringResource(R.string.insights_patch_note),
+        style = LastHit.type.label,
+        color = LastHit.colors.text2,
+        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 20.dp),
     )
 }
 
@@ -276,6 +292,14 @@ internal fun Meta(text: String, top: Dp = 2.dp) {
 internal fun Hint(text: String) {
     Text(text, style = LastHit.type.caption, color = LastHit.colors.text2, modifier = Modifier.padding(top = 12.dp))
 }
+
+/**
+ * The day an hour of the map falls on: its date when the window has only one of that weekday,
+ * "Tuesday 20 October", or the weekday in the plural, "Tuesdays".
+ */
+@Composable
+private fun dayName(map: HourHeatMap, day: DayOfWeek): String =
+    map.daysOf(day).singleOrNull()?.let { DayTitleFormatter.format(it) } ?: daysName(day)
 
 /** "Thursdays", for an hour that recurs each week. */
 @Composable

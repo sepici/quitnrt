@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
@@ -22,6 +23,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
@@ -29,6 +31,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -41,6 +44,9 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.thelasthit.nrt.R
@@ -107,6 +113,11 @@ fun MgColumns(
             if (selected != null) {
                 Column(Modifier.semantics { liveRegion = LiveRegionMode.Polite }) { tip(selected) }
             }
+            if (selected != null) {
+                // The pointer's side is only known once the tip is measured, so both are drawn and one placed.
+                TipPointer(PointerSide.LEFT)
+                TipPointer(PointerSide.RIGHT)
+            }
         },
         modifier = modifier
             .fillMaxWidth()
@@ -116,31 +127,106 @@ fun MgColumns(
         val height = ChartHeight.roundToPx()
         val chart = measurables[0].measure(Constraints.fixed(width, height))
         val tipBox = measurables.getOrNull(1)?.measure(Constraints(maxWidth = width))
+        val toLeft = measurables.getOrNull(2)?.measure(Constraints())
+        val toRight = measurables.getOrNull(3)?.measure(Constraints())
+        val density: Density = this
         layout(width, height) {
             chart.place(0, 0)
-            if (tipBox != null && selected != null) {
+            if (tipBox != null && selected != null && toLeft != null && toRight != null) {
                 // Beside the column, on whichever side has room, near the top of the plot.
                 val slot = (width - axis) / columns.size
                 val centre = axis + slot * (selected + 0.5f)
                 val gap = 12.dp.toPx() + min(MaxBar.toPx(), barWidth(slot)) / 2
                 val right = centre + gap
-                val x = if (right + tipBox.width <= width) right else (centre - gap - tipBox.width).coerceAtLeast(0f)
-                tipBox.place(x.toInt(), PlotTop.roundToPx() + 6.dp.roundToPx())
+                val onRight = right + tipBox.width <= width
+                val x = if (onRight) right else (centre - gap - tipBox.width).coerceAtLeast(0f)
+                val y = PlotTop.roundToPx() + 6.dp.roundToPx()
+                tipBox.place(x.toInt(), y)
+                val pointer = if (onRight) toLeft else toRight
+                val side = if (onRight) PointerSide.LEFT else PointerSide.RIGHT
+                pointer.place(pointerAt(side, IntRect(x.toInt(), y, x.toInt() + tipBox.width, y + tipBox.height), y + tipBox.height / 2f, pointer, density))
             }
         }
     }
 }
 
-/** What a tap shows: the value first and strongest, then what it is. */
+/** Which way a tip's pointer points: up when the tip sits under its mark, and so on. */
+enum class PointerSide { UP, DOWN, LEFT, RIGHT }
+
+private val PointerLength = 6.dp
+private val PointerWidth = 12.dp
+private val TipCorner = 10.dp
+private val TipBorder = 1.dp
+
+/**
+ * The small triangle that joins a tip to the mark it describes, in the tip's colours. Its base
+ * runs a border's width into the tip, so the tip's edge doesn't cross it.
+ */
+@Composable
+fun TipPointer(side: PointerSide) {
+    val colors = LastHit.colors
+    val border = tipBorder(colors)
+    val across = side == PointerSide.UP || side == PointerSide.DOWN
+    val length = PointerLength + TipBorder
+    Canvas(Modifier.size(width = if (across) PointerWidth else length, height = if (across) length else PointerWidth)) {
+        val w = size.width
+        val h = size.height
+        // The tip, then the two corners of the base.
+        val (apex, a, b) = when (side) {
+            PointerSide.UP -> Triple(Offset(w / 2, 0f), Offset(0f, h), Offset(w, h))
+            PointerSide.DOWN -> Triple(Offset(w / 2, h), Offset(0f, 0f), Offset(w, 0f))
+            PointerSide.LEFT -> Triple(Offset(0f, h / 2), Offset(w, 0f), Offset(w, h))
+            PointerSide.RIGHT -> Triple(Offset(w, h / 2), Offset(0f, 0f), Offset(0f, h))
+        }
+        val path = Path().apply {
+            moveTo(a.x, a.y)
+            lineTo(apex.x, apex.y)
+            lineTo(b.x, b.y)
+            close()
+        }
+        drawPath(path, colors.surface)
+        val stroke = TipBorder.toPx()
+        drawLine(border, a, apex, strokeWidth = stroke, cap = StrokeCap.Round)
+        drawLine(border, apex, b, strokeWidth = stroke, cap = StrokeCap.Round)
+    }
+}
+
+/**
+ * Where a [pointer] goes on the [side] of a tip at [tip] facing its mark, centred on [mark] along
+ * that side (an x for up and down, a y for left and right), and kept clear of the tip's corners.
+ */
+fun pointerAt(side: PointerSide, tip: IntRect, mark: Float, pointer: Placeable, density: Density): IntOffset = with(density) {
+    val overlap = TipBorder.roundToPx()
+    val corner = TipCorner.roundToPx()
+    when (side) {
+        PointerSide.UP, PointerSide.DOWN -> {
+            val x = (mark - pointer.width / 2f).toInt()
+                .coerceIn(tip.left + corner, (tip.right - corner - pointer.width).coerceAtLeast(tip.left + corner))
+            IntOffset(x, if (side == PointerSide.UP) tip.top - pointer.height + overlap else tip.bottom - overlap)
+        }
+        PointerSide.LEFT, PointerSide.RIGHT -> {
+            val y = (mark - pointer.height / 2f).toInt()
+                .coerceIn(tip.top + corner, (tip.bottom - corner - pointer.height).coerceAtLeast(tip.top + corner))
+            IntOffset(if (side == PointerSide.LEFT) tip.left - pointer.width + overlap else tip.right - overlap, y)
+        }
+    }
+}
+
+private fun tipBorder(colors: LastHitColors) = if (colors.isDark) colors.lineStrong else colors.line
+
+/**
+ * What a tap shows: the value first and strongest, then what it is. A tight shadow, so it never
+ * smudges the marks around it, and the charts add a [TipPointer] to the mark.
+ */
 @Composable
 fun ChartTip(value: String, lines: List<String>) {
     val colors = LastHit.colors
-    val shape = RoundedCornerShape(10.dp)
+    val shape = RoundedCornerShape(TipCorner)
     Column(
         Modifier
-            .shadow(8.dp, shape)
+            .shadow(2.dp, shape)
             .background(colors.surface, shape)
-            .border(1.dp, if (colors.isDark) colors.lineStrong else colors.line, shape)
+            .border(TipBorder, tipBorder(colors), shape)
             .padding(start = 12.dp, end = 12.dp, top = 9.dp, bottom = 10.dp),
     ) {
         Text(value, style = LastHit.type.title.copy(fontWeight = FontWeight.ExtraBold), color = colors.text)
@@ -256,12 +342,34 @@ private fun DrawScope.drawColumns(
                     style = Stroke(2.dp.toPx()),
                 )
             }
+        } else if (value == Dose.ZERO && !column.partial) {
+            // A day with no doses is a short tick on the baseline, so it never looks like a gap in the data.
+            drawZeroTick(centre, min(width, ZeroTick.toPx()), if (index == selected) colors.text else colors.text2)
         }
         column.label?.let { label ->
             val style = if (column.labelStrong) tick.copy(fontWeight = FontWeight.ExtraBold, color = colors.text) else tick.copy(color = colors.text3)
             val layout = measurer.measure(label, style)
             drawText(layout, topLeft = Offset(centre - layout.size.width / 2f, LabelTop.toPx()))
         }
+    }
+}
+
+private val ZeroTick = 10.dp
+
+/** A 2 dp tick [width] wide just over the baseline at [centre], for a column of nothing. */
+private fun DrawScope.drawZeroTick(centre: Float, width: Float, colour: Color) {
+    val height = 2.dp.toPx()
+    val bottom = Baseline.toPx() - 2.dp.toPx()
+    drawRoundRect(colour, topLeft = Offset(centre - width / 2, bottom - height), size = Size(width, height), cornerRadius = CornerRadius(height / 2))
+}
+
+/** The key's sample for a day with no doses: the tick the chart draws. */
+@Composable
+fun ZeroTickKey() {
+    val colour = LastHit.colors.text2
+    Canvas(Modifier.size(width = 10.dp, height = 14.dp)) {
+        val height = 2.dp.toPx()
+        drawRoundRect(colour, topLeft = Offset(0f, size.height - height), size = Size(size.width, height), cornerRadius = CornerRadius(height / 2))
     }
 }
 

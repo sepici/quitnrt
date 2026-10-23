@@ -47,6 +47,8 @@ import app.thelasthit.nrt.ui.components.FieldLabel
 import app.thelasthit.nrt.ui.components.PrimaryButton
 import app.thelasthit.nrt.ui.components.RadioList
 import app.thelasthit.nrt.ui.components.RadioOption
+import app.thelasthit.nrt.ui.components.sheetEdge
+import app.thelasthit.nrt.ui.components.sheetScrim
 import app.thelasthit.nrt.ui.format.DayMonthYearFormatter
 import app.thelasthit.nrt.ui.format.pillLabelText
 import app.thelasthit.nrt.ui.format.rememberTimeFormatter
@@ -235,6 +237,8 @@ private fun RestoreSheet(candidate: RestoreCandidate, viewModel: SettingsViewMod
         onDismissRequest = viewModel::closeRestore,
         sheetState = sheetState,
         containerColor = colors.surface,
+        scrimColor = sheetScrim,
+        modifier = Modifier.sheetEdge(colors),
         contentColor = colors.text,
         dragHandle = { BottomSheetDefaults.DragHandle(color = colors.lineStrong, width = 36.dp, height = 4.dp) },
     ) {

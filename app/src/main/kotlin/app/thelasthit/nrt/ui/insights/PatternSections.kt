@@ -13,11 +13,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
@@ -26,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -46,7 +43,6 @@ import app.thelasthit.nrt.domain.insights.ByProduct
 import app.thelasthit.nrt.domain.insights.TimeOfDay
 import app.thelasthit.nrt.domain.insights.Triggers
 import app.thelasthit.nrt.ui.components.IconTile
-import app.thelasthit.nrt.ui.format.DayMonthFormatter
 import app.thelasthit.nrt.ui.format.DayTitleFormatter
 import app.thelasthit.nrt.ui.format.icon
 import app.thelasthit.nrt.ui.format.plural
@@ -86,7 +82,7 @@ internal fun TriggersSection(state: InsightsState) {
                     else -> stringResource(R.string.insights_triggers_meta_plain_type, attribute)
                 },
                 if (state.patchesLeftOut) stringResource(R.string.insights_patches_not_counted) else null,
-                state.comparesFrom?.let { stringResource(R.string.insights_changes_against, period, DayMonthFormatter.format(it)) },
+                state.comparesFrom?.let { stringResource(R.string.insights_changes_against, period, keptTogether(it)) },
             ).joinToString(" "),
         )
         when {
@@ -102,10 +98,12 @@ internal fun TriggersSection(state: InsightsState) {
                 SubHeading(stringResource(R.string.insights_by_group))
                 Groups(triggers.groups)
                 SubHeading(stringResource(R.string.insights_by_time_of_day))
+                // One format for the whole list: counts when any part has too few doses for a share to mean much.
+                val counts = TimeOfDay.entries.any { (triggers.partDoses[it] ?: 0) in 1 until FEW_DOSES }
                 Column(Modifier.padding(top = 4.dp)) {
                     TimeOfDay.entries.forEachIndexed { index, part ->
                         if (index > 0) HorizontalDivider(color = LastHit.colors.line)
-                        PartRow(state, triggers, part)
+                        PartRow(state, triggers, part, counts)
                     }
                 }
                 Untagged(triggers)
@@ -193,9 +191,9 @@ private fun Groups(groups: List<Triggers.GroupShare>) {
     }
 }
 
-/** A part of the day and its hours, beside its top tag and how much of that part it covers. */
+/** A part of the day and its hours, beside its top tag and how much of that part it covers, as a count or a share. */
 @Composable
-private fun PartRow(state: InsightsState, triggers: Triggers, part: TimeOfDay) {
+private fun PartRow(state: InsightsState, triggers: Triggers, part: TimeOfDay, counts: Boolean) {
     val colors = LastHit.colors
     val timeFormat = rememberTimeFormatter()
     val next = TimeOfDay.entries[(part.ordinal + 1) % TimeOfDay.entries.size]
@@ -223,7 +221,7 @@ private fun PartRow(state: InsightsState, triggers: Triggers, part: TimeOfDay) {
                 else -> {
                     Text(tagName(state, top.key), style = rowTitle, color = colors.text, textAlign = TextAlign.End)
                     Text(
-                        if (doses < FEW_DOSES) {
+                        if (counts) {
                             pluralStringResource(part.count, doses, top.doses, doses)
                         } else {
                             stringResource(part.share, percentText(top.share))
@@ -283,44 +281,72 @@ internal fun HabitsSection(state: InsightsState) {
                     state.patchesLeftOut -> stringResource(R.string.insights_habits_gaps_patches)
                     else -> stringResource(R.string.insights_habits_gaps)
                 },
-                state.comparesFrom?.let { stringResource(R.string.insights_changes_start, DayMonthFormatter.format(it)) },
+                state.comparesFrom?.let { stringResource(R.string.insights_changes_against, period, keptTogether(it)) },
             ).joinToString(" "),
         )
         val first = habits.firstDose
         if (first == null) {
             Meta(stringResource(R.string.insights_table_none), top = 14.dp)
         } else {
-            Column(Modifier.padding(top = 14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Tile(stringResource(R.string.insights_first_dose), Modifier.weight(1f).fillMaxHeight()) {
-                        TileValue(AnnotatedString(timeFormat.format(first)))
-                        habits.firstDoseChange?.let { TimeChange(it, later = R.string.insights_later, earlier = R.string.insights_earlier, same = R.string.insights_same_time) }
-                    }
-                    Tile(stringResource(R.string.insights_average_gap), Modifier.weight(1f).fillMaxHeight()) {
-                        val gap = habits.averageGap
-                        if (gap == null) {
-                            Text(
-                                stringResource(R.string.insights_no_gaps),
-                                style = tileValue.copy(fontSize = 20.sp, lineHeight = 36.sp, letterSpacing = 0.sp),
-                                color = LastHit.colors.text2,
-                                modifier = Modifier.padding(top = 2.dp),
-                            )
-                        } else {
-                            TileValue(durationValue(gap.toMinutes().toInt()), durationSpoken(gap.toMinutes().toInt()))
-                            habits.averageGapChange?.let { TimeChange(it, later = R.string.insights_longer, earlier = R.string.insights_shorter, same = R.string.insights_no_change) }
+            val gap = habits.averageGap
+            val firstValue = AnnotatedString(timeFormat.format(first))
+            val gapValue = gap?.let { durationValue(it.toMinutes().toInt()) }
+            val firstChange = habits.firstDoseChange?.let { timeChangeText(it, later = R.string.insights_later, earlier = R.string.insights_earlier, same = R.string.insights_same_time) }
+            val gapChange = habits.averageGapChange?.let { timeChangeText(it, later = R.string.insights_longer, earlier = R.string.insights_shorter, same = R.string.insights_no_change) }
+            val measurer = rememberTextMeasurer()
+            val changeStyle = changeText
+            val density = LocalDensity.current
+            // The widest figure or change, with an arrow and the tile's padding, so a change never wraps away from its arrow.
+            val needed = with(density) {
+                val values = listOfNotNull(firstValue, gapValue).map { measurer.measure(it, tileValue).size.width.toDp() }
+                val changes = listOfNotNull(firstChange, gapChange).map { measurer.measure(it, changeStyle).size.width.toDp() + 16.sp.toDp() + 4.dp }
+                (values + changes).max() + 32.dp
+            }
+            BoxWithConstraints(Modifier.padding(top = 14.dp)) {
+                // Side by side as the mockups have them, or one a row when a large font needs the room.
+                val stacked = needed > (maxWidth - 8.dp) / 2
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val firstTile: @Composable (Modifier) -> Unit = { modifier ->
+                        Tile(stringResource(R.string.insights_first_dose), modifier) {
+                            TileValue(firstValue)
+                            habits.firstDoseChange?.let { TimeChange(it, later = R.string.insights_later, earlier = R.string.insights_earlier, same = R.string.insights_same_time) }
                         }
                     }
-                }
-                habits.longestGap?.let { gap ->
-                    Tile(stringResource(R.string.insights_longest_gap), Modifier.fillMaxWidth()) {
-                        val minutes = gap.length.toMinutes().toInt()
-                        TileValue(durationValue(minutes), durationSpoken(minutes))
-                        Text(
-                            stringResource(R.string.insights_gap_when, DayTitleFormatter.format(gap.date), timeFormat.format(gap.from), timeFormat.format(gap.to)),
-                            style = LastHit.type.label,
-                            color = LastHit.colors.text,
-                        )
-                        habits.longestGapChange?.let { TimeChange(it, later = R.string.insights_longer, earlier = R.string.insights_shorter, same = R.string.insights_no_change) }
+                    val gapTile: @Composable (Modifier) -> Unit = { modifier ->
+                        Tile(stringResource(R.string.insights_average_gap), modifier) {
+                            if (gap == null || gapValue == null) {
+                                Text(
+                                    stringResource(R.string.insights_no_gaps),
+                                    style = tileValue.copy(fontSize = 20.sp, lineHeight = 36.sp, letterSpacing = 0.sp),
+                                    color = LastHit.colors.text2,
+                                    modifier = Modifier.padding(top = 2.dp),
+                                )
+                            } else {
+                                TileValue(gapValue, durationSpoken(gap.toMinutes().toInt()))
+                                habits.averageGapChange?.let { TimeChange(it, later = R.string.insights_longer, earlier = R.string.insights_shorter, same = R.string.insights_no_change) }
+                            }
+                        }
+                    }
+                    if (stacked) {
+                        firstTile(Modifier.fillMaxWidth())
+                        gapTile(Modifier.fillMaxWidth())
+                    } else {
+                        Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            firstTile(Modifier.weight(1f).fillMaxHeight())
+                            gapTile(Modifier.weight(1f).fillMaxHeight())
+                        }
+                    }
+                    habits.longestGap?.let { longest ->
+                        Tile(stringResource(R.string.insights_longest_gap), Modifier.fillMaxWidth()) {
+                            val minutes = longest.length.toMinutes().toInt()
+                            TileValue(durationValue(minutes), durationSpoken(minutes))
+                            Text(
+                                stringResource(R.string.insights_gap_when, DayTitleFormatter.format(longest.date), timeFormat.format(longest.from), timeFormat.format(longest.to)),
+                                style = LastHit.type.label,
+                                color = LastHit.colors.text,
+                            )
+                            habits.longestGapChange?.let { TimeChange(it, later = R.string.insights_longer, earlier = R.string.insights_shorter, same = R.string.insights_no_change) }
+                        }
                     }
                 }
             }
@@ -358,17 +384,24 @@ private fun TileValue(value: AnnotatedString, spoken: String? = null) {
     )
 }
 
+/** "4 min later", "No change": a change in minutes, later or longer when positive. */
+@Composable
+private fun timeChangeText(minutes: Int, later: Int, earlier: Int, same: Int): String {
+    val amount = abs(minutes)
+    return when {
+        minutes > 0 -> stringResource(later, durationText(amount))
+        minutes < 0 -> stringResource(earlier, durationText(amount))
+        else -> stringResource(same)
+    }
+}
+
 /** A change in minutes: later or longer when positive, with an arrow, and [same] for none. */
 @Composable
 private fun TimeChange(minutes: Int, later: Int, earlier: Int, same: Int) {
     val amount = abs(minutes)
     Delta(
         direction = minutes.sign,
-        text = when {
-            minutes > 0 -> stringResource(later, durationText(amount))
-            minutes < 0 -> stringResource(earlier, durationText(amount))
-            else -> stringResource(same)
-        },
+        text = timeChangeText(minutes, later, earlier, same),
         spoken = when {
             minutes > 0 -> stringResource(later, durationSpoken(amount))
             minutes < 0 -> stringResource(earlier, durationSpoken(amount))
@@ -433,7 +466,6 @@ private fun durationValue(minutes: Int): AnnotatedString {
 internal fun ByProductSection(state: InsightsState) {
     val byProduct = state.byProduct ?: return
     val type = state.type
-    val attribute = type?.let { typeAttribute(it) }
     val title = when {
         type == null -> stringResource(R.string.insights_products_title)
         // "Other product products" would say it twice.
@@ -441,14 +473,23 @@ internal fun ByProductSection(state: InsightsState) {
         else -> stringResource(R.string.insights_products_title_type, typeAttribute(type)).sentence()
     }
     Section(title = title, action = {}) {
-        Meta(if (attribute == null) stringResource(R.string.insights_products_meta) else stringResource(R.string.insights_products_meta_type, attribute))
+        // With one product its share is all of it, so the row says only how much a day.
+        val single = byProduct.products.size == 1
+        val noun = type?.let { typeNoun(it) }
+        Meta(
+            when {
+                single -> stringResource(R.string.insights_products_meta_single)
+                noun == null -> stringResource(R.string.insights_products_meta)
+                else -> stringResource(R.string.insights_products_meta_type, noun)
+            },
+        )
         if (byProduct.products.isEmpty()) {
             Meta(stringResource(R.string.insights_table_none), top = 14.dp)
         } else {
             Column(Modifier.padding(top = 8.dp)) {
                 byProduct.products.forEachIndexed { index, product ->
                     if (index > 0) HorizontalDivider(color = LastHit.colors.line)
-                    ProductRow(product, state.productDays)
+                    ProductRow(product, state.productDays, showShare = !single)
                 }
             }
         }
@@ -456,7 +497,7 @@ internal fun ByProductSection(state: InsightsState) {
 }
 
 @Composable
-private fun ProductRow(product: ByProduct.Share, days: Int) {
+private fun ProductRow(product: ByProduct.Share, days: Int, showShare: Boolean) {
     val colors = LastHit.colors
     Row(
         Modifier
@@ -469,17 +510,17 @@ private fun ProductRow(product: ByProduct.Share, days: Int) {
         Column(Modifier.weight(1f)) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(product.name, style = rowTitle, color = colors.text, modifier = Modifier.weight(1f).alignByBaseline())
-                Text(percentText(product.share), style = figure, color = colors.text, modifier = Modifier.alignByBaseline())
+                if (showShare) Text(percentText(product.share), style = figure, color = colors.text, modifier = Modifier.alignByBaseline())
             }
             Text(unitsText(product, days), style = LastHit.type.label.copy(fontWeight = FontWeight.Normal), color = colors.text2)
-            ShareBar(product.share, Modifier.padding(top = 8.dp))
+            if (showShare) ShareBar(product.share, Modifier.padding(top = 8.dp))
         }
     }
 }
 
 /**
- * How much a day: "1.3 pieces a day", "1 spray a day", or for a patch "0.2 a day, on 7 of 29
- * days". With today the only day so far, what's been used so far today.
+ * How much a day: "1.3 pieces a day", "1 spray a day", or for a patch, one a day on the days it's
+ * on, "Used on 7 of 29 days". With today the only day so far, what's been used so far today.
  */
 @Composable
 private fun unitsText(product: ByProduct.Share, days: Int): String {
@@ -488,7 +529,7 @@ private fun unitsText(product: ByProduct.Share, days: Int): String {
     val number = if (tenths % 10 == 0L) (tenths / 10).toString() else "${tenths / 10}.${tenths % 10}"
     val period = pluralStringResource(R.plurals.insights_days, days, days)
     return when {
-        product.form.isBackground -> stringResource(R.string.insights_a_day_on, number, product.days, period)
+        product.form.isBackground -> stringResource(R.string.insights_used_on, product.days, period)
         tenths == 0L -> stringResource(R.string.insights_units_in, pluralStringResource(product.unit.plural, product.units, product.units), period)
         tenths == 10L -> stringResource(R.string.insights_unit_a_day, pluralStringResource(product.unit.plural, 1, 1))
         else -> stringResource(R.string.insights_units_a_day, number, stringResource(unitsName(product.unit)))
@@ -526,24 +567,21 @@ private fun Delta(direction: Int, text: String, spoken: String, modifier: Modifi
     val colors = LastHit.colors
     Row(
         modifier.clearAndSetSemantics { contentDescription = spoken },
-        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
     ) {
-        Icon(
-            painterResource(
-                when {
-                    direction > 0 -> R.drawable.ic_arrow_up
-                    direction < 0 -> R.drawable.ic_arrow_down
-                    else -> R.drawable.ic_minus
-                },
-            ),
-            contentDescription = null,
-            tint = colors.text,
-            modifier = Modifier.size(16.dp),
+        ChangeArrow(
+            when {
+                direction > 0 -> R.drawable.ic_arrow_up
+                direction < 0 -> R.drawable.ic_arrow_down
+                else -> R.drawable.ic_minus
+            },
         )
-        Text(text, style = LastHit.type.label.copy(fontWeight = FontWeight.SemiBold), color = colors.text2)
+        Text(text, style = changeText, color = colors.text2)
     }
 }
+
+private val changeText
+    @Composable get() = LastHit.type.label.copy(fontWeight = FontWeight.SemiBold)
 
 @Composable
 private fun SubHeading(text: String) {

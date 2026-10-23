@@ -2,9 +2,11 @@ package app.thelasthit.nrt.ui.components
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,6 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.thelasthit.nrt.ui.theme.LastHit
+import app.thelasthit.nrt.ui.theme.LastHitColors
 
 /**
  * A round tile with an icon, leading list rows. A [dose] gets the neutral stone tile rather than
@@ -63,3 +66,16 @@ fun Modifier.bleed(by: Dp): Modifier = layout { measurable, constraints ->
     val width = (placeable.width - side * 2).coerceIn(constraints.minWidth, constraints.maxWidth)
     layout(width, placeable.height) { placeable.place(-side, 0) }
 }
+
+/**
+ * The scrim behind a sheet, as the mockups have it: the scrim colour at 56%, so the page falls
+ * back behind the sheet in dark mode too.
+ */
+val sheetScrim: Color
+    @Composable get() = LastHit.colors.scrim.copy(alpha = 0.56f)
+
+/** A sheet's top corners, as Material draws them from the theme's extra large shape. */
+private val SheetTop = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+
+/** In dark mode, a hairline round a sheet's top edge, so it stands clear of the dimmed page. */
+fun Modifier.sheetEdge(colors: LastHitColors): Modifier = if (colors.isDark) border(1.dp, colors.line, SheetTop) else this

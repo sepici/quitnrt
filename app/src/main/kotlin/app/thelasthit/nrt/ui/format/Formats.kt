@@ -33,6 +33,15 @@ fun Dose.mgText(): String {
     return if (tenths % 10 == 0L) (tenths / 10).toString() else "${tenths / 10}.${tenths % 10}"
 }
 
+/**
+ * An average in mg, always to one decimal place, so averages read alike from view to view:
+ * 9.0, 12.5. Totals use [mgText].
+ */
+fun Dose.averageText(): String {
+    val tenths = (micrograms + 50) / 100
+    return "${tenths / 10}.${tenths % 10}"
+}
+
 /** Times follow the phone's 12 or 24 hour setting. */
 @Composable
 fun rememberTimeFormatter(): DateTimeFormatter {

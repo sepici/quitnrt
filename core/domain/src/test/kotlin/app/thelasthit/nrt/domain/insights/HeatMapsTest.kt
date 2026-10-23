@@ -88,6 +88,29 @@ class HeatMapsTest {
     }
 
     @Test
+    fun `a weekday the window hasn't reached has no days, while one with no doses still has its days`() {
+        // A first week from Monday 19 to Friday 23 October, with doses only on the Monday.
+        val window = InsightRange.DAYS_7.window(LocalDate.of(2026, 10, 23), LocalDate.of(2026, 10, 19))!!
+        val map = HourHeatMap.of(listOf(entry("2026-10-19T08:10")), dayStart, window.dates)
+        assertEquals(listOf(LocalDate.of(2026, 10, 19)), map.daysOf(DayOfWeek.MONDAY))
+        assertEquals(listOf(LocalDate.of(2026, 10, 21)), map.daysOf(DayOfWeek.WEDNESDAY))
+        assertEquals(0, map.cell(DayOfWeek.WEDNESDAY, 4).doses)
+        assertTrue(map.daysOf(DayOfWeek.SATURDAY).isEmpty())
+        assertTrue(map.daysOf(DayOfWeek.SUNDAY).isEmpty())
+    }
+
+    @Test
+    fun `a longer window counts each weekday's days, oldest first`() {
+        val window = InsightWindow(LocalDate.of(2026, 9, 24), LocalDate.of(2026, 10, 23))
+        val map = HourHeatMap.of(emptyList(), dayStart, window.dates)
+        assertEquals(
+            listOf(LocalDate.of(2026, 9, 25), LocalDate.of(2026, 10, 2), LocalDate.of(2026, 10, 9), LocalDate.of(2026, 10, 16), LocalDate.of(2026, 10, 23)),
+            map.daysOf(DayOfWeek.FRIDAY),
+        )
+        assertEquals(4, map.daysOf(DayOfWeek.MONDAY).size)
+    }
+
+    @Test
     fun `the ramp has an empty step and five shades, the top one for the largest`() {
         assertEquals(0, HeatScale.step(0, 10))
         assertEquals(1, HeatScale.step(1, 10))

@@ -113,7 +113,7 @@ class InsightsTest {
         waitFor("13.3")
         compose.onNodeWithText("Patch").performClick()
         // Patches on Monday and Thursday: 28 mg over 4 full days.
-        waitFor("7")
+        waitFor("7.0")
         compose.onNode(hasText("Patch") and isSelectable()).assertIsSelected()
     }
 
@@ -135,12 +135,12 @@ class InsightsTest {
         app.seedWeek()
         show()
         // Wednesday's three pieces at 08:15 are one dose, but the most mg of the 08:00 doses.
-        waitForDescription("Most often Wednesdays from 08:00, 1 dose.")
+        waitForDescription("Most often Wednesday 21 October from 08:00, 1 dose.")
         compose.onNodeWithText("Doses by hour and day of the week. Patches aren't counted.").assertExists()
         compose.onNodeWithContentDescription("Show when you use as a table").performScrollTo().performClick()
-        waitFor("Wednesdays, 08:00 to 09:00")
+        waitFor("Wednesday 21 October, 08:00 to 09:00")
         compose.onNodeWithText("1 dose, 12 mg").assertExists()
-        compose.onNodeWithText("Tuesdays, 19:00 to 20:00").assertExists()
+        compose.onNodeWithText("Tuesday 20 October, 19:00 to 20:00").assertExists()
     }
 
     @Test
@@ -148,32 +148,68 @@ class InsightsTest {
         app.setUp()
         app.seedWeek()
         show()
-        waitForDescription("Most often Wednesdays from 08:00")
+        waitForDescription("Most often Wednesday 21 October from 08:00")
         compose.onNode(hasText("mg") and isSelectable()).performScrollTo().performClick()
-        waitForDescription("The most is on Wednesdays from 08:00, 12 mg.")
+        waitForDescription("Doses by hour and day, shaded by mg. The most is on Wednesday 21 October from 08:00, 12 mg.")
     }
 
     @Test
-    fun `tapping an hour shows its doses and mg`() {
+    fun `tapping an hour shows its doses and mg, named by its date in a first week`() {
         app.setUp()
         app.seedWeek()
         show()
-        waitForDescription("Most often Wednesdays from 08:00")
+        waitForDescription("Most often Wednesday 21 October from 08:00")
         compose.tapHour(column = 2, row = 4)
-        waitFor("Wednesdays, 08:00 to 09:00")
+        waitFor("Wednesday 21 October, 08:00 to 09:00")
         compose.onNodeWithText("1 dose, 12 mg").assertExists()
-        compose.onNodeWithText("Over the 5 days").assertExists()
+        compose.onNode(hasText("Over the last", substring = true)).assertDoesNotExist()
     }
 
     @Test
-    fun `the calendar shades from the lightest day to the heaviest, and dashes days before the first dose`() {
+    fun `over a longer range, an hour is the weekday's over the last days`() {
+        app.setUp()
+        app.seedHistory()
+        app.seedWeek()
+        show()
+        waitForDescription("Most often")
+        compose.tapHour(column = 3, row = 4)
+        waitFor("Thursdays, 08:00 to 09:00")
+        compose.onNodeWithText("Over the last 30\u00A0days").assertExists()
+    }
+
+    @Test
+    fun `weekdays the first week hasn't reached are dashed and can't be picked`() {
+        app.setUp()
+        app.seedWeek()
+        show()
+        waitForDescription("Most often Wednesday 21 October")
+        // Saturday and Sunday came before Monday's first dose.
+        compose.tapHour(column = 5, row = 4)
+        compose.waitForIdle()
+        compose.onNode(hasText("08:00 to 09:00", substring = true)).assertDoesNotExist()
+        compose.onAllNodesWithText("Before your first dose").assertCountEquals(2)
+    }
+
+    @Test
+    fun `a long press then a slide moves the picked hour`() {
+        app.setUp()
+        app.seedWeek()
+        show()
+        waitForDescription("Most often Wednesday 21 October")
+        compose.pressAndSlideHour(column = 2, fromRow = 4, toRow = 6)
+        waitFor("Wednesday 21 October, 10:00 to 11:00")
+    }
+
+    @Test
+    fun `the calendar shades from the lowest day to the highest, and dashes days before the first dose`() {
         app.setUp()
         app.seedWeek()
         show()
         // Monday to Thursday: 14, 13, 12 and 14 mg. Today's 8 mg so far doesn't set the scale.
-        waitForDescription("from 12 mg on the lightest day with doses to 14 mg on the heaviest.")
-        compose.onNodeWithText("Before your first dose").performScrollTo().assertExists()
-        compose.onNodeWithText("Today, so far").assertExists()
+        waitForDescription("from 12 mg on the lowest day with doses to 14 mg on the highest.")
+        // The hour map's key and the calendar's.
+        compose.onAllNodesWithText("Before your first dose").assertCountEquals(2)
+        compose.onNodeWithText("Today, so far").performScrollTo().assertExists()
         // The range starts on Saturday the 17th, so the first week row is the week of the 12th.
         compose.tapCalendarDay(column = 2, row = 1)
         waitFor("Wednesday 21 October")
@@ -190,7 +226,7 @@ class InsightsTest {
         show()
         waitFor("13.3")
         compose.onNodeWithText("Patch").performClick()
-        waitFor("The hour map, triggers and habits leave out patches, since a patch releases nicotine steadily.")
+        waitFor("Patches release nicotine steadily, so there are no times, triggers or gaps to show for them.")
         compose.onNode(hasText("When you use", substring = true)).assertDoesNotExist()
         compose.onNodeWithText("Patch triggers").assertDoesNotExist()
         compose.onNodeWithText("Patch habits").assertDoesNotExist()
@@ -204,7 +240,7 @@ class InsightsTest {
         app.seedWeek()
         show()
         // 7 doses besides the patches, 3 of them tagged once each.
-        waitFor("Share of doses with each tag. Patches aren't counted. Changes against the week before start on 1 November.")
+        waitFor("Share of doses with each tag. Patches aren't counted. From 1\u00A0November, you'll see changes against the week before.")
         compose.onAllNodesWithText("With coffee or tea").assertCountEquals(2)
         compose.onNodeWithText("1 of 4 morning doses").assertExists()
         compose.onNodeWithText("1 of 2 afternoon doses").assertExists()
@@ -218,7 +254,7 @@ class InsightsTest {
         app.setUp()
         app.seedWeek()
         show()
-        waitFor("Gaps only count within a day, and patches aren't counted. Changes start on 1 November.")
+        waitFor("Gaps only count within a day, and patches aren't counted. From 1\u00A0November, you'll see changes against the week before.")
         // First doses at 08:00, 08:15 and 08:10. Gaps of 5 h and 6 h on Tuesday, 2 h 45 min twice today.
         compose.onNodeWithText("08:08").assertExists()
         compose.onNode(hasContentDescription("4 hours 8 minutes")).assertExists()
@@ -232,7 +268,7 @@ class InsightsTest {
         app.seedWeek()
         show()
         // Monday to Thursday: 28 mg of patches, 24 mg of 4 mg gum and 1 mg of spray.
-        waitFor("0.5 a day, on 2 of 4\u00A0days")
+        waitFor("Used on 2 of 4\u00A0days")
         compose.onNodeWithText("53%").assertExists()
         compose.onNodeWithText("1.5\u00A0pieces a day").assertExists()
         compose.onNodeWithText("0.3\u00A0sprays a day").assertExists()
@@ -245,7 +281,7 @@ class InsightsTest {
         app.seedWeek()
         show()
         waitFor("Share of doses with each tag, against the 30\u00A0days before. Patches aren't counted.")
-        compose.onNodeWithText("Against the 30\u00A0days before. Gaps only count within a day, and patches aren't counted.").assertExists()
+        compose.onNodeWithText("First dose and gaps, against the 30\u00A0days before. Gaps only count within a day, and patches aren't counted.").assertExists()
         compose.onNodeWithText("Gum").performClick()
         // Gum alone has no patches to leave out, and every section names it.
         waitFor("Share of gum doses with each tag, against the 30\u00A0days before.")
@@ -256,12 +292,12 @@ class InsightsTest {
         compose.onNodeWithContentDescription("Show when you use gum as a table").assertExists()
         compose.onNodeWithText("Gum triggers").assertExists()
         compose.onNodeWithText("Gum habits").assertExists()
-        compose.onNodeWithText("Against the 30\u00A0days before. Gaps only count within a day, between gum doses.").assertExists()
+        compose.onNodeWithText("First dose and gaps, against the 30\u00A0days before. Gaps only count within a day, between gum doses.").assertExists()
         compose.onNodeWithText("Gum calendar").assertExists()
-        compose.onNodeWithText("Each day shaded by gum mg.").assertExists()
+        compose.onNodeWithText("Each day shaded by mg from gum.").assertExists()
         compose.onNodeWithContentDescription("Show gum calendar as a table").assertExists()
         compose.onNodeWithText("Gum products").assertExists()
-        compose.onNodeWithText("Share of gum mg, and how much a day.").assertExists()
+        compose.onNodeWithText("Share of the mg from gum, and how much a day.").assertExists()
     }
 
     @Test
@@ -287,7 +323,7 @@ class InsightsTest {
         waitFor("Share of doses with each tag, against the week before.")
         compose.onNode(hasText("more than the week before", substring = true)).assertExists()
         compose.onNode(hasContentDescription("Up 25 points")).assertExists()
-        compose.onNodeWithText("Against the week before. Gaps only count within a day.").assertExists()
+        compose.onNodeWithText("First dose and gaps, against the week before. Gaps only count within a day.").assertExists()
         compose.onNode(hasContentDescription("30 minutes later")).assertExists()
     }
 
@@ -301,10 +337,10 @@ class InsightsTest {
             app.graph.entries.log(LogRequest(GUM_2, at = london("2026-10-23T00:15")))
         }
         show()
-        waitFor("Each column is a whole day from 00:30, so a dose at 00:15 on Friday sits at the bottom of Thursday.")
+        waitFor("Each day runs from 00:30, so a dose at 00:15 on Friday sits at the bottom of Thursday.")
         compose.onNodeWithContentDescription("Show when you use as a table").performScrollTo().performClick()
-        waitFor("Thursdays, 23:30 to 00:30")
-        compose.onNodeWithText("Thursdays, 08:30 to 09:30").assertExists()
+        waitFor("Thursday 22 October, 23:30 to 00:30")
+        compose.onNodeWithText("Thursday 22 October, 08:30 to 09:30").assertExists()
         compose.onAllNodesWithText("1 dose, 2\u00A0mg").assertCountEquals(2)
     }
 
@@ -343,7 +379,7 @@ class InsightsTest {
     }
 
     @Test
-    fun `on a calendar one week tall, a tapped day's tip sits over it`() {
+    fun `a tapped day's tip sits under its row, clear of the day names`() {
         app.setUp()
         app.seedWeek()
         // Sunday, so the 7 days are Monday to Sunday, one row.
@@ -354,8 +390,8 @@ class InsightsTest {
         waitFor("Thursday 22 October")
         val calendar = compose.onNode(hasContentDescription("Calendar of mg each day", substring = true)).getUnclippedBoundsInRoot()
         val tip = compose.onNodeWithText("Thursday 22 October").getUnclippedBoundsInRoot()
-        // Above the row of days, which starts under the day names, never over the legend below.
-        assertTrue(tip.bottom < calendar.top + 18.dp)
+        // Under the row of days: the names take about 18 dp, and the row 48 dp.
+        assertTrue(tip.top > calendar.top + 18.dp + 44.dp)
     }
 
     @Test

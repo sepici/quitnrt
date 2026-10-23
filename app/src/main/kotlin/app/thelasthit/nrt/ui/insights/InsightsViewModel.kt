@@ -166,7 +166,7 @@ class InsightsViewModel(
                 intake = DailyIntake.of(window, today, firstDay, chosen),
                 previousAverage = before?.let { DailyIntake.of(previous, today, firstDay, it).averagePerDay },
                 productNames = names,
-                hours = HourHeatMap.of(chosenInWindow, choice.dayStart),
+                hours = HourHeatMap.of(chosenInWindow, choice.dayStart, window.dates),
                 calendar = CalendarHeat.of(range, today, firstDay, chosenInWindow),
                 patchesLeftOut = patches.isNotEmpty() && others.isNotEmpty(),
                 onlyPatches = patches.isNotEmpty() && others.isEmpty(),

@@ -2,6 +2,7 @@ package app.thelasthit.nrt.ui.insights
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalDensity
@@ -46,13 +48,14 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.thelasthit.nrt.domain.insights.CalendarHeat
 import app.thelasthit.nrt.domain.insights.HeatScale
 import app.thelasthit.nrt.domain.insights.HourHeatMap
-import app.thelasthit.nrt.ui.format.DayShortMonthFormatter
 import app.thelasthit.nrt.ui.theme.LastHit
 import app.thelasthit.nrt.ui.theme.LastHitColors
 import app.thelasthit.nrt.ui.theme.heatFill
@@ -74,10 +77,13 @@ private val HourRow = 14.dp
 private val HourGap = 2.dp
 private val HourLabelMin = 42.dp
 private val HeaderGap = 6.dp
-private val TipGap = 8.dp
 
-private val CalendarRow = 44.dp
-private val CalendarGap = 4.dp
+/** Room between a mark and its tip for the tip's pointer, clear of a selection ring. */
+private val TipGap = 10.dp
+
+/** A row of the calendar, the full height of a touch target. */
+private val CalendarRow = 48.dp
+private val CalendarGapMin = 4.dp
 private val CalendarCell = 40.dp
 
 /** The step a cell takes on the ramp, shaded by doses or by mg. */
@@ -88,9 +94,14 @@ fun HourHeatMap.stepOf(cell: HourHeatMap.Cell, shade: Shade): Int = when (shade)
 
 /**
  * When doses happen: 24 hour rows from the day start down, by 7 day columns, each cell shaded on
- * the stone ramp. Rows are labelled every 4 by [timeLabel]. Tapping a cell rings it and shows
- * [tip] under it, or over it in the lower half; tapping it again, or off the grid, lets it go.
- * Screen readers get [description] instead.
+ * the stone ramp. Rows are labelled every 4 by [timeLabel]. A weekday the window hasn't reached
+ * yet is one dashed outline, as the calendar draws days before the first dose, not a run of
+ * empty cells.
+ *
+ * Tapping a cell rings it and shows [tip] under it, or over it in the lower half; tapping it
+ * again, or off the grid, lets it go. The cells are small for a finger, so a long press picks
+ * the cell under it and sliding moves the pick, with the tip following. Screen readers get
+ * [description] instead.
  */
 @Composable
 fun HourMap(
@@ -109,6 +120,7 @@ fun HourMap(
     val hourStyle = LastHit.type.caption.copy(fontSize = 12.sp, lineHeight = 12.sp, fontWeight = FontWeight.Medium, color = colors.text3)
     val days = DayOfWeek.entries.map { it.getDisplayName(DayStyle.SHORT, Locale.UK) }
     val hours = (0 until HourHeatMap.ROWS step 4).map { timeLabel(map.startOf(it)) }
+    val noDays = DayOfWeek.entries.map { map.daysOf(it).isEmpty() }
     val density = LocalDensity.current
     // Room for the widest hour at any font size, and never narrower than the mockups' 42 dp.
     val labelWidth = with(density) { maxOf(HourLabelMin.toPx(), hours.maxOf { measurer.measure(it, hourStyle).size.width } + 6.dp.toPx()) }
@@ -121,22 +133,39 @@ fun HourMap(
     fun DrawScope.cellLeft(column: Int) = labelWidth + HourGap.toPx() + column * (cellWidth() + HourGap.toPx())
     fun DrawScope.rowTop(row: Int) = header + HourGap.toPx() + row * (HourRow.toPx() + HourGap.toPx())
 
+    /** The cell at [at], or null off the grid or on a weekday with no days. */
+    fun PointerInputScope.slotAt(at: Offset): HourSlot? {
+        val gap = HourGap.toPx()
+        val width = (size.width - labelWidth - gap * 7) / 7
+        val column = ((at.x - labelWidth - gap) / (width + gap)).toInt()
+        val row = ((at.y - header - gap) / (HourRow.toPx() + gap)).toInt()
+        val inside = at.x >= labelWidth && at.y >= header && column in 0..6 && row in 0 until HourHeatMap.ROWS
+        return if (inside && !noDays[column]) HourSlot(column, row) else null
+    }
+
     Layout(
         content = {
             Canvas(
                 Modifier
                     .fillMaxSize()
                     .semantics { contentDescription = description }
-                    .pointerInput(labelWidth, header) {
-                        detectTapGestures { at ->
-                            val gap = HourGap.toPx()
-                            val width = (size.width - labelWidth - gap * 7) / 7
-                            val column = ((at.x - labelWidth - gap) / (width + gap)).toInt()
-                            val row = ((at.y - header - gap) / (HourRow.toPx() + gap)).toInt()
-                            val inside = at.x >= labelWidth && at.y >= header && column in 0..6 && row in 0 until HourHeatMap.ROWS
-                            val slot = HourSlot(column, row)
-                            select(if (!inside || slot == currentSelected) null else slot)
-                        }
+                    .pointerInput(labelWidth, header, noDays) {
+                        detectTapGestures(
+                            onLongPress = { at -> slotAt(at)?.let(select) },
+                            onTap = { at ->
+                                val slot = slotAt(at)
+                                select(if (slot == currentSelected) null else slot)
+                            },
+                        )
+                    }
+                    .pointerInput(labelWidth, header, noDays) {
+                        detectDragGesturesAfterLongPress(
+                            onDragStart = { at -> slotAt(at)?.let(select) },
+                            onDrag = { change, _ ->
+                                change.consume()
+                                slotAt(change.position)?.let { if (it != currentSelected) select(it) }
+                            },
+                        )
                     },
             ) {
                 days.forEachIndexed { column, day ->
@@ -148,8 +177,13 @@ fun HourMap(
                     drawText(layout, topLeft = Offset(0f, rowTop(index * 4) - layout.size.height / 2f))
                 }
                 val radius = CornerRadius(3.dp.toPx())
-                for (row in 0 until HourHeatMap.ROWS) {
-                    for (column in 0 until 7) {
+                for (column in 0 until 7) {
+                    if (noDays[column]) {
+                        val top = rowTop(0)
+                        drawDashed(Offset(cellLeft(column), top), Size(cellWidth(), rowTop(HourHeatMap.ROWS - 1) + HourRow.toPx() - top), 5.dp.toPx(), colors)
+                        continue
+                    }
+                    for (row in 0 until HourHeatMap.ROWS) {
                         val cell = map.cell(DayOfWeek.entries[column], row)
                         drawRoundRect(
                             colors.heatFill(map.stepOf(cell, shade)),
@@ -167,6 +201,8 @@ fun HourMap(
                 Column(Modifier.semantics { liveRegion = LiveRegionMode.Polite }) {
                     tip(map.cell(DayOfWeek.entries[selected.column], selected.row))
                 }
+                TipPointer(PointerSide.UP)
+                TipPointer(PointerSide.DOWN)
             }
         },
         modifier = modifier
@@ -177,16 +213,23 @@ fun HourMap(
         val total = height.roundToPx()
         val chart = measurables[0].measure(Constraints.fixed(width, total))
         val tipBox = measurables.getOrNull(1)?.measure(Constraints(maxWidth = width))
+        val up = measurables.getOrNull(2)?.measure(Constraints())
+        val down = measurables.getOrNull(3)?.measure(Constraints())
+        val scope: Density = this
         layout(width, total) {
             chart.place(0, 0)
-            if (tipBox != null && selected != null) {
+            if (tipBox != null && up != null && down != null && selected != null) {
                 val gap = HourGap.toPx()
                 val cell = (width - labelWidth - gap * 7) / 7
                 val centre = labelWidth + gap + selected.column * (cell + gap) + cell / 2
                 val top = header + gap + selected.row * (HourRow.toPx() + gap)
-                val x = (centre - tipBox.width / 2).coerceIn(0f, (width - tipBox.width).toFloat().coerceAtLeast(0f))
-                val y = tipTop(top, top + HourRow.toPx(), tipBox.height, total, TipGap.toPx(), preferBelow = selected.row < HourHeatMap.ROWS / 2)
-                tipBox.place(x.toInt(), y.toInt())
+                val bottom = top + HourRow.toPx()
+                val x = (centre - tipBox.width / 2).coerceIn(0f, (width - tipBox.width).toFloat().coerceAtLeast(0f)).toInt()
+                val y = tipTop(top, bottom, tipBox.height, total, TipGap.toPx(), preferBelow = selected.row < HourHeatMap.ROWS / 2).toInt()
+                tipBox.place(x, y)
+                val below = y >= bottom
+                val pointer = if (below) up else down
+                pointer.place(pointerAt(if (below) PointerSide.UP else PointerSide.DOWN, IntRect(x, y, x + tipBox.width, y + tipBox.height), centre, pointer, scope))
             }
         }
     }
@@ -195,8 +238,7 @@ fun HourMap(
 /**
  * Where a tip goes for a mark from [markTop] to [markBottom], in a chart [total] tall: under it
  * when [preferBelow] and there's room, over it when there's room there, and under it when only
- * that has room. With room for neither, as in a calendar one week tall, it goes over the mark,
- * where it covers what came before the chart rather than hiding under what comes after.
+ * that has room. With room for neither it goes under the mark, over what follows the chart.
  */
 private fun tipTop(markTop: Float, markBottom: Float, tipHeight: Int, total: Int, gap: Float, preferBelow: Boolean): Float {
     val below = markBottom + gap
@@ -206,17 +248,19 @@ private fun tipTop(markTop: Float, markBottom: Float, tipHeight: Int, total: Int
     return when {
         preferBelow && fitsBelow -> below
         fitsAbove -> above
-        fitsBelow -> below
-        else -> above
+        else -> below
     }
 }
 
 /**
  * The days of a range as Monday-to-Sunday weeks, each day a square shaded by its mg, with its
- * number in the corner. Days before the first dose are dashed outlines, and today is ringed.
- * Tapping a day rings it and shows [tip], under it when there's room and over it otherwise;
- * tapping it again, or a day that isn't tracked, lets it go. Screen readers get [description]
- * instead.
+ * number in the corner and the month under the 1st. The squares run edge to edge of the content,
+ * and each row is a full touch target tall. Days before the first dose are dashed outlines, and
+ * today is ringed outside.
+ *
+ * Tapping a day picks it, with a ring inside the square in its number's colour, so it never looks
+ * like today, and shows [tip] under its row, pointing at it. Tapping it again, or a day that isn't
+ * tracked, lets it go. Screen readers get [description] instead.
  */
 @Composable
 fun CalendarMap(
@@ -231,6 +275,7 @@ fun CalendarMap(
     val measurer = rememberTextMeasurer()
     val dayStyle = LastHit.type.caption.copy(fontSize = 12.sp, lineHeight = 16.sp, fontWeight = FontWeight.SemiBold, color = colors.text2)
     val numberStyle = LastHit.type.caption.copy(fontSize = 11.sp, lineHeight = 14.sp, fontWeight = FontWeight.SemiBold)
+    val monthStyle = numberStyle.copy(fontSize = 10.sp, lineHeight = 12.sp, fontWeight = FontWeight.Medium)
     val names = DayOfWeek.entries.map { it.getDisplayName(DayStyle.SHORT, Locale.UK) }
     val density = LocalDensity.current
     val header = with(density) { measurer.measure(names.first(), dayStyle).size.height + 2.dp.toPx() }
@@ -238,12 +283,10 @@ fun CalendarMap(
     val currentSelected by rememberUpdatedState(selected)
     val select by rememberUpdatedState(onSelect)
 
-    fun DrawScope.columnWidth() = (size.width - CalendarGap.toPx() * 6) / 7
-    fun DrawScope.cellSize() = min(CalendarCell.toPx(), columnWidth())
-    fun DrawScope.cellOrigin(column: Int, row: Int): Offset {
-        val left = column * (columnWidth() + CalendarGap.toPx()) + (columnWidth() - cellSize()) / 2
-        val top = header + row * CalendarRow.toPx() + (CalendarRow.toPx() - cellSize()) / 2
-        return Offset(left, top)
+    /** The squares' side and the gap between them, for a calendar [width] wide. */
+    fun Density.cells(width: Float): Pair<Float, Float> {
+        val side = min(CalendarCell.toPx(), (width - CalendarGapMin.toPx() * 6) / 7)
+        return side to (width - side * 7) / 6
     }
 
     Layout(
@@ -254,8 +297,9 @@ fun CalendarMap(
                     .semantics { contentDescription = description }
                     .pointerInput(calendar, header) {
                         detectTapGestures { at ->
-                            val gap = CalendarGap.toPx()
-                            val column = (at.x / ((size.width - gap * 6) / 7 + gap)).toInt()
+                            // Each day's touch area is its whole column and row, gaps included.
+                            val (side, gap) = cells(size.width.toFloat())
+                            val column = ((at.x + gap / 2) / (side + gap)).toInt().coerceIn(0, 6)
                             val row = ((at.y - header) / CalendarRow.toPx()).toInt()
                             val day = calendar.weeks.getOrNull(row)?.getOrNull(column)?.takeIf { at.y >= header }
                             val pick = day?.takeIf { it.state == CalendarHeat.State.TRACKED }?.date
@@ -263,45 +307,53 @@ fun CalendarMap(
                         }
                     },
             ) {
+                val (side, gap) = cells(size.width)
+                fun origin(column: Int, row: Int) = Offset(column * (side + gap), header + row * CalendarRow.toPx() + (CalendarRow.toPx() - side) / 2)
                 names.forEachIndexed { column, name ->
                     val layout = measurer.measure(name, dayStyle)
-                    val left = column * (columnWidth() + CalendarGap.toPx())
-                    drawText(layout, topLeft = Offset(left + (columnWidth() - layout.size.width) / 2, 0f))
+                    drawText(layout, topLeft = Offset(column * (side + gap) + (side - layout.size.width) / 2, 0f))
                 }
-                val side = cellSize()
                 val radius = 8.dp.toPx()
                 calendar.weeks.forEachIndexed { row, week ->
                     week.forEachIndexed { column, day ->
                         if (day.state == CalendarHeat.State.OUTSIDE) return@forEachIndexed
-                        val origin = cellOrigin(column, row)
+                        val origin = origin(column, row)
                         val step = calendar.step(day)
                         val ink = if (day.state == CalendarHeat.State.NO_DATA) colors.text3 else colors.heatInk(step)
                         if (day.state == CalendarHeat.State.NO_DATA) {
-                            val inset = 0.75.dp.toPx()
-                            drawRoundRect(
-                                colors.lineStrong,
-                                topLeft = origin + Offset(inset, inset),
-                                size = Size(side - inset * 2, side - inset * 2),
-                                cornerRadius = CornerRadius(radius - inset),
-                                style = Stroke(1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx()))),
-                            )
+                            drawDashed(origin, Size(side, side), radius, colors)
                         } else {
                             drawRoundRect(colors.heatFill(step), topLeft = origin, size = Size(side, side), cornerRadius = CornerRadius(radius))
                         }
                         val isToday = day.date == calendar.today
-                        if (isToday || day.date == selected) drawRing(origin, Size(side, side), radius, colors)
-                        val label = if (day.date.dayOfMonth == 1) DayShortMonthFormatter.format(day.date) else day.date.dayOfMonth.toString()
-                        val layout = measurer.measure(
-                            label,
-                            numberStyle.copy(color = ink, fontWeight = if (isToday) FontWeight.ExtraBold else FontWeight.SemiBold),
-                        )
-                        drawText(layout, topLeft = origin + Offset(6.dp.toPx(), 4.dp.toPx()))
+                        if (isToday) drawRing(origin, Size(side, side), radius, colors)
+                        if (day.date == selected) {
+                            val inset = 3.dp.toPx()
+                            val stroke = 2.dp.toPx()
+                            drawRoundRect(
+                                ink,
+                                topLeft = origin + Offset(inset, inset),
+                                size = Size(side - inset * 2, side - inset * 2),
+                                cornerRadius = CornerRadius(radius - inset),
+                                style = Stroke(stroke),
+                            )
+                        }
+                        val weight = if (isToday || day.date == selected) FontWeight.ExtraBold else FontWeight.SemiBold
+                        val number = measurer.measure(day.date.dayOfMonth.toString(), numberStyle.copy(color = ink, fontWeight = weight))
+                        val corner = origin + Offset(6.dp.toPx(), 4.dp.toPx())
+                        drawText(number, topLeft = corner)
+                        // The 1st names its month on a line of its own, so it fits the square at any font size.
+                        if (day.date.dayOfMonth == 1) {
+                            val month = measurer.measure(day.date.month.getDisplayName(DayStyle.SHORT, Locale.UK), monthStyle.copy(color = ink))
+                            drawText(month, topLeft = corner + Offset(0f, number.size.height.toFloat()))
+                        }
                     }
                 }
             }
             if (selected != null) {
                 calendar.weeks.flatten().firstOrNull { it.date == selected }?.let { day ->
                     Column(Modifier.semantics { liveRegion = LiveRegionMode.Polite }) { tip(day) }
+                    TipPointer(PointerSide.UP)
                 }
             }
         },
@@ -313,22 +365,36 @@ fun CalendarMap(
         val total = height.roundToPx()
         val chart = measurables[0].measure(Constraints.fixed(width, total))
         val tipBox = measurables.getOrNull(1)?.measure(Constraints(maxWidth = width))
+        val pointer = measurables.getOrNull(2)?.measure(Constraints())
+        val scope: Density = this
         layout(width, total) {
             chart.place(0, 0)
             val row = calendar.weeks.indexOfFirst { week -> week.any { it.date == selected } }
-            if (tipBox != null && row >= 0) {
+            if (tipBox != null && pointer != null && row >= 0) {
                 val column = calendar.weeks[row].indexOfFirst { it.date == selected }
-                val gap = CalendarGap.toPx()
-                val columnWidth = (width - gap * 6) / 7
-                val side = min(CalendarCell.toPx(), columnWidth)
-                val centre = column * (columnWidth + gap) + columnWidth / 2
-                val top = header + row * CalendarRow.toPx() + (CalendarRow.toPx() - side) / 2
-                val x = (centre - tipBox.width / 2).coerceIn(0f, (width - tipBox.width).toFloat().coerceAtLeast(0f))
-                val y = tipTop(top, top + side, tipBox.height, total, TipGap.toPx(), preferBelow = true)
-                tipBox.place(x.toInt(), y.toInt())
+                val (side, gap) = scope.cells(width.toFloat())
+                val centre = column * (side + gap) + side / 2
+                val bottom = header + row * CalendarRow.toPx() + (CalendarRow.toPx() + side) / 2
+                // Always under the row, clear of the day names, and over the legend when it runs past the calendar.
+                val x = (centre - tipBox.width / 2).coerceIn(0f, (width - tipBox.width).toFloat().coerceAtLeast(0f)).toInt()
+                val y = (bottom + TipGap.toPx()).toInt()
+                tipBox.place(x, y)
+                pointer.place(pointerAt(PointerSide.UP, IntRect(x, y, x + tipBox.width, y + tipBox.height), centre, pointer, scope))
             }
         }
     }
+}
+
+/** A dashed outline, as for days with no data yet. */
+private fun DrawScope.drawDashed(topLeft: Offset, size: Size, radius: Float, colors: LastHitColors) {
+    val inset = 0.75.dp.toPx()
+    drawRoundRect(
+        colors.lineStrong,
+        topLeft = topLeft + Offset(inset, inset),
+        size = Size(size.width - inset * 2, size.height - inset * 2),
+        cornerRadius = CornerRadius(radius - inset),
+        style = Stroke(1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx()))),
+    )
 }
 
 /** A 2 dp ring in the text colour, held off the shape by a 2 dp gap in the page colour. */
@@ -490,19 +556,18 @@ private fun BoundaryTicks(starts: List<String>, swatch: Dp) {
     }
 }
 
-/** The calendar key's sample for today: a small square ringed like today's day. */
+/** The calendar key's sample for today: the ring alone, since today's square can take any shade. */
 @Composable
 fun TodayRingKey() {
     val colors = LastHit.colors
     Canvas(Modifier.size(20.dp)) {
         val inset = 4.dp.toPx()
         val side = size.width - inset * 2
-        drawRoundRect(colors.heatFill(2), topLeft = Offset(inset, inset), size = Size(side, side), cornerRadius = CornerRadius(3.dp.toPx()))
         drawRing(Offset(inset, inset), Size(side, side), 3.dp.toPx(), colors)
     }
 }
 
-/** The calendar key's sample for days before the first dose: a dashed square. */
+/** The key's sample for days before the first dose, on the calendar and the hour map: a dashed square. */
 @Composable
 fun NoDataKey() {
     val colors = LastHit.colors

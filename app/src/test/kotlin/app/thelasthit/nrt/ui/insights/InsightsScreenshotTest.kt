@@ -141,7 +141,7 @@ class InsightsScreenshotTest {
             ready = hasContentDescription("Show when you use as a table"),
             before = {
                 onNode(hasContentDescription("Show when you use as a table")).performScrollTo().performClick()
-                waitUntil(5_000) { onAllNodes(hasText("Wednesdays, 08:00 to 09:00")).fetchSemanticsNodes().isNotEmpty() }
+                waitUntil(5_000) { onAllNodes(hasText("Wednesday 21 October, 08:00 to 09:00")).fetchSemanticsNodes().isNotEmpty() }
                 onNode(hasContentDescription("Show calendar as a table")).performScrollTo().performClick()
                 waitUntil(5_000) { onAllNodes(hasText("Monday 19 October")).fetchSemanticsNodes().isNotEmpty() }
             },
