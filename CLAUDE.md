@@ -9,6 +9,7 @@ each week met into a hit on a pixel-art creature that stands for the habit.
 1. `docs/STATUS.md`: where the build is, what's decided since the plan, and what's next.
 2. `docs/PLAN.md`: the agreed plan (scope, rules, phases). Don't change agreed behaviour without asking.
 3. `docs/STYLE.md`: the copy rules. They apply to every user-facing string.
+4. `docs/ROADMAP.md`: each remaining phase cut into slices, the decisions they need, and the rules for working unattended.
 
 ## Working with the owner
 
