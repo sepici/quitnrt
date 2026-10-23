@@ -10,6 +10,7 @@ Everything stays on the phone. The app has no internet permission.
 - **Status and next steps:** [`docs/STATUS.md`](docs/STATUS.md)
 - **Plan:** [`docs/PLAN.md`](docs/PLAN.md)
 - **Copy rules:** [`docs/STYLE.md`](docs/STYLE.md)
+- **Release builds and signing:** [`docs/RELEASE.md`](docs/RELEASE.md)
 - **Product research:** [`docs/research/catalogue/`](docs/research/catalogue/)
 
 ## Layout

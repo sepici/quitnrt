@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- No qualifier needed: minSdk 26 always has adaptive icons. It moved here from
+     mipmap-anydpi-v26 rather than to mipmap-anydpi, because AGP's incremental resource merge
+     treats those two as the same output and drops the icon from existing debug builds. -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/ic_launcher_background" />
     <foreground android:drawable="@drawable/ic_launcher_foreground" />
