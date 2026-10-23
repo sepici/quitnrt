@@ -69,11 +69,16 @@ class TriggersTest {
                 entry("2026-10-21T08:00", tags = setOf("coffee_tea")),
                 entry("2026-10-21T13:00", tags = setOf("after_meal")),
                 entry("2026-10-21T23:30", tags = setOf("stressed")),
+                entry("2026-10-21T23:45"),
             ),
             previous = null,
             groupOf = groups::get,
         )
         assertEquals(listOf("coffee_tea"), triggers.byTimeOfDay.getValue(TimeOfDay.MORNING).map { it.key })
+        // The untagged dose still counts toward the night's doses, so stressed is half of them.
+        assertEquals(2, triggers.partDoses.getValue(TimeOfDay.NIGHT))
+        assertEquals(0.5, triggers.byTimeOfDay.getValue(TimeOfDay.NIGHT).single().share)
+        assertEquals(0, triggers.partDoses.getValue(TimeOfDay.EVENING))
         assertEquals(listOf("stressed"), triggers.byTimeOfDay.getValue(TimeOfDay.NIGHT).map { it.key })
         assertTrue(triggers.byTimeOfDay.getValue(TimeOfDay.EVENING).isEmpty())
     }

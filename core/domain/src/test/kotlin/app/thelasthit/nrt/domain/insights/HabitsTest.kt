@@ -50,7 +50,23 @@ class HabitsTest {
         )
         // Gaps of 2, 5 and 1 hours. The 18 hours overnight don't count.
         assertEquals(Duration.ofMinutes(160), habits.averageGap)
-        assertEquals(Habits.Gap(Duration.ofHours(5), LocalDate.parse("2026-10-20")), habits.longestGap)
+        assertEquals(
+            Habits.Gap(Duration.ofHours(5), LocalDate.parse("2026-10-20"), LocalTime.of(10, 0), LocalTime.of(15, 0)),
+            habits.longestGap,
+        )
+    }
+
+    @Test
+    fun `a gap's times are each dose's own clock`() {
+        val habits = Habits.of(
+            listOf(entry("2026-10-20T08:00"), entry("2026-10-20T12:30", zone = java.time.ZoneId.of("Europe/Paris"))),
+            previous = null,
+            dayStart,
+        )
+        // 12:30 in Paris is 11:30 in London, so the gap is 3 h 30 min, from 08:00 to 12:30.
+        assertEquals(Duration.ofMinutes(210), habits.longestGap?.length)
+        assertEquals(LocalTime.of(8, 0), habits.longestGap?.from)
+        assertEquals(LocalTime.of(12, 30), habits.longestGap?.to)
     }
 
     @Test

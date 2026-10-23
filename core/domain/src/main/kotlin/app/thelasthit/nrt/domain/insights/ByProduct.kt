@@ -4,19 +4,25 @@ import app.thelasthit.nrt.domain.dose.Dose
 import app.thelasthit.nrt.domain.dose.sum
 import app.thelasthit.nrt.domain.log.Entry
 import app.thelasthit.nrt.domain.product.DoseUnit
+import app.thelasthit.nrt.domain.product.ProductForm
 
 /** Each product's share of the mg, and its units a day. Patches count here, as in every mg total. */
 data class ByProduct(val products: List<Share>) {
 
-    /** [name] is as it was last logged; [unitsPerDay] is across every day the period covers. */
+    /**
+     * [name], [form] and [unit] are as last logged; [unitsPerDay] is across every day the period
+     * covers, and [days] is how many of those days had any.
+     */
     data class Share(
         val productId: String,
         val name: String,
+        val form: ProductForm,
         val unit: DoseUnit,
         val total: Dose,
         val share: Double,
         val units: Int,
         val unitsPerDay: Double,
+        val days: Int,
     )
 
     companion object {
@@ -30,11 +36,13 @@ data class ByProduct(val products: List<Share>) {
                 Share(
                     productId = id,
                     name = latest.productName,
+                    form = latest.form,
                     unit = latest.unit,
                     total = total,
                     share = if (all == Dose.ZERO) 0.0 else total.micrograms.toDouble() / all.micrograms,
                     units = units,
                     unitsPerDay = if (days <= 0) 0.0 else units.toDouble() / days,
+                    days = list.map { it.logicalDate }.distinct().size,
                 )
             }.sortedWith(compareByDescending<Share> { it.total }.thenBy { it.name })
             return ByProduct(products)
