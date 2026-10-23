@@ -1,0 +1,2914 @@
+{
+ "version": 1,
+ "lines": [
+  {
+   "id": "nicorette-invisipatch-uk",
+   "brand": "Nicorette",
+   "line": "Invisipatch",
+   "shortName": "Nicorette Invisipatch",
+   "kind": "BRAND",
+   "form": "PATCH_16H",
+   "unit": "PATCH",
+   "markets": [
+    "GB",
+    "IE"
+   ],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 10,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 15,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 25,
+     "maxPerDay": 1
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicorette-gum-uk",
+   "brand": "Nicorette",
+   "line": "Gum",
+   "shortName": "Nicorette gum",
+   "kind": "BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Icy White",
+    "Freshmint",
+    "Fruitfusion",
+    "Original"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicorette-cools-uk",
+   "brand": "Nicorette",
+   "line": "Cools lozenge",
+   "shortName": "Nicorette Cools",
+   "kind": "BRAND",
+   "form": "LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "GB",
+    "IE"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Icy Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicorette-fruit-lozenge-uk",
+   "brand": "Nicorette",
+   "line": "Fruit lozenge",
+   "shortName": "Nicorette Fruit lozenge",
+   "kind": "BRAND",
+   "form": "LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Fruit"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicorette-quickmist-uk",
+   "brand": "Nicorette",
+   "line": "QuickMist mouth spray",
+   "shortName": "QuickMist",
+   "kind": "BRAND",
+   "form": "MOUTH_SPRAY",
+   "unit": "SPRAY",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Freshmint",
+    "Spearmint",
+    "Cool Berry"
+   ],
+   "strengths": [
+    {
+     "mg": 1,
+     "maxPerDay": 64
+    }
+   ],
+   "window": {
+    "count": 4,
+    "hours": 1
+   }
+  },
+  {
+   "id": "nicorette-inhalator-uk",
+   "brand": "Nicorette",
+   "line": "Inhalator",
+   "shortName": "Nicorette Inhalator",
+   "kind": "BRAND",
+   "form": "INHALATOR",
+   "unit": "CARTRIDGE",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 15,
+     "maxPerDay": 6
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicorette-nasal-spray-uk",
+   "brand": "Nicorette",
+   "line": "Nasal spray",
+   "shortName": "Nicorette nasal spray",
+   "kind": "BRAND",
+   "form": "NASAL_SPRAY",
+   "unit": "SPRAY",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 0.5,
+     "maxPerDay": 64
+    }
+   ],
+   "window": {
+    "count": 4,
+    "hours": 1
+   }
+  },
+  {
+   "id": "nicorette-microtab-uk",
+   "brand": "Nicorette",
+   "line": "Microtab",
+   "shortName": "Nicorette Microtab",
+   "kind": "BRAND",
+   "form": "MICROTAB",
+   "unit": "TABLET",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 40
+    }
+   ],
+   "window": {
+    "count": 2,
+    "hours": 1
+   }
+  },
+  {
+   "id": "niquitin-clear-patch-uk",
+   "brand": "NiQuitin",
+   "line": "Clear patch",
+   "shortName": "NiQuitin patch",
+   "kind": "BRAND",
+   "form": "PATCH_24H",
+   "unit": "PATCH",
+   "markets": [
+    "GB",
+    "IE"
+   ],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 21,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 14,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 7,
+     "maxPerDay": 1
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "niquitin-pre-quit-patch-uk",
+   "brand": "NiQuitin",
+   "line": "Pre-Quit clear patch",
+   "shortName": "NiQuitin Pre-Quit patch",
+   "kind": "BRAND",
+   "form": "PATCH_24H",
+   "unit": "PATCH",
+   "markets": [
+    "GB"
+   ],
+   "status": "UNCERTAIN",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 21,
+     "maxPerDay": 1
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "niquitin-minis-uk",
+   "brand": "NiQuitin",
+   "line": "Minis",
+   "shortName": "NiQuitin Minis",
+   "kind": "BRAND",
+   "form": "MINI_LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Mint",
+    "Citrus"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "niquitin-minis-1-5-uk",
+   "brand": "NiQuitin",
+   "line": "Minis (older pack)",
+   "shortName": "NiQuitin Minis",
+   "kind": "BRAND",
+   "form": "MINI_LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "GB"
+   ],
+   "status": "DISCONTINUED",
+   "flavours": [
+    "Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 1.5,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "niquitin-lozenges-uk",
+   "brand": "NiQuitin",
+   "line": "Lozenges",
+   "shortName": "NiQuitin lozenge",
+   "kind": "BRAND",
+   "form": "LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "niquitin-gum-uk",
+   "brand": "NiQuitin",
+   "line": "Extra Fresh Mint gum",
+   "shortName": "NiQuitin gum",
+   "kind": "BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "GB"
+   ],
+   "status": "DISCONTINUED",
+   "flavours": [
+    "Extra Fresh Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "niquitin-strips-uk",
+   "brand": "NiQuitin",
+   "line": "Strips",
+   "shortName": "NiQuitin Strips",
+   "kind": "BRAND",
+   "form": "ORAL_FILM",
+   "unit": "STRIP",
+   "markets": [
+    "GB"
+   ],
+   "status": "DISCONTINUED",
+   "flavours": [
+    "Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 2.5,
+     "maxPerDay": null
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicotinell-patch-uk",
+   "brand": "Nicotinell",
+   "line": "24 hour patch",
+   "shortName": "Nicotinell patch",
+   "kind": "BRAND",
+   "form": "PATCH_24H",
+   "unit": "PATCH",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 21,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 14,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 7,
+     "maxPerDay": 1
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicotinell-gum-uk",
+   "brand": "Nicotinell",
+   "line": "Gum",
+   "shortName": "Nicotinell gum",
+   "kind": "BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "GB",
+    "IE"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Mint",
+    "Fruit"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 24
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": {
+    "count": 1,
+    "hours": 1
+   }
+  },
+  {
+   "id": "nicotinell-lozenge-uk",
+   "brand": "Nicotinell",
+   "line": "Mint lozenge",
+   "shortName": "Nicotinell lozenge",
+   "kind": "BRAND",
+   "form": "LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 1,
+     "maxPerDay": 24
+    },
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    }
+   ],
+   "window": {
+    "count": 1,
+    "hours": 1
+   }
+  },
+  {
+   "id": "nicotinell-spray-uk",
+   "brand": "Nicotinell",
+   "line": "Rapid Relief oral spray",
+   "shortName": "Nicotinell spray",
+   "kind": "BRAND",
+   "form": "MOUTH_SPRAY",
+   "unit": "SPRAY",
+   "markets": [
+    "GB",
+    "IE"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Spicy Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 1,
+     "maxPerDay": 64
+    }
+   ],
+   "window": {
+    "count": 4,
+    "hours": 1
+   }
+  },
+  {
+   "id": "boots-nicassist-gum",
+   "brand": "Boots NicAssist",
+   "line": "Gum",
+   "shortName": "NicAssist gum",
+   "kind": "OWN_BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Minty Fresh",
+    "Ice Mint",
+    "Fruit Fresh"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "boots-nicassist-lozenge",
+   "brand": "Boots NicAssist",
+   "line": "Lozenge",
+   "shortName": "NicAssist lozenge",
+   "kind": "OWN_BRAND",
+   "form": "LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 1,
+     "maxPerDay": 24
+    },
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "boots-nicassist-patch-16h",
+   "brand": "Boots NicAssist",
+   "line": "Translucent patch",
+   "shortName": "NicAssist patch",
+   "kind": "OWN_BRAND",
+   "form": "PATCH_16H",
+   "unit": "PATCH",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 10,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 15,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 25,
+     "maxPerDay": 1
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "boots-nicassist-patch-24h",
+   "brand": "Boots NicAssist",
+   "line": "24 hour patch",
+   "shortName": "NicAssist 24 h patch",
+   "kind": "OWN_BRAND",
+   "form": "PATCH_24H",
+   "unit": "PATCH",
+   "markets": [
+    "GB"
+   ],
+   "status": "DISCONTINUED",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 7,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 14,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 21,
+     "maxPerDay": 1
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "boots-nicassist-microtab",
+   "brand": "Boots NicAssist",
+   "line": "Microtab",
+   "shortName": "NicAssist Microtab",
+   "kind": "OWN_BRAND",
+   "form": "MICROTAB",
+   "unit": "TABLET",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 40
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "boots-nicassist-nasal-spray",
+   "brand": "Boots NicAssist",
+   "line": "Nasal spray",
+   "shortName": "NicAssist nasal spray",
+   "kind": "OWN_BRAND",
+   "form": "NASAL_SPRAY",
+   "unit": "SPRAY",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 0.5,
+     "maxPerDay": 64
+    }
+   ],
+   "window": {
+    "count": 4,
+    "hours": 1
+   }
+  },
+  {
+   "id": "boots-nicassist-mouth-spray",
+   "brand": "Boots NicAssist",
+   "line": "Mouth spray",
+   "shortName": "NicAssist mouth spray",
+   "kind": "OWN_BRAND",
+   "form": "MOUTH_SPRAY",
+   "unit": "SPRAY",
+   "markets": [
+    "GB"
+   ],
+   "status": "DISCONTINUED",
+   "flavours": [
+    "Peppermint"
+   ],
+   "strengths": [
+    {
+     "mg": 1,
+     "maxPerDay": 64
+    }
+   ],
+   "window": {
+    "count": 4,
+    "hours": 1
+   }
+  },
+  {
+   "id": "boots-nicassist-inhalator",
+   "brand": "Boots NicAssist",
+   "line": "Inhalator",
+   "shortName": "NicAssist Inhalator",
+   "kind": "OWN_BRAND",
+   "form": "INHALATOR",
+   "unit": "CARTRIDGE",
+   "markets": [
+    "GB"
+   ],
+   "status": "DISCONTINUED",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 15,
+     "maxPerDay": 6
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "superdrug-gum",
+   "brand": "Superdrug",
+   "line": "Nicotine gum",
+   "shortName": "Superdrug gum",
+   "kind": "OWN_BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Peppermint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "superdrug-lozenge",
+   "brand": "Superdrug",
+   "line": "Nicotine lozenge",
+   "shortName": "Superdrug lozenge",
+   "kind": "OWN_BRAND",
+   "form": "LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Peppermint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "tesco-gum",
+   "brand": "Tesco",
+   "line": "Nicotine gum",
+   "shortName": "Tesco gum",
+   "kind": "OWN_BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Peppermint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "tesco-lozenge",
+   "brand": "Tesco",
+   "line": "Nicotine lozenge",
+   "shortName": "Tesco lozenge",
+   "kind": "OWN_BRAND",
+   "form": "LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Peppermint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "asda-gum",
+   "brand": "Asda",
+   "line": "Nicotine gum",
+   "shortName": "Asda gum",
+   "kind": "OWN_BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Peppermint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "asda-lozenge",
+   "brand": "Asda",
+   "line": "Nicotine lozenge",
+   "shortName": "Asda lozenge",
+   "kind": "OWN_BRAND",
+   "form": "LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Peppermint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "sainsburys-gum",
+   "brand": "Sainsbury's",
+   "line": "Nicotine gum",
+   "shortName": "Sainsbury's gum",
+   "kind": "OWN_BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Peppermint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "sainsburys-lozenge",
+   "brand": "Sainsbury's",
+   "line": "Nicotine lozenge",
+   "shortName": "Sainsbury's lozenge",
+   "kind": "OWN_BRAND",
+   "form": "LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Peppermint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "morrisons-gum",
+   "brand": "Morrisons",
+   "line": "Nicotine gum",
+   "shortName": "Morrisons gum",
+   "kind": "OWN_BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Peppermint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "morrisons-lozenge",
+   "brand": "Morrisons",
+   "line": "Nicotine lozenge",
+   "shortName": "Morrisons lozenge",
+   "kind": "OWN_BRAND",
+   "form": "LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Peppermint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "galpharm-gum",
+   "brand": "Galpharm",
+   "line": "Nicotine gum",
+   "shortName": "Galpharm gum",
+   "kind": "OWN_BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Peppermint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "galpharm-lozenge",
+   "brand": "Galpharm",
+   "line": "Nicotine lozenge",
+   "shortName": "Galpharm lozenge",
+   "kind": "OWN_BRAND",
+   "form": "LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "GB"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Peppermint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicorette-gum-us",
+   "brand": "Nicorette",
+   "line": "Gum",
+   "shortName": "Nicorette gum",
+   "kind": "BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Original",
+    "Mint",
+    "White Ice Mint",
+    "Spearmint Burst",
+    "Fruit Chill",
+    "Cinnamon Surge"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 24
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 24
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicorette-lozenge-us",
+   "brand": "Nicorette",
+   "line": "Lozenge",
+   "shortName": "Nicorette lozenge",
+   "kind": "BRAND",
+   "form": "LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Mint",
+    "Ice Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 20
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 20
+    }
+   ],
+   "window": {
+    "count": 5,
+    "hours": 6
+   }
+  },
+  {
+   "id": "nicorette-mini-lozenge-us",
+   "brand": "Nicorette",
+   "line": "Mini lozenge",
+   "shortName": "Nicorette mini",
+   "kind": "BRAND",
+   "form": "MINI_LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 20
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 20
+    }
+   ],
+   "window": {
+    "count": 5,
+    "hours": 6
+   }
+  },
+  {
+   "id": "nicoderm-cq-patch-us",
+   "brand": "NicoDerm CQ",
+   "line": "Clear patch",
+   "shortName": "NicoDerm CQ patch",
+   "kind": "BRAND",
+   "form": "PATCH_24H",
+   "unit": "PATCH",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 21,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 14,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 7,
+     "maxPerDay": 1
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "habitrol-patch-us",
+   "brand": "Habitrol",
+   "line": "Patch",
+   "shortName": "Habitrol patch",
+   "kind": "BRAND",
+   "form": "PATCH_24H",
+   "unit": "PATCH",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 21,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 14,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 7,
+     "maxPerDay": 1
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "habitrol-gum-us",
+   "brand": "Habitrol",
+   "line": "Gum",
+   "shortName": "Habitrol gum",
+   "kind": "BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Coated Mint",
+    "Coated Cinnamon"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 24
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 24
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "habitrol-lozenge-us",
+   "brand": "Habitrol",
+   "line": "Lozenge",
+   "shortName": "Habitrol lozenge",
+   "kind": "BRAND",
+   "form": "LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Original",
+    "Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 20
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 20
+    }
+   ],
+   "window": {
+    "count": 5,
+    "hours": 6
+   }
+  },
+  {
+   "id": "nicotrol-inhaler-us",
+   "brand": "Nicotrol",
+   "line": "Inhaler",
+   "shortName": "Nicotrol inhaler",
+   "kind": "BRAND",
+   "form": "INHALATOR",
+   "unit": "CARTRIDGE",
+   "markets": [
+    "US"
+   ],
+   "status": "DISCONTINUED",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 10,
+     "maxPerDay": 16
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicotrol-ns-us",
+   "brand": "Nicotrol",
+   "line": "NS nasal spray",
+   "shortName": "Nicotrol NS",
+   "kind": "BRAND",
+   "form": "NASAL_SPRAY",
+   "unit": "SPRAY",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 0.5,
+     "maxPerDay": 80
+    }
+   ],
+   "window": {
+    "count": 10,
+    "hours": 1
+   }
+  },
+  {
+   "id": "cvs-gum-us",
+   "brand": "CVS Health",
+   "line": "Nicotine gum",
+   "shortName": "CVS Health gum",
+   "kind": "OWN_BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Original",
+    "Mint",
+    "Ice Mint",
+    "Fruit",
+    "Cinnamon"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 24
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 24
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "cvs-lozenge-us",
+   "brand": "CVS Health",
+   "line": "Nicotine lozenge",
+   "shortName": "CVS Health lozenge",
+   "kind": "OWN_BRAND",
+   "form": "LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Mint",
+    "Cherry",
+    "Cinnamon",
+    "Ice Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 20
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 20
+    }
+   ],
+   "window": {
+    "count": 5,
+    "hours": 6
+   }
+  },
+  {
+   "id": "cvs-mini-lozenge-us",
+   "brand": "CVS Health",
+   "line": "Nicotine mini lozenge",
+   "shortName": "CVS Health mini",
+   "kind": "OWN_BRAND",
+   "form": "MINI_LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Mint",
+    "Cinnamon"
+   ],
+   "strengths": [
+    {
+     "mg": 4,
+     "maxPerDay": 20
+    }
+   ],
+   "window": {
+    "count": 5,
+    "hours": 6
+   }
+  },
+  {
+   "id": "cvs-patch-us",
+   "brand": "CVS Health",
+   "line": "Nicotine patch",
+   "shortName": "CVS Health patch",
+   "kind": "OWN_BRAND",
+   "form": "PATCH_24H",
+   "unit": "PATCH",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 21,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 14,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 7,
+     "maxPerDay": 1
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "walgreens-gum-us",
+   "brand": "Walgreens",
+   "line": "Nicotine gum",
+   "shortName": "Walgreens gum",
+   "kind": "OWN_BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Original",
+    "Mint",
+    "Fruit Freeze"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 24
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 24
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "walgreens-lozenge-us",
+   "brand": "Walgreens",
+   "line": "Nicotine lozenge",
+   "shortName": "Walgreens lozenge",
+   "kind": "OWN_BRAND",
+   "form": "LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Cinnamon",
+    "Ice Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 20
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 20
+    }
+   ],
+   "window": {
+    "count": 5,
+    "hours": 6
+   }
+  },
+  {
+   "id": "walgreens-mini-lozenge-us",
+   "brand": "Walgreens",
+   "line": "Nicotine mini lozenge",
+   "shortName": "Walgreens mini",
+   "kind": "OWN_BRAND",
+   "form": "MINI_LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 4,
+     "maxPerDay": 20
+    }
+   ],
+   "window": {
+    "count": 5,
+    "hours": 6
+   }
+  },
+  {
+   "id": "walgreens-patch-us",
+   "brand": "Walgreens",
+   "line": "Nicotine patch",
+   "shortName": "Walgreens patch",
+   "kind": "OWN_BRAND",
+   "form": "PATCH_24H",
+   "unit": "PATCH",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 21,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 14,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 7,
+     "maxPerDay": 1
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "equate-gum-us",
+   "brand": "Equate",
+   "line": "Nicotine gum",
+   "shortName": "Equate gum",
+   "kind": "OWN_BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Original",
+    "Fruit",
+    "Mint",
+    "Cinnamon",
+    "Ice Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 24
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 24
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "equate-lozenge-us",
+   "brand": "Equate",
+   "line": "Nicotine lozenge",
+   "shortName": "Equate lozenge",
+   "kind": "OWN_BRAND",
+   "form": "LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Mint",
+    "Cherry",
+    "Cinnamon",
+    "Ice Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 20
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 20
+    }
+   ],
+   "window": {
+    "count": 5,
+    "hours": 6
+   }
+  },
+  {
+   "id": "equate-mini-lozenge-us",
+   "brand": "Equate",
+   "line": "Nicotine mini lozenge",
+   "shortName": "Equate mini",
+   "kind": "OWN_BRAND",
+   "form": "MINI_LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Mint",
+    "Cherry Ice",
+    "Citrus"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 20
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 20
+    }
+   ],
+   "window": {
+    "count": 5,
+    "hours": 6
+   }
+  },
+  {
+   "id": "equate-patch-us",
+   "brand": "Equate",
+   "line": "Nicotine patch",
+   "shortName": "Equate patch",
+   "kind": "OWN_BRAND",
+   "form": "PATCH_24H",
+   "unit": "PATCH",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 21,
+     "maxPerDay": 1
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "kirkland-gum-us",
+   "brand": "Kirkland Signature",
+   "line": "Nicotine gum",
+   "shortName": "Kirkland Signature gum",
+   "kind": "OWN_BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Original",
+    "Ice Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 24
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 24
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "kirkland-lozenge-us",
+   "brand": "Kirkland Signature",
+   "line": "Nicotine lozenge",
+   "shortName": "Kirkland Signature lozenge",
+   "kind": "OWN_BRAND",
+   "form": "LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Mint",
+    "Cherry"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 20
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 20
+    }
+   ],
+   "window": {
+    "count": 5,
+    "hours": 6
+   }
+  },
+  {
+   "id": "up-and-up-gum-us",
+   "brand": "up&up",
+   "line": "Nicotine gum",
+   "shortName": "up&up gum",
+   "kind": "OWN_BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 24
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 24
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "up-and-up-mini-lozenge-us",
+   "brand": "up&up",
+   "line": "Nicotine mini lozenge",
+   "shortName": "up&up mini",
+   "kind": "OWN_BRAND",
+   "form": "MINI_LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Mint",
+    "Cherry Ice",
+    "Citrus"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 20
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 20
+    }
+   ],
+   "window": {
+    "count": 5,
+    "hours": 6
+   }
+  },
+  {
+   "id": "up-and-up-patch-us",
+   "brand": "up&up",
+   "line": "Nicotine patch",
+   "shortName": "up&up patch",
+   "kind": "OWN_BRAND",
+   "form": "PATCH_24H",
+   "unit": "PATCH",
+   "markets": [
+    "US"
+   ],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 21,
+     "maxPerDay": 1
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicorette-gum-ca",
+   "brand": "Nicorette",
+   "line": "Gum",
+   "shortName": "Nicorette gum",
+   "kind": "BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "CA"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Fresh Fruit",
+    "Cinnamon",
+    "Extreme Chill",
+    "Ultra Fresh Mint",
+    "Spearmint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 20
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 20
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicorette-lozenge-ca",
+   "brand": "Nicorette",
+   "line": "Lozenge",
+   "shortName": "Nicorette lozenge",
+   "kind": "BRAND",
+   "form": "LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "CA"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Mint",
+    "Fresh Fruit"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicorette-mini-lozenge-ca",
+   "brand": "Nicorette",
+   "line": "Mini lozenge",
+   "shortName": "Nicorette mini",
+   "kind": "BRAND",
+   "form": "MINI_LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "CA"
+   ],
+   "status": "UNCERTAIN",
+   "flavours": [
+    "Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicorette-quickmist-ca",
+   "brand": "Nicorette",
+   "line": "QuickMist mouth spray",
+   "shortName": "QuickMist",
+   "kind": "BRAND",
+   "form": "MOUTH_SPRAY",
+   "unit": "SPRAY",
+   "markets": [
+    "CA"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Mint",
+    "Spearmint",
+    "Berry"
+   ],
+   "strengths": [
+    {
+     "mg": 1,
+     "maxPerDay": 64
+    }
+   ],
+   "window": {
+    "count": 4,
+    "hours": 1
+   }
+  },
+  {
+   "id": "nicorette-quickmist-smarttrack-ca",
+   "brand": "Nicorette",
+   "line": "QuickMist SmartTrack",
+   "shortName": "QuickMist SmartTrack",
+   "kind": "BRAND",
+   "form": "MOUTH_SPRAY",
+   "unit": "SPRAY",
+   "markets": [
+    "CA"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 1,
+     "maxPerDay": 64
+    }
+   ],
+   "window": {
+    "count": 4,
+    "hours": 1
+   }
+  },
+  {
+   "id": "nicorette-inhaler-ca",
+   "brand": "Nicorette",
+   "line": "Inhaler",
+   "shortName": "Nicorette inhaler",
+   "kind": "BRAND",
+   "form": "INHALATOR",
+   "unit": "CARTRIDGE",
+   "markets": [
+    "CA"
+   ],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 10,
+     "maxPerDay": 12
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicoderm-patch-ca",
+   "brand": "NicoDerm",
+   "line": "Clear patch",
+   "shortName": "NicoDerm patch",
+   "kind": "BRAND",
+   "form": "PATCH_24H",
+   "unit": "PATCH",
+   "markets": [
+    "CA"
+   ],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 21,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 14,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 7,
+     "maxPerDay": 1
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "habitrol-patch-ca",
+   "brand": "Habitrol",
+   "line": "Patch",
+   "shortName": "Habitrol patch",
+   "kind": "BRAND",
+   "form": "PATCH_24H",
+   "unit": "PATCH",
+   "markets": [
+    "CA"
+   ],
+   "status": "UNCERTAIN",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 21,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 14,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 7,
+     "maxPerDay": 1
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "thrive-gum-ca",
+   "brand": "Thrive",
+   "line": "Gum",
+   "shortName": "Thrive gum",
+   "kind": "BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "CA"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Fresh Spearmint",
+    "Cool Mint",
+    "Fruit Explosion"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 20
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 20
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "thrive-lozenge-ca",
+   "brand": "Thrive",
+   "line": "Lozenge",
+   "shortName": "Thrive lozenge",
+   "kind": "BRAND",
+   "form": "LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "CA"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Peppermint"
+   ],
+   "strengths": [
+    {
+     "mg": 1,
+     "maxPerDay": 25
+    },
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "life-brand-gum-ca",
+   "brand": "Life Brand",
+   "line": "Nicotine gum",
+   "shortName": "Life Brand gum",
+   "kind": "OWN_BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "CA"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Ice Mint",
+    "Mint Chill"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": null
+    },
+    {
+     "mg": 4,
+     "maxPerDay": null
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "life-brand-mini-lozenge-ca",
+   "brand": "Life Brand",
+   "line": "Nicotine mini lozenge",
+   "shortName": "Life Brand mini",
+   "kind": "OWN_BRAND",
+   "form": "MINI_LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "CA"
+   ],
+   "status": "UNCERTAIN",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": null
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "life-brand-patch-ca",
+   "brand": "Life Brand",
+   "line": "Nicotine patch",
+   "shortName": "Life Brand patch",
+   "kind": "OWN_BRAND",
+   "form": "PATCH_24H",
+   "unit": "PATCH",
+   "markets": [
+    "CA"
+   ],
+   "status": "UNCERTAIN",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 14,
+     "maxPerDay": 1
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "rexall-gum-ca",
+   "brand": "Rexall",
+   "line": "Nic-Assist gum",
+   "shortName": "Rexall gum",
+   "kind": "OWN_BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "CA"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Fresh Mint",
+    "Cinnamon"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": null
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicorette-gum-au",
+   "brand": "Nicorette",
+   "line": "Gum",
+   "shortName": "Nicorette gum",
+   "kind": "BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "AU"
+   ],
+   "status": "UNCERTAIN",
+   "flavours": [
+    "Classic",
+    "Icy Mint",
+    "Freshfruit"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 20
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 10
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicorette-cooldrops-au",
+   "brand": "Nicorette",
+   "line": "Cooldrops lozenge",
+   "shortName": "Nicorette Cooldrops",
+   "kind": "BRAND",
+   "form": "LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "AU",
+    "NZ"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Icy Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicorette-fruitdrops-au",
+   "brand": "Nicorette",
+   "line": "Fruitdrops lozenge",
+   "shortName": "Nicorette Fruitdrops",
+   "kind": "BRAND",
+   "form": "LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "AU"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Fruit"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicorette-invisipatch-au",
+   "brand": "Nicorette",
+   "line": "Invisipatch",
+   "shortName": "Nicorette Invisipatch",
+   "kind": "BRAND",
+   "form": "PATCH_16H",
+   "unit": "PATCH",
+   "markets": [
+    "AU"
+   ],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 10,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 15,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 25,
+     "maxPerDay": 1
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicorette-quickmist-au",
+   "brand": "Nicorette",
+   "line": "QuickMist mouth spray",
+   "shortName": "QuickMist",
+   "kind": "BRAND",
+   "form": "MOUTH_SPRAY",
+   "unit": "SPRAY",
+   "markets": [
+    "AU"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Freshmint",
+    "Cool Berry"
+   ],
+   "strengths": [
+    {
+     "mg": 1,
+     "maxPerDay": 64
+    }
+   ],
+   "window": {
+    "count": 4,
+    "hours": 1
+   }
+  },
+  {
+   "id": "nicorette-inhalator-au",
+   "brand": "Nicorette",
+   "line": "Inhalator",
+   "shortName": "Nicorette Inhalator",
+   "kind": "BRAND",
+   "form": "INHALATOR",
+   "unit": "CARTRIDGE",
+   "markets": [
+    "AU",
+    "NZ"
+   ],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 15,
+     "maxPerDay": 6
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicabate-clear-patch-au",
+   "brand": "Nicabate",
+   "line": "Clear patch",
+   "shortName": "Nicabate patch",
+   "kind": "BRAND",
+   "form": "PATCH_24H",
+   "unit": "PATCH",
+   "markets": [
+    "AU"
+   ],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 21,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 14,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 7,
+     "maxPerDay": 1
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicabate-classic-patch-au",
+   "brand": "Nicabate",
+   "line": "P classic patch",
+   "shortName": "Nicabate P patch",
+   "kind": "BRAND",
+   "form": "PATCH_24H",
+   "unit": "PATCH",
+   "markets": [
+    "AU"
+   ],
+   "status": "UNCERTAIN",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 21,
+     "maxPerDay": 1
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicabate-gum-au",
+   "brand": "Nicabate",
+   "line": "Gum",
+   "shortName": "Nicabate gum",
+   "kind": "BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "AU"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Extra Fresh Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 20
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 10
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicabate-minis-au",
+   "brand": "Nicabate",
+   "line": "Minis",
+   "shortName": "Nicabate Minis",
+   "kind": "BRAND",
+   "form": "MINI_LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "AU"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": {
+    "count": 1,
+    "hours": 1
+   }
+  },
+  {
+   "id": "quitx-patch-au",
+   "brand": "QuitX",
+   "line": "Patch",
+   "shortName": "QuitX patch",
+   "kind": "BRAND",
+   "form": "PATCH_24H",
+   "unit": "PATCH",
+   "markets": [
+    "AU"
+   ],
+   "status": "UNCERTAIN",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 21,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 14,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 7,
+     "maxPerDay": 1
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "quitx-gum-au",
+   "brand": "QuitX",
+   "line": "Gum",
+   "shortName": "QuitX gum",
+   "kind": "BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "AU"
+   ],
+   "status": "UNCERTAIN",
+   "flavours": [
+    "Freshmint",
+    "Classic"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": null
+    },
+    {
+     "mg": 4,
+     "maxPerDay": null
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicotinell-patch-au",
+   "brand": "Nicotinell",
+   "line": "Patch",
+   "shortName": "Nicotinell patch",
+   "kind": "BRAND",
+   "form": "PATCH_24H",
+   "unit": "PATCH",
+   "markets": [
+    "AU"
+   ],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 21,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 14,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 7,
+     "maxPerDay": 1
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicotinell-gum-au",
+   "brand": "Nicotinell",
+   "line": "Gum",
+   "shortName": "Nicotinell gum",
+   "kind": "BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "AU"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Mint",
+    "Fruit"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": null
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 10
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicotinell-lozenge-au",
+   "brand": "Nicotinell",
+   "line": "Lozenge",
+   "shortName": "Nicotinell lozenge",
+   "kind": "BRAND",
+   "form": "LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "AU"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Icy Blast",
+    "Peppermint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "nicotinell-mini-lozenge-au",
+   "brand": "Nicotinell",
+   "line": "Mini lozenge",
+   "shortName": "Nicotinell mini",
+   "kind": "BRAND",
+   "form": "MINI_LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "AU"
+   ],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "pharmacy-care-patch-au",
+   "brand": "Pharmacy Care",
+   "line": "Nicotine patch",
+   "shortName": "Pharmacy Care patch",
+   "kind": "OWN_BRAND",
+   "form": "PATCH_24H",
+   "unit": "PATCH",
+   "markets": [
+    "AU"
+   ],
+   "status": "UNCERTAIN",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 21,
+     "maxPerDay": 1
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "habitrol-patch-nz",
+   "brand": "Habitrol",
+   "line": "Patch",
+   "shortName": "Habitrol patch",
+   "kind": "BRAND",
+   "form": "PATCH_24H",
+   "unit": "PATCH",
+   "markets": [
+    "NZ"
+   ],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 21,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 14,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 7,
+     "maxPerDay": 1
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "habitrol-gum-nz",
+   "brand": "Habitrol",
+   "line": "Gum",
+   "shortName": "Habitrol gum",
+   "kind": "BRAND",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [
+    "NZ"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Fruit",
+    "Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": 20
+    },
+    {
+     "mg": 4,
+     "maxPerDay": 10
+    }
+   ],
+   "window": {
+    "count": 1,
+    "hours": 1
+   }
+  },
+  {
+   "id": "habitrol-lozenge-nz",
+   "brand": "Habitrol",
+   "line": "Lozenge",
+   "shortName": "Habitrol lozenge",
+   "kind": "BRAND",
+   "form": "LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [
+    "NZ"
+   ],
+   "status": "CURRENT",
+   "flavours": [
+    "Mint"
+   ],
+   "strengths": [
+    {
+     "mg": 1,
+     "maxPerDay": 25
+    },
+    {
+     "mg": 2,
+     "maxPerDay": 15
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "generic-gum",
+   "brand": "Generic",
+   "line": "Nicotine gum",
+   "shortName": "Gum",
+   "kind": "GENERIC",
+   "form": "GUM",
+   "unit": "PIECE",
+   "markets": [],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": null
+    },
+    {
+     "mg": 4,
+     "maxPerDay": null
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "generic-lozenge",
+   "brand": "Generic",
+   "line": "Nicotine lozenge",
+   "shortName": "Lozenge",
+   "kind": "GENERIC",
+   "form": "LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 1,
+     "maxPerDay": null
+    },
+    {
+     "mg": 1.5,
+     "maxPerDay": null
+    },
+    {
+     "mg": 2,
+     "maxPerDay": null
+    },
+    {
+     "mg": 4,
+     "maxPerDay": null
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "generic-mini-lozenge",
+   "brand": "Generic",
+   "line": "Nicotine mini lozenge",
+   "shortName": "Mini lozenge",
+   "kind": "GENERIC",
+   "form": "MINI_LOZENGE",
+   "unit": "LOZENGE",
+   "markets": [],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 1.5,
+     "maxPerDay": null
+    },
+    {
+     "mg": 2,
+     "maxPerDay": null
+    },
+    {
+     "mg": 4,
+     "maxPerDay": null
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "generic-patch-16h",
+   "brand": "Generic",
+   "line": "16 hour patch",
+   "shortName": "16 h patch",
+   "kind": "GENERIC",
+   "form": "PATCH_16H",
+   "unit": "PATCH",
+   "markets": [],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 10,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 15,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 25,
+     "maxPerDay": 1
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "generic-patch-24h",
+   "brand": "Generic",
+   "line": "24 hour patch",
+   "shortName": "24 h patch",
+   "kind": "GENERIC",
+   "form": "PATCH_24H",
+   "unit": "PATCH",
+   "markets": [],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 7,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 14,
+     "maxPerDay": 1
+    },
+    {
+     "mg": 21,
+     "maxPerDay": 1
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "generic-mouth-spray",
+   "brand": "Generic",
+   "line": "Mouth spray",
+   "shortName": "Mouth spray",
+   "kind": "GENERIC",
+   "form": "MOUTH_SPRAY",
+   "unit": "SPRAY",
+   "markets": [],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 1,
+     "maxPerDay": null
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "generic-nasal-spray",
+   "brand": "Generic",
+   "line": "Nasal spray",
+   "shortName": "Nasal spray",
+   "kind": "GENERIC",
+   "form": "NASAL_SPRAY",
+   "unit": "SPRAY",
+   "markets": [],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 0.5,
+     "maxPerDay": null
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "generic-inhalator",
+   "brand": "Generic",
+   "line": "Inhalator",
+   "shortName": "Inhalator",
+   "kind": "GENERIC",
+   "form": "INHALATOR",
+   "unit": "CARTRIDGE",
+   "markets": [],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 10,
+     "maxPerDay": null
+    },
+    {
+     "mg": 15,
+     "maxPerDay": null
+    }
+   ],
+   "window": null
+  },
+  {
+   "id": "generic-microtab",
+   "brand": "Generic",
+   "line": "Sublingual tablet",
+   "shortName": "Microtab",
+   "kind": "GENERIC",
+   "form": "MICROTAB",
+   "unit": "TABLET",
+   "markets": [],
+   "status": "CURRENT",
+   "flavours": [],
+   "strengths": [
+    {
+     "mg": 2,
+     "maxPerDay": null
+    }
+   ],
+   "window": null
+  }
+ ]
+}

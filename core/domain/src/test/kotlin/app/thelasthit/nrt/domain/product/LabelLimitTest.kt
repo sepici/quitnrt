@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.Duration
 
 class LabelLimitTest {
 
@@ -15,21 +16,22 @@ class LabelLimitTest {
     }
 
     @Test
-    fun `hourly limits work the same way`() {
-        val quickMist = LabelLimit(maxUnitsPerDay = 64, maxUnitsPerHour = 4)
-        assertFalse(quickMist.isOverHourly(4))
-        assertTrue(quickMist.isOverHourly(5))
+    fun `rolling windows work the same way`() {
+        val quickMist = LabelLimit(maxUnitsPerDay = 64, window = RollingLimit(4, Duration.ofHours(1)))
+        assertFalse(quickMist.isOverWindow(4))
+        assertTrue(quickMist.isOverWindow(5))
     }
 
     @Test
     fun `no limit means never over`() {
-        val unknown = LabelLimit()
-        assertFalse(unknown.isOverDaily(1000))
-        assertFalse(unknown.isOverHourly(1000))
+        assertFalse(LabelLimit.NONE.isOverDaily(1000))
+        assertFalse(LabelLimit.NONE.isOverWindow(1000))
     }
 
     @Test
     fun `limits must be positive`() {
         assertThrows<IllegalArgumentException> { LabelLimit(maxUnitsPerDay = 0) }
+        assertThrows<IllegalArgumentException> { RollingLimit(0, Duration.ofHours(1)) }
+        assertThrows<IllegalArgumentException> { RollingLimit(4, Duration.ZERO) }
     }
 }
