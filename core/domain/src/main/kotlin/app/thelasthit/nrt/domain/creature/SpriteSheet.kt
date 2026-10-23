@@ -33,6 +33,13 @@ class SpriteSheet private constructor(
     }
 
     /**
+     * The defeat sequence in [variant], one frame after another: knocked out, then breaking apart
+     * into pixels until only a few are left. Unknown variants fall back to the default.
+     */
+    fun defeatPixels(variant: String = defaultVariant): List<IntArray> =
+        SpriteFrame.DEFEAT.map { argbPixels(it, variant) }
+
+    /**
      * The frame's outline filled with one colour, for a creature lurking before the plan starts.
      * With [eyes], the eye pixels keep a colour of their own, so it watches from the dark.
      */
@@ -51,8 +58,10 @@ class SpriteSheet private constructor(
         private val json = Json { ignoreUnknownKeys = true }
 
         /** The sheet for [creature], or null if it hasn't been drawn yet. */
-        fun bundled(creature: Creature): SpriteSheet? {
-            if (!creature.isDrawn) return null
+        fun bundled(creature: Creature): SpriteSheet? = if (creature.isDrawn) inResources(creature) else null
+
+        /** The sheet in the resources, drawn or still waiting for review, or null if there's no file. */
+        internal fun inResources(creature: Creature): SpriteSheet? {
             val text = SpriteSheet::class.java.getResourceAsStream("/creatures/${creature.key}.json")
                 ?.bufferedReader()?.use { it.readText() }
                 ?: return null

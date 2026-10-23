@@ -5,8 +5,11 @@ so each change stays reviewable and reproducible.
 """
 import json
 import os
+import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import spritekit  # noqa: E402
 # The app reads sprites from the domain module's resources, so that's the one copy.
 OUT = os.path.join(HERE, '..', '..', 'core', 'domain', 'src', 'main', 'resources', 'creatures', 'dragon.json')
 
@@ -270,17 +273,32 @@ def barely():
     return g
 
 
+def defeat1():
+    """Knocked out: eyes shut, and the body crumples 3 px on to its legs. The smoke still rises."""
+    g = barely()
+    segs(g, {10: [(10, 'oo')]})
+    for _ in range(3):
+        spritekit.sink(g, 26)
+    # the sink takes the outline off the top of the tail where it leaves the body: close it
+    segs(g, {26: [(27, 'oo')]})
+    return g
+
+
 FRAMES = {
     "idle1": idle1,
     "idle2": idle2,
     "hurt": hurt,
     "rough": rough,
     "barely": barely,
+    "defeat1": defeat1,
 }
 
 
 def build():
     frames = {k: rows_of(f()) for k, f in FRAMES.items()}
+    # then it breaks apart into pixels, as every creature does (spritekit.breakup)
+    for i, g in enumerate(spritekit.breakup(defeat1(), seed='dragon'), start=2):
+        frames[f"defeat{i}"] = rows_of(g)
     data = {
         "creature": "dragon",
         "size": 32,
@@ -290,7 +308,7 @@ def build():
         "defaultVariant": "forest",
         "frames": frames,
     }
-    with open(OUT, 'w') as f:
+    with open(OUT, 'w', newline='\n') as f:
         f.write(dump(data))
     return data
 
