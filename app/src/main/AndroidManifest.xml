@@ -15,13 +15,15 @@
         android:theme="@style/Theme.TheLastHit">
 
         <!--
-            singleTask, so a link from Tasker or an NFC sticker reaches the app's one screen, through
-            onNewIntent when it's already open, rather than stacking a second copy in another app's task.
+            singleTop, so a link from Tasker, an NFC sticker or a shortcut reaches the open app
+            through onNewIntent. They start it as a new task, which finds the app's own task and its
+            one screen on top. Not singleTask: that would close whatever sits above the screen when
+            the app is opened again, such as the file picker for a backup, losing the export.
         -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:launchMode="singleTask">
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

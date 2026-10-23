@@ -18,11 +18,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.thelasthit.nrt.R
+import app.thelasthit.nrt.data.repo.ProductRepository
 import app.thelasthit.nrt.domain.matcher.LogLinkError
 import app.thelasthit.nrt.domain.matcher.LogLinkParser
 import app.thelasthit.nrt.ui.format.ShortDateFormatter
 import app.thelasthit.nrt.ui.format.formatAt
+import app.thelasthit.nrt.ui.format.labelNoteText
 import app.thelasthit.nrt.ui.format.mgText
+import app.thelasthit.nrt.ui.format.plural
 import app.thelasthit.nrt.ui.format.rememberTimeFormatter
 import app.thelasthit.nrt.ui.graphViewModel
 import app.thelasthit.nrt.ui.log.LogSheet
@@ -32,8 +35,9 @@ import java.time.format.DateTimeFormatter
 
 /**
  * Shows what came of the links the app was opened with, over whichever page is open: the
- * snackbar with Undo for a logged dose, the duplicate question, a refusal in plain words, or the
- * log sheet for a bare link or a product that could be several.
+ * snackbar with Undo for a logged dose (and the label note after it, for a dose over the pack's
+ * limit), the duplicate question, a refusal in plain words, or the log sheet for a bare link or a
+ * product that could be several.
  */
 @Composable
 fun LinkHost(
@@ -55,7 +59,17 @@ fun LinkHost(
                         actionLabel = resources.getString(R.string.action_undo),
                         duration = SnackbarDuration.Long,
                     )
-                    if (result == SnackbarResult.ActionPerformed) viewModel.undo(outcome.entry)
+                    if (result == SnackbarResult.ActionPerformed) {
+                        viewModel.undo(outcome.entry)
+                    } else if (outcome.warning != null) {
+                        // After the snackbar, so Undo comes first. Today's note under the hero only
+                        // follows Today's own doses.
+                        snackbars.showSnackbar(
+                            resources.labelNoteText(outcome.warning),
+                            withDismissAction = true,
+                            duration = SnackbarDuration.Long,
+                        )
+                    }
                 }
                 is LinkOutcome.Refused -> launch {
                     snackbars.showSnackbar(resources.linkErrorText(outcome.error, timeFormat), duration = SnackbarDuration.Long)
@@ -74,7 +88,7 @@ fun LinkHost(
             onDismiss = { sheetOpen = false },
             onSaved = { saved ->
                 sheetOpen = false
-                viewModel.onSaved(saved.entry)
+                viewModel.onSaved(saved)
             },
         )
     }
@@ -98,10 +112,18 @@ fun Resources.linkErrorText(error: LogLinkError, timeFormat: DateTimeFormatter):
     is LogLinkError.UnknownParameter -> getString(R.string.link_unknown_parameter, error.name)
     is LogLinkError.RepeatedParameter -> getString(R.string.link_repeated_parameter, error.name)
     LogLinkError.MissingProduct -> getString(R.string.link_missing_product)
-    is LogLinkError.UnknownProduct -> getString(R.string.link_unknown_product, error.text)
+    // A product of the user's own goes by an ID that means nothing to anyone, so it isn't shown.
+    is LogLinkError.UnknownProduct -> if (error.text.startsWith(ProductRepository.CUSTOM_ID_PREFIX, ignoreCase = true)) {
+        getString(R.string.link_product_gone)
+    } else {
+        getString(R.string.link_unknown_product, error.text)
+    }
+    is LogLinkError.HiddenProduct ->
+        getString(R.string.link_hidden_product, getString(R.string.dose_named, error.product.shortName, error.product.perUnit.mgText()))
     is LogLinkError.BadQuantity -> getString(R.string.link_bad_quantity, LogLinkParser.MAX_QUANTITY)
     is LogLinkError.ConflictingQuantity -> getString(R.string.link_conflicting_quantity, error.inProduct, error.qty)
-    is LogLinkError.TooMany -> getString(R.string.link_too_many, error.quantity, LogLinkParser.MAX_QUANTITY)
+    is LogLinkError.TooMany ->
+        getString(R.string.link_too_many, getQuantityString(error.unit.plural, error.quantity, error.quantity), LogLinkParser.MAX_QUANTITY)
     is LogLinkError.BadTime -> getString(R.string.link_bad_time)
     is LogLinkError.TimeInFuture -> getString(R.string.link_time_in_future, ShortDateFormatter.format(error.at), timeFormat.format(error.at))
     is LogLinkError.UnknownTags -> getQuantityString(R.plurals.link_unknown_tags, error.tags.size, error.tags.joinToString(", "))

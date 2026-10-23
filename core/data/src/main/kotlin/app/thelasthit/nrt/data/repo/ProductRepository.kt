@@ -65,7 +65,7 @@ class ProductRepository(
         require(name.isNotBlank()) { "A product needs a name" }
         require(perUnit > Dose.ZERO) { "A product needs a dose" }
         val product = UserProduct(
-            id = "custom-${UUID.randomUUID()}",
+            id = "$CUSTOM_ID_PREFIX${UUID.randomUUID()}",
             catalogueId = null,
             name = name.trim(),
             shortName = name.trim(),
@@ -116,4 +116,9 @@ class ProductRepository(
     }
 
     private suspend fun nextQuickLogPosition(): Int = dao.quickLog().size
+
+    companion object {
+        /** How a product the user made starts its ID: `custom-` and a random UUID, which means nothing to anyone. */
+        const val CUSTOM_ID_PREFIX = "custom-"
+    }
 }

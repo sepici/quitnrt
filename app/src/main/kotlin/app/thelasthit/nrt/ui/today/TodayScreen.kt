@@ -66,6 +66,7 @@ import app.thelasthit.nrt.ui.format.elapsedSpoken
 import app.thelasthit.nrt.ui.format.elapsedText
 import app.thelasthit.nrt.ui.format.formatAt
 import app.thelasthit.nrt.ui.format.icon
+import app.thelasthit.nrt.ui.format.labelNoteText
 import app.thelasthit.nrt.ui.format.mgText
 import app.thelasthit.nrt.ui.format.pillLabelText
 import app.thelasthit.nrt.ui.format.rememberTimeFormatter
@@ -348,13 +349,7 @@ private fun Hero(
 @Composable
 private fun LabelNote(note: LabelWarning, onDismiss: () -> Unit) {
     val colors = LastHit.colors
-    val text = when (note) {
-        is LabelWarning.OverDaily -> stringResource(R.string.today_over_daily, note.limit)
-        is LabelWarning.OverWindow -> {
-            val hours = note.limit.span.toHours().toInt().coerceAtLeast(1)
-            pluralStringResource(R.plurals.today_over_window, hours, note.limit.maxUnits, hours)
-        }
-    }
+    val text = LocalResources.current.labelNoteText(note)
     Row(
         Modifier
             .padding(start = 8.dp, end = 8.dp, top = 8.dp)

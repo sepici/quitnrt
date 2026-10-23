@@ -361,6 +361,10 @@ class ProductMatcherTest {
         assertEquals(found(gum2), matcher.match("nicorette gum").expect())
         assertEquals(unknown, matcher.match("4mg gum").expect())
         assertEquals(unknown, matcher.match(gum4).expect())
+        // Only by its exact ID, for a link made before it was hidden.
+        assertEquals(gum4, matcher.hidden(" $gum4 ")?.id)
+        assertEquals(null, matcher.hidden("4mg gum"))
+        assertEquals(null, matcher.hidden(gum2))
     }
 
     @Test

@@ -1,6 +1,7 @@
 package app.thelasthit.nrt.domain.matcher
 
 import app.thelasthit.nrt.domain.log.LogTime
+import app.thelasthit.nrt.domain.product.DoseUnit
 import app.thelasthit.nrt.domain.product.UserProduct
 import java.net.URLDecoder
 import java.time.Instant
@@ -19,8 +20,9 @@ import java.util.Locale
  * - `product` (required): a product ID, or a description the [ProductMatcher] reads, with hyphens
  *   or encoded spaces between the words. A hyphen between digits before "mg" is a decimal point,
  *   as in the catalogue's IDs: `nicorette-nasal-spray-0-5mg` is the 0.5 mg spray. It has to name
- *   one of the user's products. When it fits several equally well and the rest of the link is
- *   fine, the result is [LogLinkResult.Ambiguous], so the app can ask which one.
+ *   one of the user's products that isn't hidden. The exact ID of a hidden one, such as a pinned
+ *   shortcut's, is [LogLinkError.HiddenProduct]. When it fits several equally well and the rest
+ *   of the link is fine, the result is [LogLinkResult.Ambiguous], so the app can ask which one.
  * - `qty`: a whole number from 1 to [MAX_QUANTITY], one by default. It counts what `product`
  *   names, so `product=inhalator-cartridge&qty=2` is 16 sessions on an inhalator logged by session.
  * - `at`: a local date and time, such as `2026-10-23T15:00`, read in the phone's zone. Now when
@@ -63,7 +65,9 @@ class LogLinkParser(private val products: ProductMatcher, private val tags: TagM
         val candidates = when (match) {
             is ProductMatch.Found -> listOf(match.candidate)
             is ProductMatch.Ambiguous -> match.candidates
-            ProductMatch.Unknown -> return invalid(LogLinkError.UnknownProduct(productText))
+            ProductMatch.Unknown -> return invalid(
+                products.hidden(productText)?.let { LogLinkError.HiddenProduct(it) } ?: LogLinkError.UnknownProduct(productText),
+            )
         }
 
         val qtyText = params[QTY]?.trim()
@@ -77,7 +81,9 @@ class LogLinkParser(private val products: ProductMatcher, private val tags: TagM
         }
         // Each candidate in its own unit. A cartridge is 8 on an inhalator logged by session.
         val quantities = candidates.map { it.quantityFor(qty ?: inProduct ?: 1) }
-        quantities.firstOrNull { it > MAX_QUANTITY }?.let { return invalid(LogLinkError.TooMany(it)) }
+        candidates.zip(quantities).firstOrNull { (_, quantity) -> quantity > MAX_QUANTITY }?.let { (candidate, quantity) ->
+            return invalid(LogLinkError.TooMany(quantity, candidate.product.unit))
+        }
 
         val at = params[AT]?.trim()?.let { text ->
             val local = localTime(text) ?: return invalid(LogLinkError.BadTime(text))
@@ -195,14 +201,24 @@ sealed interface LogLinkError {
 
     data class UnknownProduct(val text: String) : LogLinkError
 
+    /**
+     * `product` is the exact ID of one of the user's products that's hidden, as a pinned shortcut
+     * made before it was hidden is. Hidden products aren't logged from links, as they aren't from
+     * the log sheet, so the app can say how to bring it back.
+     */
+    data class HiddenProduct(val product: UserProduct) : LogLinkError
+
     /** `qty` isn't a whole number from 1 to [LogLinkParser.MAX_QUANTITY]. */
     data class BadQuantity(val text: String) : LogLinkError
 
     /** `product` gives a number of its own ("two gums") that isn't `qty`. */
     data class ConflictingQuantity(val inProduct: Int, val qty: Int) : LogLinkError
 
-    /** More than [LogLinkParser.MAX_QUANTITY] of the product's units, such as 13 cartridges logged by session. */
-    data class TooMany(val quantity: Int) : LogLinkError
+    /**
+     * More than [LogLinkParser.MAX_QUANTITY] of the product's units, such as 13 cartridges on an
+     * inhalator logged by session: [quantity] is then 104 and [unit] is sessions.
+     */
+    data class TooMany(val quantity: Int, val unit: DoseUnit) : LogLinkError
 
     /** `at` isn't a date and time like 2026-10-23T15:00. */
     data class BadTime(val text: String) : LogLinkError

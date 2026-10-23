@@ -13,6 +13,7 @@ import app.thelasthit.nrt.data.repo.LogRequest
 import app.thelasthit.nrt.data.repo.LogResult
 import app.thelasthit.nrt.domain.log.Entry
 import app.thelasthit.nrt.domain.log.EntrySource
+import app.thelasthit.nrt.domain.log.LabelWarning
 import app.thelasthit.nrt.domain.matcher.LogLinkError
 import app.thelasthit.nrt.domain.matcher.LogLinkParser
 import app.thelasthit.nrt.domain.matcher.LogLinkRequest
@@ -22,6 +23,7 @@ import app.thelasthit.nrt.domain.matcher.TagMatcher
 import app.thelasthit.nrt.domain.matcher.TagName
 import app.thelasthit.nrt.link.IncomingLink
 import app.thelasthit.nrt.ui.format.builtInTagName
+import app.thelasthit.nrt.ui.log.SavedDose
 import app.thelasthit.nrt.ui.today.PendingDuplicate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -38,8 +40,11 @@ import java.time.ZoneId
 
 /** What came of a link, for the app's shell to show. */
 sealed interface LinkOutcome {
-    /** A dose was saved, for the snackbar with Undo. */
-    data class Logged(val entry: Entry, val name: String) : LinkOutcome
+    /**
+     * A dose was saved, for the snackbar with Undo, and, when it took the day over the pack's
+     * limit, the calm note after it.
+     */
+    data class Logged(val entry: Entry, val name: String, val warning: LabelWarning? = null) : LinkOutcome
 
     data class Refused(val error: LogLinkError) : LinkOutcome
 
@@ -53,7 +58,8 @@ sealed interface LinkOutcome {
 /**
  * Handles the `lasthit://log` links the app is opened with, one at a time in the order they came.
  * A link logs through the same path as the log sheet: [app.thelasthit.nrt.data.repo.EntryRepository.log]
- * with the link's source, the duplicate check, and Undo. Belongs to the activity, so a link that
+ * with the link's source, the duplicate check, and Undo. A link waiting on the duplicate question
+ * holds back the ones after it until it's answered. Belongs to the activity, so a link that
  * arrives before the app's screens are up waits for them.
  */
 class LinkViewModel(
@@ -66,6 +72,9 @@ class LinkViewModel(
     private val incoming = Channel<IncomingLink>(Channel.UNLIMITED)
     private val _outcomes = Channel<LinkOutcome>(Channel.BUFFERED)
     private val _duplicate = MutableStateFlow<PendingDuplicate?>(null)
+
+    /** The answer to [duplicate]: true to keep both. */
+    private val answers = Channel<Boolean>(Channel.CONFLATED)
 
     val outcomes: Flow<LinkOutcome> = _outcomes.receiveAsFlow()
 
@@ -82,19 +91,19 @@ class LinkViewModel(
         incoming.trySend(link)
     }
 
-    fun keepBoth() {
-        val pending = _duplicate.value ?: return
+    fun keepBoth() = answer(keep = true)
+
+    fun discardDuplicate() = answer(keep = false)
+
+    private fun answer(keep: Boolean) {
+        if (_duplicate.value == null) return
         _duplicate.value = null
-        viewModelScope.launch { log(pending.request.copy(allowDuplicate = true)) }
+        answers.trySend(keep)
     }
 
-    fun discardDuplicate() {
-        _duplicate.value = null
-    }
-
-    /** The log sheet a link opened saved a dose, so it gets the same snackbar. */
-    fun onSaved(entry: Entry) {
-        viewModelScope.launch { _outcomes.send(LinkOutcome.Logged(entry, nameOf(entry))) }
+    /** The log sheet a link opened saved a dose, so it gets the same snackbar and note. */
+    fun onSaved(saved: SavedDose) {
+        viewModelScope.launch { _outcomes.send(LinkOutcome.Logged(saved.entry, nameOf(saved.entry), saved.warning)) }
     }
 
     fun undo(entry: Entry) {
@@ -114,7 +123,8 @@ class LinkViewModel(
     }
 
     private suspend fun parse(link: String): LogLinkResult {
-        val products = graph.products.all.first()
+        // Hidden ones too: the matcher leaves them out, but knows a pinned shortcut's for one.
+        val products = graph.products.everything.first()
         val tags = graph.tags.all.first().filterNot { it.isHidden }.map { TagName(it.key, tagNames(it)) }
         // Off the main thread: the first use reads the whole catalogue.
         return withContext(Dispatchers.Default) {
@@ -124,8 +134,12 @@ class LinkViewModel(
 
     private suspend fun log(request: LogRequest) {
         when (val result = graph.entries.log(request)) {
-            is LogResult.Saved -> _outcomes.send(LinkOutcome.Logged(result.entry, nameOf(result.entry)))
-            is LogResult.PossibleDuplicate -> _duplicate.value = PendingDuplicate(request, result.existing)
+            is LogResult.Saved -> _outcomes.send(LinkOutcome.Logged(result.entry, nameOf(result.entry), result.labelWarning))
+            is LogResult.PossibleDuplicate -> {
+                // The next link waits for the answer, so its own question can't take this one's place.
+                _duplicate.value = PendingDuplicate(request, result.existing)
+                if (answers.receive()) log(request.copy(allowDuplicate = true))
+            }
             // The link was checked a moment ago, so these only happen if something changed since.
             LogResult.TimeInFuture -> {
                 val at = LocalDateTime.ofInstant(request.at ?: graph.clock.instant(), zone())

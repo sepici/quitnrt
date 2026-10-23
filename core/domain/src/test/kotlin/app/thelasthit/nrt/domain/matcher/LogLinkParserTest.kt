@@ -8,6 +8,7 @@ import app.thelasthit.nrt.domain.matcher.LogLinkError.BadEncoding
 import app.thelasthit.nrt.domain.matcher.LogLinkError.BadQuantity
 import app.thelasthit.nrt.domain.matcher.LogLinkError.BadTime
 import app.thelasthit.nrt.domain.matcher.LogLinkError.ConflictingQuantity
+import app.thelasthit.nrt.domain.matcher.LogLinkError.HiddenProduct
 import app.thelasthit.nrt.domain.matcher.LogLinkError.MissingProduct
 import app.thelasthit.nrt.domain.matcher.LogLinkError.NotALogLink
 import app.thelasthit.nrt.domain.matcher.LogLinkError.RepeatedParameter
@@ -121,7 +122,7 @@ class LogLinkParserTest {
         val cartridges = valid("lasthit://log?product=inhalator-cartridge&qty=2")
         assertEquals(inhalator, cartridges.product)
         assertEquals(16, cartridges.quantity)
-        assertEquals(TooMany(104), refused("lasthit://log?product=inhalator-cartridge&qty=13"))
+        assertEquals(TooMany(104, DoseUnit.SESSION), refused("lasthit://log?product=inhalator-cartridge&qty=13"))
         assertEquals(2, valid("lasthit://log?product=two-4mg-gums&qty=2").quantity)
         assertEquals(ConflictingQuantity(inProduct = 2, qty = 3), refused("lasthit://log?product=two-4mg-gums&qty=3"))
     }
@@ -151,7 +152,10 @@ class LogLinkParserTest {
         assertEquals(MissingProduct, refused("lasthit://log?qty=1"))
         assertEquals(MissingProduct, refused("lasthit://log?tags="))
         assertEquals(UnknownProduct("nicorette-gum-6mg"), refused("lasthit://log?product=nicorette-gum-6mg"))
-        assertEquals(UnknownProduct("niquitin-clear-patch-uk-21mg"), refused("lasthit://log?product=niquitin-clear-patch-uk-21mg"))
+        // Words only match products in use, but a hidden one's exact ID says which it is.
+        assertEquals(UnknownProduct("niquitin 21mg patch"), refused("lasthit://log?product=niquitin+21mg+patch"))
+        assertEquals(HiddenProduct(hiddenPatch), refused("lasthit://log?product=niquitin-clear-patch-uk-21mg"))
+        assertEquals(HiddenProduct(hiddenPatch), refused("lasthit://log?product=NiQuitin-Clear-Patch-UK-21mg&qty=2"))
     }
 
     @Test
@@ -187,7 +191,7 @@ class LogLinkParserTest {
         val result = parser.parse("lasthit://log?product=inhalator-cartridge&qty=2", now, london) as LogLinkResult.Ambiguous
         assertEquals(mapOf(inhalator.id to 16, byCartridge.id to 2), result.choices.associate { it.product.id to it.quantity })
         // Too many of either is too many.
-        assertEquals(LogLinkResult.Invalid(TooMany(104)), parser.parse("lasthit://log?product=inhalator-cartridge&qty=13", now, london))
+        assertEquals(LogLinkResult.Invalid(TooMany(104, DoseUnit.SESSION)), parser.parse("lasthit://log?product=inhalator-cartridge&qty=13", now, london))
     }
 
     @Test

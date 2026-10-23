@@ -15,6 +15,7 @@ import app.thelasthit.nrt.R
 import app.thelasthit.nrt.data.db.TagEntity
 import app.thelasthit.nrt.domain.dose.Dose
 import app.thelasthit.nrt.domain.log.Elapsed
+import app.thelasthit.nrt.domain.log.LabelWarning
 import app.thelasthit.nrt.domain.log.TagGroup
 import app.thelasthit.nrt.domain.product.DoseUnit
 import app.thelasthit.nrt.domain.product.FormWord
@@ -93,6 +94,15 @@ fun pillLabelText(label: PillLabel): String = LocalResources.current.pillLabelTe
 fun Resources.pillLabelText(label: PillLabel): String = when (label) {
     is PillLabel.ByForm -> getString(R.string.pill_label, getString(label.word.text), label.strength.mgText())
     is PillLabel.ByName -> getString(R.string.pill_label, label.name, label.strength.mgText())
+}
+
+/** The calm note for a dose over the pack's limit, on Today and after a link's dose. */
+fun Resources.labelNoteText(note: LabelWarning): String = when (note) {
+    is LabelWarning.OverDaily -> getString(R.string.today_over_daily, note.limit)
+    is LabelWarning.OverWindow -> {
+        val hours = note.limit.span.toHours().toInt().coerceAtLeast(1)
+        getQuantityString(R.plurals.today_over_window, hours, note.limit.maxUnits, hours)
+    }
 }
 
 @get:StringRes
