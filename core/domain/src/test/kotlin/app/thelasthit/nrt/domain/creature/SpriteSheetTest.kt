@@ -50,4 +50,13 @@ class SpriteSheetTest {
         assertThrows<IllegalArgumentException> { SpriteSheet.parse(sheet(List(8) { "ooox...." })) }
         assertThrows<IllegalArgumentException> { SpriteSheet.parse(sheet(good, colours = """{"o":"black"}""")) }
     }
+
+    @Test
+    fun `a silhouette fills the outline with one colour`() {
+        val colour = 0xFF10221A.toInt()
+        val silhouette = dragon.silhouettePixels(SpriteFrame.IDLE_1, colour)
+        val normal = dragon.argbPixels(SpriteFrame.IDLE_1)
+        assertEquals(normal.map { it == 0 }, silhouette.map { it == 0 })
+        assertTrue(silhouette.filter { it != 0 }.all { it == colour })
+    }
 }

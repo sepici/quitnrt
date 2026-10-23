@@ -1,16 +1,16 @@
 # Status and handover
 
-Last updated: 23 October 2026, when work moved from a cloud session to a local one.
+Last updated: 23 October 2026, after Today and the log sheet were built in the local session.
 
 ## Where things are
 
 | Phase | State |
 |---|---|
 | 0. Foundation and direction | Done. Gradle set-up, CI, copy lint, style guide, design direction chosen, first creature signed off |
-| 1. Logging | **About half done.** Domain rules, product catalogue, data layer, backup, theme, sprites and settings are built and tested. **The screens aren't started.** |
+| 1. Logging | **Over half done.** Domain rules, catalogue, data layer, backup, theme, sprites and settings, plus app wiring, **Today and the log sheet**. History, onboarding, Settings and the lair are next. |
 | 2 to 9 | Not started |
 
-CI is green on the latest commit: copy rules, 59 domain tests, Robolectric data tests, debug APK, Android lint.
+The full check passes locally: copy rules, 75 domain tests, 23 data tests, 19 app UI, screenshot and format tests, debug APK, Android lint.
 
 ## Decisions made since `docs/PLAN.md` was written
 
@@ -53,18 +53,20 @@ Build against the B mockups. All strings go in `strings.xml` and pass `checkCopy
    5. **name your demon**: name, creature (dragon only for now), and colour from the sprite's palette variants
    6. day start (04:00 default)
    7. done
-3. **Today**, from B's `today.html`:
-   - **Hero:** the big mg number, a meter (the guide marker comes in phase 3), and quick-log pills with an edit button.
-   - **Last dose row,** leading with the time since ("1 h 25 min ago").
-   - **Advice line:** a placeholder until phase 5, or hide it.
-   - **Week columns** as described above.
-   - **Demon band:** lurking silhouette and "??" HP until the plan starts.
-   - **Entries list.**
-   - **Pill labels:** quick-log pills need short labels ("Gum 2 mg"). Derive them from form and strength, and add the brand only when two pills would otherwise read the same.
-4. **Log sheet**, from B's `log.html`:
-   - product, quantity stepper, quick times plus a date and time picker, planned or craving, craving strength 1 to 5, grouped tags, and an optional note
-   - Save pinned to the bottom
-   - Results handled: the duplicate question, label-limit notes, Undo snackbar, and future-time refusal
+3. **Today.** Done, from B's `today.html`. Agreed with the owner before building:
+   - **No meter until phase 3.** With no guide there's nothing to measure against, so the hero shows the mg and "3 doses so far".
+   - **Quick-log pills:** a tap logs one unit now, with Undo in the snackbar. A long press opens the log sheet on that product.
+   - **Pill labels** come from `PillLabel`: the form and pack strength ("Gum 2 mg", "Mouth spray 1 mg"), and the product's name only when two pills would read the same. The mockup's "QuickMist 1 mg" is the name version.
+   - **Week columns** (A's style) are scaled to the tallest day, with no guide line, ticks or legend until there's a guide. A week with nothing logged shrinks to the baselines.
+   - **Demon band:** the creature as a silhouette on the band backdrop ("Lurks until your plan starts.", "?? HP"), with the backdrop's light rim in dark mode. Tapping it opens the lair.
+   - **Advice line** is left out until phase 5.
+   - **Label limits:** a dose over the pack's limit shows a calm note under the hero until dismissed.
+4. **Log sheet.** Done, from B's `log.html`.
+   - The quick times include "2 h ago" from PLAN §4, which the mockup left out.
+   - Craving strength hides when the dose is planned.
+   - Tags put the most used in the last 30 days first (`TagOrder`), and each group folds after 4 behind "More". Selected tags always show.
+   - "Pick a time" is a date then a time. Days after today can't be picked, and a future time is flagged at once.
+   - The duplicate question is "Logged twice in a minute. Keep both?", with "Keep both" or "Discard this one".
 5. **History:**
    - entries grouped by logical day with totals
    - tap to edit (the log sheet in edit mode)
@@ -108,4 +110,7 @@ The owner asked for agents on UI/UX, colour, tone and copy, so nothing ends up l
 - **Room schema.** `core/data/schemas/` holds the generated schemas; `1.json` is committed. Commit each new version alongside its migration.
 - **Mockup fonts aren't in the repo.** The mockups only show the real fonts in the screenshots; the app bundles its own copies.
 - **Sprites in dark mode.** The mockups add a 1 px light rim around sprites in dark mode. Do this in the sprite renderer (phase 4), and watch the seam where the feet meet the rock.
-- **Scratch tools.** The design tools that rebuild mockups and boards are in `docs/design/*/tools/`. `docs/design/tools/shot.mjs` expects Playwright at `/opt/node-tools`; point it at a local Playwright install.
+- **Scratch tools.** The design tools that rebuild mockups and boards are in `docs/design/*/tools/`. `docs/design/tools/shot.mjs` reads Playwright's location from `PLAYWRIGHT_DIR`.
+- **Pixel art in the app.** The band and lair backdrops are pixel grids in `core/domain/src/main/resources/backdrops/`, written by `art/tools/backdrops.py` from the mockups' shapes. `GameArt` and `drawPixels` in `ui/game` draw them and the sprites with no smoothing.
+- **Icons** are the mockups' SVG symbols turned into vector drawables by `docs/design/tools/svg2vector.py`.
+- **Screenshots and UI tests.** `captureLooks` captures a screen in light and dark. Large font is a second test with `@Config(fontScale = LARGE_FONT)`, so sheets and dialogs scale too. `TestApp` stops the clock at Friday 23 October, 15:05 in London. In Compose tests, wait on what the screen shows before reading the database: polling it with `runBlocking` starves the save being waited for.

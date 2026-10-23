@@ -60,6 +60,10 @@ data class LastHitColors(
     val onIconTile: Color,
     val error: Color,
     val onError: Color,
+    /** The pressed-in lower edge of the primary button. */
+    val primaryEdge: Color,
+    /** For the game layer, which draws its own light and dark pixel art. */
+    val isDark: Boolean,
 )
 
 val LightColors = LastHitColors(
@@ -109,6 +113,8 @@ val LightColors = LastHitColors(
     onIconTile = Color(0xFF0B4A33),
     error = Color(0xFFA33A2B),
     onError = Color(0xFFFFFFFF),
+    primaryEdge = Color(0xFF06301F),
+    isDark = false,
 )
 
 val DarkColors = LastHitColors(
@@ -158,6 +164,8 @@ val DarkColors = LastHitColors(
     onIconTile = Color(0xFF9FE0BA),
     error = Color(0xFFF2A99B),
     onError = Color(0xFF2A0A04),
+    primaryEdge = Color(0xFF9FB0A5),
+    isDark = true,
 )
 
 val LocalLastHitColors = staticCompositionLocalOf { LightColors }

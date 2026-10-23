@@ -13,4 +13,203 @@
     <string name="onboarding_placeholder_title">Set-up</string>
     <string name="onboarding_placeholder_body">Set-up arrives in a later build. For now you can go straight to the app.</string>
     <string name="onboarding_placeholder_skip">Go to the app</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="action_undo">Undo</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_close">Close</string>
+    <string name="action_dismiss">Dismiss</string>
+
+    <!-- Doses and times. Digits, then a space, then the unit. -->
+    <string name="dose_mg">%1$s\u00A0mg</string>
+    <string name="dose_named">%1$s %2$s\u00A0mg</string>
+    <string name="unit_mg">mg</string>
+    <string name="elapsed_just_now">Just now</string>
+    <string name="elapsed_minutes">%1$d\u00A0min ago</string>
+    <string name="elapsed_hours">%1$d\u00A0h ago</string>
+    <string name="elapsed_hours_minutes">%1$d\u00A0h %2$d\u00A0min ago</string>
+    <plurals name="elapsed_days">
+        <item quantity="one">%1$d\u00A0day ago</item>
+        <item quantity="other">%1$d\u00A0days ago</item>
+    </plurals>
+    <plurals name="elapsed_days_hours">
+        <item quantity="one">%1$d\u00A0day %2$d\u00A0h ago</item>
+        <item quantity="other">%1$d\u00A0days %2$d\u00A0h ago</item>
+    </plurals>
+
+    <!-- Product forms, as quick-log pills name them: "Gum 2 mg". -->
+    <string name="pill_label">%1$s %2$s\u00A0mg</string>
+    <string name="form_word_gum">Gum</string>
+    <string name="form_word_lozenge">Lozenge</string>
+    <string name="form_word_mini_lozenge">Mini lozenge</string>
+    <string name="form_word_patch">Patch</string>
+    <string name="form_word_mouth_spray">Mouth spray</string>
+    <string name="form_word_nasal_spray">Nasal spray</string>
+    <string name="form_word_inhalator">Inhalator</string>
+    <string name="form_word_microtab">Microtab</string>
+    <string name="form_word_strip">Strip</string>
+    <string name="form_word_pouch">Pouch</string>
+
+    <plurals name="unit_piece">
+        <item quantity="one">%1$d\u00A0piece</item>
+        <item quantity="other">%1$d\u00A0pieces</item>
+    </plurals>
+    <plurals name="unit_lozenge">
+        <item quantity="one">%1$d\u00A0lozenge</item>
+        <item quantity="other">%1$d\u00A0lozenges</item>
+    </plurals>
+    <plurals name="unit_patch">
+        <item quantity="one">%1$d\u00A0patch</item>
+        <item quantity="other">%1$d\u00A0patches</item>
+    </plurals>
+    <plurals name="unit_spray">
+        <item quantity="one">%1$d\u00A0spray</item>
+        <item quantity="other">%1$d\u00A0sprays</item>
+    </plurals>
+    <plurals name="unit_session">
+        <item quantity="one">%1$d\u00A0session</item>
+        <item quantity="other">%1$d\u00A0sessions</item>
+    </plurals>
+    <plurals name="unit_cartridge">
+        <item quantity="one">%1$d\u00A0cartridge</item>
+        <item quantity="other">%1$d\u00A0cartridges</item>
+    </plurals>
+    <plurals name="unit_puff">
+        <item quantity="one">%1$d\u00A0puff</item>
+        <item quantity="other">%1$d\u00A0puffs</item>
+    </plurals>
+    <plurals name="unit_tablet">
+        <item quantity="one">%1$d\u00A0tablet</item>
+        <item quantity="other">%1$d\u00A0tablets</item>
+    </plurals>
+    <plurals name="unit_strip">
+        <item quantity="one">%1$d\u00A0strip</item>
+        <item quantity="other">%1$d\u00A0strips</item>
+    </plurals>
+    <plurals name="unit_pouch">
+        <item quantity="one">%1$d\u00A0pouch</item>
+        <item quantity="other">%1$d\u00A0pouches</item>
+    </plurals>
+    <plurals name="unit_custom">
+        <item quantity="one">%1$d\u00A0unit</item>
+        <item quantity="other">%1$d\u00A0units</item>
+    </plurals>
+
+    <!-- Tags. Keys match BuiltInTags in :core:domain. -->
+    <string name="tag_group_feelings">Feelings</string>
+    <string name="tag_group_routine">Routine</string>
+    <string name="tag_group_people">People</string>
+    <string name="tag_group_body">Body</string>
+    <string name="tag_group_habit">Habit</string>
+    <string name="tag_stressed">Stressed</string>
+    <string name="tag_anxious">Anxious</string>
+    <string name="tag_angry">Angry</string>
+    <string name="tag_low">Low</string>
+    <string name="tag_bored">Bored</string>
+    <string name="tag_lonely">Lonely</string>
+    <string name="tag_happy">Happy</string>
+    <string name="tag_excited">Excited</string>
+    <string name="tag_celebrating">Celebrating</string>
+    <string name="tag_relieved">Relieved</string>
+    <string name="tag_after_meal">After a meal</string>
+    <string name="tag_coffee_tea">With coffee or tea</string>
+    <string name="tag_drink">With a drink</string>
+    <string name="tag_woke_up">Just woke up</string>
+    <string name="tag_before_bed">Before bed</string>
+    <string name="tag_commuting">Commuting or driving</string>
+    <string name="tag_work_break">Work break</string>
+    <string name="tag_after_exercise">After exercise</string>
+    <string name="tag_on_call">On a call</string>
+    <string name="tag_screen_time">Screen time</string>
+    <string name="tag_nicotine_users">Around other nicotine users</string>
+    <string name="tag_socialising">Out socialising</string>
+    <string name="tag_alone">On my own</string>
+    <string name="tag_after_argument">After an argument</string>
+    <string name="tag_strong_craving">Strong craving</string>
+    <string name="tag_withdrawal">Withdrawal</string>
+    <string name="tag_tired">Tired</string>
+    <string name="tag_hungry">Hungry</string>
+    <string name="tag_cant_focus">Can\'t focus</string>
+    <string name="tag_autopilot">On autopilot</string>
+
+    <!-- Today -->
+    <string name="today_title">Today</string>
+    <string name="today_youve_had">You\'ve had</string>
+    <plurals name="today_doses_so_far">
+        <item quantity="one">%1$d\u00A0dose so far</item>
+        <item quantity="other">%1$d\u00A0doses so far</item>
+    </plurals>
+    <string name="today_nothing_yet">Nothing logged yet today</string>
+    <string name="today_amount_description">%1$s\u00A0mg today</string>
+    <string name="today_log">Log</string>
+    <string name="today_log_description">Log a dose</string>
+    <string name="today_quick_log_description">Log %1$s</string>
+    <string name="today_edit_quick_log">Choose, reorder or remove quick log products</string>
+    <string name="today_last_dose">Last dose, %1$s, %2$s</string>
+    <string name="today_week_total">mg this week</string>
+    <string name="today_week_day">%1$s %2$s\u00A0mg</string>
+    <string name="today_week_day_so_far">%1$s %2$s\u00A0mg so far</string>
+    <string name="today_logged_today">Logged today</string>
+    <plurals name="today_logged_summary">
+        <item quantity="one">%1$d\u00A0dose, %2$s\u00A0mg</item>
+        <item quantity="other">%1$d\u00A0doses, %2$s\u00A0mg</item>
+    </plurals>
+    <string name="today_empty">Nothing logged yet today. Your doses will show up here.</string>
+    <string name="today_logged">Logged %1$s\u00A0mg %2$s</string>
+    <string name="today_over_daily">That\'s more than the pack\'s daily limit of %1$d. Worth a word with a pharmacist.</string>
+    <plurals name="today_over_window">
+        <item quantity="one">That\'s more than the pack\'s limit of %1$d in an hour. Worth a word with a pharmacist.</item>
+        <item quantity="other">That\'s more than the pack\'s limit of %1$d in %2$d\u00A0hours. Worth a word with a pharmacist.</item>
+    </plurals>
+
+    <!-- The demon before the plan starts. Dry, and about the demon, never the user. -->
+    <string name="demon_default_name">Your demon</string>
+    <string name="demon_lurking">Lurks until your plan starts.</string>
+    <string name="demon_hp_unknown">\?\?</string>
+    <string name="demon_hp">HP</string>
+    <string name="demon_band_description">%1$s, lurking until your plan starts. Open the lair</string>
+
+    <!-- Log sheet -->
+    <string name="log_title">Log a dose</string>
+    <string name="log_title_edit">Edit dose</string>
+    <string name="log_so_far">%1$s\u00A0mg so far today</string>
+    <string name="log_product">Product</string>
+    <string name="log_more">More</string>
+    <string name="log_more_detail">Your other products</string>
+    <string name="log_no_products">No products yet. Add one in Settings.</string>
+    <string name="log_amount">Amount</string>
+    <string name="log_amount_dose">%1$s\u00A0mg this dose</string>
+    <string name="log_one_fewer">One fewer</string>
+    <string name="log_one_more">One more</string>
+    <string name="log_time">Time</string>
+    <string name="log_time_now">Now, %1$s</string>
+    <string name="log_time_15">15\u00A0min ago</string>
+    <string name="log_time_30">30\u00A0min ago</string>
+    <string name="log_time_1h">1\u00A0h ago</string>
+    <string name="log_time_2h">2\u00A0h ago</string>
+    <string name="log_time_yesterday">Yesterday</string>
+    <string name="log_time_pick">Pick a time</string>
+    <string name="log_time_picked">%1$s, %2$s</string>
+    <string name="log_time_set">Set time</string>
+    <string name="log_time_next">Next</string>
+    <string name="log_future">That time hasn\'t come yet. Pick a time up to now.</string>
+    <string name="log_kind">Planned or craving</string>
+    <string name="log_planned">Planned</string>
+    <string name="log_craving">Craving</string>
+    <string name="log_strength">Craving strength</string>
+    <string name="log_strength_mild">Mild</string>
+    <string name="log_strength_strong">Strong</string>
+    <string name="log_strength_value">Craving strength %1$d of 5</string>
+    <string name="log_tags">Tags</string>
+    <string name="log_tags_more">More</string>
+    <string name="log_tags_fewer">Fewer</string>
+    <string name="log_note">Note</string>
+    <string name="log_note_hint">Optional</string>
+    <string name="log_save">Save</string>
+    <string name="log_save_detail">%1$s\u00A0mg at %2$s</string>
+    <string name="log_save_changes">Save changes</string>
+    <string name="log_duplicate_title">Logged twice in a minute. Keep both?</string>
+    <string name="log_duplicate_body">The same product was logged at %1$s. If that was this dose, discard this one.</string>
+    <string name="log_duplicate_keep">Keep both</string>
+    <string name="log_duplicate_discard">Discard this one</string>
 </resources>

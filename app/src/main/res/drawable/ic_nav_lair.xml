@@ -1,10 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- From the Fieldbook v2 B mockups. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
     <path
-        android:fillColor="#FF000000"
-        android:pathData="M18,3h3v3l-9,9l-3,-3z M5,11l8,8l-1.5,1.5l-8,-8z M6.5,16l1.5,1.5l-3.5,3.5l-1.5,-1.5z" />
+        android:pathData="M3 20h18"
+        android:strokeColor="#FF000000"
+        android:strokeWidth="1.9"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M5 20v-7a7 7 0 0 1 14 0v7"
+        android:strokeColor="#FF000000"
+        android:strokeWidth="1.9"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M10 20v-3a2 2 0 0 1 4 0v3"
+        android:strokeColor="#FF000000"
+        android:strokeWidth="1.9"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
 </vector>

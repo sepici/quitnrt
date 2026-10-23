@@ -14,7 +14,10 @@ import app.thelasthit.nrt.data.DataGraph
 val CreationExtras.graph: DataGraph
     get() = (checkNotNull(this[APPLICATION_KEY]) as LastHitApp).graph
 
-/** A ViewModel built from the app's [DataGraph], with no dependency injection framework. */
+/**
+ * A ViewModel built from the app's [DataGraph], with no dependency injection framework. [key]
+ * tells apart two of the same class on one screen.
+ */
 @Composable
-inline fun <reified VM : ViewModel> graphViewModel(crossinline create: (DataGraph) -> VM): VM =
-    viewModel(factory = viewModelFactory { initializer { create(graph) } })
+inline fun <reified VM : ViewModel> graphViewModel(key: String? = null, crossinline create: (DataGraph) -> VM): VM =
+    viewModel(key = key, factory = viewModelFactory { initializer { create(graph) } })

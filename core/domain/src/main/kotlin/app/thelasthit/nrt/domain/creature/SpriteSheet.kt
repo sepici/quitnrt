@@ -30,6 +30,12 @@ class SpriteSheet private constructor(
         return IntArray(slots.size) { i -> slots[i].toInt().let { if (it < 0) 0 else colours[it] } }
     }
 
+    /** The frame's outline filled with one colour, for a creature lurking before the plan starts. */
+    fun silhouettePixels(frame: SpriteFrame, argb: Int): IntArray {
+        val slots = frames.getValue(frame)
+        return IntArray(slots.size) { i -> if (slots[i] < 0) 0 else argb }
+    }
+
     companion object {
         private val json = Json { ignoreUnknownKeys = true }
 
