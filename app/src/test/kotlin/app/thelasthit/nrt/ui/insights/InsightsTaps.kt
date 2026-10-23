@@ -9,7 +9,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.dp
 
 /**
- * Taps the hour map's cell at [column] (Monday is 0) and [row] (0 is the day start's hour), from
+ * Taps the hour map's cell at [column] (Monday is 0) and [row] (0 starts at the day start), from
  * the layout in `HourMap` at the normal font size: a 42 dp label column, 2 dp gaps, 14 dp rows,
  * and day names 16 sp tall over a 6 dp gap.
  */

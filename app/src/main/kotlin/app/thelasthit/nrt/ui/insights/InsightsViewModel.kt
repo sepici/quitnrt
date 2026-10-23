@@ -64,7 +64,10 @@ data class InsightsState(
     val tags: Map<String, TagEntity> = emptyMap(),
     val triggers: Triggers? = null,
     val habits: Habits? = null,
-    /** Over the window's finished days, or today alone when it's the only day so far. */
+    /**
+     * Over the window's finished days, or today alone when it's the only day so far or the only
+     * one with doses, so a kind first used today shows what's been used so far.
+     */
     val byProduct: ByProduct? = null,
     /** The finished days [byProduct] covers, or 0 when it's today alone. */
     val productDays: Int = 0,
@@ -153,6 +156,9 @@ class InsightsViewModel(
             val before = if (fullPrevious) chosen.filter { it.logicalDate in previous } else null
             val tagMap = tags.associateBy { it.key }
             val finished = window.dates.count { it != today }
+            val finishedEntries = chosenInWindow.filter { it.logicalDate != today }
+            // Today alone when it's the only day so far, or the only one with any of this kind yet.
+            val todayOnly = finished == 0 || finishedEntries.isEmpty()
             base.copy(
                 types = types,
                 type = choice.type,
@@ -167,12 +173,8 @@ class InsightsViewModel(
                 tags = tagMap,
                 triggers = Triggers.of(chosenInWindow, before, groupOf = { tagMap[it]?.group }),
                 habits = Habits.of(chosenInWindow, before, choice.dayStart),
-                byProduct = if (finished == 0) {
-                    ByProduct.of(chosenInWindow, days = 1)
-                } else {
-                    ByProduct.of(chosenInWindow.filter { it.logicalDate != today }, days = finished)
-                },
-                productDays = finished,
+                byProduct = if (todayOnly) ByProduct.of(chosenInWindow, days = 1) else ByProduct.of(finishedEntries, days = finished),
+                productDays = if (todayOnly) 0 else finished,
                 // The period before is all logged once the first day is two ranges back.
                 comparesFrom = if (fullPrevious) null else firstDay.plusDays(range.days * 2L - 1),
             )

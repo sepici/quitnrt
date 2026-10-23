@@ -73,14 +73,17 @@ private const val TOP_TAGS = 5
 @Composable
 internal fun TriggersSection(state: InsightsState) {
     val triggers = state.triggers ?: return
-    val period = pluralStringResource(R.plurals.insights_days, state.range.days, state.range.days)
-    Section(title = stringResource(R.string.insights_triggers_title), action = {}) {
+    val period = periodBefore(state.range)
+    val attribute = state.type?.let { typeAttribute(it) }
+    val title = if (attribute == null) stringResource(R.string.insights_triggers_title) else stringResource(R.string.insights_triggers_title_type, attribute).sentence()
+    Section(title = title, action = {}) {
         Meta(
             listOfNotNull(
-                if (state.comparesFrom == null) {
-                    stringResource(R.string.insights_triggers_meta, period)
-                } else {
-                    stringResource(R.string.insights_triggers_meta_plain)
+                when {
+                    attribute == null && state.comparesFrom == null -> stringResource(R.string.insights_triggers_meta, period)
+                    attribute == null -> stringResource(R.string.insights_triggers_meta_plain)
+                    state.comparesFrom == null -> stringResource(R.string.insights_triggers_meta_type, attribute, period)
+                    else -> stringResource(R.string.insights_triggers_meta_plain_type, attribute)
                 },
                 if (state.patchesLeftOut) stringResource(R.string.insights_patches_not_counted) else null,
                 state.comparesFrom?.let { stringResource(R.string.insights_changes_against, period, DayMonthFormatter.format(it)) },
@@ -267,13 +270,19 @@ private fun boldFirst(template: String, figure: String, colour: androidx.compose
 @Composable
 internal fun HabitsSection(state: InsightsState) {
     val habits = state.habits ?: return
-    val period = pluralStringResource(R.plurals.insights_days, state.range.days, state.range.days)
+    val period = periodBefore(state.range)
     val timeFormat = rememberTimeFormatter()
-    Section(title = stringResource(R.string.insights_habits_title), action = {}) {
+    val attribute = state.type?.let { typeAttribute(it) }
+    val title = if (attribute == null) stringResource(R.string.insights_habits_title) else stringResource(R.string.insights_habits_title_type, attribute).sentence()
+    Section(title = title, action = {}) {
         Meta(
             listOfNotNull(
                 if (state.comparesFrom == null) stringResource(R.string.insights_habits_against, period) else null,
-                stringResource(if (state.patchesLeftOut) R.string.insights_habits_gaps_patches else R.string.insights_habits_gaps),
+                when {
+                    attribute != null -> stringResource(R.string.insights_habits_gaps_type, attribute)
+                    state.patchesLeftOut -> stringResource(R.string.insights_habits_gaps_patches)
+                    else -> stringResource(R.string.insights_habits_gaps)
+                },
                 state.comparesFrom?.let { stringResource(R.string.insights_changes_start, DayMonthFormatter.format(it)) },
             ).joinToString(" "),
         )
@@ -423,8 +432,16 @@ private fun durationValue(minutes: Int): AnnotatedString {
 @Composable
 internal fun ByProductSection(state: InsightsState) {
     val byProduct = state.byProduct ?: return
-    Section(title = stringResource(R.string.insights_products_title), action = {}) {
-        Meta(stringResource(if (state.type == null) R.string.insights_products_meta else R.string.insights_products_meta_type))
+    val type = state.type
+    val attribute = type?.let { typeAttribute(it) }
+    val title = when {
+        type == null -> stringResource(R.string.insights_products_title)
+        // "Other product products" would say it twice.
+        type.word == null -> stringResource(R.string.insights_products_title_other)
+        else -> stringResource(R.string.insights_products_title_type, typeAttribute(type)).sentence()
+    }
+    Section(title = title, action = {}) {
+        Meta(if (attribute == null) stringResource(R.string.insights_products_meta) else stringResource(R.string.insights_products_meta_type, attribute))
         if (byProduct.products.isEmpty()) {
             Meta(stringResource(R.string.insights_table_none), top = 14.dp)
         } else {

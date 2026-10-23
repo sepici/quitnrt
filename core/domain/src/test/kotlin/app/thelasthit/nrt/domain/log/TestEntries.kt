@@ -5,6 +5,7 @@ import app.thelasthit.nrt.domain.product.ProductForm
 import app.thelasthit.nrt.domain.time.DayBoundary
 import java.time.Instant
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.ZoneId
 import java.util.UUID
 
@@ -12,7 +13,7 @@ internal val LONDON: ZoneId = ZoneId.of("Europe/London")
 
 internal fun london(text: String): Instant = LocalDateTime.parse(text).atZone(LONDON).toInstant()
 
-/** A dose taken at [at] on the clock in [zone], counted toward its day with a 04:00 day start. */
+/** A dose taken at [at] on the clock in [zone], counted toward its day with [dayStart], 04:00 unless set. */
 internal fun entry(
     at: String,
     productId: String = "nicorette-gum-uk-2mg",
@@ -22,6 +23,7 @@ internal fun entry(
     source: EntrySource = EntrySource.APP,
     tags: Set<String> = emptySet(),
     zone: ZoneId = LONDON,
+    dayStart: LocalTime = DayBoundary.DEFAULT_DAY_START,
 ): Entry {
     val instant = LocalDateTime.parse(at).atZone(zone).toInstant()
     return Entry(
@@ -35,7 +37,7 @@ internal fun entry(
         total = perUnit * quantity,
         occurredAt = instant,
         zone = zone,
-        logicalDate = DayBoundary().logicalDate(instant, zone),
+        logicalDate = DayBoundary(dayStart).logicalDate(instant, zone),
         tagKeys = tags,
         source = source,
     )

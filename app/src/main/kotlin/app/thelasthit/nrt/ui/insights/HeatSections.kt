@@ -1,6 +1,5 @@
 package app.thelasthit.nrt.ui.insights
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -17,6 +16,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.domain.dose.Dose
 import app.thelasthit.nrt.domain.insights.CalendarHeat
@@ -44,18 +44,31 @@ internal fun WhenYouUse(state: InsightsState) {
     var asTable by rememberSaveable { mutableStateOf(false) }
     var shade by rememberSaveable { mutableStateOf(Shade.DOSES) }
     var selected by remember(state.range, state.type, shade, asTable) { mutableStateOf<HourSlot?>(null) }
-    fun hourText(hour: Int) = timeFormat.format(LocalTime.of(hour, 0))
+    val timeText: (LocalTime) -> String = { timeFormat.format(it) }
+    val noun = state.type?.let { typeNoun(it) }
+    val attribute = state.type?.let { typeAttribute(it) }
     Section(
-        title = stringResource(R.string.insights_when_title),
-        action = { TableButton(asTable, R.string.insights_when_table, R.string.insights_when_chart) { asTable = !asTable } },
+        title = if (noun == null) stringResource(R.string.insights_when_title) else stringResource(R.string.insights_when_title_type, noun),
+        action = {
+            TableButton(
+                asTable,
+                toTable = if (noun == null) stringResource(R.string.insights_when_table) else stringResource(R.string.insights_when_table_type, noun),
+                toChart = if (noun == null) stringResource(R.string.insights_when_chart) else stringResource(R.string.insights_when_chart_type, noun),
+            ) { asTable = !asTable }
+        },
     ) {
-        Meta(stringResource(if (state.patchesLeftOut) R.string.insights_when_meta_patches else R.string.insights_when_meta))
+        Meta(
+            listOfNotNull(
+                if (attribute == null) stringResource(R.string.insights_when_meta) else stringResource(R.string.insights_when_meta_type, attribute).sentence(),
+                if (state.patchesLeftOut) stringResource(R.string.insights_patches_not_counted) else null,
+            ).joinToString(" "),
+        )
         val cellWhen: @Composable (HourHeatMap.Cell) -> String = { cell ->
-            stringResource(R.string.insights_cell_when, daysName(cell.day), hourText(cell.hour), hourText((cell.hour + 1) % 24))
+            stringResource(R.string.insights_cell_when, daysName(cell.day), timeText(cell.from), timeText(cell.to))
         }
         if (asTable) {
             val rows = (0 until 7).flatMap { column ->
-                (0 until 24).map { row -> map.cell(DayOfWeek.entries[column], map.hourAt(row)) }
+                (0 until HourHeatMap.ROWS).map { row -> map.cell(DayOfWeek.entries[column], row) }
             }.filter { it.doses > 0 }
             if (rows.isEmpty()) {
                 Meta(stringResource(R.string.insights_table_none), top = 14.dp)
@@ -72,8 +85,8 @@ internal fun WhenYouUse(state: InsightsState) {
             HourMap(
                 map = map,
                 shade = shade,
-                hourLabel = ::hourText,
-                description = hourSummary(map, shade, ::hourText),
+                timeLabel = timeText,
+                description = hourSummary(map, shade, timeText),
                 selected = selected,
                 onSelect = { selected = it },
                 tip = { cell ->
@@ -89,7 +102,10 @@ internal fun WhenYouUse(state: InsightsState) {
                         ),
                     )
                 },
-                modifier = Modifier.padding(top = 14.dp),
+                // Over what follows, so a tip that runs past the map is never hidden under it.
+                modifier = Modifier
+                    .padding(top = 14.dp)
+                    .zIndex(1f),
             )
             val tops = when (shade) {
                 Shade.DOSES -> HeatScale.stepTops(map.maxDoses.toLong()).map { it?.toString() }
@@ -121,7 +137,7 @@ private fun cellValue(cell: HourHeatMap.Cell): String =
 
 /** What a screen reader hears for the hour map: its busiest hour, by what it's shaded by. */
 @Composable
-private fun hourSummary(map: HourHeatMap, shade: Shade, hourText: (Int) -> String): String {
+private fun hourSummary(map: HourHeatMap, shade: Shade, timeText: (LocalTime) -> String): String {
     val busiest = when (shade) {
         Shade.DOSES -> map.busiest
         Shade.MG -> map.cells.maxWithOrNull(compareBy<HourHeatMap.Cell> { it.total }.thenBy { it.doses })
@@ -130,10 +146,10 @@ private fun hourSummary(map: HourHeatMap, shade: Shade, hourText: (Int) -> Strin
         Shade.DOSES -> stringResource(
             R.string.insights_when_summary_doses,
             daysName(busiest.day),
-            hourText(busiest.hour),
+            timeText(busiest.from),
             pluralStringResource(R.plurals.insights_doses, busiest.doses, busiest.doses),
         )
-        Shade.MG -> stringResource(R.string.insights_when_summary_mg, daysName(busiest.day), hourText(busiest.hour), busiest.total.mgText())
+        Shade.MG -> stringResource(R.string.insights_when_summary_mg, daysName(busiest.day), timeText(busiest.from), busiest.total.mgText())
     }
     return first + " " + stringResource(R.string.insights_summary_table_hours)
 }
@@ -149,11 +165,26 @@ internal fun CalendarSection(state: InsightsState) {
     var selected by remember(state.range, state.type, asTable) { mutableStateOf<LocalDate?>(null) }
     val today = state.today
     val tracked = calendar.weeks.flatten().filter { it.state == CalendarHeat.State.TRACKED }
+    val attribute = state.type?.let { typeAttribute(it) }
     Section(
-        title = stringResource(R.string.insights_calendar_title),
-        action = { TableButton(asTable, R.string.insights_calendar_table, R.string.insights_calendar_chart) { asTable = !asTable } },
+        title = if (attribute == null) stringResource(R.string.insights_calendar_title) else stringResource(R.string.insights_calendar_title_type, attribute).sentence(),
+        action = {
+            TableButton(
+                asTable,
+                toTable = if (attribute == null) {
+                    stringResource(R.string.insights_calendar_table)
+                } else {
+                    stringResource(R.string.insights_calendar_table_type, attribute)
+                },
+                toChart = if (attribute == null) {
+                    stringResource(R.string.insights_calendar_chart)
+                } else {
+                    stringResource(R.string.insights_calendar_chart_type, attribute)
+                },
+            ) { asTable = !asTable }
+        },
     ) {
-        Meta(stringResource(R.string.insights_calendar_meta))
+        Meta(if (attribute == null) stringResource(R.string.insights_calendar_meta) else stringResource(R.string.insights_calendar_meta_type, attribute))
         if (asTable) {
             ChartTable(tracked.reversed().map { day -> dayRow(day, today) }, Modifier.padding(top = 14.dp))
         } else {
@@ -166,7 +197,10 @@ internal fun CalendarSection(state: InsightsState) {
                     val (label, value) = dayRow(day, today)
                     ChartTip(value, listOf(label))
                 },
-                modifier = Modifier.padding(top = 14.dp),
+                // Over the legend and keys, so a tip that runs past the calendar is never hidden under them.
+                modifier = Modifier
+                    .padding(top = 14.dp)
+                    .zIndex(1f),
             )
             val low = calendar.lowTotal
             val high = calendar.highTotal
@@ -221,11 +255,11 @@ internal fun PatchNote() {
 
 /** The table button in a section's header, which swaps the chart for its numbers and back. */
 @Composable
-internal fun TableButton(asTable: Boolean, @StringRes toTable: Int, @StringRes toChart: Int, onClick: () -> Unit) {
+internal fun TableButton(asTable: Boolean, toTable: String, toChart: String, onClick: () -> Unit) {
     IconButton(onClick = onClick) {
         Icon(
             painterResource(if (asTable) R.drawable.ic_nav_insights else R.drawable.ic_table),
-            contentDescription = stringResource(if (asTable) toChart else toTable),
+            contentDescription = if (asTable) toChart else toTable,
             tint = LastHit.colors.text,
         )
     }

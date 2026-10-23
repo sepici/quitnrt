@@ -45,19 +45,25 @@ object HeatScale {
 }
 
 /**
- * When doses happen, as 24 hour rows by 7 day columns, Monday first. Rows start at the day
- * start's hour and columns are the logical day, so a dose at 01:30 that counts toward Friday sits
- * at the bottom of Friday's column. Hours are read off the clock where the dose was taken.
+ * When doses happen, as 24 hour-long rows by 7 day columns, Monday first. Rows run an hour each
+ * from the day start and columns are the logical day, so with a 04:00 day start a dose at 01:30
+ * that counts toward Friday sits at the bottom of Friday's column. A day start on the half hour
+ * moves the rows with it (04:30 to 05:30 and so on), so a dose just before it still sits at the
+ * bottom of the day it counts toward. Times are read off the clock where the dose was taken.
  * Patches are left out, since they release steadily rather than answering a craving.
  */
-class HourHeatMap private constructor(val firstHour: Int, private val grid: Map<Pair<DayOfWeek, Int>, Cell>) {
+class HourHeatMap private constructor(val dayStart: LocalTime, private val grid: Map<Pair<DayOfWeek, Int>, Cell>) {
 
-    data class Cell(val day: DayOfWeek, val hour: Int, val doses: Int, val total: Dose)
+    /** [row] counts from 0 at the day start, and [from] is the clock time it starts at. */
+    data class Cell(val day: DayOfWeek, val row: Int, val from: LocalTime, val doses: Int, val total: Dose) {
+        /** When the row ends, an hour after [from]. */
+        val to: LocalTime get() = from.plusHours(1)
+    }
 
-    /** The clock hour on [row], counting from 0 at the top. */
-    fun hourAt(row: Int): Int = (firstHour + row) % 24
+    /** The clock time [row] starts at, counting from 0 at the top. */
+    fun startOf(row: Int): LocalTime = dayStart.plusHours(row.toLong())
 
-    fun cell(day: DayOfWeek, hour: Int): Cell = grid[day to hour] ?: Cell(day, hour, 0, Dose.ZERO)
+    fun cell(day: DayOfWeek, row: Int): Cell = grid[day to row] ?: Cell(day, row, startOf(row), 0, Dose.ZERO)
 
     /** Only the cells with doses in them. */
     val cells: Collection<Cell> get() = grid.values
@@ -70,11 +76,20 @@ class HourHeatMap private constructor(val firstHour: Int, private val grid: Map<
     val busiest: Cell? get() = grid.values.maxWithOrNull(compareBy<Cell> { it.doses }.thenBy { it.total })
 
     companion object {
+        const val ROWS = 24
+
         fun of(entries: List<Entry>, dayStart: LocalTime): HourHeatMap {
+            val start = dayStart.toSecondOfDay() / 60
             val grid = entries.filterNot { it.isBackground }
-                .groupBy { it.logicalDate.dayOfWeek to it.occurredAt.atZone(it.zone).hour }
-                .mapValues { (key, list) -> Cell(key.first, key.second, list.size, list.map { it.total }.sum()) }
-            return HourHeatMap(dayStart.hour, grid)
+                .groupBy { entry ->
+                    val clock = entry.occurredAt.atZone(entry.zone).toLocalTime().toSecondOfDay() / 60
+                    entry.logicalDate.dayOfWeek to Math.floorMod(clock - start, ROWS * 60) / 60
+                }
+                .mapValues { (key, list) ->
+                    val (day, row) = key
+                    Cell(day, row, dayStart.plusHours(row.toLong()), list.size, list.map { it.total }.sum())
+                }
+            return HourHeatMap(dayStart, grid)
         }
     }
 }

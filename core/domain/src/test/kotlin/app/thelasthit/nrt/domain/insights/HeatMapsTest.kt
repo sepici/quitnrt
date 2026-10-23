@@ -19,23 +19,54 @@ class HeatMapsTest {
     @Test
     fun `rows start at the day start and wrap round to the hour before it`() {
         val map = HourHeatMap.of(emptyList(), dayStart)
-        assertEquals(4, map.hourAt(0))
-        assertEquals(23, map.hourAt(19))
-        assertEquals(3, map.hourAt(23))
+        assertEquals(LocalTime.of(4, 0), map.startOf(0))
+        assertEquals(LocalTime.of(23, 0), map.startOf(19))
+        assertEquals(LocalTime.of(3, 0), map.startOf(23))
+        assertEquals(LocalTime.of(4, 0), map.cell(DayOfWeek.MONDAY, 23).to)
     }
 
     @Test
-    fun `a late dose sits in its logical day's column at its clock hour`() {
-        // Saturday 01:30 counts toward Friday.
+    fun `a late dose sits at the bottom of its logical day's column`() {
+        // Saturday 01:30 counts toward Friday, in the 01:00 row, 21 rows down from 04:00.
         val map = HourHeatMap.of(listOf(entry("2026-10-24T01:30")), dayStart)
-        assertEquals(1, map.cell(DayOfWeek.FRIDAY, 1).doses)
-        assertEquals(0, map.cell(DayOfWeek.SATURDAY, 1).doses)
+        val cell = map.cell(DayOfWeek.FRIDAY, 21)
+        assertEquals(1, cell.doses)
+        assertEquals(LocalTime.of(1, 0), cell.from)
+        assertEquals(0, map.cell(DayOfWeek.SATURDAY, 21).doses)
+    }
+
+    @Test
+    fun `a day start on the half hour moves the rows with it`() {
+        val halfPast = LocalTime.of(4, 30)
+        // Friday 04:10 is before the day start, so it's the last of Thursday, not its first.
+        val map = HourHeatMap.of(
+            listOf(entry("2026-10-22T04:40", dayStart = halfPast), entry("2026-10-23T04:10", dayStart = halfPast)),
+            halfPast,
+        )
+        val first = map.cell(DayOfWeek.THURSDAY, 0)
+        assertEquals(1, first.doses)
+        assertEquals(LocalTime.of(4, 30), first.from)
+        assertEquals(LocalTime.of(5, 30), first.to)
+        val last = map.cell(DayOfWeek.THURSDAY, 23)
+        assertEquals(1, last.doses)
+        assertEquals(LocalTime.of(3, 30), last.from)
+        assertEquals(LocalTime.of(4, 30), last.to)
+    }
+
+    @Test
+    fun `with the day starting at half past midnight, a dose at a quarter past sits at the bottom of the day before`() {
+        val early = LocalTime.of(0, 30)
+        val map = HourHeatMap.of(listOf(entry("2026-10-23T00:15", dayStart = early)), early)
+        val cell = map.cell(DayOfWeek.THURSDAY, 23)
+        assertEquals(1, cell.doses)
+        assertEquals(LocalTime.of(23, 30), cell.from)
+        assertEquals(0, map.cell(DayOfWeek.THURSDAY, 0).doses)
     }
 
     @Test
     fun `hours are read off the clock where the dose was taken`() {
         val map = HourHeatMap.of(listOf(entry("2026-10-21T08:15", zone = ZoneId.of("America/New_York"))), dayStart)
-        assertEquals(1, map.cell(DayOfWeek.WEDNESDAY, 8).doses)
+        assertEquals(1, map.cell(DayOfWeek.WEDNESDAY, 4).doses)
     }
 
     @Test
@@ -48,10 +79,10 @@ class HeatMapsTest {
             ),
             dayStart,
         )
-        val cell = map.cell(DayOfWeek.MONDAY, 8)
+        val cell = map.cell(DayOfWeek.MONDAY, 4)
         assertEquals(2, cell.doses)
         assertEquals(Dose.mg(10), cell.total)
-        assertEquals(0, map.cell(DayOfWeek.MONDAY, 7).doses)
+        assertEquals(0, map.cell(DayOfWeek.MONDAY, 3).doses)
         assertEquals(cell, map.busiest)
         assertEquals(2, map.maxDoses)
     }

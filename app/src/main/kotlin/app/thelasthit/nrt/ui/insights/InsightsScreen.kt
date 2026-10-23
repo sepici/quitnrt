@@ -66,6 +66,7 @@ import app.thelasthit.nrt.domain.dose.Dose
 import app.thelasthit.nrt.domain.insights.DailyIntake
 import app.thelasthit.nrt.domain.insights.InsightRange
 import app.thelasthit.nrt.domain.insights.ProductType
+import app.thelasthit.nrt.domain.product.FormWord
 import app.thelasthit.nrt.ui.components.Chip
 import app.thelasthit.nrt.ui.components.ChipKind
 import app.thelasthit.nrt.ui.components.IconTile
@@ -282,16 +283,33 @@ private fun EachDay(state: InsightsState) {
     val weekly = state.weekly
     var asTable by rememberSaveable(weekly) { mutableStateOf(false) }
     var selected by remember(state.range, state.type, asTable) { mutableStateOf<Int?>(null) }
-    val toggle = stringResource(
-        when {
-            weekly && asTable -> R.string.insights_week_chart
-            weekly -> R.string.insights_week_table
-            asTable -> R.string.insights_day_chart
-            else -> R.string.insights_day_table
-        },
-    )
+    val noun = state.type?.let { typeNoun(it) }
+    val toggle = if (noun == null) {
+        stringResource(
+            when {
+                weekly && asTable -> R.string.insights_week_chart
+                weekly -> R.string.insights_week_table
+                asTable -> R.string.insights_day_chart
+                else -> R.string.insights_day_table
+            },
+        )
+    } else {
+        stringResource(
+            when {
+                weekly && asTable -> R.string.insights_week_chart_type
+                weekly -> R.string.insights_week_table_type
+                asTable -> R.string.insights_day_chart_type
+                else -> R.string.insights_day_table_type
+            },
+            noun,
+        )
+    }
     Section(
-        title = stringResource(if (weekly) R.string.insights_each_week else R.string.insights_each_day),
+        title = if (noun == null) {
+            stringResource(if (weekly) R.string.insights_each_week else R.string.insights_each_day)
+        } else {
+            stringResource(if (weekly) R.string.insights_each_week_type else R.string.insights_each_day_type, noun).sentence()
+        },
         action = {
             IconButton(onClick = { asTable = !asTable }) {
                 Icon(
@@ -450,7 +468,7 @@ private fun Headline(state: InsightsState, intake: DailyIntake) {
     }
     val previous = state.previousAverage
     if (average != null && previous != null) {
-        val period = pluralStringResource(R.plurals.insights_days, state.range.days, state.range.days)
+        val period = periodBefore(state.range)
         val change = average.micrograms - previous.micrograms
         Row(Modifier.padding(top = 2.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             // Under 0.05 mg either way rounds to no change at one decimal place.
@@ -599,6 +617,50 @@ private fun rangeName(range: InsightRange): String = stringResource(
 
 @Composable
 private fun typeName(type: ProductType): String = stringResource(type.word?.text ?: R.string.form_other)
+
+/** A kind of product as the thing used: "gum", "lozenges", for "When you use lozenges" and "Lozenges each day". */
+@Composable
+internal fun typeNoun(type: ProductType): String = stringResource(
+    when (type.word) {
+        FormWord.GUM -> R.string.insights_noun_gum
+        FormWord.LOZENGE -> R.string.insights_noun_lozenge
+        FormWord.MINI_LOZENGE -> R.string.insights_noun_mini_lozenge
+        FormWord.PATCH -> R.string.insights_noun_patch
+        FormWord.MOUTH_SPRAY -> R.string.insights_noun_mouth_spray
+        FormWord.NASAL_SPRAY -> R.string.insights_noun_nasal_spray
+        FormWord.INHALATOR -> R.string.insights_noun_inhalator
+        FormWord.MICROTAB -> R.string.insights_noun_microtab
+        FormWord.STRIP -> R.string.insights_noun_strip
+        FormWord.POUCH -> R.string.insights_noun_pouch
+        null -> R.string.insights_noun_other
+    },
+)
+
+/** A kind of product before another word: "gum", "lozenge", for "Lozenge triggers" and "lozenge doses". */
+@Composable
+internal fun typeAttribute(type: ProductType): String = stringResource(
+    when (type.word) {
+        FormWord.GUM -> R.string.insights_attribute_gum
+        FormWord.LOZENGE -> R.string.insights_attribute_lozenge
+        FormWord.MINI_LOZENGE -> R.string.insights_attribute_mini_lozenge
+        FormWord.PATCH -> R.string.insights_attribute_patch
+        FormWord.MOUTH_SPRAY -> R.string.insights_attribute_mouth_spray
+        FormWord.NASAL_SPRAY -> R.string.insights_attribute_nasal_spray
+        FormWord.INHALATOR -> R.string.insights_attribute_inhalator
+        FormWord.MICROTAB -> R.string.insights_attribute_microtab
+        FormWord.STRIP -> R.string.insights_attribute_strip
+        FormWord.POUCH -> R.string.insights_attribute_pouch
+        null -> R.string.insights_attribute_other
+    },
+)
+
+/** A title or line that starts with a kind of product, "gum calendar", given its capital: "Gum calendar". */
+internal fun String.sentence(): String = replaceFirstChar { it.titlecase(Locale.UK) }
+
+/** The period a change is against, for "the week before" or "the 30 days before". */
+@Composable
+internal fun periodBefore(range: InsightRange): String =
+    if (range == InsightRange.DAYS_7) stringResource(R.string.insights_period_week) else pluralStringResource(R.plurals.insights_days, range.days, range.days)
 
 @Composable
 private fun opensText(opensOn: LocalDate?, today: LocalDate): String = when (opensOn) {

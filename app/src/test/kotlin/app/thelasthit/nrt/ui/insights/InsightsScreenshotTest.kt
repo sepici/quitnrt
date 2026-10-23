@@ -12,6 +12,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.core.app.ApplicationProvider
 import app.thelasthit.nrt.TestApp
+import app.thelasthit.nrt.TestApp.Companion.london
 import app.thelasthit.nrt.seedHistory
 import app.thelasthit.nrt.seedWeek
 import app.thelasthit.nrt.setUp
@@ -33,7 +34,8 @@ private const val INSIGHTS_PAGE_LARGE = "en-rGB-w411dp-h5000dp-normal-long-notro
 
 /**
  * Insights as the mockups show it: two months logged, a tapped hour and day, gum only, patches
- * only, a first week and its tables, the long range and nothing yet.
+ * only, a first week, its tables and a tapped day on one calendar row, the long range and nothing
+ * yet.
  */
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -106,6 +108,27 @@ class InsightsScreenshotTest {
         compose.captureLooks("insights-new", ready = hasText("The 7-day average line starts on 26 October.")) {
             InsightsScreen(remember { SnackbarHostState() })
         }
+    }
+
+    /** A first week seen on Sunday, one calendar row, with Thursday tapped: its tip sits over the row. */
+    @Test @Config(qualifiers = INSIGHTS_PAGE)
+    fun calendarTip() = captureCalendarTip()
+
+    @Test @Config(qualifiers = INSIGHTS_PAGE_LARGE, fontScale = LARGE_FONT)
+    fun calendarTipLarge() = captureCalendarTip()
+
+    private fun captureCalendarTip() {
+        app.setUp()
+        app.seedWeek()
+        app.clock.now = london("2026-10-25T15:05")
+        compose.captureLooks(
+            "insights-calendar-tip",
+            ready = hasContentDescription("Calendar of mg each day", substring = true),
+            before = {
+                tapCalendarDay(column = 3, row = 0)
+                waitUntil(5_000) { onAllNodes(hasText("Thursday 22 October")).fetchSemanticsNodes().isNotEmpty() }
+            },
+        ) { InsightsScreen(remember { SnackbarHostState() }) }
     }
 
     /** A first week's hours and days as tables. */

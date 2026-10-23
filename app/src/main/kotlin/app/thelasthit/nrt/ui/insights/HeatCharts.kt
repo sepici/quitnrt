@@ -59,6 +59,7 @@ import app.thelasthit.nrt.ui.theme.heatFill
 import app.thelasthit.nrt.ui.theme.heatInk
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.format.TextStyle as DayStyle
 import java.util.Locale
 import kotlin.math.min
@@ -66,7 +67,7 @@ import kotlin.math.min
 /** What the hour map shades by. */
 enum class Shade { DOSES, MG }
 
-/** A cell of the hour map, by column (Monday first) and row (from the day start's hour). */
+/** A cell of the hour map, by column (Monday first) and row (an hour each, from the day start). */
 data class HourSlot(val column: Int, val row: Int)
 
 private val HourRow = 14.dp
@@ -87,15 +88,15 @@ fun HourHeatMap.stepOf(cell: HourHeatMap.Cell, shade: Shade): Int = when (shade)
 
 /**
  * When doses happen: 24 hour rows from the day start down, by 7 day columns, each cell shaded on
- * the stone ramp. Hours are labelled every 4 rows by [hourLabel]. Tapping a cell rings it and
- * shows [tip] under it, or over it in the lower half; tapping it again, or off the grid, lets it
- * go. Screen readers get [description] instead.
+ * the stone ramp. Rows are labelled every 4 by [timeLabel]. Tapping a cell rings it and shows
+ * [tip] under it, or over it in the lower half; tapping it again, or off the grid, lets it go.
+ * Screen readers get [description] instead.
  */
 @Composable
 fun HourMap(
     map: HourHeatMap,
     shade: Shade,
-    hourLabel: (Int) -> String,
+    timeLabel: (LocalTime) -> String,
     description: String,
     selected: HourSlot?,
     onSelect: (HourSlot?) -> Unit,
@@ -107,12 +108,12 @@ fun HourMap(
     val dayStyle = LastHit.type.caption.copy(fontSize = 12.sp, lineHeight = 16.sp, fontWeight = FontWeight.SemiBold, color = colors.text2)
     val hourStyle = LastHit.type.caption.copy(fontSize = 12.sp, lineHeight = 12.sp, fontWeight = FontWeight.Medium, color = colors.text3)
     val days = DayOfWeek.entries.map { it.getDisplayName(DayStyle.SHORT, Locale.UK) }
-    val hours = (0 until 24 step 4).map { hourLabel(map.hourAt(it)) }
+    val hours = (0 until HourHeatMap.ROWS step 4).map { timeLabel(map.startOf(it)) }
     val density = LocalDensity.current
     // Room for the widest hour at any font size, and never narrower than the mockups' 42 dp.
     val labelWidth = with(density) { maxOf(HourLabelMin.toPx(), hours.maxOf { measurer.measure(it, hourStyle).size.width } + 6.dp.toPx()) }
     val header = with(density) { measurer.measure(days.first(), dayStyle).size.height + HeaderGap.toPx() }
-    val height = with(density) { (header + (HourRow.toPx() + HourGap.toPx()) * 24).toDp() }
+    val height = with(density) { (header + (HourRow.toPx() + HourGap.toPx()) * HourHeatMap.ROWS).toDp() }
     val currentSelected by rememberUpdatedState(selected)
     val select by rememberUpdatedState(onSelect)
 
@@ -132,7 +133,7 @@ fun HourMap(
                             val width = (size.width - labelWidth - gap * 7) / 7
                             val column = ((at.x - labelWidth - gap) / (width + gap)).toInt()
                             val row = ((at.y - header - gap) / (HourRow.toPx() + gap)).toInt()
-                            val inside = at.x >= labelWidth && at.y >= header && column in 0..6 && row in 0..23
+                            val inside = at.x >= labelWidth && at.y >= header && column in 0..6 && row in 0 until HourHeatMap.ROWS
                             val slot = HourSlot(column, row)
                             select(if (!inside || slot == currentSelected) null else slot)
                         }
@@ -147,9 +148,9 @@ fun HourMap(
                     drawText(layout, topLeft = Offset(0f, rowTop(index * 4) - layout.size.height / 2f))
                 }
                 val radius = CornerRadius(3.dp.toPx())
-                for (row in 0 until 24) {
+                for (row in 0 until HourHeatMap.ROWS) {
                     for (column in 0 until 7) {
-                        val cell = map.cell(DayOfWeek.entries[column], map.hourAt(row))
+                        val cell = map.cell(DayOfWeek.entries[column], row)
                         drawRoundRect(
                             colors.heatFill(map.stepOf(cell, shade)),
                             topLeft = Offset(cellLeft(column), rowTop(row)),
@@ -164,7 +165,7 @@ fun HourMap(
             }
             if (selected != null) {
                 Column(Modifier.semantics { liveRegion = LiveRegionMode.Polite }) {
-                    tip(map.cell(DayOfWeek.entries[selected.column], map.hourAt(selected.row)))
+                    tip(map.cell(DayOfWeek.entries[selected.column], selected.row))
                 }
             }
         },
@@ -184,7 +185,7 @@ fun HourMap(
                 val centre = labelWidth + gap + selected.column * (cell + gap) + cell / 2
                 val top = header + gap + selected.row * (HourRow.toPx() + gap)
                 val x = (centre - tipBox.width / 2).coerceIn(0f, (width - tipBox.width).toFloat().coerceAtLeast(0f))
-                val y = if (selected.row < 12) top + HourRow.toPx() + TipGap.toPx() else top - TipGap.toPx() - tipBox.height
+                val y = tipTop(top, top + HourRow.toPx(), tipBox.height, total, TipGap.toPx(), preferBelow = selected.row < HourHeatMap.ROWS / 2)
                 tipBox.place(x.toInt(), y.toInt())
             }
         }
@@ -192,10 +193,30 @@ fun HourMap(
 }
 
 /**
+ * Where a tip goes for a mark from [markTop] to [markBottom], in a chart [total] tall: under it
+ * when [preferBelow] and there's room, over it when there's room there, and under it when only
+ * that has room. With room for neither, as in a calendar one week tall, it goes over the mark,
+ * where it covers what came before the chart rather than hiding under what comes after.
+ */
+private fun tipTop(markTop: Float, markBottom: Float, tipHeight: Int, total: Int, gap: Float, preferBelow: Boolean): Float {
+    val below = markBottom + gap
+    val above = markTop - gap - tipHeight
+    val fitsBelow = below + tipHeight <= total
+    val fitsAbove = above >= 0
+    return when {
+        preferBelow && fitsBelow -> below
+        fitsAbove -> above
+        fitsBelow -> below
+        else -> above
+    }
+}
+
+/**
  * The days of a range as Monday-to-Sunday weeks, each day a square shaded by its mg, with its
  * number in the corner. Days before the first dose are dashed outlines, and today is ringed.
- * Tapping a day rings it and shows [tip]; tapping it again, or a day that isn't tracked, lets it
- * go. Screen readers get [description] instead.
+ * Tapping a day rings it and shows [tip], under it when there's room and over it otherwise;
+ * tapping it again, or a day that isn't tracked, lets it go. Screen readers get [description]
+ * instead.
  */
 @Composable
 fun CalendarMap(
@@ -303,8 +324,7 @@ fun CalendarMap(
                 val centre = column * (columnWidth + gap) + columnWidth / 2
                 val top = header + row * CalendarRow.toPx() + (CalendarRow.toPx() - side) / 2
                 val x = (centre - tipBox.width / 2).coerceIn(0f, (width - tipBox.width).toFloat().coerceAtLeast(0f))
-                val below = row < (calendar.weeks.size + 1) / 2
-                val y = if (below) top + side + TipGap.toPx() else top - TipGap.toPx() - tipBox.height
+                val y = tipTop(top, top + side, tipBox.height, total, TipGap.toPx(), preferBelow = true)
                 tipBox.place(x.toInt(), y.toInt())
             }
         }
