@@ -3,13 +3,17 @@ package app.thelasthit.nrt.ui.insights
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.thelasthit.nrt.data.DataGraph
+import app.thelasthit.nrt.data.db.TagEntity
 import app.thelasthit.nrt.domain.dose.Dose
+import app.thelasthit.nrt.domain.insights.ByProduct
 import app.thelasthit.nrt.domain.insights.CalendarHeat
 import app.thelasthit.nrt.domain.insights.DailyIntake
+import app.thelasthit.nrt.domain.insights.Habits
 import app.thelasthit.nrt.domain.insights.HourHeatMap
 import app.thelasthit.nrt.domain.insights.InsightRange
 import app.thelasthit.nrt.domain.insights.InsightWindow
 import app.thelasthit.nrt.domain.insights.ProductType
+import app.thelasthit.nrt.domain.insights.Triggers
 import app.thelasthit.nrt.domain.insights.ofType
 import app.thelasthit.nrt.domain.log.Entry
 import app.thelasthit.nrt.domain.time.DayBoundary
@@ -54,8 +58,18 @@ data class InsightsState(
     val calendar: CalendarHeat? = null,
     /** The window has patches beside other doses, and the hour map leaves them out. */
     val patchesLeftOut: Boolean = false,
-    /** Everything in the window is a patch, so the hour map has nothing to show. */
+    /** Everything in the window is a patch, so the hour map, triggers and habits have nothing to show. */
     val onlyPatches: Boolean = false,
+    /** Tag key to the tag, for its name. */
+    val tags: Map<String, TagEntity> = emptyMap(),
+    val triggers: Triggers? = null,
+    val habits: Habits? = null,
+    /** Over the window's finished days, or today alone when it's the only day so far. */
+    val byProduct: ByProduct? = null,
+    /** The finished days [byProduct] covers, or 0 when it's today alone. */
+    val productDays: Int = 0,
+    /** While the period before isn't all logged, the day changes against it start. */
+    val comparesFrom: LocalDate? = null,
 ) {
     val isEmpty: Boolean get() = firstDay == null
 
@@ -126,7 +140,7 @@ class InsightsViewModel(
         if (firstDay == null || window == null) return flowOf(base)
         // The period before is as long again, and it covers the 6 days the first averages reach back.
         val previous = window.previous
-        return combine(graph.entries.observeRange(previous.start, today), graph.products.shortNames) { entries, names ->
+        return combine(graph.entries.observeRange(previous.start, today), graph.products.shortNames, graph.tags.all) { entries, names, tags ->
             val inWindow = entries.filter { it.logicalDate in window }
             val types = ProductType.inUse(inWindow).let { inUse ->
                 if (choice.type == null || choice.type in inUse) inUse else inUse + choice.type
@@ -134,21 +148,33 @@ class InsightsViewModel(
             val chosen = entries.ofType(choice.type)
             val chosenInWindow = chosen.filter { it.logicalDate in window }
             val (patches, others) = chosenInWindow.partition { it.isBackground }
+            // The period before, only when it's all logged, so a change never counts days from before the first.
+            val fullPrevious = window.hasFullPrevious(firstDay)
+            val before = if (fullPrevious) chosen.filter { it.logicalDate in previous } else null
+            val tagMap = tags.associateBy { it.key }
+            val finished = window.dates.count { it != today }
             base.copy(
                 types = types,
                 type = choice.type,
                 window = window,
                 intake = DailyIntake.of(window, today, firstDay, chosen),
-                previousAverage = if (window.hasFullPrevious(firstDay)) {
-                    DailyIntake.of(previous, today, firstDay, chosen.filter { it.logicalDate in previous }).averagePerDay
-                } else {
-                    null
-                },
+                previousAverage = before?.let { DailyIntake.of(previous, today, firstDay, it).averagePerDay },
                 productNames = names,
                 hours = HourHeatMap.of(chosenInWindow, choice.dayStart),
                 calendar = CalendarHeat.of(range, today, firstDay, chosenInWindow),
                 patchesLeftOut = patches.isNotEmpty() && others.isNotEmpty(),
                 onlyPatches = patches.isNotEmpty() && others.isEmpty(),
+                tags = tagMap,
+                triggers = Triggers.of(chosenInWindow, before, groupOf = { tagMap[it]?.group }),
+                habits = Habits.of(chosenInWindow, before, choice.dayStart),
+                byProduct = if (finished == 0) {
+                    ByProduct.of(chosenInWindow, days = 1)
+                } else {
+                    ByProduct.of(chosenInWindow.filter { it.logicalDate != today }, days = finished)
+                },
+                productDays = finished,
+                // The period before is all logged once the first day is two ranges back.
+                comparesFrom = if (fullPrevious) null else firstDay.plusDays(range.days * 2L - 1),
             )
         }
     }

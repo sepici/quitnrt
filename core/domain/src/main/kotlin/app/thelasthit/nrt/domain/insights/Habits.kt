@@ -21,7 +21,8 @@ data class Habits(
     val longestGap: Gap?,
     val longestGapChange: Int?,
 ) {
-    data class Gap(val length: Duration, val date: LocalDate)
+    /** [from] and [to] are the clock times of the doses either side, each where it was taken. */
+    data class Gap(val length: Duration, val date: LocalDate, val from: LocalTime, val to: LocalTime)
 
     companion object {
         /** [previous] is the period just before, or null when it isn't all logged. */
@@ -50,7 +51,7 @@ data class Habits(
                 val days = entries.filterNot { it.isBackground }.groupBy { it.logicalDate }
                     .mapValues { (_, list) -> list.sortedBy { it.occurredAt } }
                 val gaps = days.flatMap { (date, list) ->
-                    list.zipWithNext { a, b -> Gap(Duration.between(a.occurredAt, b.occurredAt), date) }
+                    list.zipWithNext { a, b -> Gap(Duration.between(a.occurredAt, b.occurredAt), date, a.clockTime, b.clockTime) }
                 }
                 return Measures(
                     firstDoseMinutes = days.values.map { minutesAfter(it.first(), dayStart) }.roundedMean(),
@@ -60,8 +61,10 @@ data class Habits(
                 )
             }
 
+            private val Entry.clockTime: LocalTime get() = occurredAt.atZone(zone).toLocalTime()
+
             private fun minutesAfter(entry: Entry, dayStart: LocalTime): Long {
-                val clock = entry.occurredAt.atZone(entry.zone).toLocalTime()
+                val clock = entry.clockTime
                 return Math.floorMod(clock.toSecondOfDay() / 60 - dayStart.toSecondOfDay() / 60, 24 * 60).toLong()
             }
         }

@@ -725,7 +725,7 @@
     <string name="insights_when_summary_none">No doses by hour and day in this period.</string>
     <string name="insights_summary_table_hours">The table button lists every hour with a dose.</string>
     <string name="insights_table_none">No doses in this period.</string>
-    <string name="insights_patch_note">The hour map leaves out patches, since a patch releases nicotine steadily.</string>
+    <string name="insights_patch_note">The hour map, triggers and habits leave out patches, since a patch releases nicotine steadily.</string>
     <string name="insights_calendar_title">Calendar</string>
     <string name="insights_calendar_table">Show calendar as a table</string>
     <string name="insights_calendar_chart">Show calendar as a chart</string>
@@ -734,4 +734,82 @@
     <string name="insights_calendar_summary_plain">Calendar of mg each day.</string>
     <string name="insights_key_no_data">Before your first dose</string>
     <string name="insights_key_today_ring">Today, so far</string>
+    <string name="insights_percent">%1$d%%</string>
+    <string name="insights_under_one_percent">Under %1$d%%</string>
+    <string name="insights_no_change">No change</string>
+    <string name="insights_up">Up %1$s</string>
+    <string name="insights_down">Down %1$s</string>
+    <plurals name="insights_points">
+        <item quantity="one">%1$d point</item>
+        <item quantity="other">%1$d points</item>
+    </plurals>
+    <string name="insights_patches_not_counted">Patches aren\'t counted.</string>
+    <string name="insights_changes_against">Changes against the %1$s before start on %2$s.</string>
+    <string name="insights_changes_start">Changes start on %1$s.</string>
+    <string name="insights_triggers_title">Triggers</string>
+    <string name="insights_triggers_meta">Share of doses with each tag, against the %1$s before.</string>
+    <string name="insights_triggers_meta_plain">Share of doses with each tag.</string>
+    <string name="insights_triggers_none">No dose in this period had a tag.</string>
+    <string name="insights_by_group">By group</string>
+    <string name="insights_by_time_of_day">By time of day</string>
+    <string name="insights_morning">Morning</string>
+    <string name="insights_afternoon">Afternoon</string>
+    <string name="insights_evening">Evening</string>
+    <string name="insights_night">Night</string>
+    <string name="insights_time_range">%1$s to %2$s</string>
+    <string name="insights_morning_share">%1$s of morning doses</string>
+    <string name="insights_afternoon_share">%1$s of afternoon doses</string>
+    <string name="insights_evening_share">%1$s of evening doses</string>
+    <string name="insights_night_share">%1$s of night doses</string>
+    <plurals name="insights_morning_count">
+        <item quantity="one">%1$d of %2$d morning dose</item>
+        <item quantity="other">%1$d of %2$d morning doses</item>
+    </plurals>
+    <plurals name="insights_afternoon_count">
+        <item quantity="one">%1$d of %2$d afternoon dose</item>
+        <item quantity="other">%1$d of %2$d afternoon doses</item>
+    </plurals>
+    <plurals name="insights_evening_count">
+        <item quantity="one">%1$d of %2$d evening dose</item>
+        <item quantity="other">%1$d of %2$d evening doses</item>
+    </plurals>
+    <plurals name="insights_night_count">
+        <item quantity="one">%1$d of %2$d night dose</item>
+        <item quantity="other">%1$d of %2$d night doses</item>
+    </plurals>
+    <string name="insights_part_none">No doses</string>
+    <string name="insights_part_untagged">No tags</string>
+    <string name="insights_untagged_share">%1$s of doses had no tag.</string>
+    <plurals name="insights_untagged_count">
+        <item quantity="one">%1$d of %2$d dose had no tag.</item>
+        <item quantity="other">%1$d of %2$d doses had no tag.</item>
+    </plurals>
+    <string name="insights_all_tagged">Every dose had a tag.</string>
+    <string name="insights_habits_title">Habits</string>
+    <string name="insights_habits_against">Against the %1$s before.</string>
+    <string name="insights_habits_gaps">Gaps only count within a day.</string>
+    <string name="insights_habits_gaps_patches">Gaps only count within a day, and patches aren\'t counted.</string>
+    <string name="insights_first_dose">First dose</string>
+    <string name="insights_average_gap">Average gap</string>
+    <string name="insights_longest_gap">Longest gap</string>
+    <string name="insights_no_gaps">None yet</string>
+    <string name="insights_gap_when">%1$s, %2$s to %3$s</string>
+    <string name="insights_unit_h">h</string>
+    <string name="insights_unit_min">min</string>
+    <string name="insights_hours_minutes">%1$d\u00A0h %2$d\u00A0min</string>
+    <string name="insights_hours">%1$d\u00A0h</string>
+    <string name="insights_minutes">%1$d\u00A0min</string>
+    <string name="insights_later">%1$s later</string>
+    <string name="insights_earlier">%1$s earlier</string>
+    <string name="insights_same_time">Same time</string>
+    <string name="insights_longer">%1$s longer</string>
+    <string name="insights_shorter">%1$s shorter</string>
+    <string name="insights_products_title">By product</string>
+    <string name="insights_products_meta">Share of all mg, and how much a day.</string>
+    <string name="insights_products_meta_type">Share of the mg, and how much a day.</string>
+    <string name="insights_units_a_day">%1$s\u00A0%2$s a day</string>
+    <string name="insights_unit_a_day">%1$s a day</string>
+    <string name="insights_units_in">%1$s in %2$s</string>
+    <string name="insights_a_day_on">%1$s a day, on %2$d of %3$s</string>
+    <string name="insights_so_far_today">%1$s so far today</string>
 </resources>

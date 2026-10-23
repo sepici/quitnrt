@@ -15,6 +15,8 @@ data class Triggers(
     val groups: List<GroupShare>,
     /** Each part of the day's tags, as shares of that part's doses. */
     val byTimeOfDay: Map<TimeOfDay, List<TagShare>>,
+    /** How many doses each part of the day had, tagged or not. */
+    val partDoses: Map<TimeOfDay, Int>,
     /** Doses with no tag at all. */
     val untagged: Int,
 ) {
@@ -46,6 +48,7 @@ data class Triggers(
                 tags = tags,
                 groups = groups,
                 byTimeOfDay = TimeOfDay.entries.associateWith { part -> shares(doses.filter { TimeOfDay.of(it) == part }) },
+                partDoses = TimeOfDay.entries.associateWith { part -> doses.count { TimeOfDay.of(it) == part } },
                 untagged = doses.count { it.tagKeys.isEmpty() },
             )
         }

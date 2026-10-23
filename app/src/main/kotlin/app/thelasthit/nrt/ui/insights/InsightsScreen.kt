@@ -132,8 +132,15 @@ fun InsightsScreen(
             TopBar()
             Filters(current, onRange = viewModel::pickRange, onType = viewModel::pickType)
             EachDay(current)
-            if (current.onlyPatches) PatchNote() else WhenYouUse(current)
+            if (current.onlyPatches) {
+                PatchNote()
+            } else {
+                WhenYouUse(current)
+                TriggersSection(current)
+                HabitsSection(current)
+            }
             CalendarSection(current)
+            ByProductSection(current)
             Spacer(Modifier.height(32.dp))
         }
     }

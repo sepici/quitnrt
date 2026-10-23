@@ -24,6 +24,11 @@ class ByProductTest {
         assertEquals(0.3, gum.share, 1e-9)
         assertEquals(3, gum.units)
         assertEquals(1.5, gum.unitsPerDay, 1e-9)
+        assertEquals(2, gum.days)
+        assertEquals(ProductForm.GUM, gum.form)
+        val patch = byProduct.products.first()
+        assertEquals(1, patch.days)
+        assertEquals(ProductForm.PATCH_24H, patch.form)
     }
 
     @Test

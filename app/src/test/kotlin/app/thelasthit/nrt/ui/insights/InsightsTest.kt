@@ -14,6 +14,8 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -176,9 +178,66 @@ class InsightsTest {
         show()
         waitFor("13.3")
         compose.onNodeWithText("Patch").performClick()
-        waitFor("The hour map leaves out patches, since a patch releases nicotine steadily.")
+        waitFor("The hour map, triggers and habits leave out patches, since a patch releases nicotine steadily.")
         compose.onNodeWithText("When you use").assertDoesNotExist()
+        compose.onNodeWithText("Triggers").assertDoesNotExist()
+        compose.onNodeWithText("Habits").assertDoesNotExist()
         compose.onNodeWithText("Calendar").assertExists()
+        compose.onNodeWithText("By product").assertExists()
+    }
+
+    @Test
+    fun `triggers show each tag's share, the top tag in each part of the day, and when changes start`() {
+        app.setUp()
+        app.seedWeek()
+        show()
+        // 7 doses besides the patches, 3 of them tagged once each.
+        waitFor("Share of doses with each tag. Patches aren't counted. Changes against the 7\u00A0days before start on 1 November.")
+        compose.onAllNodesWithText("With coffee or tea").assertCountEquals(2)
+        compose.onNodeWithText("1 of 4 morning doses").assertExists()
+        compose.onNodeWithText("1 of 2 afternoon doses").assertExists()
+        compose.onNodeWithText("No tags").assertExists()
+        compose.onNodeWithText("4 of 7 doses had no tag.").performScrollTo().assertExists()
+        compose.onNodeWithText("Routine").assertExists()
+    }
+
+    @Test
+    fun `habits show the first dose and the gaps, with the longest one's day and times`() {
+        app.setUp()
+        app.seedWeek()
+        show()
+        waitFor("Gaps only count within a day, and patches aren't counted. Changes start on 1 November.")
+        // First doses at 08:00, 08:15 and 08:10. Gaps of 5 h and 6 h on Tuesday, 2 h 45 min twice today.
+        compose.onNodeWithText("08:08").assertExists()
+        compose.onNode(hasContentDescription("4 hours 8 minutes")).assertExists()
+        compose.onNode(hasContentDescription("6 hours")).assertExists()
+        compose.onNodeWithText("Tuesday 20 October, 13:00 to 19:00").performScrollTo().assertExists()
+    }
+
+    @Test
+    fun `by product shares the finished days' mg, and says how much a day`() {
+        app.setUp()
+        app.seedWeek()
+        show()
+        // Monday to Thursday: 28 mg of patches, 24 mg of 4 mg gum and 1 mg of spray.
+        waitFor("0.5 a day, on 2 of 4\u00A0days")
+        compose.onNodeWithText("53%").assertExists()
+        compose.onNodeWithText("1.5\u00A0pieces a day").assertExists()
+        compose.onNodeWithText("0.3\u00A0sprays a day").assertExists()
+    }
+
+    @Test
+    fun `with a full period before, triggers and habits compare with it`() {
+        app.setUp()
+        app.seedHistory()
+        app.seedWeek()
+        show()
+        waitFor("Share of doses with each tag, against the 30\u00A0days before. Patches aren't counted.")
+        compose.onNodeWithText("Against the 30\u00A0days before. Gaps only count within a day, and patches aren't counted.").assertExists()
+        compose.onNodeWithText("Gum").performClick()
+        // Gum alone has no patches to leave out.
+        waitFor("Share of doses with each tag, against the 30\u00A0days before.")
+        compose.onNodeWithText("Share of the mg, and how much a day.").assertExists()
     }
 
     @Test

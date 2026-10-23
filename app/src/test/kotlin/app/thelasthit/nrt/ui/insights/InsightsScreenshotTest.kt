@@ -33,7 +33,7 @@ private const val INSIGHTS_PAGE_LARGE = "en-rGB-w411dp-h5000dp-normal-long-notro
 
 /**
  * Insights as the mockups show it: two months logged, a tapped hour and day, gum only, patches
- * only, a first week, the long range and nothing yet.
+ * only, a first week and its tables, the long range and nothing yet.
  */
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
