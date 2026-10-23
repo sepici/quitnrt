@@ -1,6 +1,6 @@
 # Status and handover
 
-Last updated: 23 October 2026, after the phase 1 screens were built and reviewed in the local session.
+Last updated: 24 October 2026, while the build runs unattended towards a testing build (phases 2 to 7, then 9).
 
 ## Where things are
 
@@ -8,10 +8,14 @@ Last updated: 23 October 2026, after the phase 1 screens were built and reviewed
 |---|---|
 | 0. Foundation and direction | Done. Gradle set-up, CI, copy lint, style guide, design direction chosen, first creature signed off |
 | 1. Logging | **Done.** Domain rules, catalogue, data layer, backup, theme, sprites, plus **onboarding, Today, the log sheet, History, Settings and the lair**, reviewed, with the owner's calls on the reviews applied. |
-| 2. Insights | **In progress.** The stats are in `core/domain` (`domain/insights`), with tests. Insights has its filters and the daily chart; the heat maps, triggers, habits, by product and the History filter are next. |
-| 3 to 9 | Not started. Each is cut into slices in `docs/ROADMAP.md`, with the decisions it needs, all approved. Wear OS (8) comes after release. |
+| 2. Insights | **Slices 1 to 6 done:** the stats, every Insights section and the History filter. Slice 7, the reviews, is next. |
+| 3. Programme | **Slice 1 in progress.** The rules are in `domain/programme`, being reworked for the mix-based taper (P3-6). The data for phases 3 to 5 comes next, in one migration. Mockups have the owner's green light, and are being updated for the mix. |
+| 4. Demon and achievements | **Art done, waiting for the owner's look:** the seven other creatures with defeat frames for all eight, and the gear and badge icons. |
+| 5. Advice | **Slice 1 done:** the content library. The rules are being built. Mockups have the owner's green light. |
+| 6. Quick-log | **Slice 1 done:** the matcher and the deep-link parser. Links and shortcuts are being built. |
+| 7, 9 | Not started, except the release build (phase 9), which is being built. Wear OS (8) comes after release. |
 
-The full check passes locally: copy rules, 93 domain tests, 28 data tests, 74 app UI, screenshot and format tests, debug APK, Android lint.
+The full check passes locally on `main`.
 
 ## Waiting for the owner
 
@@ -28,7 +32,8 @@ Nothing blocks the build. These are worth a look when you're next in:
     - A breathing session counts towards the badges when it runs to the end, in whole rounds. Pausing is fine.
     - The screen stays on while a timer runs. The delay timer keeps counting from its start if you leave, and buzzes at the end. There's no ongoing notification until phase 6.
     - The breathing animation sits on the hero green block, not the success green.
-- **Before release:** review the advice content (P5-1), the creature, gear and badge sheets (P4-1), and the sounds and haptics on your phone.
+- **The art (P4-1):** `art/previews/line-up.png` and the creature sheets, plus `icons-gear.png`, `icons-badges.png` and `icons-3x.png`. Once the creatures are signed off, `Creature.isDrawn` flips and onboarding offers all eight.
+- **Before release:** review the advice content (P5-1) and the sounds and haptics on your phone.
 
 The roadmap's decisions were all approved on 23 October, with Wear OS moved to after release. On 24 October the owner gave the phase 3 and phase 5 mockups a green light, asked for the build to run on to a build ready for testing, and changed the taper to follow the mix of products (PLAN §6.2, ROADMAP P3-6).
 
@@ -182,7 +187,7 @@ From PLAN §10 and §19, agreed with the owner on 23 October.
 **Rules,** each in `core/domain/.../insights` with tests:
 - **Ranges:** 7 days is always on; 30 needs more than 7 days of history, 60 more than 30, and 90 more than 60. A window never starts before the first logged day (`InsightRange.window`).
 - **Rolling average:** up to 7 days, never before the first day. Today is left out until it's over, and is left out of the average a day too (`DailyIntake`).
-- **Hour heat map:** rows start at the day start's hour and columns are the logical day, so a Friday 01:30 dose sits at the bottom of Friday. Hours are read off the dose's own clock, and patches are left out (`HourHeatMap`).
+- **Hour heat map:** rows run an hour each from the day start, so a 04:30 day start gives 04:30 to 05:30 rows, and columns are the logical day. A dose just before the day start sits at the bottom of the day it counts towards. Hours are read off the dose's own clock, and patches are left out (`HourHeatMap`).
 - **Calendar:** days in the range before the first dose have no data, not zero (`CalendarHeat`).
 - **Heat shading:** an empty step plus 5 shades of one ramp (`HeatScale`).
 - **Times of day:** morning from 05:00, afternoon from 12:00, evening from 17:00, night from 22:00, on the dose's own clock (`TimeOfDay`).
@@ -209,10 +214,36 @@ From PLAN §10 and §19, agreed with the owner on 23 October.
    - The table button swaps the chart for `ChartTable`, every day's number, newest first.
    - With nothing logged, the screen says so and offers the log sheet.
    - `seedHistory()` in the app tests logs two months of plausible use for Insights screenshots.
-4. Both heat maps.
-5. Triggers, habits and by product.
-6. The History filter.
+4. Both heat maps. Done.
+   - **When you use** (`HourMap` in `ui/insights/HeatCharts.kt`): shaded by doses or mg, with a tip on tap, a table of every hour with a dose, and a legend of the steps in use.
+   - **Calendar** (`CalendarMap`): days before the first dose are dashed, and today is ringed. The legend marks where each step starts, so its labels can be decimals.
+   - A tip goes below its cell only when it fits, otherwise above, and both maps draw over what follows them.
+   - The heat ramp is in `Color.kt` (`heat`, with `heatFill` and `heatInk`).
+5. Triggers, habits and by product. Done, in `ui/insights/PatternSections.kt`.
+   - **Triggers:** the top 5 tags with their change in points (arrows, never green or red), group shares, the top tag in each part of the day, and the untagged line. Under 10 doses these read as counts.
+   - **Habits:** first dose, average gap and longest gap tiles.
+   - **By product:** each product's share of the finished days' mg and units a day, or today's doses so far when a type has none on finished days.
+   - With a product type chosen, each section names it, as the gum mockup does ("Gum triggers"). Only gum's wording was signed off; the other types follow its pattern.
+   - A window of nothing but patches shows one note in place of the hour map, triggers and habits. Comparisons in the 7-day range say "the week before".
+6. The History filter. Done.
+   - A filter button in History's top bar opens a sheet with one product or one tag. Only products and tags with doses are listed, most used first, and tags fold after 4 per group behind "More".
+   - Under a filter, a chip names it and clears it, with the count beside it. Days with no match are hidden, day totals count only the matches, and day lines read "1 of 5 doses". A page is 30 days with a match.
+   - `HistoryFilter.matches` (`domain/log`) is the rule, and `EntryRepositoryTest` checks the SQL in `observeMatching` against it.
 7. Copy and fresh-eyes reviews.
+
+## Phases 3 to 6: built so far (24 October)
+
+- **Programme rules** (`domain/programme`): the baseline, the plan builder, the clock, results with the 24-hour grace period, carry on, repeat, overtime, hits and HP. Being reworked for the mix-based taper (P3-6). The data layer must call `Programme.settle` for due results before any entry write, since the domain can't tell when an entry was written: that ordering is what keeps a result fixed once it's in.
+- **Creatures** (`resources/creatures/`): the imp, bear, kraken, goblin, slime, wraith and serpent, each with idle1, idle2, hurt, rough, barely and defeat1 to defeat4, in the dragon's four variants. The dragon gained defeat frames; its signed-off frames are unchanged.
+  - The defeat (`SpriteFrame.DEFEAT`, `SpriteSheet.defeatPixels`) is a drawn knockout, then three breakup frames that crack, burst and scatter into pixels.
+  - `SpriteSheetTest` checks that every hurt and rough frame, and the step to barely, changes enough pixels to see at a glance.
+  - The sources are in `art/tools/creatures/`, built by `build_creatures.py`; `preview.py` renders `art/previews/` without Pillow.
+  - `Creature.isDrawn` stays false for the seven until the owner has looked (P4-1).
+  - Sprites run to the edges of their 32 × 32 grid, so the dark-mode rim needs a canvas padded by 1 px a side.
+- **Gear and badges** (`resources/icons/`, `domain/game`): 8 gear icons and 33 badges at 16 × 16, a frame per badge group, drawn by `art/tools/icons.py`. `Gear` and `Achievement` hold the keys.
+- **Master palette:** one file, `resources/palette.json`, as ramps (dark to light) shared by creatures, gear and badges, loaded by `MasterPalette`. It has 44 colours, above PLAN's "about 24", because each creature needs its own ramps.
+- **Advice content** (`domain/advice`, `resources/advice/strategies.json`): 35 strategies from NHS, CDC and HSE pages, each with sources and the date read. The breathing and delay timers are marked as interactive. A test holds the content to PLAN §9's table, and strategies can be limited to product forms. It also has quitlines for each market.
+- **Matcher** (`domain/matcher`): `ProductMatcher`, `TagMatcher` and `LogLinkParser`. A number before a unit or a plural is how many ("nicorette 2 gums"), and a leading number before a singular is the strength ("21 patch"). Times in links are local, and a future time is refused.
 
 ## How design and copy are reviewed
 
