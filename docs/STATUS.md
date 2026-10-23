@@ -35,6 +35,19 @@ The plan has most of these already; this list is the quick reference.
 - **Demon details** (name, creature, palette) sit in settings until the programme starts (phase 3), when the demon moves into the database with its HP.
 - **Only the dragon is drawn.** Onboarding should list all eight creatures, with only the dragon selectable for now.
 - **Palette variants:** `forest` (the app's palette, default), `ember`, `moss`, `frost`.
+- **Palette tweak (23 October),** asked for by the owner after seeing the app:
+  - The light background is closer to white: `#FAF9F5`.
+  - Dark mode's greens are lighter: the hero is `#1A6A4A`, its pills `#257556`, secondary hero text `#D6ECDF`, the hero track `#358866`, and icon tiles `#224233`.
+  - Every pair in the contrast table still passes. `Color.kt`, `tokens.css`, `tokens.json` and `fieldbook-v2/tools/build.py` all match.
+- **Mockups for onboarding, History and Settings** are in `docs/design/fieldbook-v2/b/` (`onboarding-*`, `history*`, `settings*`). The owner signed them off with these calls:
+  1. Creatures not drawn yet show as an empty dotted frame with "Only the dragon is drawn so far." No padlock.
+  2. The quick log is reordered by dragging a handle, with "Move up" and "Move down" as accessibility actions.
+  3. The disclaimer is accepted with one "Accept and set up" button.
+  4. Onboarding buttons name the next step ("Next: your country"). The stop date can be skipped.
+  5. The lurking demon is a silhouette in the stage's browns with marigold eyes, on Today's band too.
+  6. Swipe to delete and "Replace everything" use the error red.
+  7. History leaves out the guide ticks and the filter button until phase 3 and phase 2.
+  8. Pills keep the form rule, "Mouth spray 1 mg", where the mockups say "QuickMist 1 mg".
 
 ## Next: the rest of phase 1 (the screens)
 

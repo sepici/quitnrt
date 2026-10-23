@@ -35,8 +35,8 @@ object GameArt {
     fun sprite(sheet: SpriteSheet, frame: SpriteFrame, variant: String): ImageBitmap =
         bitmap(sheet.argbPixels(frame, variant), sheet.size, sheet.size)
 
-    fun silhouette(sheet: SpriteSheet, frame: SpriteFrame, colour: Color): ImageBitmap =
-        bitmap(sheet.silhouettePixels(frame, colour.toArgb()), sheet.size, sheet.size)
+    fun silhouette(sheet: SpriteSheet, frame: SpriteFrame, colour: Color, eyes: Color? = null): ImageBitmap =
+        bitmap(sheet.silhouettePixels(frame, colour.toArgb(), eyes?.toArgb()), sheet.size, sheet.size)
 
     private fun bitmap(pixels: IntArray, width: Int, height: Int): ImageBitmap =
         Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888).asImageBitmap()

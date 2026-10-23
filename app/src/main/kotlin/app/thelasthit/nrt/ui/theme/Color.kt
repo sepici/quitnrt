@@ -5,8 +5,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 /**
- * The palette from docs/design/fieldbook-v2/b/tokens.json. Material's colour scheme covers the
- * standard components; these are the roles it has no slot for.
+ * The palette from docs/design/fieldbook-v2/b/tokens.json, which is kept in step with this file.
+ * Material's colour scheme covers the standard components; these are the roles it has no slot for.
  *
  * Rules that matter: nicotine used is always [used], a neutral stone, never green or marigold,
  * so a heavier day never looks more complete. [guide] is drawn as a marker or line, never a
@@ -67,7 +67,7 @@ data class LastHitColors(
 )
 
 val LightColors = LastHitColors(
-    bg = Color(0xFFF6F4EC),
+    bg = Color(0xFFFAF9F5),
     surface = Color(0xFFFFFFFF),
     sunk = Color(0xFFECE9DE),
     line = Color(0xFFE2DED2),
@@ -126,12 +126,12 @@ val DarkColors = LastHitColors(
     text = Color(0xFFECF1EA),
     text2 = Color(0xFFA7B8AD),
     text3 = Color(0xFF93A699),
-    hero = Color(0xFF0D4E36),
+    hero = Color(0xFF1A6A4A),
     onHero = Color(0xFFF2F4EC),
-    onHero2 = Color(0xFFB6D6C3),
-    heroTrack = Color(0xFF2B6F54),
+    onHero2 = Color(0xFFD6ECDF),
+    heroTrack = Color(0xFF358866),
     heroUsed = Color(0xFFE6DFCB),
-    heroChip = Color(0xFF1F5F45),
+    heroChip = Color(0xFF257556),
     primary = Color(0xFFEEF2EB),
     onPrimary = Color(0xFF09130F),
     link = Color(0xFF8FDDB0),
@@ -160,7 +160,7 @@ val DarkColors = LastHitColors(
     stageSky = Color(0xFF16120C),
     stageText = Color(0xFFF2EBDA),
     stageText2 = Color(0xFFCDBF9E),
-    iconTile = Color(0xFF1A2E24),
+    iconTile = Color(0xFF224233),
     onIconTile = Color(0xFF9FE0BA),
     error = Color(0xFFF2A99B),
     onError = Color(0xFF2A0A04),

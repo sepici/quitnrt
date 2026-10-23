@@ -11,6 +11,8 @@ class SpriteSheet private constructor(
     val creature: String,
     val size: Int,
     private val slotKeys: List<Char>,
+    /** The slot labelled "eye" in the sprite file, or -1. */
+    private val eyeSlot: Int,
     private val variants: Map<String, IntArray>,
     val defaultVariant: String,
     private val frames: Map<SpriteFrame, ByteArray>,
@@ -30,10 +32,19 @@ class SpriteSheet private constructor(
         return IntArray(slots.size) { i -> slots[i].toInt().let { if (it < 0) 0 else colours[it] } }
     }
 
-    /** The frame's outline filled with one colour, for a creature lurking before the plan starts. */
-    fun silhouettePixels(frame: SpriteFrame, argb: Int): IntArray {
+    /**
+     * The frame's outline filled with one colour, for a creature lurking before the plan starts.
+     * With [eyes], the eye pixels keep a colour of their own, so it watches from the dark.
+     */
+    fun silhouettePixels(frame: SpriteFrame, argb: Int, eyes: Int? = null): IntArray {
         val slots = frames.getValue(frame)
-        return IntArray(slots.size) { i -> if (slots[i] < 0) 0 else argb }
+        return IntArray(slots.size) { i ->
+            when {
+                slots[i] < 0 -> 0
+                eyes != null && slots[i].toInt() == eyeSlot -> eyes
+                else -> argb
+            }
+        }
     }
 
     companion object {
@@ -82,7 +93,8 @@ class SpriteSheet private constructor(
                     }
                 }
             }
-            return SpriteSheet(file.creature, size, slotKeys, variants, file.defaultVariant, frames)
+            val eyeSlot = slotKeys.indexOfFirst { file.slots[it.toString()] == "eye" }
+            return SpriteSheet(file.creature, size, slotKeys, eyeSlot, variants, file.defaultVariant, frames)
         }
 
         private fun parseColour(hex: String): Int {

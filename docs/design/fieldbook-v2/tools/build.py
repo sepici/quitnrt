@@ -48,7 +48,7 @@ SPRITE = {  # Gary, 8 slots
 }
 
 LIGHT = {
-    'bg': '#F6F4EC', 'surface': '#FFFFFF', 'sunk': '#ECE9DE', 'line': '#E2DED2', 'lineStrong': '#858A81',
+    'bg': '#FAF9F5', 'surface': '#FFFFFF', 'sunk': '#ECE9DE', 'line': '#E2DED2', 'lineStrong': '#858A81',
     'text': '#10221A', 'text2': '#4C5A52', 'text3': '#5E6A63',
     'hero': '#0B4A33', 'onHero': '#F6F4EC', 'onHero2': '#B3D2C0', 'heroTrack': '#2A6A50', 'heroUsed': '#E6DFCB',
     'heroLine': '#2E6B52', 'heroChip': '#205F47',
@@ -68,8 +68,8 @@ LIGHT = {
 DARK = {
     'bg': '#09130F', 'surface': '#122019', 'sunk': '#1A2B22', 'line': '#22342B', 'lineStrong': '#6F8679',
     'text': '#ECF1EA', 'text2': '#A7B8AD', 'text3': '#93A699',
-    'hero': '#0D4E36', 'onHero': '#F2F4EC', 'onHero2': '#B6D6C3', 'heroTrack': '#2B6F54', 'heroUsed': '#E6DFCB',
-    'heroLine': '#2C6C52', 'heroChip': '#1F5F45',
+    'hero': '#1A6A4A', 'onHero': '#F2F4EC', 'onHero2': '#D6ECDF', 'heroTrack': '#358866', 'heroUsed': '#E6DFCB',
+    'heroLine': '#2E7D5C', 'heroChip': '#257556',
     'primary': '#EEF2EB', 'onPrimary': '#09130F', 'primaryEdge': '#9FB0A5',
     'link': '#8FDDB0',
     'used': '#8F8B7F', 'track': '#26372E', 'guide': '#A7B8AD',
@@ -81,7 +81,7 @@ DARK = {
     'scrim': '#000000',
     'hpFull': '#3FB072', 'hpHi': '#7DD69B', 'hpEmpty': '#463A22', 'hpOutline': '#050D09',
     'stageSky': '#16120C', 'stageText': '#F2EBDA', 'stageText2': '#CDBF9E',
-    'iconTile': '#1A2E24', 'onIconTile': '#9FE0BA',
+    'iconTile': '#224233', 'onIconTile': '#9FE0BA',
 }
 
 # Lair stage and Today band backdrop slots.

@@ -89,15 +89,18 @@ fun DemonBand(
 }
 
 /**
- * A backdrop with the creature as a dark shape on its rock. In dark mode the shape gets the
- * backdrop's light rim, or it would vanish into the night sky.
+ * A backdrop with the creature as a dark shape on its rock, watching with marigold eyes. In dark
+ * mode the shape gets the backdrop's light rim, or it would vanish into the night sky.
  */
 @Composable
 fun LurkingScene(backdrop: Backdrop, creature: Creature, modifier: Modifier = Modifier) {
-    val dark = LastHit.colors.isDark
+    val colors = LastHit.colors
+    val dark = colors.isDark
     val image = remember(backdrop, dark) { GameArt.backdrop(backdrop, dark) }
     val sheet = remember(creature) { GameArt.sheet(creature) }
-    val shape = remember(sheet, dark) { GameArt.silhouette(sheet, SpriteFrame.IDLE_1, if (dark) LurkDark else LurkLight) }
+    val shape = remember(sheet, dark) {
+        GameArt.silhouette(sheet, SpriteFrame.IDLE_1, if (dark) LurkDark else LurkLight, eyes = colors.marigold)
+    }
     val rim = remember(sheet, dark) {
         backdrop.rim(dark)?.let { GameArt.silhouette(sheet, SpriteFrame.IDLE_1, Color(it)) }
     }
@@ -115,5 +118,6 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawRim(rim: ImageB
     }
 }
 
-private val LurkLight = Color(0xE010221A)
-private val LurkDark = Color(0xFF050D09)
+// The stage's own browns, as in the onboarding mockups.
+private val LurkLight = Color(0xFF3F3829)
+private val LurkDark = Color(0xFF504838)
