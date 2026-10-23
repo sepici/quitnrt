@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=412">
+<title>Fieldbook v2 B, Lair</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-tune" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
+  <symbol id="i-today" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v3.5H8"/><path d="M12 8.5V12l2.5 2"/></symbol>
+  <symbol id="i-insights" viewBox="0 0 24 24"><path d="M5 20v-7M12 20V5M19 20v-10"/></symbol>
+  <symbol id="i-plan" viewBox="0 0 24 24"><path d="M3.5 6.5h5v5h5v5h7"/></symbol>
+  <symbol id="i-lair" viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M5 20v-7a7 7 0 0 1 14 0v7"/><path d="M10 20v-3a2 2 0 0 1 4 0v3"/></symbol>
+</svg>
+
+<header class="stage">
+  <picture><source srcset="stage-dark.png" media="(prefers-color-scheme: dark)"><img class="art pixelated" src="stage-light.png" alt="Gary the dragon standing on a rock"></picture>
+  <div class="status"><span class="num">15:05</span>
+    <svg width="52" height="14" viewBox="0 0 52 14" fill="currentColor" aria-hidden="true"><path d="M1 13h2v-3H1zM5 13h2V7H5zM9 13h2V4H9zM13 13h2V1h-2z"/><rect x="30.5" y="2.5" width="17" height="9" rx="2" fill="none" stroke="currentColor"/><rect x="32" y="4" width="11" height="6"/><rect x="49" y="5" width="2" height="4"/></svg>
+  </div>
+  <div class="bar"><b>Week 4 of 12</b><a class="iconbtn" aria-label="Rename or restyle Gary"><svg class="i"><use href="#i-tune"/></svg></a></div>
+</header>
+
+<section class="hud">
+  <div class="top">
+    <h1>Gary</h1>
+    <div class="hpn" aria-label="100 of 120 HP"><span class="px">100/120</span><small>HP</small></div>
+  </div>
+  <p class="flavour">Gary eyes you from the rocks.</p>
+  <div class="hp" aria-hidden="true"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i></div>
+</section>
+
+<section class="bank">
+  <div class="count" aria-label="1 hit banked"><span class="px">1</span></div>
+  <div><b>Hit banked</b><p>Every week that meets the plan earns one hit.</p></div>
+</section>
+
+<div class="acts">
+  <button class="act hit">
+    <span class="topr"><b>Hit</b><img class="pixelated" src="sword.png" alt=""></span>
+    <small>Uses 1 hit</small>
+  </button>
+  <button class="act combo" disabled aria-disabled="true">
+    <span class="topr"><b>5× attack</b></span>
+    <span><span class="pips" aria-hidden="true"><i class="f"></i><i></i><i></i><i></i><i></i></span><small style="margin-top:6px">Needs 5 hits</small></span>
+  </button>
+</div>
+
+<div class="gear">
+  <div class="row">
+    <span class="lead"><img class="pixelated" src="sword.png" alt=""></span>
+    <span class="body"><span class="ttl">Wooden sword</span><span class="sub">Equipped</span></span>
+    <a class="link">Change</a>
+  </div>
+</div>
+
+<nav class="tabs">
+  <a><span class="ind"><svg class="i"><use href="#i-today"/></svg></span>Today</a>
+  <a><span class="ind"><svg class="i"><use href="#i-history"/></svg></span>History</a>
+  <a><span class="ind"><svg class="i"><use href="#i-insights"/></svg></span>Insights</a>
+  <a><span class="ind"><svg class="i"><use href="#i-plan"/></svg></span>Plan</a>
+  <a class="on"><span class="ind"><svg class="i"><use href="#i-lair"/></svg></span>Lair<b class="badge">1</b></a>
+</nav>
+</body>
+</html>

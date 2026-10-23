@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=412">
+<title>Fieldbook v2 A, Log</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body style="position:relative">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-tune" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4.5l3 1.5"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></symbol>
+  <symbol id="i-gum" viewBox="0 0 24 24"><rect x="3.5" y="7" width="17" height="10" rx="4"/><path d="M7.5 10.5c1.5-.8 3-.8 4.5 0"/></symbol>
+  <symbol id="i-spray" viewBox="0 0 24 24"><rect x="7" y="9" width="8" height="12" rx="2"/><path d="M9 9V6.5h4V9M13 6.5h2.5"/><path d="M18.5 4.5h.01M20 7h.01M18.5 9h.01"/></symbol>
+  <symbol id="i-patch" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4.5"/><rect x="8.5" y="8.5" width="7" height="7" rx="1.5"/></symbol>
+</svg>
+
+<div class="under" aria-hidden="true">
+  <header class="hero" style="height:100%">
+    <div class="status" style="padding:0;color:var(--onHero)"><span class="num">15:05</span>
+      <svg width="52" height="14" viewBox="0 0 52 14" fill="currentColor"><path d="M1 13h2v-3H1zM5 13h2V7H5zM9 13h2V4H9zM13 13h2V1h-2z"/><rect x="30.5" y="2.5" width="17" height="9" rx="2" fill="none" stroke="currentColor"/><rect x="32" y="4" width="11" height="6"/><rect x="49" y="5" width="2" height="4"/></svg>
+    </div>
+    <div class="hero-top"><span class="date">Friday 23 October</span><span class="iconbtn"><svg class="i"><use href="#i-tune"/></svg></span></div>
+    <div class="amount"><span class="big num">8</span><span class="unit"><b>mg</b><span>today</span></span></div>
+  </header>
+  <div class="scrim"></div>
+</div>
+
+<div class="sheet" role="dialog" aria-label="Log a dose">
+  <div class="grab"></div>
+  <div class="hd">
+    <div><h1>Log a dose</h1><p>6&nbsp;mg left today</p></div>
+    <button class="iconbtn" aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button>
+  </div>
+
+  <div class="field">
+    <h3>Product</h3>
+    <div class="scroller">
+      <button class="chip prod sel"><svg class="i"><use href="#i-gum"/></svg><span class="tx">Nicorette gum<small>2&nbsp;mg</small></span></button>
+      <button class="chip prod"><svg class="i"><use href="#i-gum"/></svg><span class="tx">Nicorette gum<small>4&nbsp;mg</small></span></button>
+      <button class="chip prod"><svg class="i"><use href="#i-spray"/></svg><span class="tx">QuickMist<small>1&nbsp;mg</small></span></button>
+      <button class="chip prod"><svg class="i"><use href="#i-patch"/></svg><span class="tx">NiQuitin patch<small>14&nbsp;mg</small></span></button>
+      <button class="chip prod"><svg class="i"><use href="#i-search"/></svg><span class="tx">More<small>All products</small></span></button>
+    </div>
+  </div>
+
+  <div class="field">
+    <h3>Amount</h3>
+    <div class="stepper">
+      <div class="ctl">
+        <button aria-label="One fewer"><svg class="i"><use href="#i-minus"/></svg></button>
+        <span class="q">1 piece</span>
+        <button aria-label="One more"><svg class="i"><use href="#i-plus"/></svg></button>
+      </div>
+      <div class="tot num">2&nbsp;mg<small>this dose</small></div>
+    </div>
+  </div>
+
+  <div class="field">
+    <h3>Time</h3>
+    <div class="wrap">
+      <button class="chip sel"><svg class="i"><use href="#i-check"/></svg><span class="num">Now, 15:05</span></button>
+      <button class="chip">15 min ago</button>
+      <button class="chip">30 min ago</button>
+      <button class="chip">1 h ago</button>
+      <button class="chip">Yesterday</button>
+      <button class="chip"><svg class="i"><use href="#i-clock"/></svg>Pick a time</button>
+    </div>
+  </div>
+
+  <div class="field">
+    <h3>Planned or craving</h3>
+    <div class="seg" role="radiogroup">
+      <button role="radio" aria-checked="false">Planned</button>
+      <button role="radio" aria-checked="true" class="sel">Craving</button>
+    </div>
+  </div>
+
+  <div class="field">
+    <h3>Craving strength</h3>
+    <div class="strength" role="radiogroup" aria-label="Craving strength, 1 to 5">
+      <button role="radio">1</button>
+      <button role="radio">2</button>
+      <button role="radio" class="sel" aria-checked="true">3</button>
+      <button role="radio">4</button>
+      <button role="radio">5</button>
+    </div>
+    <div class="scale"><span>Mild</span><span>Strong</span></div>
+  </div>
+
+  <div class="field">
+    <h3>Tags</h3>
+    <dl class="tags">
+      <dt>Feelings</dt><dd><button class="chip">Stressed</button><button class="chip">Bored</button><button class="chip">Happy</button></dd>
+      <dt>Routine</dt><dd><button class="chip sel"><svg class="i"><use href="#i-check"/></svg>After a meal</button><button class="chip">With coffee or tea</button><button class="chip">Work break</button></dd>
+      <dt>People</dt><dd><button class="chip">Around other nicotine users</button></dd>
+      <dt>Body</dt><dd><button class="chip">Strong craving</button></dd>
+      <dt>Habit</dt><dd><button class="chip">On autopilot</button></dd>
+    </dl>
+  </div>
+
+  <div class="savebar">
+    <button class="btn-primary">Save <small class="num">2&nbsp;mg at 15:05</small></button>
+  </div>
+</div>
+</body>
+</html>
