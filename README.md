@@ -7,6 +7,7 @@ creature that stands for the habit. The last week's hit finishes it.
 
 Everything stays on the phone. The app has no internet permission.
 
+- **Status and next steps:** [`docs/STATUS.md`](docs/STATUS.md)
 - **Plan:** [`docs/PLAN.md`](docs/PLAN.md)
 - **Copy rules:** [`docs/STYLE.md`](docs/STYLE.md)
 - **Product research:** [`docs/research/catalogue/`](docs/research/catalogue/)
