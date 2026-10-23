@@ -12,7 +12,7 @@
    ========================================================================== */
 
 /* ---------- page pieces ---------- */
-.intro,.hint,.note p,.pl-meta,.pl-line,.pl-prose p,.pl-small,.sfoot,.opt .sub,.pl-cap span{text-wrap:pretty}
+.intro,.hint,.note p,.pl-meta,.pl-line,.pl-prose p,.pl-small,.sfoot,.opt .sub,.pl-cap span,.pl-mixnow,.pl-switch p,.pl-knock > p span{text-wrap:pretty}
 .pl-sec{padding:28px 20px 0}
 .pl-sec > h2{font:800 24px/30px var(--font-display);letter-spacing:-.6px}
 .pl-sec > .in-meta{margin-top:4px}
@@ -22,6 +22,12 @@
 .pl-fig .of{font:600 17px/24px var(--font-ui);color:var(--text2)}
 .pl-meta{font:500 14px/20px var(--font-ui);color:var(--text2);margin-top:4px}
 .pl-meta b{font-weight:700;color:var(--text)}
+/* a mix, said once in words: "8 pieces of 4 mg gum and 3 sprays" */
+.pl-mixl{font:700 17px/24px var(--font-ui);letter-spacing:-.2px;margin-top:6px}
+.pl-mixl + .pl-meta{margin-top:6px}
+.pl-mixnow{margin-top:14px;font:400 16px/24px var(--font-ui)}
+.pl-mixnow b{font-weight:700}
+.pl-mixnow + .pl-meta{margin-top:6px}
 .pl-line{font:500 14px/20px var(--font-ui);color:var(--text2);margin-top:18px}
 .pl-line b{font-weight:700;color:var(--text)}
 .pl-sec .note{margin-top:20px}
@@ -103,6 +109,31 @@
 .pl-rows .lead svg.i{width:22px;height:22px}
 .pl-shd{padding:28px 20px 0;font:700 14px/20px var(--font-ui);color:var(--text2)}
 
+/* ---------- a usual day, product by product: whole units a day, each with its stepper ---------- */
+/* B's product rows (lead, name, line under it) with the log sheet's round buttons, sized down for a list */
+.pl-units{list-style:none;margin-top:18px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.pl-units li{display:flex;align-items:center;gap:12px;min-height:76px;padding:12px 0}
+.pl-units li + li{border-top:1px solid var(--line)}
+.pl-units .lead{width:40px;height:40px}
+.pl-units .lead svg.i{width:22px;height:22px}
+.pl-units .body{flex:1;min-width:0}
+.pl-units .ttl{display:block;font:700 16px/22px var(--font-ui)}
+.pl-units .sub{display:block;font:400 14px/20px var(--font-ui);color:var(--text2)}
+.pl-units .ctl{display:flex;align-items:center;gap:2px;flex:none}
+.pl-units .ctl button{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--lineStrong)}
+.pl-units .ctl button svg.i{width:20px;height:20px}
+.pl-units .ctl button[disabled]{background:none;color:var(--disabledText);box-shadow:inset 0 0 0 1.5px var(--line)}
+.pl-units .ctl b{min-width:34px;text-align:center;font:800 22px/28px var(--font-ui);letter-spacing:-.4px}
+.pl-units li.off .ttl{color:var(--text2)}
+.pl-units li.off .lead{background:var(--sunk);color:var(--text3)}
+.pl-units li.off .ctl b{color:var(--text3)}
+.pl-units li.add{min-height:0;padding:0}
+.pl-addb{display:flex;align-items:center;gap:12px;width:100%;min-height:64px;padding:8px 0;text-align:left;color:var(--link)}
+.pl-addb .lead{width:40px;height:40px;background:none;box-shadow:inset 0 0 0 1.5px var(--line);color:var(--link)}
+.pl-addb .ttl{font:700 16px/22px var(--font-ui)}
+.pl-units + .hint{margin-top:14px}
+.pl-cols.pl-logs{margin-top:34px}
+
 /* ---------- baseline days ---------- */
 .pl-days{list-style:none;margin-top:14px}
 .pl-days li{display:flex;align-items:baseline;justify-content:space-between;gap:16px;min-height:48px;padding:13px 0;border-top:1px solid var(--line);font:400 16px/22px var(--font-ui)}
@@ -142,29 +173,63 @@
 .pl-steps .t.b{fill:var(--text2);font-variant-numeric:normal}
 .pl-steps .lv{font:800 13px/1 var(--font-ui);fill:var(--text)}
 .pl-steps .lvbg{fill:var(--bg)}
+.pl-steps .lv{font-size:12px;font-variant-numeric:tabular-nums}
+/* where 2 mg gum takes over: a thin dashed rule at the start of that week, under the line */
+.pl-steps .sw{stroke:var(--text3);stroke-width:1;stroke-dasharray:2 3}
 
 /* week by week, as a table */
-/* a taper week is one button, the whole 60 px row; the pencil only shows that it opens */
+/* a taper week is one button, the whole row: the week and its guide and allowance on the first line,
+   the week's whole mix on the second, the pencil beside both */
 .pl-th,.pl-wkb{display:grid;grid-template-columns:1fr 76px 76px 40px;align-items:center;column-gap:4px}
+.pl-wkb{grid-template-areas:"w g a pen" "m m m pen";row-gap:1px}
 .pl-th{margin-top:22px;padding-bottom:6px;font:600 12px/16px var(--font-ui);color:var(--text2);border-bottom:1px solid var(--line)}
 .pl-th span:nth-child(2),.pl-th span:nth-child(3){text-align:right}
 .pl-weeks{list-style:none}
 .pl-wk{border-bottom:1px solid var(--line)}
-.pl-wkb{width:calc(100% + 40px);min-height:60px;margin:0 -20px;padding:6px 20px;text-align:left}
-.pl-wk .w b{display:block;font:700 16px/22px var(--font-ui)}
-.pl-wk .w span{display:block;font:400 13px/18px var(--font-ui);color:var(--text2)}
+.pl-wkb{width:calc(100% + 40px);min-height:64px;margin:0 -20px;padding:10px 20px 11px;text-align:left}
+.pl-wk .w{grid-area:w;display:flex;align-items:baseline;gap:8px;min-width:0;white-space:nowrap}
+.pl-wk .w b{font:700 16px/22px var(--font-ui)}
+.pl-wk .w span{font:400 13px/18px var(--font-ui);color:var(--text2)}
+.pl-wk .g{grid-area:g}
+.pl-wk .a{grid-area:a}
+.pl-wk .pen{grid-area:pen}
+.pl-wk .m{grid-area:m;font:500 15px/21px var(--font-ui);color:var(--text)}
 .pl-wk .g,.pl-wk .a{text-align:right;font:700 16px/22px var(--font-ui);font-variant-numeric:lining-nums;white-space:nowrap}
 .pl-wk .a{font-weight:800}
 .pen{display:grid;place-items:center;justify-self:end;width:24px;height:24px;color:var(--text2)}
 .pen svg.i{width:20px;height:20px}
 .pl-wk.free .g,.pl-wk.free .a{color:var(--text2)}
-.pl-wk.edited .w span b{font-weight:700;color:var(--text)}
-.pl-wk .w .pl-free{display:inline-block;font:600 12px/16px var(--font-ui);color:var(--text2);padding:1px 7px;border-radius:var(--r-xs);background:var(--sunk);margin-left:6px;vertical-align:1px}
+.pl-wk .pl-free{display:inline-block;font:600 12px/16px var(--font-ui);color:var(--text2);padding:1px 7px;border-radius:var(--r-xs);background:var(--sunk);vertical-align:1px}
+/* the week a lower strength takes over: a mark across the table, just above that week */
+.pl-switch{display:flex;gap:10px;align-items:flex-start;margin:12px 0;padding:12px 14px;background:var(--sunk);border-radius:var(--r-md);font:500 14px/20px var(--font-ui);color:var(--text)}
+.pl-switch svg.i{width:20px;height:20px;flex:none;color:var(--text2)}
+.pl-switch b{font-weight:700}
 .pl-start{margin-top:28px;border-top:1px solid var(--line);padding:14px 20px 24px;background:var(--bg)}
 .pl-start .sum{font:500 14px/20px var(--font-ui);color:var(--text2);text-align:center;margin-bottom:12px}
 
-/* editing a week: the stepper with a ceiling */
+/* editing a week: it moves along the ladder, so the sheet lists every step the week can take as mixes,
+   from the week before's down to 1 spray. B's .opts, radio on the right; the chosen step sits on the
+   sunk tint. The list never moves under the finger: it scrolls on its own, inside an expanded sheet,
+   with the change it makes and the save button always in view below it */
 .stepper .ctl button[disabled]{background:var(--disabledBg);color:var(--disabledText);box-shadow:none;opacity:.7}
+.overlay .sheet.pl-tall{margin-top:48px;flex:1;min-height:0}
+.sheet.pl-tall .field{flex:1;min-height:0;display:flex;flex-direction:column}
+.sheet.pl-tall .field > *{flex:none}
+.sheet.pl-tall .savebar{margin-top:20px}
+/* the ring is a border, so a row's tint can't paint over it as the list scrolls */
+.sheet.pl-tall .field > .pl-ladwrap{flex:1 1 auto}
+.pl-ladwrap{position:relative;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md)}
+.pl-ladwrap::-webkit-scrollbar{display:none}
+.pl-ladwrap .opts{box-shadow:none;border-radius:0;overflow:visible;background:none}
+/* a soft edge where there's more to scroll to, gone at either end */
+.pl-ladwrap::before,.pl-ladwrap::after{content:"";position:sticky;z-index:1;display:block;height:22px;pointer-events:none;transition:opacity .15s}
+.pl-ladwrap::before{top:0;margin-bottom:-22px;background:linear-gradient(var(--surface),transparent)}
+.pl-ladwrap::after{bottom:0;margin-top:-22px;background:linear-gradient(transparent,var(--surface))}
+.pl-ladwrap.at-top::before,.pl-ladwrap.at-end::after{opacity:0}
+.pl-ladder .opt{min-height:64px;padding:10px 16px;cursor:pointer}
+.pl-ladder .opt .ttl{font-size:15px;line-height:21px}
+.pl-ladder .opt .sub{font-size:13px;line-height:18px;margin-top:1px}
+.pl-ladder .opt.sel{background:var(--sunk)}
 .pl-cap{display:flex;gap:10px;align-items:flex-start;margin-top:12px;font:500 14px/20px var(--font-ui);color:var(--text2)}
 .pl-cap svg.i{width:20px;height:20px;margin-top:0;color:var(--text2)}
 .pl-cap b{font-weight:700;color:var(--text)}
@@ -198,6 +263,10 @@
 .pl-sched .pl-srow .pen{margin-left:-2px}
 .pl-sched li.later .body b,.pl-sched li.later .amt b{font-weight:600}
 .pl-sched li.later .amt b{color:var(--text)}
+/* a week's mix: its own line under the week, from the body's edge to the row's end */
+.pl-sched li,.pl-sched .pl-srow{flex-wrap:wrap;row-gap:2px}
+.pl-sched .mix{flex-basis:100%;padding-left:40px;font:500 14px/20px var(--font-ui);color:var(--text)}
+.pl-sched .pl-srow .mix{padding-right:36px}
 .pl-more{display:flex;justify-content:center;margin-top:8px}
 
 /* status marks: green only for a week met; missed and caught up stay neutral */

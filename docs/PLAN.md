@@ -166,6 +166,7 @@ The plan needs the mix of products, not only the total, because it steps down th
   - **A lower strength,** once switching wouldn't mean more pieces a day of that kind than you started with: 4 pieces of 4 mg gum become 8 pieces of 2 mg. This is the step-down the gum makers describe: fewer of the strong pieces first, then the lower strength more often, then fewer of those.
   - **Patches** step down one strength at a time (21, 14, then 7 mg), then come off.
 - The steps are spread evenly over the taper weeks. Where they don't divide evenly, the extra steps come early, when they're a smaller share of the dose. With more weeks than steps, a step lasts more than one week. Allowances never go up.
+- **A switch to a lower strength gets a week of its own,** so there's a week to settle into the new strength before the count comes down: 4 pieces of 4 mg one week, 8 of 2 mg the next. A week that would take a switch and then another step stops at the switch, and the steps left are spread over the weeks after it by the same rule.
 - Lower strengths come from the catalogue (the same brand and kind) or your own products. A product the plan switches you to is added to your products when the plan starts.
 - Each week has a **daily mix** ("5 pieces of 4 mg gum"), a **daily guide** (the mix's mg) for pacing on the Today screen, and a **weekly allowance** (7 × the guide), which is the target. A week is judged on mg alone, so how you stay within it is up to you.
 - You can edit any taper week before it starts, by moving it up or down the ladder. It can't go above the week before, and later weeks move down with it if they'd be above it.
@@ -185,10 +186,18 @@ Example 2: baseline 8 pieces of 4 mg gum (32 mg), 12 weeks. The ladder has 12 st
 | Daily guide (mg) | 24 | 16 | 16 | 14 | 12 | 10 | 8 | 6 | 4 | 2 | **0** | **0** |
 | Weekly allowance (mg) | 168 | 112 | 112 | 98 | 84 | 70 | 56 | 42 | 28 | 14 | **0** | **0** |
 
-The step for week *w* of *T* taper weeks, on a ladder of *k* steps: with *k* ≥ *T*, every week takes *k* div *T* steps and the first *k* mod *T* weeks take one more; with *k* < *T*, week *w* is at step ⌈*k* × *w* ÷ *T*⌉. The exact rules are covered by unit tests in `:core:domain`.
+The step for week *w* of *T* taper weeks, on a ladder of *k* steps: with *k* ≥ *T*, every week takes *k* div *T* steps and the first *k* mod *T* weeks take one more; with *k* < *T*, week *w* is at step ⌈*k* × *w* ÷ *T*⌉. When a week stops early at a switch, the same formula spreads the remaining steps over the remaining weeks. The exact rules are covered by unit tests in `:core:domain`.
+
+Example 3: the usual day is 8 pieces of 4 mg gum and 3 sprays (35 mg), 12 weeks. The ladder has 15 steps. Week 2 ends at 4 pieces of 4 mg, and week 3's switch stops it there, so weeks 4 to 6 take two steps each.
+
+| Week | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Gum a day | 6 × 4 mg | 4 × 4 mg | 8 × 2 mg | 6 × 2 mg | 4 × 2 mg | 2 × 2 mg | 1 × 2 mg | 1 × 2 mg | none | none | none | none |
+| Sprays a day | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 2 | 2 | 1 | none | none |
+| Daily guide (mg) | 27 | 19 | 19 | 15 | 11 | 7 | 5 | 4 | 2 | 1 | **0** | **0** |
 
 ### 6.3 Optional extra goals per week (off by default)
-- **Most units per day.**
+- **Most units a day, per product,** such as 5 pieces of gum a day. One cap across products would count a 1 mg spray the same as a 4 mg piece.
 - **Minimum gap between doses**, e.g. 90 minutes.
 - **First dose not before** a set time, moving about 15 minutes later each week. How soon you reach for nicotine after waking is a strong sign of dependence.
 

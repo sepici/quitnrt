@@ -65,7 +65,7 @@ The taper itself: a baseline, a plan built from it, and weekly results. PLAN §6
 - **P3-3 When results arrive.** Work them out whenever the app looks, since they only depend on the time and the logs. The weekly-result notification arrives with reminders in phase 6. Recommended.
 - **P3-4 Hits before the battle.** Earned hits go into the ledger from phase 3, so none are lost. Spending them waits for phase 4. Recommended.
 - **P3-5 Main product.** Replaced by P3-6 on 24 October.
-- **P3-6 The taper follows your mix** (the owner's rule, 24 October). The baseline is a usual day of whole units per product. The plan is a ladder from it: one fewer unit of the kind that makes up the most mg, a switch to the lower strength once that wouldn't mean more pieces than you started with, patches a strength at a time. PLAN §6.2 has the rule and two worked examples.
+- **P3-6 The taper follows your mix** (the owner's rule, 24 October). The baseline is a usual day of whole units per product. The plan is a ladder from it: one fewer unit of the kind that makes up the most mg, a switch to the lower strength once that wouldn't mean more pieces than you started with, patches a strength at a time. A switch gets a week of its own, as the owner described it (4 pieces of 4 mg, then 8 of 2 mg). PLAN §6.2 has the rule and three worked examples.
 
 **Needs you:** sign off the Plan tab mockups (see G1). Today's meter is already in the signed-off `today.html`.
 

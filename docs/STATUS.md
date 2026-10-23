@@ -25,6 +25,11 @@ Nothing blocks the build. These are worth a look when you're next in:
   - **Plan tab:**
     - A baseline that ends with fewer than 5 days with doses runs on a day at a time until 5 of the last 7 have doses, and the screen says so.
     - The missed-week choice is a sheet when the result comes in, with "Carry on" chosen. Closing it counts as Carry on, and the choice can be changed on the Plan tab until the end of that day.
+  - **Plan tab, for the mix:**
+    - A switch to a lower strength gets a week of its own (PLAN §6.2, example 3), so the "8 pieces of 2 mg" week you described is always there. The designer found that a week taking two steps could otherwise pass straight through it. The mockups' numbers from week 3 on predate this; the domain's numbers are the ones to build.
+    - Editing a week lists every step it can take, from the week before's down to the last, in a scrolling list, rather than a stepper.
+    - "Most units a day" becomes a cap per product (PLAN §6.3).
+    - Past weeks in the schedule keep their mix line, so you can see where 2 mg gum began.
   - **Advice:**
     - The tip after logging is a card under Today's hero until it's dismissed or the day ends. The snackbar keeps only the logged amount and Undo.
     - Today's advice line gets two links under it: "How to do it" and "All advice". Insights uses the same pair.

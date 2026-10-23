@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=412">
-<title>Fieldbook v2 B, Plan, confirm the baseline</title>
+<title>Fieldbook v2 B, Plan, confirm the usual day</title>
 <link rel="stylesheet" href="tokens.css">
 <link rel="stylesheet" href="app.css">
 <link rel="stylesheet" href="screens.css">
@@ -67,27 +67,37 @@
 </div>
 <div class="backbar">
   <a class="iconbtn" aria-label="Back"><svg class="i"><use href="#i-back"/></svg></a>
-  <h1>Your baseline</h1>
+  <h1>Your usual day</h1>
 </div>
 
-<section class="pl-sec" style="padding-top:4px" aria-label="Your baseline">
-  <div class="pl-fig"><span class="n num">13.8</span><span class="of">mg a day</span></div>
-  <p class="pl-meta">Average of the 6 days with doses, Friday 16 to Thursday 22 October.</p>
-  <ul class="pl-days">
-    <li><span>Friday 16 October</span><b class="num">14 mg</b></li>
-    <li><span>Saturday 17 October</span><b class="num">16 mg</b></li>
-    <li class="off"><span>Sunday 18 October</span><span class="nil">Nothing logged</span></li>
-    <li><span>Monday 19 October</span><b class="num">14 mg</b></li>
-    <li><span>Tuesday 20 October</span><b class="num">13 mg</b></li>
-    <li><span>Wednesday 21 October</span><b class="num">12 mg</b></li>
-    <li><span>Thursday 22 October</span><b class="num">14 mg</b></li>
-  </ul>
+<section class="pl-sec" style="padding-top:4px" aria-label="Your usual day">
+  <div class="pl-fig"><span class="n num">35</span><span class="of">mg a day</span></div>
+  <p class="pl-meta">From your logs, Friday 16 to Thursday 22 October. Change a number if it isn’t a normal day for you.</p>
+  <ul class="pl-units" aria-label="Your usual day, product by product">
+  <li><span class="lead dose"><svg class="i"><use href="#i-gum"/></svg></span><span class="body"><span class="ttl">Nicorette gum 4 mg</span><span class="sub">8 pieces, 32 mg a day</span></span><span class="ctl" role="group" aria-label="Nicorette gum 4 mg: 8 pieces a day"><button aria-label="One piece fewer"><svg class="i"><use href="#i-minus"/></svg></button><b class="num" aria-hidden="true">8</b><button aria-label="One piece more"><svg class="i"><use href="#i-plus"/></svg></button></span></li>
+  <li><span class="lead dose"><svg class="i"><use href="#i-spray"/></svg></span><span class="body"><span class="ttl">QuickMist 1 mg</span><span class="sub">3 sprays, 3 mg a day</span></span><span class="ctl" role="group" aria-label="QuickMist 1 mg: 3 sprays a day"><button aria-label="One spray fewer"><svg class="i"><use href="#i-minus"/></svg></button><b class="num" aria-hidden="true">3</b><button aria-label="One spray more"><svg class="i"><use href="#i-plus"/></svg></button></span></li>
+  <li class="add"><button class="pl-addb"><span class="lead"><svg class="i"><use href="#i-plus"/></svg></span><span class="ttl">Add a product</span></button></li>
+</ul>
+</section>
+
+<section class="pl-sec" aria-label="What your logs show">
+  <span class="pl-kicker">What your logs show</span>
+  <div class="pl-cols pl-logs" role="img" aria-label="Friday 35 mg, Saturday 40 mg, Sunday nothing logged, Monday 34 mg, Tuesday 35 mg, Wednesday 34 mg, Thursday 36 mg.">
+  <div class="pl-day"><span class="pl-bar"><i style="height:72.9%"><b class="pl-v">35</b></i></span><span class="pl-d">F</span></div>
+  <div class="pl-day"><span class="pl-bar"><i style="height:83.3%"><b class="pl-v">40</b></i></span><span class="pl-d">S</span></div>
+  <div class="pl-day"><span class="pl-bar pl-blank"></span><span class="pl-d none">S</span></div>
+  <div class="pl-day"><span class="pl-bar"><i style="height:70.8%"><b class="pl-v">34</b></i></span><span class="pl-d">M</span></div>
+  <div class="pl-day"><span class="pl-bar"><i style="height:72.9%"><b class="pl-v">35</b></i></span><span class="pl-d">T</span></div>
+  <div class="pl-day"><span class="pl-bar"><i style="height:70.8%"><b class="pl-v">34</b></i></span><span class="pl-d">W</span></div>
+  <div class="pl-day"><span class="pl-bar"><i style="height:75.0%"><b class="pl-v">36</b></i></span><span class="pl-d">T</span></div>
+</div>
+  <div class="pl-key" aria-hidden="true"><span><i class="ku"></i>Used</span><span><i class="knone"></i>Nothing logged</span></div>
+  <p class="pl-line">Over the 6 days with doses, that’s <b>35.7 mg a day</b> on average, or 8 pieces of 4 mg gum and 3 sprays once rounded.</p>
   <div class="note"><svg class="i"><use href="#i-info"/></svg><div><b>Why Sunday doesn’t count</b><p>A day with nothing logged is usually a day you forgot to log, so counting it as 0&nbsp;mg would start your plan too low.</p></div></div>
 </section>
 
 <div class="pl-foot">
-  <button class="btn-primary">Use 13.8&nbsp;mg a day</button>
-  <button class="btn-line"><svg class="i"><use href="#i-pencil"/></svg>Edit the number</button>
+  <button class="btn-primary">Use this usual day</button>
   <p class="foot-note">Next, you pick the plan’s length and start day.</p>
 </div>
 </body>
