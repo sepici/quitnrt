@@ -88,7 +88,7 @@ class HistoryTest {
         compose.waitUntilExactlyOneExists(hasText("10:55, Work break"))
         compose.onNodeWithText("10:55, Work break").performTouchInput { swipeLeft() }
 
-        compose.waitUntilExactlyOneExists(hasText("Deleted 2\u00A0mg Nicorette gum from 10:55"))
+        compose.waitUntilExactlyOneExists(hasText("Deleted 2\u00A0mg of Nicorette gum, 10:55"))
         assertEquals(2, entriesOn(today).size)
 
         compose.onNodeWithText("Undo").performClick()
@@ -105,7 +105,7 @@ class HistoryTest {
         compose.waitUntilExactlyOneExists(hasText("13:40, After a meal"))
         compose.onNodeWithText("13:40, After a meal").performCustomAccessibilityActionWithLabel("Delete")
 
-        compose.waitUntilExactlyOneExists(hasText("Deleted 2\u00A0mg Nicorette gum from 13:40"))
+        compose.waitUntilExactlyOneExists(hasText("Deleted 2\u00A0mg of Nicorette gum, 13:40"))
         assertTrue(entriesOn(today).none { it.tagKeys == setOf("after_meal") })
     }
 

@@ -49,6 +49,9 @@ class TodayTest {
     val compose = createComposeRule()
 
     private val app: TestApp = ApplicationProvider.getApplicationContext()
+
+    /** The sheet's "Log" button, told apart from the Log pill behind the sheet by its "2 mg at 15:05". */
+    private val logButton = hasText("Log") and hasText(" at ", substring = true)
     private val today = LocalDate.parse("2026-10-23")
 
     @Before
@@ -76,7 +79,7 @@ class TodayTest {
     fun `a quick-log pill logs one now and Undo takes it back`() {
         compose.onNodeWithContentDescription("Log Nicorette gum 2\u00A0mg").performClick()
 
-        compose.waitUntilExactlyOneExists(hasText("Logged 2\u00A0mg Nicorette gum"))
+        compose.waitUntilExactlyOneExists(hasText("Logged 2\u00A0mg of Nicorette gum"))
         val entry = entriesToday().single()
         assertEquals(GUM_2, entry.productId)
         assertEquals(TestApp.NOW, entry.occurredAt)
@@ -98,9 +101,9 @@ class TodayTest {
         compose.onNodeWithContentDescription("Craving strength 3 of 5").performScrollTo().performClick()
         compose.onNodeWithText("After a meal").performScrollTo().performClick()
         compose.onNodeWithText("8\u00A0mg at 14:05").assertExists()
-        compose.onNodeWithText("Save").performClick()
+        compose.onNode(logButton).performClick()
 
-        compose.waitUntilExactlyOneExists(hasText("Logged 8\u00A0mg Nicorette gum"))
+        compose.waitUntilExactlyOneExists(hasText("Logged 8\u00A0mg of Nicorette gum"))
         val entry = entriesToday().single()
         assertEquals(GUM_4, entry.productId)
         assertEquals(2, entry.quantity)
@@ -111,13 +114,13 @@ class TodayTest {
     }
 
     @Test
-    fun `yesterday counts toward yesterday`() {
+    fun `yesterday counts towards yesterday`() {
         compose.onNodeWithContentDescription("Log a dose").performClick()
         compose.waitUntilExactlyOneExists(hasText("Log a dose"))
-        compose.onNodeWithText("Yesterday").performScrollTo().performClick()
-        compose.onNodeWithText("Save").performClick()
+        compose.onNodeWithText("This time yesterday").performScrollTo().performClick()
+        compose.onNode(logButton).performClick()
 
-        compose.waitUntilExactlyOneExists(hasText("Logged 2\u00A0mg Nicorette gum"))
+        compose.waitUntilExactlyOneExists(hasText("Logged 2\u00A0mg of Nicorette gum"))
         assertTrue(entriesToday().isEmpty())
         val yesterday = runBlocking { app.graph.entries.observeDay(today.minusDays(1)).first().entries }.single()
         assertEquals(london("2026-10-22T15:05"), yesterday.occurredAt)
@@ -128,9 +131,9 @@ class TodayTest {
         compose.onNodeWithContentDescription("Log QuickMist 1\u00A0mg").performTouchInput { longClick() }
         compose.waitUntilExactlyOneExists(hasText("1\u00A0spray"))
         compose.waitForIdle()
-        compose.onNodeWithText("Save").performClick()
+        compose.onNode(logButton).performClick()
 
-        compose.waitUntilExactlyOneExists(hasText("Logged 1\u00A0mg QuickMist"))
+        compose.waitUntilExactlyOneExists(hasText("Logged 1\u00A0mg of QuickMist"))
         assertEquals(QUICKMIST, entriesToday().single().productId)
     }
 }

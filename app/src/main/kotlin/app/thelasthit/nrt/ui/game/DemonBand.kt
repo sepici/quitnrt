@@ -1,14 +1,17 @@
 package app.thelasthit.nrt.ui.game
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,6 +28,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -48,23 +52,20 @@ fun DemonBand(
     val colors = LastHit.colors
     val displayName = name ?: stringResource(R.string.demon_default_name)
     val description = stringResource(R.string.demon_band_description, displayName)
-    Box(
-        modifier
-            .fillMaxWidth()
-            .height(132.dp)
+    BandScene(
+        creature,
+        variant = null,
+        height = 132.dp,
+        textStart = 138.dp,
+        textTop = 14.dp,
+        modifier = modifier
             .clickable(onClick = onOpenLair)
             .clearAndSetSemantics {
                 contentDescription = description
                 role = Role.Button
             },
     ) {
-        CreatureScene(GameArt.band, creature, variant = null, Modifier.fillMaxSize())
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .padding(start = 138.dp, top = 14.dp, end = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 displayName,
                 style = LastHit.type.headline.copy(fontSize = 22.sp, lineHeight = 28.sp, letterSpacing = (-0.02).em),
@@ -85,6 +86,46 @@ fun DemonBand(
                     modifier = Modifier.padding(bottom = 2.dp),
                 )
             }
+        }
+    }
+}
+
+/**
+ * The band backdrop with the creature on its rock and [content] in the sky beside it. At [height]
+ * the band shows at its own scale. When the text needs more room, at a large font say, the band
+ * grows upwards as more sky, so text never runs into the hills.
+ */
+@Composable
+fun BandScene(
+    creature: Creature,
+    variant: String?,
+    height: Dp,
+    textStart: Dp,
+    textTop: Dp,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val band = GameArt.band
+    BoxWithConstraints(modifier.fillMaxWidth()) {
+        // drawBackdrop's scale, so the gap matches the hills as drawn.
+        val scale = maxOf(maxWidth / band.width, height / band.height)
+        val land = scale * (band.height - band.horizon)
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .heightIn(min = height)
+                .background(LastHit.colors.stageSky),
+        ) {
+            CreatureScene(
+                band,
+                creature,
+                variant,
+                Modifier
+                    .align(Alignment.BottomStart)
+                    .fillMaxWidth()
+                    .height(height),
+            )
+            Column(Modifier.padding(start = textStart, top = textTop, end = 16.dp, bottom = land + 4.dp), content = content)
         }
     }
 }

@@ -71,9 +71,8 @@ import app.thelasthit.nrt.ui.format.countryName
 import app.thelasthit.nrt.ui.format.variantName
 import app.thelasthit.nrt.ui.format.pillLabelText
 import app.thelasthit.nrt.ui.format.rememberTimeFormatter
-import app.thelasthit.nrt.ui.game.CreatureScene
+import app.thelasthit.nrt.ui.game.BandScene
 import app.thelasthit.nrt.ui.game.CreatureSilhouette
-import app.thelasthit.nrt.ui.game.GameArt
 import app.thelasthit.nrt.ui.graphViewModel
 import app.thelasthit.nrt.ui.theme.LastHit
 import java.time.Instant
@@ -341,7 +340,7 @@ private fun DayStartStep(state: OnboardingState, viewModel: OnboardingViewModel)
             if (example == null) {
                 stringResource(R.string.onboarding_day_body_midnight)
             } else {
-                stringResource(R.string.onboarding_day_body, startText, timeFormat.format(example))
+                stringResource(R.string.onboarding_day_body)
             },
         )
         Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 28.dp)) {
@@ -378,15 +377,17 @@ private fun DoneStep(state: OnboardingState, onStart: () -> Unit) {
         StepHeader(stringResource(R.string.onboarding_done_title), stringResource(R.string.onboarding_done_body))
         val flavour = stringResource(R.string.onboarding_done_flavour, name)
         val description = stringResource(R.string.onboarding_done_description, flavour)
-        Box(
-            Modifier
+        BandScene(
+            Creature.DRAGON,
+            variant = null,
+            height = 188.dp,
+            textStart = 172.dp,
+            textTop = 26.dp,
+            modifier = Modifier
                 .padding(top = 24.dp)
-                .fillMaxWidth()
-                .height(188.dp)
                 .clearAndSetSemantics { contentDescription = description },
         ) {
-            CreatureScene(GameArt.band, Creature.DRAGON, variant = null, modifier = Modifier.fillMaxSize())
-            Column(Modifier.padding(start = 172.dp, end = 16.dp, top = 26.dp)) {
+            Column {
                 Text(name, style = LastHit.type.headline.copy(fontSize = 30.sp, lineHeight = 34.sp), color = colors.stageText, maxLines = 1)
                 Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(stringResource(R.string.demon_hp_unknown), style = LastHit.type.pixel, color = colors.stageText)

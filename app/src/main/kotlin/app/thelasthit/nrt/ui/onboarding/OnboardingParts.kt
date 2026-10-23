@@ -39,6 +39,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -98,19 +99,22 @@ private fun StepsBar(step: OnboardingStep, onBack: (() -> Unit)?, onSkip: (() ->
         Modifier
             .fillMaxWidth()
             .heightIn(min = 56.dp)
-            .padding(start = if (onBack == null) 20.dp else 4.dp, end = 8.dp),
+            .padding(start = 4.dp, end = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        // The back button's place is kept on every step, so the bar doesn't jump between steps.
         if (onBack != null) {
             IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) {
                 Icon(painterResource(R.drawable.ic_back), contentDescription = stringResource(R.string.onboarding_back), tint = colors.text)
             }
+        } else {
+            Spacer(Modifier.size(48.dp))
         }
         Row(
             Modifier
                 .weight(1f)
-                .padding(horizontal = if (onBack == null) 0.dp else 6.dp)
-                // The "2 of 7" next to it says the same to screen readers.
+                .padding(horizontal = 6.dp)
+                // "Step 2 of 7" next to it says the same to screen readers.
                 .clearAndSetSemantics {},
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
@@ -124,11 +128,14 @@ private fun StepsBar(step: OnboardingStep, onBack: (() -> Unit)?, onSkip: (() ->
                 )
             }
         }
+        val stepDescription = stringResource(R.string.onboarding_step_description, step.ordinal + 1, total)
         Text(
             stringResource(R.string.onboarding_step_count, step.ordinal + 1, total),
             style = LastHit.type.caption.copy(fontWeight = FontWeight.SemiBold),
             color = colors.text2,
-            modifier = Modifier.padding(start = 8.dp, end = if (onSkip == null) 12.dp else 4.dp),
+            modifier = Modifier
+                .padding(start = 8.dp, end = if (onSkip == null) 12.dp else 4.dp)
+                .semantics { contentDescription = stepDescription },
         )
         if (onSkip != null) {
             Text(

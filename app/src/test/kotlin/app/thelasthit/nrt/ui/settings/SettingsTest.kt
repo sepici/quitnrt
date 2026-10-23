@@ -12,6 +12,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isOn
@@ -81,6 +83,8 @@ class SettingsTest {
 
     private fun waitFor(text: String) = compose.waitUntilExactlyOneExists(hasText(text), timeoutMillis = 5_000)
 
+    private val isButton = SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button)
+
     /** Reads the database once the screen shows the change. Never poll with it (see TodayTest). */
     private fun <T> read(block: suspend () -> T): T = runBlocking { block() }
 
@@ -148,7 +152,7 @@ class SettingsTest {
     @Test
     fun `the quick log reorders, loses and gains products`() {
         show { QuickLogScreen(onBack = {}) }
-        waitFor("In this order")
+        waitFor("On the quick log")
 
         compose.onNodeWithText("Gum 2\u00A0mg").performCustomAccessibilityActionWithLabel("Move down")
         // Wait on the screen, not the database: Gum 4 mg's row moves above Gum 2 mg's.
@@ -174,7 +178,7 @@ class SettingsTest {
         compose.waitUntilExactlyOneExists(hasContentDescription("Nothing on"), timeoutMillis = 5_000)
 
         compose.onNodeWithText("Add a tag").performClick()
-        waitFor("It goes on the log sheet in the group you pick")
+        waitFor("It shows when you log a dose, in the group you pick")
         compose.onAllNodes(androidx.compose.ui.test.hasSetTextAction())[0].performTextInput("School run")
         compose.onNode(hasText("Routine") and SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.RadioButton)).performClick()
         compose.onNodeWithText("Add tag").performClick()
@@ -190,8 +194,8 @@ class SettingsTest {
         read { app.graph.entries.log(LogRequest(GUM_2, at = london("2026-10-23T04:15"))) }
         var left = false
         show { DayStartScreen(onBack = {}, onSaved = { left = true }) }
-        compose.waitUntilExactlyOneExists(hasContentDescription("30\u00A0minutes later"), timeoutMillis = 5_000)
-        compose.onNodeWithContentDescription("30\u00A0minutes later").performClick()
+        compose.waitUntilExactlyOneExists(hasContentDescription("Start 30\u00A0minutes later"), timeoutMillis = 5_000)
+        compose.onNodeWithContentDescription("Start 30\u00A0minutes later").performClick()
         compose.waitUntilExactlyOneExists(hasText("04:30"))
         compose.onNodeWithText("Save day start").performClick()
 
@@ -214,13 +218,18 @@ class SettingsTest {
         waitFor("What you use")
 
         viewModel.openBackup("thelasthit-backup-2026-10-23.json", backup)
-        waitFor("Restore a backup")
+        waitFor("How to restore it")
         compose.onNodeWithText("Replace everything").performClick()
-        compose.onNodeWithText("Restore backup").performClick()
+        // The button now names the choice too, and the warning then confirms it.
+        compose.onNode(hasText("Replace everything") and isButton).performClick()
         waitFor("Replace everything on this phone?")
-        compose.onNodeWithText("The 10\u00A0doses, 4\u00A0products and tag changes on this phone will be deleted. The backup from 23 October 2026 takes their place.")
-            .assertExists()
-        compose.onNode(hasText("Replace everything") and SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button)).performClick()
+        compose.onNodeWithText(
+            "The 10\u00A0doses, 4\u00A0products and tag changes on this phone will be deleted. " +
+                "The backup from 23 October 2026 takes their place, along with its day start.",
+        ).assertExists()
+        // The sheet counts as a dialog too, so find the warning's button by the warning's title.
+        val warning = hasAnyAncestor(hasAnyDescendant(hasText("Replace everything on this phone?")))
+        compose.onNode(hasText("Replace everything") and isButton and warning).performClick()
 
         waitFor("Backup restored")
         assertEquals(9, read { app.graph.backups.counts() }.entries)
@@ -242,8 +251,8 @@ class SettingsTest {
         waitFor("What you use")
 
         viewModel.openBackup("backup.json", backup)
-        waitFor("Restore a backup")
-        compose.onNodeWithText("Restore backup").performClick()
+        waitFor("How to restore it")
+        compose.onNodeWithText("Add from backup").performClick()
 
         waitFor("Added 2\u00A0doses from the backup")
         assertEquals(2, read { app.graph.backups.counts() }.entries)
@@ -258,14 +267,14 @@ class SettingsTest {
 
         viewModel.openBackup("notes.json", """{"hello": "world"}""")
         waitFor("That file isn't a backup from this app.")
-        compose.onNodeWithText("Restore a backup").assertDoesNotExist()
+        compose.onNodeWithText("How to restore it").assertDoesNotExist()
     }
 
     @Test
     fun `about shows the font licences`() {
         var opened: FontLicence? = null
         show { AboutScreen(onBack = {}, onLicence = { opened = it }) }
-        waitFor("Not medical advice")
+        waitFor("Disclaimer")
         compose.onNodeWithText("Silkscreen").performScrollTo().performClick()
         compose.waitUntil(5_000) { opened == FontLicence.SILKSCREEN }
     }

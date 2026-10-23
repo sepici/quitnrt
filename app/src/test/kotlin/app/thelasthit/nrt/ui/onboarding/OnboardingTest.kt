@@ -83,14 +83,14 @@ class OnboardingTest {
         compose.waitUntilExactlyOneExists(hasText("Next: when your day starts") and isEnabled())
         compose.onNodeWithText("Next: when your day starts").performClick()
 
-        compose.waitUntilExactlyOneExists(hasContentDescription("30\u00A0minutes later"))
-        compose.onNodeWithContentDescription("30\u00A0minutes later").performClick()
+        compose.waitUntilExactlyOneExists(hasContentDescription("Start 30\u00A0minutes later"))
+        compose.onNodeWithContentDescription("Start 30\u00A0minutes later").performClick()
         compose.waitUntilExactlyOneExists(hasText("04:30"))
         next("Finish set-up")
 
         compose.waitUntilExactlyOneExists(hasText("Mildred, forest dragon"), timeoutMillis = 5_000)
         compose.onNodeWithText("Gum\u00A02\u00A0mg, Gum\u00A04\u00A0mg, Mouth\u00A0spray\u00A01\u00A0mg").assertExists()
-        compose.onNodeWithContentDescription("Mildred is lurking. It shows itself when your plan starts. HP not shown yet.").assertExists()
+        compose.onNodeWithContentDescription("Mildred is lurking. It shows itself when your plan starts. HP unknown.").assertExists()
         next("Start logging")
 
         compose.waitUntilExactlyOneExists(hasText("You've had"), timeoutMillis = 5_000)
@@ -109,8 +109,8 @@ class OnboardingTest {
     fun `search finds a product and adds it in order`() {
         showAt(OnboardingDraft(step = OnboardingStep.PRODUCTS, country = "GB", picked = listOf(GUM_2)))
 
-        compose.waitUntilExactlyOneExists(hasText("Search, like niquitin minis 4"))
-        compose.onNodeWithText("Search, like niquitin minis 4").performTextInput("niquitin minis 4")
+        compose.waitUntilExactlyOneExists(hasText("Search, like NiQuitin minis 4"))
+        compose.onNodeWithText("Search, like NiQuitin minis 4").performTextInput("niquitin minis 4")
         compose.waitUntilExactlyOneExists(hasText("NiQuitin Minis 4\u00A0mg"))
         compose.onNodeWithText("Add").performClick()
 

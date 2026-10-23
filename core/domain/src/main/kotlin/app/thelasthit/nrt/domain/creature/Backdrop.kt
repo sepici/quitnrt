@@ -6,7 +6,7 @@ import kotlinx.serialization.json.Json
 /**
  * A pixel backdrop for the game layer, in a light and a dark version. Like the sprites, it's rows
  * of palette letters, written by `art/tools/backdrops.py`. The creature stands at [spriteX],
- * [spriteY] in backdrop pixels, at the same scale.
+ * [spriteY] in backdrop pixels, at the same scale. Text drawn on the sky stays above [horizon].
  */
 class Backdrop private constructor(
     val scene: Scene,
@@ -14,6 +14,8 @@ class Backdrop private constructor(
     val height: Int,
     val spriteX: Int,
     val spriteY: Int,
+    /** The top row of the land: hills, ground and rocks. */
+    val horizon: Int,
     private val light: IntArray,
     private val dark: IntArray,
     /** A 1 px rim around the sprite, so a dark creature stays visible on a dark sky. */
@@ -57,6 +59,7 @@ class Backdrop private constructor(
                 height = file.height,
                 spriteX = file.sprite.x,
                 spriteY = file.sprite.y,
+                horizon = file.horizon ?: file.height,
                 light = pixels("light"),
                 dark = pixels("dark"),
                 rims = buildMap {
@@ -77,6 +80,7 @@ class Backdrop private constructor(
         val width: Int,
         val height: Int,
         val sprite: Point,
+        val horizon: Int? = null,
         val rim: Map<String, String> = emptyMap(),
         val palettes: Map<String, Map<String, String>>,
         val rows: Map<String, List<String>>,

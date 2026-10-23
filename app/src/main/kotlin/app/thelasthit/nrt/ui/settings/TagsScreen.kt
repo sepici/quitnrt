@@ -112,7 +112,14 @@ fun TagsScreen(onBack: () -> Unit, viewModel: TagsViewModel = graphViewModel { T
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Box(Modifier.size(12.dp).clip(RoundedCornerShape(3.dp)).border(1.5.dp, colors.lineStrong, RoundedCornerShape(3.dp)))
+                // A tiny chip in the style of the user's own tags, so it doesn't read as a checkbox.
+                Box(
+                    Modifier
+                        .size(width = 22.dp, height = 14.dp)
+                        .clip(RoundedCornerShape(7.dp))
+                        .background(colors.sunk)
+                        .border(1.5.dp, colors.lineStrong, RoundedCornerShape(7.dp)),
+                )
                 Text(stringResource(R.string.tags_key_own), style = LastHit.type.caption, color = colors.text2)
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {

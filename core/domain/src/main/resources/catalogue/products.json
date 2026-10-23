@@ -391,7 +391,7 @@
   {
    "id": "nicotinell-patch-uk",
    "brand": "Nicotinell",
-   "line": "24 hour patch",
+   "line": "24-hour patch",
    "shortName": "Nicotinell patch",
    "kind": "BRAND",
    "form": "PATCH_24H",
@@ -594,8 +594,8 @@
   {
    "id": "boots-nicassist-patch-24h",
    "brand": "Boots NicAssist",
-   "line": "24 hour patch",
-   "shortName": "NicAssist 24 h patch",
+   "line": "24-hour patch",
+   "shortName": "NicAssist 24-hour patch",
    "kind": "OWN_BRAND",
    "form": "PATCH_24H",
    "unit": "PATCH",
@@ -2779,8 +2779,8 @@
   {
    "id": "generic-patch-16h",
    "brand": "Generic",
-   "line": "16 hour patch",
-   "shortName": "16 h patch",
+   "line": "16-hour patch",
+   "shortName": "16-hour patch",
    "kind": "GENERIC",
    "form": "PATCH_16H",
    "unit": "PATCH",
@@ -2806,8 +2806,8 @@
   {
    "id": "generic-patch-24h",
    "brand": "Generic",
-   "line": "24 hour patch",
-   "shortName": "24 h patch",
+   "line": "24-hour patch",
+   "shortName": "24-hour patch",
    "kind": "GENERIC",
    "form": "PATCH_24H",
    "unit": "PATCH",

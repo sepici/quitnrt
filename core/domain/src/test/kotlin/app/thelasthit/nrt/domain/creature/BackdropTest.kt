@@ -32,6 +32,20 @@ class BackdropTest {
     }
 
     @Test
+    fun `the band's text stays above the hills`() {
+        val band = Backdrop.bundled(Backdrop.Scene.BAND)
+        assertEquals(31, band.horizon)
+        assertTrue(band.spriteY < band.horizon, "the creature stands in front of the hills")
+    }
+
+    @Test
+    fun `with no horizon the whole backdrop is sky`() {
+        val text = """{"width":1,"height":3,"sprite":{"x":0,"y":0},"palettes":{"light":{"S":"#ffffff"},"dark":{"S":"#000000"}},
+            "rows":{"light":["S","S","S"],"dark":["S","S","S"]}}"""
+        assertEquals(3, Backdrop.parse(Backdrop.Scene.BAND, text).horizon)
+    }
+
+    @Test
     fun `an unknown letter is refused`() {
         val text = """{"width":2,"height":1,"sprite":{"x":0,"y":0},"palettes":{"light":{"S":"#ffffff"},"dark":{"S":"#000000"}},
             "rows":{"light":["SX"],"dark":["SS"]}}"""

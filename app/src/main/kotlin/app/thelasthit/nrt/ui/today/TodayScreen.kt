@@ -62,6 +62,7 @@ import app.thelasthit.nrt.ui.components.EntryRow
 import app.thelasthit.nrt.ui.components.IconTile
 import app.thelasthit.nrt.ui.components.pressable
 import app.thelasthit.nrt.ui.format.DayTitleFormatter
+import app.thelasthit.nrt.ui.format.elapsedSpoken
 import app.thelasthit.nrt.ui.format.elapsedText
 import app.thelasthit.nrt.ui.format.formatAt
 import app.thelasthit.nrt.ui.format.icon
@@ -130,10 +131,12 @@ fun TodayScreen(
             item {
                 SinceRow(
                     elapsed = Elapsed.of(Duration.between(last.occurredAt, current.now)),
+                    // "4 mg of Nicorette gum", so two 2 mg pieces don't read like the 4 mg product.
                     detail = stringResource(
                         R.string.today_last_dose,
                         rememberTimeFormatter().formatAt(last.occurredAt, last.zone),
-                        stringResource(R.string.dose_named, current.nameOf(last), last.total.mgText()),
+                        last.total.mgText(),
+                        current.nameOf(last),
                     ),
                 )
             }
@@ -383,10 +386,12 @@ private fun SinceRow(elapsed: Elapsed, detail: String) {
         ) {
             IconTile(R.drawable.ic_clock, size = 48.dp)
             Column(Modifier.weight(1f)) {
+                val spoken = elapsedSpoken(elapsed)
                 Text(
                     elapsedText(elapsed),
                     style = LastHit.type.headline.copy(letterSpacing = (-0.03).em),
                     color = LastHit.colors.text,
+                    modifier = Modifier.semantics { contentDescription = spoken },
                 )
                 Text(detail, style = LastHit.type.label.copy(fontWeight = FontWeight.Normal), color = LastHit.colors.text2)
             }

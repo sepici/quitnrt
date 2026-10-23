@@ -244,13 +244,14 @@ private fun ReorderableList(state: QuickLogState, viewModel: QuickLogViewModel) 
                                     if (index < products.lastIndex) add(CustomAccessibilityAction(moveDown) { viewModel.move(index, index + 1); true })
                                 }
                             }
-                            .padding(start = 8.dp, end = 4.dp, top = 12.dp, bottom = 12.dp),
+                            .padding(end = 4.dp, top = 12.dp, bottom = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
+                        // A full 48 dp to grab, from the row's edge, with the dots where they were.
                         Box(
                             Modifier
-                                .size(width = 32.dp, height = 48.dp)
+                                .size(48.dp)
                                 .pointerInput(index, products.size) {
                                     detectDragGesturesAfterLongPress(
                                         onDragStart = {
@@ -278,7 +279,7 @@ private fun ReorderableList(state: QuickLogState, viewModel: QuickLogViewModel) 
                                 .clearAndSetSemantics {},
                             contentAlignment = Alignment.Center,
                         ) {
-                            Icon(painterResource(R.drawable.ic_grip), contentDescription = stringResource(R.string.quick_drag), tint = colors.text3)
+                            Icon(painterResource(R.drawable.ic_grip), contentDescription = stringResource(R.string.quick_drag), tint = colors.text2)
                         }
                         IconTile(product.form.icon, size = 40.dp)
                         Column(Modifier.weight(1f)) {

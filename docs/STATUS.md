@@ -1,16 +1,16 @@
 # Status and handover
 
-Last updated: 23 October 2026, after the phase 1 screens, the lair included, were built in the local session.
+Last updated: 23 October 2026, after the phase 1 screens were built and reviewed in the local session.
 
 ## Where things are
 
 | Phase | State |
 |---|---|
 | 0. Foundation and direction | Done. Gradle set-up, CI, copy lint, style guide, design direction chosen, first creature signed off |
-| 1. Logging | **Nearly done.** Domain rules, catalogue, data layer, backup, theme, sprites, plus **onboarding, Today, the log sheet, History, Settings and the lair**. The phase reviews are next. |
+| 1. Logging | **Built and reviewed.** Domain rules, catalogue, data layer, backup, theme, sprites, plus **onboarding, Today, the log sheet, History, Settings and the lair**. Six design calls from the reviews wait on the owner (see Phase 1 reviews). |
 | 2 to 9 | Not started |
 
-The full check passes locally: copy rules, 89 domain tests, 28 data tests, 74 app UI, screenshot and format tests, debug APK, Android lint.
+The full check passes locally: copy rules, 93 domain tests, 28 data tests, 74 app UI, screenshot and format tests, debug APK, Android lint.
 
 ## Decisions made since `docs/PLAN.md` was written
 
@@ -94,12 +94,46 @@ Build against the B mockups. All strings go in `strings.xml` and pass `checkCopy
    - **About:** the disclaimer and when it was accepted, sources as the catalogue research cites them (the emc and DailyMed), privacy, and both font licences from assets.
 7. **Lair tab.** Done, lurking only, from B's `lair.html`. The battle comes in phase 4.
    - The stage backdrop with the demon as a shadow on its rock, as on Today's band. Below it are the name, "?? HP" and "Gary watches from the rocks until your plan starts."
-   - The bank says "No hits yet" beside an empty outlined slot, like the mockup's empty pips. In phase 4 the slot turns marigold once a hit is banked.
+   - The bank says "No hits yet" beside an empty slot in the HP bar's empty colour. In phase 4 the slot turns marigold once a hit is banked.
    - The stage runs up behind the status bar, so every other page makes room for the status bar itself (`page` in `AppShell`). On a tall screen the stage also takes the spare height as more sky, so the page doesn't end in a gap.
    - Left out until phase 4: the week label, the rename button, the Hit and 5× buttons, and gear. Until then the demon can only be named in onboarding.
    - Flavour lines use balanced line breaks, so a wrapped line doesn't leave one word on its own.
 
 **Tests:** Compose UI tests for logging (including backdating), edit, delete with undo, and onboarding.
+
+## Phase 1 reviews (23 October)
+
+The copy agent read `strings.xml` against `docs/STYLE.md`. The fresh-eyes reviewer saw only the 70 screenshots, PLAN §16 and STYLE.md.
+
+**Fixed:**
+- **Copy:**
+  - "Towards", not "toward". The log sheet's button says "Log", as STYLE.md's own example does.
+  - Every back button says "Back", since some pages go back to Products or About rather than Settings.
+  - The done step no longer claims everything can be changed in Settings.
+  - The last dose reads "4 mg of Nicorette gum", so two 2 mg pieces don't look like the 4 mg product.
+  - The restore button names what it does: "Add from backup" or "Replace everything".
+  - Screen readers hear "Step 2 of 7", "Add Nicorette gum 2 mg" and "1 hour 25 minutes ago".
+  - The catalogue's patches are "16-hour" and "24-hour".
+- **Week:** Today's week shows days before the first dose as no data, not 0 mg, so a first week doesn't look nicotine-free (`WeekSummary.DayTotal.tracked`).
+- **Bands:** the bands on Today, the demon step and the done step grow upwards as more sky when their text needs it, so text stays above the hills. This is `BandScene`, using the art's `horizon` row, which `art/tools/backdrops.py` now writes.
+- **Log sheet:** the product row runs to the sheet's edges, and its tiles stay top-aligned at a large font.
+- **Onboarding:** the steps bar keeps the back button's place on every step, so it doesn't jump.
+- **Smaller fixes:**
+  - The quick log's drag handle is a full 48 dp, with clearer dots.
+  - The creature and colour tiles leave room under the sprite.
+  - The own-tag legend is a tiny chip, not a checkbox-like square.
+  - The Settings version lines up with the chevrons.
+  - Onboarding's picks tray is one scrolling row.
+
+**Left alone, as they match signed-off mockups or decisions:** the undrawn creatures' dotted frames, the hero's layout, the day-start diagram, About's headings, History's amounts, and the disabled button style.
+
+**Open calls for the owner**, each with a recommendation:
+1. **A true Bold.** The mockups set row titles, labels, pills and links at weight 700, but the app bundles only 400, 500, 600 and 800, so all of those render at 800 and the app reads heavier than the mockups. Cutting a 700 instance needs the variable font and fontTools downloaded. Recommended.
+2. **Dose rows' icon tiles** use the mint tile, which the reviewer reads as green on doses. Recommended: the stone tile on dose rows only.
+3. **Dark mode's primary buttons and selected chips** are cream, the brightest thing on screen at night. Recommended: the dark hero green with light text.
+4. **The lurking demon in dark mode** looks like a cut-out, with a 1 dp rim finer than its pixels. Recommended: leave it to the phase 4 sprite renderer, which was going to redo the rim anyway.
+5. **Today's settings icon** is sliders, which usually means filters. Recommended: a gear.
+6. **"Demon"** is both what you name and one of the eight creatures. Recommended: rename that creature "Imp".
 
 ## How design and copy are reviewed
 

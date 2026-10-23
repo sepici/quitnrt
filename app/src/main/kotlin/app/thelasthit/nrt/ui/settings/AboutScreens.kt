@@ -74,7 +74,7 @@ fun DayStartScreen(
             if (example == null) {
                 stringResource(R.string.onboarding_day_body_midnight)
             } else {
-                stringResource(R.string.onboarding_day_body, timeFormat.format(time), timeFormat.format(example))
+                stringResource(R.string.onboarding_day_body)
             },
         )
         Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 24.dp)) {

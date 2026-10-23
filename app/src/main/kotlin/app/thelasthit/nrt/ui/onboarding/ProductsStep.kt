@@ -1,14 +1,14 @@
 package app.thelasthit.nrt.ui.onboarding
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.ui.catalogue.CataloguePicker
 import app.thelasthit.nrt.ui.catalogue.OrderBadge
+import app.thelasthit.nrt.ui.components.bleed
 import app.thelasthit.nrt.ui.format.pillLabelText
 import app.thelasthit.nrt.ui.theme.LastHit
 
@@ -57,7 +58,6 @@ fun ProductsStep(state: OnboardingState, viewModel: OnboardingViewModel) {
 }
 
 /** The quick log as it will be, in pick order, above the step's button. */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun QuickLogTray(state: OnboardingState) {
     val colors = LastHit.colors
@@ -82,10 +82,14 @@ private fun QuickLogTray(state: OnboardingState) {
                 modifier = Modifier.padding(top = 6.dp),
             )
         } else {
-            FlowRow(
-                Modifier.padding(top = 10.dp),
+            // One row that scrolls, so the pinned footer stays the same height however many are picked.
+            Row(
+                Modifier
+                    .padding(top = 10.dp)
+                    .bleed(20.dp)
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 state.pickedProducts.forEachIndexed { index, product ->
                     val label = state.pickLabels[product.id] ?: return@forEachIndexed

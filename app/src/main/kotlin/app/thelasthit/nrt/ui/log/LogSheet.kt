@@ -187,14 +187,15 @@ private fun Header(state: LogSheetState, onClose: () -> Unit) {
     }
 }
 
+/** A titled part of the sheet. With [bleed], the content runs to the sheet's edges and pads itself. */
 @Composable
-private fun Field(title: String, content: @Composable () -> Unit) {
-    Column(Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 20.dp)) {
+private fun Field(title: String, bleed: Boolean = false, content: @Composable () -> Unit) {
+    Column(Modifier.fillMaxWidth().padding(start = if (bleed) 0.dp else 20.dp, end = if (bleed) 0.dp else 20.dp, top = 20.dp)) {
         Text(
             title,
             style = LastHit.type.label.copy(fontWeight = FontWeight.ExtraBold),
             color = LastHit.colors.text2,
-            modifier = Modifier.padding(bottom = 10.dp),
+            modifier = Modifier.padding(start = if (bleed) 20.dp else 0.dp, bottom = 10.dp),
         )
         content()
     }
@@ -202,18 +203,25 @@ private fun Field(title: String, content: @Composable () -> Unit) {
 
 @Composable
 private fun ProductField(state: LogSheetState, viewModel: LogSheetViewModel) {
-    Field(stringResource(R.string.log_product)) {
+    Field(stringResource(R.string.log_product), bleed = true) {
         if (state.products.isEmpty()) {
-            Text(stringResource(R.string.log_no_products), style = LastHit.type.body, color = LastHit.colors.text2)
+            Text(
+                stringResource(R.string.log_no_products),
+                style = LastHit.type.body,
+                color = LastHit.colors.text2,
+                modifier = Modifier.padding(horizontal = 20.dp),
+            )
             return@Field
         }
         val others = state.products.size > state.quickLogCount && state.quickLogCount > 0
         val shown = if (state.form.showOtherProducts || !others) state.products else state.products.take(state.quickLogCount)
         // Tiles in a row share the tallest one's height, so a long name doesn't leave a ragged edge.
+        // The row scrolls under the sheet's edges, with its padding inside the scroll.
         Row(
             Modifier
                 .horizontalScroll(rememberScrollState())
-                .height(IntrinsicSize.Max),
+                .height(IntrinsicSize.Max)
+                .padding(horizontal = 20.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             shown.forEach { product ->
@@ -264,10 +272,10 @@ private fun Tile(icon: Int, big: String, small: String, selected: Boolean, role:
                 },
             )
             .padding(12.dp),
-        verticalArrangement = Arrangement.SpaceBetween,
     ) {
+        // Top-aligned, so amounts line up across tiles when one name wraps.
         Icon(painterResource(icon), contentDescription = null, tint = content)
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(10.dp))
         Column {
             Text(big, style = LastHit.type.title.copy(fontSize = 20.sp, lineHeight = 22.sp, fontWeight = FontWeight.ExtraBold), color = content)
             Text(small, style = LastHit.type.caption.copy(fontSize = 12.sp, lineHeight = 16.sp), color = content.copy(alpha = 0.85f), maxLines = 2)

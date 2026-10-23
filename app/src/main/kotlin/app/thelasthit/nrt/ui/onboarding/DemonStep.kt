@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -51,8 +50,8 @@ import app.thelasthit.nrt.ui.components.Chip
 import app.thelasthit.nrt.ui.components.ChipKind
 import app.thelasthit.nrt.ui.format.creatureName
 import app.thelasthit.nrt.ui.format.variantName
+import app.thelasthit.nrt.ui.game.BandScene
 import app.thelasthit.nrt.ui.game.CreatureImage
-import app.thelasthit.nrt.ui.game.CreatureScene
 import app.thelasthit.nrt.ui.game.GameArt
 import app.thelasthit.nrt.ui.theme.LastHit
 import java.util.Locale
@@ -137,9 +136,8 @@ private fun Preview(name: String, variant: String) {
         stringResource(variantName(variant)),
         stringResource(R.string.creature_dragon).lowercase(Locale.UK),
     )
-    Box(Modifier.padding(top = 24.dp).fillMaxWidth().height(168.dp)) {
-        CreatureScene(GameArt.band, Creature.DRAGON, variant = variant, modifier = Modifier.fillMaxSize())
-        Column(Modifier.padding(start = 172.dp, end = 16.dp, top = 30.dp)) {
+    BandScene(Creature.DRAGON, variant, height = 168.dp, textStart = 172.dp, textTop = 30.dp, modifier = Modifier.padding(top = 24.dp)) {
+        Column {
             if (name.isNotEmpty()) {
                 Text(name, style = LastHit.type.headline.copy(fontSize = 30.sp, lineHeight = 34.sp), color = colors.stageText, maxLines = 1)
             }
@@ -187,8 +185,9 @@ private fun BoxScope.CreatureTile(creature: Creature, selected: Boolean, variant
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Bottom,
         ) {
-            CreatureImage(creature, variant, Modifier.size(68.dp))
-            Text(name, style = LastHit.type.label.copy(fontWeight = FontWeight.ExtraBold), color = if (selected) colors.stageText else colors.text)
+            // 64 dp is twice the sprite's size, with room between its feet and the name.
+            CreatureImage(creature, variant, Modifier.padding(bottom = 8.dp).size(64.dp))
+            Text(name, style = LastHit.type.label.copy(fontWeight = FontWeight.SemiBold), color = if (selected) colors.stageText else colors.text)
         }
         if (selected) Tick()
     } else {
@@ -238,8 +237,8 @@ private fun BoxScope.VariantSwatch(variant: String, selected: Boolean, onPick: (
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Bottom,
     ) {
-        CreatureImage(Creature.DRAGON, variant, Modifier.size(68.dp))
-        Text(stringResource(variantName(variant)), style = LastHit.type.label.copy(fontWeight = FontWeight.ExtraBold), color = colors.stageText)
+        CreatureImage(Creature.DRAGON, variant, Modifier.padding(bottom = 8.dp).size(64.dp))
+        Text(stringResource(variantName(variant)), style = LastHit.type.label.copy(fontWeight = FontWeight.SemiBold), color = colors.stageText)
     }
     if (selected) Tick()
 }

@@ -7,6 +7,7 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import app.thelasthit.nrt.R
@@ -61,6 +62,24 @@ fun elapsedText(elapsed: Elapsed): String = when {
     elapsed.hours > 0 && elapsed.minutes > 0 -> stringResource(R.string.elapsed_hours_minutes, elapsed.hours, elapsed.minutes)
     elapsed.hours > 0 -> stringResource(R.string.elapsed_hours, elapsed.hours)
     else -> stringResource(R.string.elapsed_minutes, elapsed.minutes)
+}
+
+/** [elapsedText] in words, for screen readers, which would read "h" as a letter. */
+@Composable
+fun elapsedSpoken(elapsed: Elapsed): String {
+    val resources = LocalResources.current
+    fun part(plural: Int, count: Long) = resources.getQuantityString(plural, count.toInt(), count)
+    val days = part(R.plurals.spoken_days, elapsed.days)
+    val hours = part(R.plurals.spoken_hours, elapsed.hours.toLong())
+    val minutes = part(R.plurals.spoken_minutes, elapsed.minutes.toLong())
+    return when {
+        elapsed.isJustNow -> resources.getString(R.string.elapsed_just_now)
+        elapsed.days > 0 && elapsed.hours > 0 -> resources.getString(R.string.spoken_ago_two, days, hours)
+        elapsed.days > 0 -> resources.getString(R.string.spoken_ago, days)
+        elapsed.hours > 0 && elapsed.minutes > 0 -> resources.getString(R.string.spoken_ago_two, hours, minutes)
+        elapsed.hours > 0 -> resources.getString(R.string.spoken_ago, hours)
+        else -> resources.getString(R.string.spoken_ago, minutes)
+    }
 }
 
 @Composable

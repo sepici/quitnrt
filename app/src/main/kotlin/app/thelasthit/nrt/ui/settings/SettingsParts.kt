@@ -175,7 +175,14 @@ fun SettingsRow(
             }
         }
         if (value != null) {
-            Text(value, style = LastHit.type.label.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold), color = colors.text2)
+            // On its own, the value ends where a chevron's tip would, so the right edge lines up.
+            val alone = trailing == null && !chevron
+            Text(
+                value,
+                style = LastHit.type.label.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold),
+                color = colors.text2,
+                modifier = if (alone) Modifier.padding(end = 12.dp) else Modifier,
+            )
         }
         if (trailing != null) {
             trailing()

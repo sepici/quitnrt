@@ -15,6 +15,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -46,3 +47,15 @@ fun Modifier.pressable(colour: Color, shape: Shape, edge: Color = Color.Black.co
             val h = depth.toPx()
             drawRect(edge, topLeft = Offset(0f, size.height - h), size = Size(size.width, h))
         }
+
+/**
+ * Runs the content [by] past both sides, out of its parent's padding, so a row that scrolls
+ * sideways reaches the screen's edges. Give the row the same padding inside its scroll.
+ */
+fun Modifier.bleed(by: Dp): Modifier = layout { measurable, constraints ->
+    val side = by.roundToPx()
+    val wide = if (constraints.hasBoundedWidth) constraints.maxWidth + side * 2 else constraints.maxWidth
+    val placeable = measurable.measure(constraints.copy(minWidth = 0, maxWidth = wide))
+    val width = (placeable.width - side * 2).coerceIn(constraints.minWidth, constraints.maxWidth)
+    layout(width, placeable.height) { placeable.place(-side, 0) }
+}

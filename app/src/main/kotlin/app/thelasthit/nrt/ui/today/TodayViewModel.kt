@@ -80,8 +80,12 @@ class TodayViewModel(
 
     private val days: Flow<Pair<DaySummary, WeekSummary>> = today.flatMapLatest { date ->
         val monday = WeekSummary.mondayOf(date)
-        combine(graph.entries.observeDay(date), graph.entries.observeRange(monday, monday.plusDays(6))) { day, week ->
-            day to WeekSummary.of(date, week)
+        combine(
+            graph.entries.observeDay(date),
+            graph.entries.observeRange(monday, monday.plusDays(6)),
+            graph.entries.observeFirstDay(),
+        ) { day, week, firstDay ->
+            day to WeekSummary.of(date, week, firstDay)
         }
     }
 

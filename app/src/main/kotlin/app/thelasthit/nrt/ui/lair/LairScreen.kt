@@ -22,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -176,7 +175,7 @@ private fun UnknownHp(modifier: Modifier = Modifier) {
 
 /**
  * The hits banked, as a block with the rule for earning them. The block is marigold only when
- * there's a hit to use. With none it's an empty outlined slot, like the mockup's empty pips.
+ * there's a hit to use. With none it's an empty slot in the HP bar's empty colour.
  */
 @Composable
 private fun Bank(count: Int, title: String, rule: String, modifier: Modifier = Modifier) {
@@ -198,13 +197,7 @@ private fun Bank(count: Int, title: String, rule: String, modifier: Modifier = M
                         drawRect(colors.marigold)
                         drawRect(colors.marigoldEdge, Offset(0f, size.height - edge), Size(size.width, edge))
                     } else {
-                        val outline = 2.dp.toPx()
-                        drawRect(
-                            colors.lineStrong,
-                            Offset(outline / 2, outline / 2),
-                            Size(size.width - outline, size.height - outline),
-                            style = Stroke(outline),
-                        )
+                        drawRect(colors.hpEmpty)
                     }
                 }
                 .clearAndSetSemantics {},
@@ -213,7 +206,7 @@ private fun Bank(count: Int, title: String, rule: String, modifier: Modifier = M
             Text(
                 count.toString(),
                 style = LastHit.type.pixelLarge,
-                color = if (banked) colors.onMarigold else colors.text2,
+                color = if (banked) colors.onMarigold else colors.stageText2,
                 // The digit's own spacing sits to its right, and a banked block's edge at the bottom.
                 modifier = Modifier.padding(start = 4.dp, bottom = if (banked) 4.dp else 0.dp),
             )

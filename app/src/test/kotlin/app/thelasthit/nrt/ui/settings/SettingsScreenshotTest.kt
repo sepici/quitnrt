@@ -100,7 +100,7 @@ class SettingsScreenshotTest {
     @Test @Config(qualifiers = FULL_PAGE)
     fun quickLog() {
         setUpLikeTheMockups()
-        compose.captureLooks("settings-quick-log", ready = hasText("In this order")) { QuickLogScreen(onBack = {}) }
+        compose.captureLooks("settings-quick-log", ready = hasText("On the quick log")) { QuickLogScreen(onBack = {}) }
     }
 
     @Test @Config(qualifiers = FULL_PAGE)
@@ -118,7 +118,7 @@ class SettingsScreenshotTest {
     @Test @Config(qualifiers = FULL_PAGE)
     fun about() {
         setUpLikeTheMockups()
-        compose.captureLooks("settings-about", ready = hasText("Not medical advice")) { AboutScreen(onBack = {}, onLicence = {}) }
+        compose.captureLooks("settings-about", ready = hasText("Disclaimer")) { AboutScreen(onBack = {}, onLicence = {}) }
     }
 
     @Test @Config(qualifiers = PHONE)
@@ -132,7 +132,7 @@ class SettingsScreenshotTest {
             ready = hasText("What you use"),
             before = {
                 viewModel.openBackup("thelasthit-backup-2026-10-23.json", backup)
-                waitUntil(5_000) { onAllNodes(hasText("Restore a backup")).fetchSemanticsNodes().isNotEmpty() }
+                waitUntil(5_000) { onAllNodes(hasText("How to restore it")).fetchSemanticsNodes().isNotEmpty() }
             },
         ) { SettingsScreen(remember { SnackbarHostState() }, onBack = {}, links = links, viewModel = viewModel) }
     }

@@ -328,8 +328,8 @@ private fun ResultRow(product: CatalogueProduct, first: Boolean, picked: Boolean
             val name = stringResource(R.string.dose_named, product.shortName, product.strength.mgText())
             val description = when {
                 picked && order != null -> stringResource(R.string.onboarding_pick_description, name, order)
-                picked -> stringResource(R.string.onboarding_added)
-                else -> stringResource(R.string.onboarding_add)
+                picked -> stringResource(R.string.onboarding_added_description, name)
+                else -> stringResource(R.string.onboarding_add_description, name)
             }
             Row(
                 Modifier

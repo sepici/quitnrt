@@ -152,6 +152,14 @@ def band_stage(mode, cols=138, rows=44):
     return g, (6, 6)
 
 
+SKY = set('Ss*Uu')
+
+
+def horizon(g):
+    """The top row of the land (hills, ground and rocks). Text drawn on the backdrop stays above it."""
+    return next(y for y, row in enumerate(g) if any(ch not in SKY for ch in row))
+
+
 def export(name, build):
     grids = {mode: build(mode) for mode in ('light', 'dark')}
     (light, sprite_at), (dark, _) = grids['light'], grids['dark']
@@ -161,6 +169,7 @@ def export(name, build):
         'width': len(light[0]),
         'height': len(light),
         'sprite': {'x': sprite_at[0], 'y': sprite_at[1]},
+        'horizon': min(horizon(light), horizon(dark)),
         'rim': {mode: STAGE[mode]['rim'] for mode in ('light', 'dark') if STAGE[mode]['rim']},
         'palettes': {mode: {ch: stage_pal(mode)[ch] for ch in used} for mode in ('light', 'dark')},
         'rows': {'light': [''.join(r) for r in light], 'dark': [''.join(r) for r in dark]},

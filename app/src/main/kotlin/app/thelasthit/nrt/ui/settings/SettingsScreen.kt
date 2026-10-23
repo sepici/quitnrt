@@ -291,8 +291,9 @@ private fun RestoreSheet(candidate: RestoreCandidate, viewModel: SettingsViewMod
             }
             Box(Modifier.padding(start = 20.dp, end = 20.dp, top = 24.dp)) {
                 PrimaryButton(onClick = viewModel::startRestore) { content ->
+                    // Names what happens, since the two ways of restoring are so different.
                     Text(
-                        stringResource(R.string.restore_button),
+                        stringResource(if (candidate.mode == ImportMode.REPLACE) R.string.replace_confirm else R.string.restore_button),
                         style = LastHit.type.title.copy(fontSize = 18.sp, fontWeight = FontWeight.ExtraBold),
                         color = content,
                     )

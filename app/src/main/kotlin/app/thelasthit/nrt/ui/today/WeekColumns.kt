@@ -38,7 +38,8 @@ private val BarArea = 88.dp
 /**
  * The week as seven columns, Monday to Sunday, each the day's mg in the neutral used colour.
  * Until a plan exists there's no guide, so the tallest day sets the scale and nothing is ticked.
- * A week with nothing logged has no bars, so it shrinks to the baselines.
+ * A week with nothing logged has no bars, so it shrinks to the baselines. Days with no data,
+ * before the first dose or still to come, get a dashed baseline and no number.
  */
 @Composable
 fun WeekColumns(week: WeekSummary, modifier: Modifier = Modifier) {
@@ -46,7 +47,7 @@ fun WeekColumns(week: WeekSummary, modifier: Modifier = Modifier) {
     val resources = LocalResources.current
     val tallest = week.days.maxOf { it.total }.takeIf { it > Dose.ZERO }
     val barArea = if (tallest == null) 0.dp else BarArea
-    val summary = week.days.filter { it.date <= week.today }.joinToString(", ") { day ->
+    val summary = week.days.filter { it.tracked }.joinToString(", ") { day ->
         val name = day.date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.UK)
         val text = if (day.date == week.today) R.string.today_week_day_so_far else R.string.today_week_day
         resources.getString(text, name, day.total.mgText())
@@ -54,14 +55,13 @@ fun WeekColumns(week: WeekSummary, modifier: Modifier = Modifier) {
     Row(modifier.fillMaxWidth().clearAndSetSemantics { contentDescription = summary }) {
         week.days.forEach { day ->
             val isToday = day.date == week.today
-            val isFuture = day.date > week.today
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                 Column(
                     Modifier.height(barArea + 24.dp),
                     verticalArrangement = Arrangement.Bottom,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    if (!isFuture) {
+                    if (day.tracked) {
                         Text(
                             day.total.mgText(),
                             style = LastHit.type.caption.copy(fontWeight = if (isToday) FontWeight.ExtraBold else FontWeight.SemiBold),
@@ -79,7 +79,7 @@ fun WeekColumns(week: WeekSummary, modifier: Modifier = Modifier) {
                         )
                     }
                 }
-                Baseline(dashed = isFuture)
+                Baseline(dashed = !day.tracked)
                 Box(
                     Modifier
                         .padding(top = 10.dp)
