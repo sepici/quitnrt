@@ -1,0 +1,13 @@
+{
+  "about": "The master palette for the creatures, and next for gear and badges. Each ramp runs dark to light. Every colour of the dragon, signed off in phase 0, is here; umber is the bear's.",
+  "ramps": {
+    "pine": ["#0b2017", "#124f39", "#1f7a50", "#4fae70"],
+    "ember": ["#2a1519", "#6b2b2d", "#a3453a", "#cf7a4f"],
+    "moss": ["#16201a", "#2f4a33", "#4d7347", "#87a35e"],
+    "frost": ["#161b2b", "#2e4466", "#4a6f98", "#86acc7"],
+    "umber": ["#1f1510", "#4b301f", "#7a4c2e", "#a8744a"],
+    "cream": ["#cfdcd9", "#dcc99a", "#e6c48c", "#ece4c8", "#efe3c6", "#f1ede2", "#f3e4b6"],
+    "white": ["#f8f6e6", "#fbf8e8", "#fff7e6", "#fbfbf6"],
+    "gold": ["#e8a33d", "#f2a922", "#f0b44c", "#f2cd55", "#ffe27a"]
+  }
+}
