@@ -19,3 +19,9 @@ captures/
 
 # Python
 __pycache__/
+
+# Signing keys stay outside the repository (docs/RELEASE.md)
+*.jks
+*.keystore
+*.p12
+*.pfx
