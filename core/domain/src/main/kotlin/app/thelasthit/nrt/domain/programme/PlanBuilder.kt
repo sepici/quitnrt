@@ -19,77 +19,63 @@ enum class ProgrammeLength(val weeks: Int) {
 }
 
 /**
- * What a week aims for. The weekly allowance is the target. The daily guide paces it on Today:
- * the allowance divided by 7, rounded down to a whole microgram, so a week kept to the guide
- * every day is always met.
+ * What a week aims for: its daily [mix], at [step] on the plan's ladder, or none for an NRT-free
+ * week. The daily guide is the mix's mg exactly, for pacing on Today. The weekly allowance is
+ * 7 times the guide, and it's the target: a week is judged on mg alone.
  */
-data class WeekTarget(val weeklyAllowance: Dose) {
-    val dailyGuide: Dose get() = Dose(weeklyAllowance.micrograms / DAYS)
+data class WeekTarget(val step: Int?, val mix: Mix) {
+    init {
+        require((step == null) == mix.isEmpty) { "Only an NRT-free week has no step: $step, $mix" }
+        require(step == null || step >= 0) { "Steps count from 0, the usual day: $step" }
+    }
+
+    val isNrtFree: Boolean get() = step == null
+
+    val dailyGuide: Dose get() = mix.total
+
+    val weeklyAllowance: Dose get() = dailyGuide * DAYS
 
     companion object {
         const val DAYS = 7
-        val NRT_FREE = WeekTarget(Dose.ZERO)
+        val NRT_FREE = WeekTarget(null, Mix.NONE)
 
-        /** The week that keeps to [guide] a day. */
-        fun daily(guide: Dose): WeekTarget = WeekTarget(guide * DAYS)
+        /** The week at [step] on [ladder]. */
+        fun at(ladder: Ladder, step: Int): WeekTarget = WeekTarget(step, ladder.mixAt(step))
     }
 }
 
 /**
- * Builds the weekly targets of a programme from a baseline. The taper steps down in whole units
- * of the main product (pieces of 2 mg gum, say) to zero in the first NRT-free week:
- * - The baseline becomes whole units, to the nearest one, and it needs at least [MIN_UNITS].
- *   A single unit has nothing to step down through, so every taper week would be NRT-free too.
- *   [canStepDown] says so before a plan is built, and a smaller product makes a better main one:
- *   one 21 mg patch a day steps down in 7 mg patches.
- * - Each week drops the same number of units where it can. When the units don't divide evenly,
- *   the weeks that drop one more come first, while it's a smaller share of the dose.
- * - With fewer units than drops to make, the one-unit drops are spread evenly from the first
- *   week to the first NRT-free one, a little sooner rather than later, so the taper still uses
- *   the weeks chosen.
+ * Spreads a ladder's steps over a programme's taper weeks (PLAN §6.2). With k steps and T taper
+ * weeks:
+ * - With k ≥ T, every week takes k div T steps, and the first k mod T weeks take one more, while
+ *   the extra step is a smaller share of the dose.
+ * - With k < T, week w is at step ⌈k × w ÷ T⌉, so a step lasts more than a week.
+ * - With no steps, every taper week holds at the usual day.
  *
- * So allowances never go up, the first week is always below the baseline, and every taper week
- * keeps some nicotine.
+ * So the last taper week is always at the bottom of the ladder, the first is below the usual day
+ * whenever the ladder has steps, and allowances never go up. The NRT-free weeks follow.
  */
 object PlanBuilder {
 
-    /** The fewest whole units a baseline can step down through: one to drop, and one to keep. */
-    const val MIN_UNITS = 2L
+    /** The step taper week [week] of [taperWeeks] is at, on a ladder of [steps] steps. */
+    fun stepFor(week: Int, steps: Int, taperWeeks: Int): Int {
+        require(taperWeeks >= 1) { "A taper needs weeks: $taperWeeks" }
+        require(week in 1..taperWeeks) { "Week $week isn't one of the $taperWeeks taper weeks" }
+        require(steps >= 0) { "A ladder can't have $steps steps" }
+        return if (steps >= taperWeeks) {
+            week * (steps / taperWeeks) + minOf(week, steps % taperWeeks)
+        } else {
+            ceilDiv(steps * week, taperWeeks)
+        }
+    }
 
-    /** Whether [baselineDaily] comes to at least [MIN_UNITS] of [unit], so a plan can be built. */
-    fun canStepDown(baselineDaily: Dose, unit: Dose): Boolean =
-        baselineDaily > Dose.ZERO && unit > Dose.ZERO && units(baselineDaily, unit) >= MIN_UNITS
-
-    fun targets(baselineDaily: Dose, unit: Dose, length: ProgrammeLength): List<WeekTarget> {
-        require(baselineDaily > Dose.ZERO) { "A baseline needs some nicotine: $baselineDaily" }
-        require(unit > Dose.ZERO) { "A unit needs some nicotine: $unit" }
-        val units = units(baselineDaily, unit)
-        require(units >= MIN_UNITS) { "$baselineDaily is $units of $unit, too few to step down through" }
-        // The steps run from the baseline to the first NRT-free week, one more than the taper weeks.
-        val steps = length.taperWeeks + 1
+    /** Every week's target: the taper weeks down [ladder], then the NRT-free weeks. */
+    fun targets(ladder: Ladder, length: ProgrammeLength): List<WeekTarget> {
         val taper = (1..length.taperWeeks).map { week ->
-            WeekTarget.daily(Dose(unit.micrograms * unitsLeft(units, steps, week)))
+            WeekTarget.at(ladder, stepFor(week, ladder.size, length.taperWeeks))
         }
         return taper + List(ProgrammeLength.NRT_FREE_WEEKS) { WeekTarget.NRT_FREE }
     }
 
-    /** [baselineDaily] in whole units of [unit], to the nearest one (halves up). */
-    fun units(baselineDaily: Dose, unit: Dose): Long =
-        (baselineDaily.micrograms * 2 + unit.micrograms) / (unit.micrograms * 2)
-
-    /** The units a day left after [step] of [steps], going from [units] down to zero. */
-    private fun unitsLeft(units: Long, steps: Int, step: Int): Long {
-        val dropped = when {
-            units >= steps -> {
-                val each = units / steps
-                val extra = units % steps
-                each * step + minOf(step.toLong(), extra)
-            }
-            // Drops at the first step and the last, and evenly between, each as soon as it can be.
-            else -> ceilDiv(step * (units - 1), steps - 1L)
-        }
-        return units - dropped
-    }
-
-    private fun ceilDiv(numerator: Long, denominator: Long): Long = (numerator + denominator - 1) / denominator
+    private fun ceilDiv(numerator: Int, denominator: Int): Int = (numerator + denominator - 1) / denominator
 }

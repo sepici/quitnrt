@@ -51,7 +51,7 @@ class WeeklyResultsTest {
     fun `24 hours stay 24 hours when the clocks go forward`() {
         // A week from Saturday 20 March 2027 ends at 04:00 GMT on the 27th. The clocks go forward
         // early on the 28th, so its result comes in at 05:00 BST.
-        val spring = Programme.create(Baseline.typed(Dose.mg(24)), ProgrammeLength.WEEKS_12, Dose.mg(2), date("2027-03-20"))
+        val spring = planExample(start = date("2027-03-20"))
         assertEquals(WeekResult.PENDING, spring.settle(emptyList(), clockAt("2027-03-28T04:59")).programme.week(1).result)
         assertEquals(WeekResult.MET, spring.settle(emptyList(), clockAt("2027-03-28T05:00")).programme.week(1).result)
     }
