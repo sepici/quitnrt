@@ -118,6 +118,9 @@ abstract class EntryDao {
     abstract suspend fun setLogicalDay(id: String, day: Long)
 }
 
+/** How many live entries carry a tag. */
+data class TagUse(val tagKey: String, val uses: Int)
+
 @Dao
 interface TagDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
@@ -131,6 +134,16 @@ interface TagDao {
 
     @Query("SELECT * FROM tags ORDER BY sortOrder")
     suspend fun all(): List<TagEntity>
+
+    @Query(
+        """
+        SELECT entry_tags.tagKey AS tagKey, COUNT(*) AS uses
+        FROM entry_tags JOIN entries ON entries.id = entry_tags.entryId
+        WHERE entries.deletedAt IS NULL AND entries.occurredAt >= :sinceMs
+        GROUP BY entry_tags.tagKey
+        """,
+    )
+    fun observeUses(sinceMs: Long): Flow<List<TagUse>>
 
     @Query("DELETE FROM tags")
     suspend fun deleteAll()

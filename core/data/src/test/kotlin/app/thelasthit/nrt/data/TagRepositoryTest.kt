@@ -1,7 +1,10 @@
 package app.thelasthit.nrt.data
 
+import app.thelasthit.nrt.data.repo.LogRequest
+import app.thelasthit.nrt.data.repo.LogResult
 import app.thelasthit.nrt.domain.log.BuiltInTags
 import app.thelasthit.nrt.domain.log.TagGroup
+import app.thelasthit.nrt.domain.log.TagOrder
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -12,6 +15,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.time.Duration
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
@@ -46,5 +50,23 @@ class TagRepositoryTest {
         assertTrue(custom.key.startsWith("custom_"))
         assertEquals(BuiltInTags.all.size, custom.sortOrder)
         assertEquals(custom, data.tags.all.first().last())
+    }
+
+    @Test
+    fun usesCountRecentLiveEntriesOnly() = runTest {
+        data.tags.ensureBuiltIns()
+        val gum = data.products.addFromCatalogue("nicorette-gum-uk-2mg")
+        val now = data.clock.instant()
+        suspend fun log(minutesAgo: Long, vararg tags: String) =
+            data.entries.log(LogRequest(gum.id, at = now.minus(Duration.ofMinutes(minutesAgo)), tagKeys = tags.toSet())) as LogResult.Saved
+
+        log(10, "after_meal", "bored")
+        log(200, "after_meal")
+        log(Duration.ofDays(40).toMinutes(), "bored") // older than the window
+        val deleted = log(400, "happy")
+        data.entries.delete(deleted.entry.id)
+
+        val uses = data.tags.observeUses(now.minus(TagOrder.USE_WINDOW)).first()
+        assertEquals(mapOf("after_meal" to 2, "bored" to 1), uses)
     }
 }

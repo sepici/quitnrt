@@ -5,11 +5,17 @@ import app.thelasthit.nrt.data.db.TagEntity
 import app.thelasthit.nrt.domain.log.BuiltInTags
 import app.thelasthit.nrt.domain.log.TagGroup
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import java.time.Instant
 import java.util.UUID
 
 class TagRepository(private val dao: TagDao) {
 
     val all: Flow<List<TagEntity>> = dao.observeAll()
+
+    /** Tag key to the number of live entries since [since] that carry it, for ordering tags by use. */
+    fun observeUses(since: Instant): Flow<Map<String, Int>> =
+        dao.observeUses(since.toEpochMilli()).map { list -> list.associate { it.tagKey to it.uses } }
 
     /** Adds any built-in tags that aren't stored yet. Safe to call on every start. */
     suspend fun ensureBuiltIns() {
