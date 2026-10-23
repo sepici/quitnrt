@@ -30,16 +30,36 @@ class DailyIntakeTest {
     }
 
     @Test
-    fun `the rolling average covers up to 7 days, never before the first, and not today`() {
+    fun `the rolling average starts once there are 7 days to average, and leaves out today`() {
         val first = LocalDate.parse("2026-10-13")
         // 3 mg on the 13th, then a milligram more each day up to 12 mg on the 22nd.
         val entries = (13..22).map { day -> entry("2026-10-${day}T09:00", perUnit = Dose.mg(day - 10)) }
         val averages = DailyIntake.of(InsightWindow(first, today), today, first, entries).days
             .associate { it.date.dayOfMonth to it.average }
-        assertEquals(Dose.mg(3), averages[13])
-        assertEquals(Dose.mg(4), averages[15])
+        assertNull(averages[13])
+        assertNull(averages[18])
+        assertEquals(Dose.mg(6), averages[19])
         assertEquals(Dose.mg(9), averages[22])
         assertNull(averages[23])
+    }
+
+    @Test
+    fun `weeks average their finished days, Monday to Sunday`() {
+        val first = LocalDate.parse("2026-10-13")
+        val entries = (13..23).map { day -> entry("2026-10-${day}T09:00", perUnit = Dose.mg(day - 10)) }
+        val weeks = DailyIntake.of(InsightWindow(first, today), today, first, entries).weeks
+        assertEquals(listOf(LocalDate.parse("2026-10-12"), LocalDate.parse("2026-10-19")), weeks.map { it.monday })
+        // Tuesday to Sunday the first week, and Monday to Thursday so far this week.
+        assertEquals(listOf(Dose.mg(5.5), Dose.mg(10.5)), weeks.map { it.averagePerDay })
+        assertEquals(listOf(6, 4), weeks.map { it.days })
+    }
+
+    @Test
+    fun `on a Monday this week has no average yet`() {
+        val monday = LocalDate.parse("2026-10-26")
+        val week = DailyIntake.of(InsightWindow(monday, monday), monday, monday, listOf(entry("2026-10-26T09:00"))).weeks.single()
+        assertNull(week.averagePerDay)
+        assertEquals(0, week.days)
     }
 
     @Test

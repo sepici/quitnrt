@@ -8,7 +8,7 @@ Last updated: 23 October 2026, after the phase 1 screens were built and reviewed
 |---|---|
 | 0. Foundation and direction | Done. Gradle set-up, CI, copy lint, style guide, design direction chosen, first creature signed off |
 | 1. Logging | **Done.** Domain rules, catalogue, data layer, backup, theme, sprites, plus **onboarding, Today, the log sheet, History, Settings and the lair**, reviewed, with the owner's calls on the reviews applied. |
-| 2. Insights | **In progress.** The stats are in `core/domain` (`domain/insights`), with tests. The screens wait for the mockups. |
+| 2. Insights | **In progress.** The stats are in `core/domain` (`domain/insights`), with tests. Insights has its filters and the daily chart; the heat maps, triggers, habits, by product and the History filter are next. |
 | 3 to 9 | Not started |
 
 The full check passes locally: copy rules, 93 domain tests, 28 data tests, 74 app UI, screenshot and format tests, debug APK, Android lint.
@@ -183,7 +183,13 @@ From PLAN §10 and §19, agreed with the owner on 23 October.
    - The History filter takes one product or one tag, confirmed with "Show 48 doses". Days with no match are hidden, and day lines read "1 of 5 doses".
    - Each chart has a table button that turns it into a plain two-column list of its numbers.
    - The heat-map ramp: light `#A6A398 #8A877D #6F6C62 #555248 #3C3A30`, dark `#4E4A40 #6D6A5F #8F8B7F #B2AEA2 #D5D2C5`, with `sunk` for none. It passes the chart guidance's ordinal checks in both modes.
-3. The Insights screen and daily chart.
+3. The Insights screen and daily chart. Done.
+   - The range buttons sit in a sunk track. Locked ones are dashed, with a line saying when the next opens. The product-type chips run in one scrolling row, most mg first.
+   - The chart is `MgColumns` in `ui/insights`, drawn in Canvas. It has stone columns with rounded tops, the 7-day line on a halo, and today as an outline. Tapping a column rings it and shows a tip beside it. The y axis widens to fit its labels at large font.
+   - Above 30 days the chart shows a column a week, with this week outlined.
+   - The table button swaps the chart for `ChartTable`, every day's number, newest first.
+   - With nothing logged, the screen says so and offers the log sheet.
+   - `seedHistory()` in the app tests logs two months of plausible use for Insights screenshots.
 4. Both heat maps.
 5. Triggers, habits and by product.
 6. The History filter.

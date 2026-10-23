@@ -12,8 +12,19 @@ import java.time.temporal.TemporalAdjusters
 object HeatScale {
     const val STEPS = 5
 
+    /** From nothing up to [max], as the hour map counts doses. */
     fun step(value: Long, max: Long): Int =
         if (value <= 0 || max <= 0) 0 else ((value * STEPS + max - 1) / max).toInt().coerceIn(1, STEPS)
+
+    /**
+     * In equal steps from [low] up to [high], so even a steady month shows its heavier days.
+     * Nothing is still empty, and when every value is the same it takes the middle step.
+     */
+    fun stepBetween(value: Long, low: Long, high: Long): Int = when {
+        value <= 0 -> 0
+        high <= low -> (STEPS + 1) / 2
+        else -> (1 + (value - low) * STEPS / (high - low)).toInt().coerceIn(1, STEPS)
+    }
 }
 
 /**
@@ -55,14 +66,26 @@ class HourHeatMap private constructor(val firstHour: Int, private val grid: Map<
  * A range's days as a calendar, one square a day in Monday-to-Sunday weeks, shaded by mg.
  * Days in the range from the first dose on are tracked. Earlier days in the range have no data
  * rather than a zero, and the rest of the first and last weeks are outside the range.
+ *
+ * Shading runs from the lightest finished day with doses to the heaviest ([lowTotal] to
+ * [highTotal]). A day with none logged stays empty and doesn't flatten the scale, and today is
+ * still partial, so it's shaded on the scale but doesn't set it.
  */
-data class CalendarHeat(val weeks: List<List<Day>>) {
+data class CalendarHeat(val weeks: List<List<Day>>, val today: LocalDate) {
 
     enum class State { TRACKED, NO_DATA, OUTSIDE }
 
     data class Day(val date: LocalDate, val total: Dose, val state: State)
 
-    val maxTotal: Dose get() = weeks.flatten().filter { it.state == State.TRACKED }.maxOfOrNull { it.total } ?: Dose.ZERO
+    private val finished: List<Day> get() = weeks.flatten().filter { it.state == State.TRACKED && it.date != today }
+
+    val lowTotal: Dose get() = finished.filter { it.total > Dose.ZERO }.minOfOrNull { it.total } ?: Dose.ZERO
+
+    val highTotal: Dose get() = finished.maxOfOrNull { it.total } ?: Dose.ZERO
+
+    /** The day's step on [HeatScale], or 0 for a day that isn't tracked. */
+    fun step(day: Day): Int =
+        if (day.state != State.TRACKED) 0 else HeatScale.stepBetween(day.total.micrograms, lowTotal.micrograms, highTotal.micrograms)
 
     companion object {
         fun of(range: InsightRange, today: LocalDate, firstDay: LocalDate?, entries: List<Entry>): CalendarHeat {
@@ -81,7 +104,7 @@ data class CalendarHeat(val weeks: List<List<Day>>) {
                     date = date.plusDays(1)
                 }
             }
-            return CalendarHeat(days.chunked(7))
+            return CalendarHeat(days.chunked(7), today)
         }
     }
 }

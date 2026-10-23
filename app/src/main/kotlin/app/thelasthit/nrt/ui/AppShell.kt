@@ -44,6 +44,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.ui.history.HistoryScreen
+import app.thelasthit.nrt.ui.insights.InsightsScreen
 import app.thelasthit.nrt.ui.lair.LairScreen
 import app.thelasthit.nrt.ui.settings.AboutScreen
 import app.thelasthit.nrt.ui.settings.CatalogueScreen
@@ -132,10 +133,11 @@ fun AppShell() {
             page(TopLevelDestination.History.route) {
                 HistoryScreen(snackbars = snackbars)
             }
-            listOf(TopLevelDestination.Insights, TopLevelDestination.Plan).forEach { destination ->
-                page(destination.route) {
-                    PlaceholderScreen(title = stringResource(destination.label))
-                }
+            page(TopLevelDestination.Insights.route) {
+                InsightsScreen(snackbars = snackbars)
+            }
+            page(TopLevelDestination.Plan.route) {
+                PlaceholderScreen(title = stringResource(TopLevelDestination.Plan.label))
             }
             composable(TopLevelDestination.Lair.route) { LairScreen() }
             settings(navController, snackbars, showMessage)

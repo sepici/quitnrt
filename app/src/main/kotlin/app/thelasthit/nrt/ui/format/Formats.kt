@@ -53,6 +53,9 @@ val DayMonthYearFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MM
 /** "Wed 21 Oct", for a picked time on the log sheet. */
 val ShortDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE d MMM", Locale.UK)
 
+/** "28 Sep", under a chart's columns. */
+val DayShortMonthFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM", Locale.UK)
+
 @Composable
 fun elapsedText(elapsed: Elapsed): String = when {
     elapsed.isJustNow -> stringResource(R.string.elapsed_just_now)

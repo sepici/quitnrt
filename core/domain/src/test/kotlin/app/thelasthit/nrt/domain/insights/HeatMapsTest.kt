@@ -85,6 +85,37 @@ class HeatMapsTest {
         assertEquals(Dose.mg(4), days.getValue(22).total)
         assertEquals(State.TRACKED, days.getValue(23).state)
         assertEquals(State.OUTSIDE, days.getValue(24).state)
-        assertEquals(Dose.mg(4), calendar.maxTotal)
+    }
+
+    @Test
+    fun `the calendar shades from the lightest finished day with doses to the heaviest, and today doesn't set the scale`() {
+        val today = LocalDate.parse("2026-10-23")
+        val calendar = CalendarHeat.of(
+            InsightRange.DAYS_7,
+            today,
+            firstDay = LocalDate.parse("2026-10-17"),
+            entries = listOf(
+                entry("2026-10-21T09:00", perUnit = Dose.mg(12)),
+                entry("2026-10-22T09:00", perUnit = Dose.mg(18)),
+                entry("2026-10-23T09:00", perUnit = Dose.mg(30)),
+            ),
+        )
+        assertEquals(Dose.mg(12), calendar.lowTotal)
+        assertEquals(Dose.mg(18), calendar.highTotal)
+        val days = calendar.weeks.flatten().associateBy { it.date.dayOfMonth }
+        assertEquals(0, calendar.step(days.getValue(20)))
+        assertEquals(1, calendar.step(days.getValue(21)))
+        assertEquals(5, calendar.step(days.getValue(22)))
+        assertEquals(5, calendar.step(days.getValue(23)))
+        assertEquals(0, calendar.step(days.getValue(16)))
+    }
+
+    @Test
+    fun `steps between two values run in equal parts, with nothing still empty`() {
+        assertEquals(0, HeatScale.stepBetween(0, 10, 20))
+        assertEquals(1, HeatScale.stepBetween(10, 10, 20))
+        assertEquals(3, HeatScale.stepBetween(15, 10, 20))
+        assertEquals(5, HeatScale.stepBetween(20, 10, 20))
+        assertEquals(3, HeatScale.stepBetween(12, 12, 12))
     }
 }

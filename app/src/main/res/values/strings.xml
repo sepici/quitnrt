@@ -629,4 +629,73 @@
     <string name="log_duplicate_body">The same product was logged at %1$s. If you\'re logging that dose again, discard this one.</string>
     <string name="log_duplicate_keep">Keep both</string>
     <string name="log_duplicate_discard">Discard this one</string>
+
+    <!-- Insights. Plain and specific: the numbers, and what they're measured against. -->
+    <string name="insights_title">Insights</string>
+    <string name="insights_range_7">7\u00A0days</string>
+    <string name="insights_range_30">30\u00A0days</string>
+    <string name="insights_range_60">60\u00A0days</string>
+    <string name="insights_range_90">90\u00A0days</string>
+    <string name="insights_range_locked">%1$s, opens %2$s</string>
+    <string name="insights_opens_tomorrow">%1$s opens tomorrow, after %2$s of logging.</string>
+    <string name="insights_opens_on">%1$s opens on %2$s, after %3$s of logging.</string>
+    <string name="insights_tomorrow">tomorrow</string>
+    <string name="insights_on_date">on %1$s</string>
+    <string name="insights_after_week">a week</string>
+    <plurals name="insights_days">
+        <item quantity="one">%1$d\u00A0day</item>
+        <item quantity="other">%1$d\u00A0days</item>
+    </plurals>
+    <string name="insights_all">All</string>
+    <string name="insights_each_day">Each day</string>
+    <string name="insights_each_week">Each week</string>
+    <string name="insights_day_table">Show each day as a table</string>
+    <string name="insights_day_chart">Show each day as a chart</string>
+    <string name="insights_week_table">Show each week as a table</string>
+    <string name="insights_week_chart">Show each week as a chart</string>
+    <string name="insights_mg_a_day">mg a day</string>
+    <string name="insights_mg_so_far">mg so far today</string>
+    <plurals name="insights_full_days">
+        <item quantity="one">Average of 1 full day. Today counts once it\'s over.</item>
+        <item quantity="other">Average of %1$d full days. Today counts once it\'s over.</item>
+    </plurals>
+    <string name="insights_no_full_days">The average starts once today is over.</string>
+    <string name="insights_less_than">%1$s\u00A0mg less than the %2$s before</string>
+    <string name="insights_more_than">%1$s\u00A0mg more than the %2$s before</string>
+    <string name="insights_same_as">The same as the %1$s before</string>
+    <string name="insights_key_day">Each day</string>
+    <string name="insights_key_average">7-day average</string>
+    <string name="insights_key_today">Today, %1$s\u00A0mg so far</string>
+    <string name="insights_key_week">Average a day, each week</string>
+    <string name="insights_key_this_week">This week so far</string>
+    <string name="insights_average_starts">The 7-day average line starts on %1$s.</string>
+    <plurals name="insights_doses">
+        <item quantity="one">%1$d dose</item>
+        <item quantity="other">%1$d doses</item>
+    </plurals>
+    <string name="insights_tip_day">%1$s\u00A0mg, %2$s</string>
+    <string name="insights_tip_today">%1$s\u00A0mg so far, %2$s</string>
+    <string name="insights_tip_average">7-day average %1$s\u00A0mg</string>
+    <string name="insights_tip_week">%1$s\u00A0mg a day</string>
+    <string name="insights_week_of">Week of %1$s</string>
+    <plurals name="insights_week_days">
+        <item quantity="one">Average of 1 day</item>
+        <item quantity="other">Average of %1$d days</item>
+    </plurals>
+    <plurals name="insights_week_days_so_far">
+        <item quantity="one">Average of 1 day so far</item>
+        <item quantity="other">Average of %1$d days so far</item>
+    </plurals>
+    <string name="insights_today">Today</string>
+    <string name="insights_row_mg">%1$s\u00A0mg</string>
+    <string name="insights_row_mg_so_far">%1$s\u00A0mg so far</string>
+    <string name="insights_row_mg_a_day">%1$s\u00A0mg a day</string>
+    <string name="insights_summary_average">Each day over the last %1$s averages %2$s\u00A0mg.</string>
+    <string name="insights_summary_weekly">Each week over the last %1$s, as an average a day.</string>
+    <string name="insights_summary_highest">The highest day was %1$s\u00A0mg, on %2$s.</string>
+    <string name="insights_summary_today">Today is %1$s\u00A0mg so far.</string>
+    <string name="insights_summary_table">The table button lists every day.</string>
+    <string name="insights_summary_table_weeks">The table button lists every week.</string>
+    <string name="insights_empty_title">Nothing logged yet</string>
+    <string name="insights_empty_body">Your charts start with your first dose. After a week of logging, they show when you use most.</string>
 </resources>
