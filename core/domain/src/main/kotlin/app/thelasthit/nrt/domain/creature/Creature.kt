@@ -30,7 +30,7 @@ enum class SpriteFrame(val key: String) {
     /** Knocked out by the final hit. */
     DEFEAT_1("defeat1"),
 
-    /** Cracking into tiles that start to drift apart. */
+    /** Cracking into shards that start to drift apart. */
     DEFEAT_2("defeat2"),
 
     /** Burst into loose bits of pixels. */
