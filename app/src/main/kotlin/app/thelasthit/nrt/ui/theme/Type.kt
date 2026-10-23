@@ -7,6 +7,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import app.thelasthit.nrt.R
@@ -45,7 +46,11 @@ val LastHitTypography = LastHitType(
     body = TextStyle(fontFamily = Grotesk, fontWeight = FontWeight.Normal, fontSize = 16.sp, lineHeight = 24.sp),
     label = TextStyle(fontFamily = Grotesk, fontWeight = FontWeight.Medium, fontSize = 14.sp, lineHeight = 20.sp),
     caption = TextStyle(fontFamily = Grotesk, fontWeight = FontWeight.Medium, fontSize = 13.sp, lineHeight = 18.sp),
-    flavour = TextStyle(fontFamily = Grotesk, fontWeight = FontWeight.Normal, fontStyle = FontStyle.Italic, fontSize = 17.sp, lineHeight = 24.sp),
+    // Balanced, so a flavour line that wraps splits evenly instead of leaving one word on its own.
+    flavour = TextStyle(
+        fontFamily = Grotesk, fontWeight = FontWeight.Normal, fontStyle = FontStyle.Italic, fontSize = 17.sp, lineHeight = 24.sp,
+        lineBreak = LineBreak.Heading,
+    ),
     pixel = TextStyle(fontFamily = Pixel, fontSize = 24.sp, lineHeight = 24.sp, letterSpacing = (-0.125).em),
     pixelLarge = TextStyle(fontFamily = Pixel, fontSize = 32.sp, lineHeight = 32.sp, letterSpacing = (-0.125).em),
 )

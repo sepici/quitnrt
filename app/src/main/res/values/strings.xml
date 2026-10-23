@@ -539,6 +539,13 @@
     <string name="demon_hp">HP</string>
     <string name="demon_band_description">%1$s, lurking until your plan starts. Open the lair</string>
 
+    <!-- The lair while the demon lurks. The battle arrives with the plan. -->
+    <string name="lair_lurking">%1$s watches from the rocks until your plan starts.</string>
+    <string name="lair_stage_lurking">%1$s as a shadow on a rock, with only its eyes showing</string>
+    <string name="lair_hp_unknown">HP unknown</string>
+    <string name="lair_no_hits">No hits yet</string>
+    <string name="lair_hits_rule">Every week that meets the plan earns one hit.</string>
+
     <!-- Entries, wherever they're listed -->
     <string name="entry_title_quantity">%1$s, %2$s</string>
     <string name="entry_time_next_day">%1$s %2$s</string>

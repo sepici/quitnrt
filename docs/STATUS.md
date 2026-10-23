@@ -1,16 +1,16 @@
 # Status and handover
 
-Last updated: 23 October 2026, after onboarding, Today, the log sheet, History and Settings were built in the local session.
+Last updated: 23 October 2026, after the phase 1 screens, the lair included, were built in the local session.
 
 ## Where things are
 
 | Phase | State |
 |---|---|
 | 0. Foundation and direction | Done. Gradle set-up, CI, copy lint, style guide, design direction chosen, first creature signed off |
-| 1. Logging | **Nearly done.** Domain rules, catalogue, data layer, backup, theme, sprites, plus **onboarding, Today, the log sheet, History and Settings**. The lair and the phase reviews are next. |
+| 1. Logging | **Nearly done.** Domain rules, catalogue, data layer, backup, theme, sprites, plus **onboarding, Today, the log sheet, History, Settings and the lair**. The phase reviews are next. |
 | 2 to 9 | Not started |
 
-The full check passes locally: copy rules, 79 domain tests, 25 data tests, 30 app UI, screenshot and format tests, debug APK, Android lint.
+The full check passes locally: copy rules, 89 domain tests, 28 data tests, 74 app UI, screenshot and format tests, debug APK, Android lint.
 
 ## Decisions made since `docs/PLAN.md` was written
 
@@ -92,7 +92,12 @@ Build against the B mockups. All strings go in `strings.xml` and pass `checkCopy
    - **Day start:** the onboarding stepper and diagram, then "Save day start", which moves every dose.
    - **Backup:** export JSON, export CSV, and restore through the system file picker. Merge adds what's missing; replace warns first with what it deletes. Errors use the app's own words via `BackupException.Reason`.
    - **About:** the disclaimer and when it was accepted, sources as the catalogue research cites them (the emc and DailyMed), privacy, and both font licences from assets.
-7. **Lair tab:** for now, Gary large on his backdrop with the "lurking" state. The battle comes in phase 4.
+7. **Lair tab.** Done, lurking only, from B's `lair.html`. The battle comes in phase 4.
+   - The stage backdrop with the demon as a shadow on its rock, as on Today's band. Below it are the name, "?? HP" and "Gary watches from the rocks until your plan starts."
+   - The bank says "No hits yet" beside an empty outlined slot, like the mockup's empty pips. In phase 4 the slot turns marigold once a hit is banked.
+   - The stage runs up behind the status bar, so every other page makes room for the status bar itself (`page` in `AppShell`). On a tall screen the stage also takes the spare height as more sky, so the page doesn't end in a gap.
+   - Left out until phase 4: the week label, the rename button, the Hit and 5× buttons, and gear. Until then the demon can only be named in onboarding.
+   - Flavour lines use balanced line breaks, so a wrapped line doesn't leave one word on its own.
 
 **Tests:** Compose UI tests for logging (including backdating), edit, delete with undo, and onboarding.
 

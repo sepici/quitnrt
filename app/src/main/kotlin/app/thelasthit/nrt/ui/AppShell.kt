@@ -3,9 +3,13 @@ package app.thelasthit.nrt.ui
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -23,12 +27,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -38,6 +44,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.ui.history.HistoryScreen
+import app.thelasthit.nrt.ui.lair.LairScreen
 import app.thelasthit.nrt.ui.settings.AboutScreen
 import app.thelasthit.nrt.ui.settings.CatalogueScreen
 import app.thelasthit.nrt.ui.settings.DayStartScreen
@@ -103,12 +110,18 @@ fun AppShell() {
             if (!inSettings) BottomBar(currentRoute, navController)
         },
     ) { padding ->
+        val direction = LocalLayoutDirection.current
         NavHost(
             navController = navController,
             startDestination = TopLevelDestination.Today.route,
-            modifier = Modifier.padding(padding),
+            // Each page makes room for the status bar itself (see page), so the lair's stage can run up behind it.
+            modifier = Modifier.padding(
+                start = padding.calculateStartPadding(direction),
+                end = padding.calculateEndPadding(direction),
+                bottom = padding.calculateBottomPadding(),
+            ),
         ) {
-            composable(TopLevelDestination.Today.route) {
+            page(TopLevelDestination.Today.route) {
                 TodayScreen(
                     snackbars = snackbars,
                     onOpenSettings = { navController.navigate(SettingsRoutes.MAIN) },
@@ -116,23 +129,30 @@ fun AppShell() {
                     onEditQuickLog = { navController.navigate(SettingsRoutes.QUICK_LOG) },
                 )
             }
-            composable(TopLevelDestination.History.route) {
+            page(TopLevelDestination.History.route) {
                 HistoryScreen(snackbars = snackbars)
             }
-            val placeholders = listOf(TopLevelDestination.Insights, TopLevelDestination.Plan, TopLevelDestination.Lair)
-            placeholders.forEach { destination ->
-                composable(destination.route) {
+            listOf(TopLevelDestination.Insights, TopLevelDestination.Plan).forEach { destination ->
+                page(destination.route) {
                     PlaceholderScreen(title = stringResource(destination.label))
                 }
             }
+            composable(TopLevelDestination.Lair.route) { LairScreen() }
             settings(navController, snackbars, showMessage)
         }
     }
 }
 
+/** A page that starts below the status bar, as every page but the lair does. */
+private fun NavGraphBuilder.page(route: String, content: @Composable (NavBackStackEntry) -> Unit) {
+    composable(route) { entry ->
+        Box(Modifier.fillMaxSize().statusBarsPadding()) { content(entry) }
+    }
+}
+
 private fun NavGraphBuilder.settings(navController: NavController, snackbars: SnackbarHostState, showMessage: (Int) -> Unit) {
     val back: () -> Unit = { navController.popBackStack() }
-    composable(SettingsRoutes.MAIN) {
+    page(SettingsRoutes.MAIN) {
         SettingsScreen(
             snackbars = snackbars,
             onBack = back,
@@ -145,22 +165,22 @@ private fun NavGraphBuilder.settings(navController: NavController, snackbars: Sn
             ),
         )
     }
-    composable(SettingsRoutes.PRODUCTS) {
+    page(SettingsRoutes.PRODUCTS) {
         ProductsScreen(onBack = back, onAddFromCatalogue = { navController.navigate(SettingsRoutes.CATALOGUE) })
     }
-    composable(SettingsRoutes.CATALOGUE) { CatalogueScreen(onBack = back) }
-    composable(SettingsRoutes.QUICK_LOG) { QuickLogScreen(onBack = back) }
-    composable(SettingsRoutes.TAGS) { TagsScreen(onBack = back) }
-    composable(SettingsRoutes.DAY_START) {
+    page(SettingsRoutes.CATALOGUE) { CatalogueScreen(onBack = back) }
+    page(SettingsRoutes.QUICK_LOG) { QuickLogScreen(onBack = back) }
+    page(SettingsRoutes.TAGS) { TagsScreen(onBack = back) }
+    page(SettingsRoutes.DAY_START) {
         DayStartScreen(onBack = back, onSaved = {
             showMessage(R.string.day_saved)
             back()
         })
     }
-    composable(SettingsRoutes.ABOUT) {
+    page(SettingsRoutes.ABOUT) {
         AboutScreen(onBack = back, onLicence = { navController.navigate(SettingsRoutes.licence(it)) })
     }
-    composable(SettingsRoutes.LICENCE) { entry ->
+    page(SettingsRoutes.LICENCE) { entry ->
         val font = entry.arguments?.getString("font")?.let { name -> FontLicence.entries.firstOrNull { it.name == name } }
         if (font != null) LicenceScreen(font, onBack = back)
     }
