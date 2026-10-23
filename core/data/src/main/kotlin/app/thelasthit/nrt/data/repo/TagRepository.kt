@@ -14,8 +14,13 @@ class TagRepository(private val dao: TagDao) {
     val all: Flow<List<TagEntity>> = dao.observeAll()
 
     /** Tag key to the number of live entries since [since] that carry it, for ordering tags by use. */
-    fun observeUses(since: Instant): Flow<Map<String, Int>> =
-        dao.observeUses(since.toEpochMilli()).map { list -> list.associate { it.tagKey to it.uses } }
+    fun observeUses(since: Instant): Flow<Map<String, Int>> = uses(since.toEpochMilli())
+
+    /** Tag key to the number of live entries that carry it, across all of History, for its filter. */
+    fun observeAllUses(): Flow<Map<String, Int>> = uses(Long.MIN_VALUE)
+
+    private fun uses(sinceMs: Long): Flow<Map<String, Int>> =
+        dao.observeUses(sinceMs).map { list -> list.associate { it.tagKey to it.uses } }
 
     /** Adds any built-in tags that aren't stored yet. Safe to call on every start. */
     suspend fun ensureBuiltIns() {

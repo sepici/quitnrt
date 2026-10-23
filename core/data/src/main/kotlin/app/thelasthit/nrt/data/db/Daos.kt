@@ -116,6 +116,32 @@ abstract class EntryDao {
     @Query("SELECT MIN(logicalEpochDay) FROM entries WHERE deletedAt IS NULL")
     abstract fun observeFirstDay(): Flow<Long?>
 
+    @Transaction
+    @Query("SELECT * FROM entries WHERE deletedAt IS NULL AND productId = :productId ORDER BY occurredAt DESC")
+    abstract fun observeWithProduct(productId: String): Flow<List<EntryWithTags>>
+
+    @Transaction
+    @Query(
+        """
+        SELECT entries.* FROM entries JOIN entry_tags ON entry_tags.entryId = entries.id
+        WHERE entries.deletedAt IS NULL AND entry_tags.tagKey = :tagKey
+        ORDER BY entries.occurredAt DESC
+        """,
+    )
+    abstract fun observeWithTag(tagKey: String): Flow<List<EntryWithTags>>
+
+    @Query("SELECT productId AS productId, COUNT(*) AS uses FROM entries WHERE deletedAt IS NULL GROUP BY productId")
+    abstract fun observeProductUses(): Flow<List<ProductUse>>
+
+    @Query(
+        """
+        SELECT logicalEpochDay AS epochDay, COUNT(*) AS doses FROM entries
+        WHERE deletedAt IS NULL AND logicalEpochDay BETWEEN :fromDay AND :toDay
+        GROUP BY logicalEpochDay
+        """,
+    )
+    abstract fun observeDosesPerDay(fromDay: Long, toDay: Long): Flow<List<DayDoses>>
+
     @Query("SELECT COUNT(*) FROM entries WHERE deletedAt IS NULL")
     abstract suspend fun countLive(): Int
 
@@ -138,6 +164,12 @@ abstract class EntryDao {
 
 /** How many live entries carry a tag. */
 data class TagUse(val tagKey: String, val uses: Int)
+
+/** How many live entries a product has. */
+data class ProductUse(val productId: String, val uses: Int)
+
+/** How many live entries count toward a logical day. */
+data class DayDoses(val epochDay: Long, val doses: Int)
 
 @Dao
 interface TagDao {

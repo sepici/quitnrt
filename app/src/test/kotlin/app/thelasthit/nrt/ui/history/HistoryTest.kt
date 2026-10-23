@@ -9,12 +9,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasScrollToIndexAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performCustomAccessibilityActionWithLabel
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.test.core.app.ApplicationProvider
@@ -149,6 +152,139 @@ class HistoryTest {
         compose.onNodeWithText("09:00, Bored").assertDoesNotExist()
         compose.onNodeWithText("Show earlier days").performClick()
         compose.waitUntilExactlyOneExists(hasText("09:00, Bored"))
+    }
+
+    /** Opens the filter sheet and waits for its button, which counts every dose until a pick. */
+    private fun openFilter(allDoses: Int) {
+        compose.waitUntilExactlyOneExists(hasContentDescription("Filter by product or tag"))
+        compose.onNodeWithContentDescription("Filter by product or tag").performClick()
+        compose.waitUntilExactlyOneExists(hasText("Show $allDoses\u00A0doses"))
+    }
+
+    @Test
+    fun `a tag filter keeps only its doses, counted against each day`() {
+        app.setUp()
+        app.seedWeek()
+        log("2026-10-22T12:50", "after_meal")
+        show()
+
+        openFilter(allDoses = 10)
+        compose.onNodeWithText("After a meal").performScrollTo().performClick()
+        compose.waitUntilExactlyOneExists(hasText("Show 2\u00A0doses"))
+        compose.onNodeWithText("Show 2\u00A0doses").performClick()
+
+        compose.waitUntilExactlyOneExists(hasContentDescription("Filtered by After a meal. Clear filter"))
+        compose.onNodeWithText("2\u00A0doses").assertExists()
+        compose.onNodeWithContentDescription("Filter by product or tag, on").assertExists()
+        // Totals count only the matches, each day's line counts every dose, and days without a match are hidden.
+        compose.onNodeWithContentDescription("Today, 2\u00A0mg so far, 1 of 3\u00A0doses").assertExists()
+        compose.onNodeWithContentDescription("Thursday 22 October, 2\u00A0mg, 1 of 2\u00A0doses").assertExists()
+        compose.onNode(hasContentDescription("Wednesday 21 October", substring = true)).assertDoesNotExist()
+        compose.onNodeWithText("10:55, Work break").assertDoesNotExist()
+
+        compose.onNodeWithContentDescription("Filtered by After a meal. Clear filter").performClick()
+        compose.waitUntilExactlyOneExists(hasText("10:55, Work break"))
+        compose.onNodeWithContentDescription("Filter by product or tag").assertExists()
+        compose.onNodeWithContentDescription("Today, 8\u00A0mg so far").assertExists()
+    }
+
+    @Test
+    fun `a product filter shows that product's doses`() {
+        app.setUp()
+        app.seedWeek()
+        show()
+
+        openFilter(allDoses = 9)
+        compose.onNodeWithText("Mouth spray 1\u00A0mg").performScrollTo().performClick()
+        compose.waitUntilExactlyOneExists(hasText("Show 1\u00A0dose"))
+        compose.onNodeWithText("Show 1\u00A0dose").performClick()
+
+        compose.waitUntilExactlyOneExists(hasContentDescription("Filtered by Mouth spray 1\u00A0mg. Clear filter"))
+        compose.onNodeWithContentDescription("Tuesday 20 October, 1\u00A0mg, 1 of 3\u00A0doses").assertExists()
+        compose.onNodeWithText("19:00").assertExists()
+        compose.onNode(hasContentDescription("Today", substring = true)).assertDoesNotExist()
+    }
+
+    @Test
+    fun `the sheet offers only used tags and folds a group after four`() {
+        app.setUp()
+        listOf("after_meal", "woke_up", "coffee_tea", "drink", "before_bed", "commuting").forEachIndexed { index, tag ->
+            log("2026-10-23T%02d:00".format(8 + index), tag)
+        }
+        show()
+
+        openFilter(allDoses = 6)
+        compose.onNodeWithText("Stressed").assertDoesNotExist()
+        // All used once, so they keep their own order: the first four show, the rest wait behind More.
+        compose.onNodeWithText("Just woke up").assertExists()
+        compose.onNodeWithText("Before bed").assertDoesNotExist()
+        compose.onNodeWithText("Commuting or driving").assertDoesNotExist()
+        compose.onNodeWithContentDescription("2 more Routine tags").performScrollTo().performClick()
+        compose.waitUntilExactlyOneExists(hasText("Commuting or driving"))
+        compose.onNodeWithText("Before bed").assertExists()
+    }
+
+    @Test
+    fun `tapping the pick again unpicks it`() {
+        app.setUp()
+        app.seedWeek()
+        show()
+
+        openFilter(allDoses = 9)
+        compose.onNodeWithText("Work break").performScrollTo().performClick()
+        compose.waitUntilExactlyOneExists(hasText("Show 1\u00A0dose"))
+        compose.onNodeWithText("Work break").performScrollTo().performClick()
+        compose.waitUntilExactlyOneExists(hasText("Show 9\u00A0doses"))
+    }
+
+    @Test
+    fun `a filter reaches past the days History shows at first`() {
+        app.setUp()
+        log("2026-10-23T09:00", "bored")
+        log("2026-08-14T13:00", "after_meal")
+        show()
+
+        compose.waitUntilExactlyOneExists(hasText("Show earlier days"))
+        openFilter(allDoses = 2)
+        compose.onNodeWithText("After a meal").performScrollTo().performClick()
+        compose.waitUntilExactlyOneExists(hasText("Show 1\u00A0dose"))
+        compose.onNodeWithText("Show 1\u00A0dose").performClick()
+
+        compose.waitUntilExactlyOneExists(hasText("13:00, After a meal"))
+        compose.onNodeWithContentDescription("Friday 14 August, 2\u00A0mg, 1 of 1\u00A0dose").assertExists()
+        compose.onNodeWithText("Show earlier days").assertDoesNotExist()
+        compose.onNodeWithText("09:00, Bored").assertDoesNotExist()
+    }
+
+    @Test
+    fun `under a filter a page is thirty days with a match`() {
+        app.setUp()
+        // A dose after a meal every other day, 31 days of them reaching back to Monday 24 August,
+        // with an untagged dose on each day between that the filter hides.
+        (0L..30L).map { today.minusDays(2 * it) }.forEach { day ->
+            log("${day}T12:30", "after_meal")
+            log("${day.minusDays(1)}T09:00")
+        }
+        // The two oldest days with a match have another dose each, for their "1 of 2 doses".
+        log("2026-08-26T08:00")
+        log("2026-08-24T08:00")
+        show()
+
+        openFilter(allDoses = 64)
+        compose.onNodeWithText("After a meal").performScrollTo().performClick()
+        compose.waitUntilExactlyOneExists(hasText("Show 31 doses"))
+        compose.onNodeWithText("Show 31 doses").performClick()
+
+        // The first page holds 30 days with a match, eight weeks back, and stops before the 31st.
+        compose.waitUntilExactlyOneExists(hasContentDescription("Filtered by After a meal. Clear filter"))
+        compose.onNode(hasScrollToIndexAction()).performScrollToNode(hasText("Show earlier days"))
+        compose.onNodeWithContentDescription("Wednesday 26 August, 2 mg, 1 of 2 doses").assertExists()
+        compose.onNode(hasContentDescription("Monday 24 August", substring = true)).assertDoesNotExist()
+        compose.onNode(hasContentDescription("Tuesday 25 August", substring = true)).assertDoesNotExist()
+
+        compose.onNodeWithText("Show earlier days").performClick()
+        compose.waitUntilExactlyOneExists(hasContentDescription("Monday 24 August, 2 mg, 1 of 2 doses"))
+        compose.onNodeWithText("Show earlier days").assertDoesNotExist()
     }
 
     @Test
