@@ -16,3 +16,9 @@ captures/
 
 # OS
 .DS_Store
+
+# Signing keys stay outside the repository (docs/RELEASE.md)
+*.jks
+*.keystore
+*.p12
+*.pfx

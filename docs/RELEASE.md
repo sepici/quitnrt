@@ -3,6 +3,11 @@
 How the release build is made and signed, how to try one on your phone, and what to check
 before it goes to Play. PLAN §18 has the rules behind it.
 
+The commands below are for PowerShell, run from the repository's folder. They give the Android
+tools by their full paths, since the SDK isn't on your PATH. Gradle and retrace need Java 17 or
+newer, and the `java` on your PATH is older, so the blocks that use them start by pointing
+`JAVA_HOME` at the Java that comes with Android Studio. It lasts until you close that window.
+
 ## What the release build does
 
 - **Shrinking.** R8 removes unused code and renames what's left, and resource shrinking drops
@@ -42,7 +47,8 @@ proves an upload came from you. If it's ever lost, Play support can reset it.
    It asks for a password. A PKCS12 keystore uses the same password for the key, so the store
    password and the key password are the same.
 2. Keep the `.jks` file and its password somewhere safe outside the repository, such as a
-   password manager. Never commit either.
+   password manager. Never commit either. `.gitignore` skips keystore files as a safety net,
+   but don't rely on it.
 3. To sign release builds on your own computer as well (optional), add the four names to
    `C:\Users\<you>\.gradle\gradle.properties`, not the repository's `gradle.properties`. Use
    forward slashes in the path:
@@ -78,7 +84,8 @@ Then paste it as the secret's value.
 The `release` job in `.github/workflows/ci.yml` runs on each push to `main` after the checks
 pass, or from **Run workflow** on the Actions tab. It writes the keystore to the runner's temporary
 folder, builds, and deletes it at the end. Without the secrets it still builds, signed with that
-run's own debug key, which Play won't accept. The run's summary says which key was used. The
+run's own debug key, which Play won't accept. If only some of them are set, or one is misnamed,
+the job fails and names the ones it's missing. The run's summary says which key was used. The
 artefact `the-last-hit-release-<commit>` holds the APK, the bundle and R8's `mapping.txt`.
 
 ## Build and install a release-like build
@@ -86,6 +93,7 @@ artefact `the-last-hit-release-<commit>` holds the APK, the bundle and R8's `map
 With your phone connected and USB debugging on:
 
 ```
+$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
 ./gradlew :app:assembleRelease :app:bundleRelease :app:checkReleaseResources
 ./gradlew :app:installRelease
 ```
@@ -129,12 +137,17 @@ screen once on a fresh install of the release build:
 9. **Dark mode and large font.** A quick look at Today and Settings in each.
 10. **Permissions.** In the phone's Settings, the app's permissions page lists none. The app has
     no internet access.
+11. **Android 17.** The app targets Android 17 (API 37), and the changes in behaviour that come
+    with that only apply on Android 17. If your phone runs an older version, go through steps 1
+    to 7 again on an Android 17 emulator: in Android Studio's Device Manager, add a phone with an
+    API 37 system image and start it, then run `./gradlew :app:installRelease` again.
 
 If it crashes, save the crash log and read it back with the mapping file from the same build. In
 PowerShell:
 
 ```
-adb logcat -b crash -d | Out-File -Encoding utf8 crash.txt
+$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
+& "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe" logcat -b crash -d | Out-File -Encoding utf8 crash.txt
 & "$env:LOCALAPPDATA\Android\Sdk\cmdline-tools\latest\bin\retrace.bat" app\build\outputs\mapping\release\mapping.txt crash.txt
 ```
 
