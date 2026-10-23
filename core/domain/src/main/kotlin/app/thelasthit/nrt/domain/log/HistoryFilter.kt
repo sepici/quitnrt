@@ -7,6 +7,10 @@ import java.time.LocalDate
  * out, and each day that's left keeps its count of every dose, so it can read "1 of 5 doses".
  */
 sealed interface HistoryFilter {
+    /**
+     * Whether the filter keeps [entry]. This is the rule: the app asks the database for the
+     * matches through EntryRepository.observeMatching, whose queries are tested against it.
+     */
     fun matches(entry: Entry): Boolean
 
     data class Product(val productId: String) : HistoryFilter {

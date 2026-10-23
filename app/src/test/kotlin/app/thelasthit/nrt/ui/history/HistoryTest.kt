@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasScrollToIndexAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -16,6 +17,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performCustomAccessibilityActionWithLabel
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.test.core.app.ApplicationProvider
@@ -252,6 +254,37 @@ class HistoryTest {
         compose.onNodeWithContentDescription("Friday 14 August, 2\u00A0mg, 1 of 1\u00A0dose").assertExists()
         compose.onNodeWithText("Show earlier days").assertDoesNotExist()
         compose.onNodeWithText("09:00, Bored").assertDoesNotExist()
+    }
+
+    @Test
+    fun `under a filter a page is thirty days with a match`() {
+        app.setUp()
+        // A dose after a meal every other day, 31 days of them reaching back to Monday 24 August,
+        // with an untagged dose on each day between that the filter hides.
+        (0L..30L).map { today.minusDays(2 * it) }.forEach { day ->
+            log("${day}T12:30", "after_meal")
+            log("${day.minusDays(1)}T09:00")
+        }
+        // The two oldest days with a match have another dose each, for their "1 of 2 doses".
+        log("2026-08-26T08:00")
+        log("2026-08-24T08:00")
+        show()
+
+        openFilter(allDoses = 64)
+        compose.onNodeWithText("After a meal").performScrollTo().performClick()
+        compose.waitUntilExactlyOneExists(hasText("Show 31 doses"))
+        compose.onNodeWithText("Show 31 doses").performClick()
+
+        // The first page holds 30 days with a match, eight weeks back, and stops before the 31st.
+        compose.waitUntilExactlyOneExists(hasContentDescription("Filtered by After a meal. Clear filter"))
+        compose.onNode(hasScrollToIndexAction()).performScrollToNode(hasText("Show earlier days"))
+        compose.onNodeWithContentDescription("Wednesday 26 August, 2 mg, 1 of 2 doses").assertExists()
+        compose.onNode(hasContentDescription("Monday 24 August", substring = true)).assertDoesNotExist()
+        compose.onNode(hasContentDescription("Tuesday 25 August", substring = true)).assertDoesNotExist()
+
+        compose.onNodeWithText("Show earlier days").performClick()
+        compose.waitUntilExactlyOneExists(hasContentDescription("Monday 24 August, 2 mg, 1 of 2 doses"))
+        compose.onNodeWithText("Show earlier days").assertDoesNotExist()
     }
 
     @Test

@@ -180,6 +180,31 @@ class EntryRepositoryTest {
     }
 
     @Test
+    fun matchingFindsExactlyTheLiveEntriesTheFilterRuleKeeps() = runTest {
+        val patch = "niquitin-clear-patch-uk-14mg"
+        data.products.addFromCatalogue(patch)
+        saved(LogRequest(patch, at = london("2026-10-23T07:30"), tagKeys = setOf("woke_up")))
+        saved(LogRequest(gum, at = london("2026-10-23T13:40"), tagKeys = setOf("after_meal", "stressed")))
+        saved(LogRequest(gum, quantity = 2, at = london("2026-10-23T10:55"), tagKeys = setOf("work_break")))
+        saved(LogRequest(quickMist, at = london("2026-10-23T01:20"), tagKeys = setOf("after_meal"))) // counts toward the 22nd
+        saved(LogRequest(quickMist, at = london("2026-10-22T12:50"), tagKeys = setOf("stressed")))
+        saved(LogRequest(gum, at = london("2026-10-21T08:00")))
+        saved(LogRequest(patch, at = london("2025-03-01T07:00"), tagKeys = setOf("after_meal")))
+        val deleted = saved(LogRequest(gum, at = london("2026-10-20T19:00"), tagKeys = setOf("after_meal"))).entry
+        data.entries.delete(deleted.id)
+
+        val live = data.entries.observeRange(LocalDate.parse("2025-01-01"), today).first()
+        assertEquals(7, live.size)
+        val filters = listOf(gum, quickMist, patch, "never-logged").map { HistoryFilter.Product(it) } +
+            listOf("after_meal", "stressed", "work_break", "woke_up", "bored").map { HistoryFilter.Tag(it) }
+        // HistoryFilter.matches is the rule. The queries must keep exactly what it keeps, newest first.
+        for (filter in filters) {
+            val expected = live.filter(filter::matches).sortedByDescending { it.occurredAt }
+            assertEquals("$filter", expected, data.entries.observeMatching(filter).first())
+        }
+    }
+
+    @Test
     fun productUsesCountLiveEntriesOfEveryDay() = runTest {
         saved(LogRequest(gum, at = london("2025-03-01T09:00")))
         saved(LogRequest(gum, quantity = 3, at = london("2026-10-23T08:10")))

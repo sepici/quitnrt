@@ -134,7 +134,11 @@ class EntryRepository(
     /** The first logical day with a live entry, or null when nothing is logged. */
     fun observeFirstDay(): Flow<LocalDate?> = dao.observeFirstDay().map { day -> day?.let(LocalDate::ofEpochDay) }
 
-    /** Every live entry that [filter] matches, across all of History, newest first. */
+    /**
+     * Every live entry that [filter] matches, across all of History, newest first. The queries do
+     * in SQL what [HistoryFilter.matches] says, so History needn't load every entry to filter it;
+     * EntryRepositoryTest checks that they keep exactly the entries it keeps.
+     */
     fun observeMatching(filter: HistoryFilter): Flow<List<Entry>> = when (filter) {
         is HistoryFilter.Product -> dao.observeWithProduct(filter.productId)
         is HistoryFilter.Tag -> dao.observeWithTag(filter.tagKey)
