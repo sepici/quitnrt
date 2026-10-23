@@ -82,6 +82,9 @@ class MissedWeeksTest {
         assertTrue(again.isExtension)
         assertEquals(programme.week(4).startDate, again.startDate)
         assertEquals(Dose.mg(112), again.target.weeklyAllowance)
+        // It keeps the missed week's mix too: 8 pieces of 2 mg gum.
+        assertEquals(mix(GUM_2 to 8), again.target.mix)
+        assertEquals(missed.programme.week(3).target, again.target)
         // The rest of the plan moves on a week, unchanged.
         assertEquals(programme.weeks.drop(3).map { it.target }, repeated.weeks.drop(4).map { it.target })
         assertEquals(programme.weeks.drop(3).map { it.startDate.plusWeeks(1) }, repeated.weeks.drop(4).map { it.startDate })

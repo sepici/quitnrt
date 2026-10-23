@@ -4,8 +4,11 @@ import android.content.Context
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import app.thelasthit.nrt.data.db.AppDatabase
 import app.thelasthit.nrt.data.repo.BackupRepository
+import app.thelasthit.nrt.data.repo.BreathingRepository
 import app.thelasthit.nrt.data.repo.EntryRepository
+import app.thelasthit.nrt.data.repo.GameRepository
 import app.thelasthit.nrt.data.repo.ProductRepository
+import app.thelasthit.nrt.data.repo.ProgrammeRepository
 import app.thelasthit.nrt.data.repo.TagRepository
 import app.thelasthit.nrt.data.settings.SettingsStore
 import app.thelasthit.nrt.domain.catalogue.Catalogue
@@ -30,8 +33,15 @@ class DataGraph(
     val settings: SettingsStore = settingsStore
     val products = ProductRepository(database.products(), catalogue = { catalogue }, clock = clock)
     val tags = TagRepository(database.tags())
-    val entries = EntryRepository(database.entries(), products, settings, clock, zone = { ZoneId.systemDefault() })
-    val backups = BackupRepository(database, settings, entries, clock)
+    val programmes = ProgrammeRepository(database, products, settings, catalogue = { catalogue }, clock = clock, zone = { ZoneId.systemDefault() })
+
+    /** Every write settles the programme's due results first. */
+    val entries = EntryRepository(database.entries(), products, settings, clock, results = programmes, zone = { ZoneId.systemDefault() })
+
+    /** Reading the demon and spending hits settle the due results first. */
+    val game = GameRepository(database, settings, results = programmes, clock = clock)
+    val breathing = BreathingRepository(database.breathing())
+    val backups = BackupRepository(database, settings, entries, results = programmes, clock = clock)
 
     companion object {
         /** An in-memory database and a throwaway settings file, for UI tests. */

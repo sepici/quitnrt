@@ -5,6 +5,7 @@ import app.thelasthit.nrt.domain.dose.sum
 import app.thelasthit.nrt.domain.log.Entry
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 
 /**
  * Where a programme is. A [Programme] with weeks is [ACTIVE], [OVERTIME] or [COMPLETE]. Before
@@ -34,23 +35,55 @@ enum class WeekResult {
 }
 
 /**
+ * A week's extra goals (PLAN §6.3), each off while it's null. They show in stats and advice, and
+ * never change whether a week is met.
+ */
+data class WeekGoals(
+    /** The most units a day. */
+    val maxUnitsPerDay: Int? = null,
+    /** The shortest gap between doses, in minutes. */
+    val minGapMinutes: Int? = null,
+    /** The time on the wall clock the day's first dose waits for. */
+    val firstDoseNotBefore: LocalTime? = null,
+) {
+    init {
+        require(maxUnitsPerDay == null || maxUnitsPerDay >= 1) { "At least 1 unit a day: $maxUnitsPerDay" }
+        require(minGapMinutes == null || minGapMinutes in 1..MINUTES_A_DAY) { "A gap is 1 to $MINUTES_A_DAY minutes: $minGapMinutes" }
+        require(firstDoseNotBefore == null || firstDoseNotBefore.second == 0 && firstDoseNotBefore.nano == 0) {
+            "The first dose waits for a whole minute: $firstDoseNotBefore"
+        }
+    }
+
+    companion object {
+        /** Every goal off, as they start. */
+        val NONE = WeekGoals()
+
+        private const val MINUTES_A_DAY = 24 * 60
+    }
+}
+
+/**
  * One week of a programme: seven logical days from [startDate]. [number] is its place in the
- * run, counting repeats and overtime. A result, once in, has the time it came in.
+ * run, counting repeats and overtime. A result, once in, has the time it came in. [goals] are its
+ * extra goals, which a repeat takes from the week it repeats.
  */
 data class ProgrammeWeek(
     val number: Int,
     val startDate: LocalDate,
     val target: WeekTarget,
     val kind: WeekKind = WeekKind.PLANNED,
-    val isNrtFree: Boolean = false,
     val result: WeekResult = WeekResult.PENDING,
     val resultAt: Instant? = null,
+    val goals: WeekGoals = WeekGoals.NONE,
 ) {
     init {
         require(number >= 1) { "Weeks count from 1: $number" }
         require((result == WeekResult.PENDING) == (resultAt == null)) { "Week $number is $result at $resultAt" }
-        require(!isNrtFree || target == WeekTarget.NRT_FREE) { "Week $number is NRT-free with $target" }
+        require(kind != WeekKind.OVERTIME || target.isNrtFree) { "Overtime week $number has $target" }
     }
+
+    /** The last weeks of every programme, and overtime: a target of zero. */
+    val isNrtFree: Boolean get() = target.isNrtFree
 
     val endDate: LocalDate get() = startDate.plusDays(WeekTarget.DAYS - 1L)
 
@@ -74,13 +107,13 @@ data class Settlement(val programme: Programme, val newHits: List<EarnedHit>)
 
 /**
  * A programme from its first week: the weeks back to back from the start day, each with its
- * target and result. The demon's HP and the hits come from the weeks alone, so they can always
- * be worked out again and checked against the hit ledger.
+ * target and result, and the [ladder] their mixes come from. The demon's HP and the hits come
+ * from the weeks alone, so they can always be worked out again and checked against the hit
+ * ledger.
  */
 data class Programme(
-    val baseline: Baseline,
+    val ladder: Ladder,
     val length: ProgrammeLength,
-    val mainProductId: String?,
     val weeks: List<ProgrammeWeek>,
 ) {
     init {
@@ -90,8 +123,14 @@ data class Programme(
             require(week.startDate == weeks.first().startDate.plusWeeks(index.toLong())) {
                 "Week ${week.number} doesn't follow on from the week before"
             }
+            require(week.target.step == null || week.target.step in 0..ladder.size) {
+                "Week ${week.number} is at step ${week.target.step} of a ladder of ${ladder.size}"
+            }
         }
     }
+
+    /** The usual day the programme steps down from. */
+    val usualDay: UsualDay get() = ladder.usual
 
     val startDate: LocalDate get() = weeks.first().startDate
 
@@ -191,7 +230,6 @@ data class Programme(
         startDate = week.endDate.plusDays(1),
         target = WeekTarget.NRT_FREE,
         kind = WeekKind.OVERTIME,
-        isNrtFree = true,
     )
 
     // After a missed week.
@@ -214,9 +252,9 @@ data class Programme(
     fun openChoice(clock: ProgrammeClock): ProgrammeWeek? = weeks.lastOrNull { canRepeat(it.number, clock) }
 
     /**
-     * Repeats missed week [number]: the week after it, already running, takes its target, and
-     * every later week moves on a week. That adds a week and 10 HP, and meeting the repeat pays
-     * back the missed week too.
+     * Repeats missed week [number]: the week after it, already running, takes its target, mix
+     * and goals, and every later week moves on a week with its own. That adds a week and 10 HP,
+     * and meeting the repeat pays back the missed week too.
      */
     fun repeat(number: Int, clock: ProgrammeClock): Programme {
         require(canRepeat(number, clock)) { "Week $number can't be repeated now" }
@@ -226,7 +264,7 @@ data class Programme(
             startDate = missed.endDate.plusDays(1),
             target = missed.target,
             kind = WeekKind.REPEAT,
-            isNrtFree = missed.isNrtFree,
+            goals = missed.goals,
         )
         val later = weeks.drop(number).map { it.copy(number = it.number + 1, startDate = it.startDate.plusWeeks(1)) }
         return copy(weeks = weeks.take(number) + again + later)
@@ -235,48 +273,47 @@ data class Programme(
     // Editing.
 
     /**
-     * The weekly allowances week [number] can be set to on [today], or null when it can't be
-     * edited: it has started, or it's NRT-free. Allowances never go up, so it stays between the
-     * week after and the week before, or the baseline for the first week.
+     * The ladder steps week [number] can be moved to on [today], or null when it can't be edited:
+     * it has started, or it's NRT-free. It can't go above the week before (for week 1, the usual
+     * day, or the first step when the usual day is over a label limit), and it can go down to
+     * the bottom of the ladder, one unit of the weakest product.
      */
-    fun editableRange(number: Int, today: LocalDate): ClosedRange<Dose>? {
+    fun editableSteps(number: Int, today: LocalDate): IntRange? {
         val week = weeks.getOrNull(number - 1) ?: return null
-        if (week.isNrtFree || week.kind == WeekKind.OVERTIME || week.startDate <= today) return null
-        val most = weeks.getOrNull(number - 2)?.target?.weeklyAllowance ?: baseline.weekly
-        val least = weeks.getOrNull(number)?.target?.weeklyAllowance ?: Dose.ZERO
-        return least..most
+        if (week.isNrtFree || week.startDate <= today) return null
+        val highest = when (val before = weeks.getOrNull(number - 2)) {
+            null -> ladder.top
+            else -> before.target.step ?: return null
+        }
+        return highest..ladder.size
     }
 
-    fun edit(number: Int, weeklyAllowance: Dose, today: LocalDate): Programme {
-        val range = requireNotNull(editableRange(number, today)) { "Week $number can't be edited on $today" }
-        require(weeklyAllowance in range) { "Week $number has to stay within $range: $weeklyAllowance" }
-        return copy(weeks = weeks.map { if (it.number == number) it.copy(target = WeekTarget(weeklyAllowance)) else it })
+    /**
+     * Moves week [number] to [step] on the ladder. Later weeks that would then be above it move
+     * down to it, so allowances never go up.
+     */
+    fun edit(number: Int, step: Int, today: LocalDate): Programme {
+        val range = requireNotNull(editableSteps(number, today)) { "Week $number can't be edited on $today" }
+        require(step in range) { "Week $number has to stay within steps $range: $step" }
+        val target = WeekTarget.at(ladder, step)
+        return copy(
+            weeks = weeks.map { week ->
+                val above = week.number > number && !week.isNrtFree && checkNotNull(week.target.step) < step
+                if (week.number == number || above) week.copy(target = target) else week
+            },
+        )
     }
 
     companion object {
         /** Programme weeks run from the start day picked, tomorrow unless the user says otherwise. */
         fun defaultStart(today: LocalDate): LocalDate = today.plusDays(1)
 
-        /**
-         * A new programme, built from [baseline] in whole units of the main product, [mainUnit]
-         * each. It needs a baseline [PlanBuilder.canStepDown] through with that unit.
-         */
-        fun create(
-            baseline: Baseline,
-            length: ProgrammeLength,
-            mainUnit: Dose,
-            startDate: LocalDate,
-            mainProductId: String? = null,
-        ): Programme {
-            val weeks = PlanBuilder.targets(baseline.daily, mainUnit, length).mapIndexed { index, target ->
-                ProgrammeWeek(
-                    number = index + 1,
-                    startDate = startDate.plusWeeks(index.toLong()),
-                    target = target,
-                    isNrtFree = index >= length.taperWeeks,
-                )
+        /** A new programme from [startDate], its taper weeks spread down [ladder] (PLAN §6.2). */
+        fun create(ladder: Ladder, length: ProgrammeLength, startDate: LocalDate): Programme {
+            val weeks = PlanBuilder.targets(ladder, length).mapIndexed { index, target ->
+                ProgrammeWeek(number = index + 1, startDate = startDate.plusWeeks(index.toLong()), target = target)
             }
-            return Programme(baseline, length, mainProductId, weeks)
+            return Programme(ladder, length, weeks)
         }
     }
 }

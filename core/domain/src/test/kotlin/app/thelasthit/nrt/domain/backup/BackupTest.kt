@@ -1,9 +1,17 @@
 package app.thelasthit.nrt.domain.backup
 
+import app.thelasthit.nrt.domain.advice.BreathingPattern
 import app.thelasthit.nrt.domain.log.EntryKind
 import app.thelasthit.nrt.domain.log.TagGroup
 import app.thelasthit.nrt.domain.product.DoseUnit
 import app.thelasthit.nrt.domain.product.ProductForm
+import app.thelasthit.nrt.domain.programme.BaselineSource
+import app.thelasthit.nrt.domain.programme.LedgerKind
+import app.thelasthit.nrt.domain.programme.MissedWeekChoice
+import app.thelasthit.nrt.domain.programme.ProgrammeStatus
+import app.thelasthit.nrt.domain.programme.WeekKind
+import app.thelasthit.nrt.domain.programme.WeekResult
+import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -51,6 +59,81 @@ class BackupTest {
             BackupException.Reason.NOT_A_BACKUP,
             assertThrows<BackupException> { Backup.decode(backup.copy(format = "something-else").encode()) }.reason,
         )
-        assertEquals(BackupException.Reason.NEWER_VERSION, assertThrows<BackupException> { Backup.decode(backup.copy(version = 2).encode()) }.reason)
+        assertEquals(BackupException.Reason.NEWER_VERSION, assertThrows<BackupException> { Backup.decode(backup.copy(version = 3).encode()) }.reason)
+    }
+
+    @Test
+    fun `a version 2 backup carries the programme and the game`() {
+        val gum = Backup.Units("nicorette-gum-uk-2mg", "Nicorette gum 2 mg", ProductForm.GUM, DoseUnit.PIECE, 2000, 12)
+        val full = backup.copy(
+            settings = backup.settings.copy(demonName = "Gary", demonCreature = "dragon", demonVariant = "ember", soundOn = false, equippedGear = "wooden_stick"),
+            programmes = listOf(
+                Backup.Programme(
+                    id = "p1", status = ProgrammeStatus.ACTIVE, createdAt = "2026-10-16T09:00:00Z",
+                    baselineStartedOn = "2026-10-16", baselineStart = "2026-10-16", baselineEnd = "2026-10-22",
+                    baselineSource = BaselineSource.MEASURED, baselineMeasuredMicrograms = 23_400,
+                    lengthWeeks = 12, nrtFreeWeeks = 2, startDate = "2026-10-24",
+                    usualDay = listOf(gum),
+                    ladder = listOf(Backup.Step(1, listOf(gum.copy(unitsPerDay = 11)))),
+                    weeks = listOf(
+                        Backup.Week(
+                            number = 1, startDate = "2026-10-24", step = 1, dailyGuideMicrograms = 22_000,
+                            weeklyAllowanceMicrograms = 154_000, units = listOf(gum.copy(unitsPerDay = 11)),
+                            result = WeekResult.MISSED, resultAt = "2026-11-01T04:00:00Z",
+                            choice = MissedWeekChoice.CARRY_ON, choiceAt = "2026-11-01T09:00:00Z",
+                            maxUnitsPerDay = 11, minGapMinutes = 90, firstDoseNotBefore = "07:30",
+                        ),
+                        Backup.Week(number = 12, startDate = "2027-01-09", kind = WeekKind.PLANNED, dailyGuideMicrograms = 0, weeklyAllowanceMicrograms = 0),
+                    ),
+                ),
+            ),
+            demons = listOf(Backup.Demon("d1", "p1", "Gary", "dragon", "ember", maxHp = 120, createdAt = "2026-10-23T14:00:00Z")),
+            hitLedger = listOf(Backup.LedgerRow("h1", "p1", LedgerKind.WEEK_MET, 1, week = 1, earnedBy = 1, at = "2026-11-01T04:00:00Z")),
+            achievements = listOf(Backup.Unlock("first_entry", "2026-10-16T09:10:00Z")),
+            gear = listOf(Backup.Unlock("wooden_stick", "2026-10-24T04:00:00Z")),
+            breathingSessions = listOf(Backup.BreathingSession("b1", BreathingPattern.BOX, "2026-10-23T13:00:00Z", 120, 7, true)),
+        )
+        assertEquals(full, Backup.decode(full.encode()))
+        assertTrue("\"weeklyAllowanceUg\": 154000" in full.encode())
+        assertTrue("\"firstDoseNotBefore\": \"07:30\"" in full.encode())
+    }
+
+    @Test
+    fun `a week written before the extra goals has them all off`() {
+        val text = """
+            { "number": 1, "startDate": "2026-10-24", "step": 1, "dailyGuideUg": 22000, "weeklyAllowanceUg": 154000 }
+        """.trimIndent()
+        val week = Json.decodeFromString(Backup.Week.serializer(), text)
+        assertEquals(null, week.maxUnitsPerDay)
+        assertEquals(null, week.minGapMinutes)
+        assertEquals(null, week.firstDoseNotBefore)
+    }
+
+    @Test
+    fun `a version 1 file still reads, with no programmes or game`() {
+        val text = """
+            {
+              "format": "the-last-hit-backup",
+              "version": 1,
+              "exportedAt": "2026-10-23T14:05:00Z",
+              "settings": { "dayStart": "04:00", "country": "GB", "stoppedSmokingOn": null },
+              "products": [],
+              "tags": [],
+              "entries": []
+            }
+        """.trimIndent()
+        val read = Backup.decode(text)
+        assertEquals(1, read.version)
+        assertEquals("GB", read.settings.country)
+        assertEquals(null, read.settings.demonName)
+        assertEquals(null, read.settings.soundOn)
+        assertTrue(read.programmes.isEmpty() && read.demons.isEmpty() && read.hitLedger.isEmpty())
+        assertTrue(read.achievements.isEmpty() && read.gear.isEmpty() && read.breathingSessions.isEmpty())
+    }
+
+    @Test
+    fun `new backups are version 2`() {
+        assertEquals(2, Backup.VERSION)
+        assertTrue("\"version\": 2" in backup.encode())
     }
 }

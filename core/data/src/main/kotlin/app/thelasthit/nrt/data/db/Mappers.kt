@@ -50,23 +50,26 @@ internal fun UserProduct.toEntity(createdAt: Long) = ProductEntity(
     createdAt = createdAt,
 )
 
-internal fun EntryWithTags.toDomain() = Entry(
-    id = entry.id,
-    productId = entry.productId,
-    productName = entry.productName,
-    form = entry.form,
-    unit = entry.unit,
-    perUnit = Dose(entry.perUnitMicrograms),
-    quantity = entry.quantity,
-    total = Dose(entry.totalMicrograms),
-    occurredAt = Instant.ofEpochMilli(entry.occurredAt),
-    zone = ZoneId.of(entry.zoneId),
-    logicalDate = LocalDate.ofEpochDay(entry.logicalEpochDay),
-    kind = entry.kind,
-    cravingStrength = entry.cravingStrength,
-    tagKeys = tags.map { it.tagKey }.toSet(),
-    note = entry.note,
-    source = entry.source,
+internal fun EntryWithTags.toDomain() = entry.toDomain(tags.map { it.tagKey }.toSet())
+
+/** An entry without its tags, where they aren't needed. */
+internal fun EntryEntity.toDomain(tagKeys: Set<String> = emptySet()) = Entry(
+    id = id,
+    productId = productId,
+    productName = productName,
+    form = form,
+    unit = unit,
+    perUnit = Dose(perUnitMicrograms),
+    quantity = quantity,
+    total = Dose(totalMicrograms),
+    occurredAt = Instant.ofEpochMilli(occurredAt),
+    zone = ZoneId.of(zoneId),
+    logicalDate = LocalDate.ofEpochDay(logicalEpochDay),
+    kind = kind,
+    cravingStrength = cravingStrength,
+    tagKeys = tagKeys,
+    note = note,
+    source = source,
 )
 
 internal fun Entry.toEntity(createdAt: Long, updatedAt: Long) = EntryEntity(

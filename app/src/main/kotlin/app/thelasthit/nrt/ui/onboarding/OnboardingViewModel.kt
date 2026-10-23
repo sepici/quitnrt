@@ -139,8 +139,7 @@ class OnboardingViewModel(
             graph.settings.setCountry(chosen.country)
             chosen.picked.forEach { graph.products.addFromCatalogue(it) }
             graph.settings.setDemon(chosen.demonName.trim(), Creature.DRAGON, chosen.variant)
-            graph.settings.setDayStart(chosen.dayStart)
-            graph.entries.recalculateLogicalDays(DayBoundary(chosen.dayStart))
+            graph.entries.changeDayStart(chosen.dayStart)
             draft.update { it.copy(step = OnboardingStep.DONE) }
         }
     }

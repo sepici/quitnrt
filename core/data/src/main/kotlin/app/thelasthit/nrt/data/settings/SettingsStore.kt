@@ -28,12 +28,17 @@ data class Settings(
     val stoppedSmokingOn: LocalDate? = null,
     val onboardingComplete: Boolean = false,
     /**
-     * The demon picked in onboarding. It lives here until the programme starts, when it gets its
-     * HP and moves into the database.
+     * The demon the next plan starts with: the one picked in onboarding, or the last programme's
+     * once it closes, with any restyle since. When a plan starts, the demon gets its HP and a row
+     * in the database (ProgrammeRepository.startPlan), and this stays as it was while it runs.
      */
     val demonName: String? = null,
     val demonCreature: Creature = Creature.DRAGON,
     val demonVariant: String? = null,
+    /** The game's sounds. On by default, and quiet in silent mode whatever this says. */
+    val soundOn: Boolean = true,
+    /** The gear shown in the lair, by its key, or null for none picked yet. */
+    val equippedGear: String? = null,
 ) {
     val dayBoundary: DayBoundary get() = DayBoundary(dayStart)
 }
@@ -50,6 +55,8 @@ class SettingsStore(private val store: DataStore<Preferences>) {
             demonName = prefs[DEMON_NAME],
             demonCreature = Creature.fromKey(prefs[DEMON_CREATURE]),
             demonVariant = prefs[DEMON_VARIANT],
+            soundOn = prefs[SOUND_ON] ?: true,
+            equippedGear = prefs[EQUIPPED_GEAR],
         )
     }
 
@@ -72,10 +79,23 @@ class SettingsStore(private val store: DataStore<Preferences>) {
 
     suspend fun completeOnboarding() = store.edit { it[ONBOARDING_COMPLETE] = true }
 
-    suspend fun setDemon(name: String, creature: Creature, variant: String) = store.edit { prefs ->
-        prefs[DEMON_NAME] = name.trim()
+    /** The demon the next plan starts with. A blank or null [name], or a null [variant], shows the app's default. */
+    suspend fun setDemon(name: String?, creature: Creature, variant: String?) = store.edit { prefs ->
+        val trimmed = name?.trim()?.ifBlank { null }
+        if (trimmed == null) prefs.remove(DEMON_NAME) else prefs[DEMON_NAME] = trimmed
         prefs[DEMON_CREATURE] = creature.key
-        prefs[DEMON_VARIANT] = variant
+        if (variant == null) prefs.remove(DEMON_VARIANT) else prefs[DEMON_VARIANT] = variant
+    }
+
+    suspend fun setSoundOn(on: Boolean) = store.edit { it[SOUND_ON] = on }
+
+    /** Only gear that's unlocked should be equipped: GameRepository.equip checks that. */
+    suspend fun setEquippedGear(key: String?) = store.edit { prefs ->
+        if (key == null) {
+            prefs.remove(EQUIPPED_GEAR)
+        } else {
+            prefs[EQUIPPED_GEAR] = key
+        }
     }
 
     companion object {
@@ -87,6 +107,8 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         private val DEMON_NAME = stringPreferencesKey("demon_name")
         private val DEMON_CREATURE = stringPreferencesKey("demon_creature")
         private val DEMON_VARIANT = stringPreferencesKey("demon_variant")
+        private val SOUND_ON = booleanPreferencesKey("sound_on")
+        private val EQUIPPED_GEAR = stringPreferencesKey("equipped_gear")
 
         /** Only one DataStore may exist per file, so the app creates this once. */
         fun createDataStore(context: Context): DataStore<Preferences> =
