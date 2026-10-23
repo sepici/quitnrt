@@ -4,10 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.thelasthit.nrt.data.DataGraph
 import app.thelasthit.nrt.domain.catalogue.Catalogue
-import app.thelasthit.nrt.domain.catalogue.CatalogueLine
 import app.thelasthit.nrt.domain.catalogue.CatalogueProduct
 import app.thelasthit.nrt.domain.catalogue.Markets
 import app.thelasthit.nrt.domain.creature.Creature
+import app.thelasthit.nrt.ui.catalogue.CatalogueBrowse
+import app.thelasthit.nrt.ui.catalogue.browseFor
 import app.thelasthit.nrt.domain.product.PillLabel
 import app.thelasthit.nrt.domain.time.DayBoundary
 import kotlinx.coroutines.Dispatchers
@@ -51,15 +52,10 @@ data class OnboardingState(
     val today: LocalDate,
     /** The market for the phone's region, tagged in the country list. */
     val region: String,
-    val brands: List<String>,
-    /** The chosen brand's lines, shown when there's no search. */
-    val lines: List<CatalogueLine>,
-    /** Search results, or null when the search box is empty. */
-    val results: List<CatalogueProduct>?,
+    val browse: CatalogueBrowse,
     val pickedProducts: List<CatalogueProduct>,
     val pickLabels: Map<String, PillLabel>,
 ) {
-    val brand: String? get() = draft.brand?.takeIf { it in brands } ?: brands.firstOrNull()
     val canName: Boolean get() = draft.demonName.isNotBlank()
 }
 
@@ -81,23 +77,12 @@ class OnboardingViewModel(
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     private fun build(current: OnboardingDraft, catalogue: Catalogue): OnboardingState {
-        val browsable = catalogue.browse(current.country, current.otherCountries)
-        val brands = browsable.map { it.brand }.distinct()
-        val brand = current.brand?.takeIf { it in brands } ?: brands.firstOrNull()
-        val searchCountry = if (current.otherCountries) null else current.country
-        val results = current.query.takeIf { it.isNotBlank() }?.let { query ->
-            catalogue.search(query, current.country).filter { product ->
-                searchCountry == null || product.markets.isEmpty() || searchCountry in product.markets
-            }
-        }
         val picked = current.picked.mapNotNull(catalogue::find)
         return OnboardingState(
             draft = current,
             today = DayBoundary(current.dayStart).logicalDate(graph.clock.instant(), zone()),
             region = region,
-            brands = brands,
-            lines = CatalogueLine.group(browsable.filter { it.brand == brand }),
-            results = results,
+            browse = catalogue.browseFor(current.country, current.otherCountries, current.brand, current.query),
             pickedProducts = picked,
             pickLabels = PillLabel.of(picked.map { it.toUserProduct() }),
         )

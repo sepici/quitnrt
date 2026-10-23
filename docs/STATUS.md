@@ -1,13 +1,13 @@
 # Status and handover
 
-Last updated: 23 October 2026, after onboarding, Today, the log sheet and History were built in the local session.
+Last updated: 23 October 2026, after onboarding, Today, the log sheet, History and Settings were built in the local session.
 
 ## Where things are
 
 | Phase | State |
 |---|---|
 | 0. Foundation and direction | Done. Gradle set-up, CI, copy lint, style guide, design direction chosen, first creature signed off |
-| 1. Logging | **Mostly done.** Domain rules, catalogue, data layer, backup, theme, sprites and settings, plus app wiring, **onboarding, Today, the log sheet and History**. Settings and the lair are next. |
+| 1. Logging | **Nearly done.** Domain rules, catalogue, data layer, backup, theme, sprites, plus **onboarding, Today, the log sheet, History and Settings**. The lair and the phase reviews are next. |
 | 2 to 9 | Not started |
 
 The full check passes locally: copy rules, 79 domain tests, 25 data tests, 30 app UI, screenshot and format tests, debug APK, Android lint.
@@ -84,13 +84,14 @@ Build against the B mockups. All strings go in `strings.xml` and pass `checkCopy
    - Swipe left to delete, with Undo. Screen readers get Delete as an action.
    - A dose after midnight that counts toward the evening before names its clock day: "01:20 Friday".
    - Rows show the amount when it's more than one: "QuickMist, 2 sprays".
-6. **Settings:**
-   - products: add from the catalogue or by hand, hide
-   - quick log: add, remove, reorder
-   - tags: rename, hide, add
-   - day start: then `entries.recalculateLogicalDays`
-   - backup: JSON export and import (merge or replace) and CSV, through the system file picker
-   - About: disclaimer, sources and font licences
+6. **Settings.** Done, from the signed-off `settings*` mockups. It opens from Today's top bar, and Today's pencil goes straight to the quick log. The tab bar hides on every Settings page.
+   - **Products:** in use and hidden, with Hide and Show. Tap one to change its name or daily pack limit (an hourly limit from the pack stays). Add by hand with a type, a strength typed in mg (`Dose.parseMg`, whole micrograms) and an optional limit.
+   - **Add from the catalogue** uses the same `CataloguePicker` as onboarding. Tapping a strength adds it, or hides it if it's in use.
+   - **Quick log:** a preview of Today's pills, drag a handle to reorder (Move up and Move down for screen readers), take off or add.
+   - **Tags:** rename, move group, hide, or add your own. A renamed built-in tag can go back to its own name.
+   - **Day start:** the onboarding stepper and diagram, then "Save day start", which moves every dose.
+   - **Backup:** export JSON, export CSV, and restore through the system file picker. Merge adds what's missing; replace warns first with what it deletes. Errors use the app's own words via `BackupException.Reason`.
+   - **About:** the disclaimer and when it was accepted, sources as the catalogue research cites them (the emc and DailyMed), privacy, and both font licences from assets.
 7. **Lair tab:** for now, Gary large on his backdrop with the "lurking" state. The battle comes in phase 4.
 
 **Tests:** Compose UI tests for logging (including backdating), edit, delete with undo, and onboarding.
@@ -126,4 +127,4 @@ The owner asked for agents on UI/UX, colour, tone and copy, so nothing ends up l
 - **Scratch tools.** The design tools that rebuild mockups and boards are in `docs/design/*/tools/`. `docs/design/tools/shot.mjs` reads Playwright's location from `PLAYWRIGHT_DIR`.
 - **Pixel art in the app.** The band and lair backdrops are pixel grids in `core/domain/src/main/resources/backdrops/`, written by `art/tools/backdrops.py` from the mockups' shapes. `GameArt` and `drawPixels` in `ui/game` draw them and the sprites with no smoothing.
 - **Icons** are the mockups' SVG symbols turned into vector drawables by `docs/design/tools/svg2vector.py`.
-- **Screenshots and UI tests.** `captureLooks` captures a screen in light and dark. Large font is a second test with `@Config(fontScale = LARGE_FONT)`, so sheets and dialogs scale too. `TestApp` stops the clock at Friday 23 October, 15:05 in London. In Compose tests, wait on what the screen shows before reading the database: polling it with `runBlocking` starves the save being waited for.
+- **Screenshots and UI tests.** `captureLooks` captures a screen in light and dark. Large font is a second test with `@Config(fontScale = LARGE_FONT)`, so sheets and dialogs scale too. `TestApp` stops the clock at Friday 23 October, 15:05 in London. In Compose tests, wait on what the screen shows. Reading semantics syncs with Compose, which runs the main thread's pending work; a wait that only checks the database or a plain flag never does, so the save it waits for never finishes. When there's nothing on screen to wait for, call `waitForIdle()` inside the condition.

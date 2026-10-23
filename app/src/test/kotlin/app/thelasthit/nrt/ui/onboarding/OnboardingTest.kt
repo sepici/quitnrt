@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -78,7 +79,9 @@ class OnboardingTest {
         compose.waitUntilExactlyOneExists(hasText("Next: when your day starts"))
         compose.onNodeWithText("Next: when your day starts").assertIsNotEnabled()
         compose.onNodeWithText("Mildred").performScrollTo().performClick()
-        compose.onNodeWithText("Next: when your day starts").assertIsEnabled().performClick()
+        // The state is built off the main thread, so wait for the button rather than assert at once.
+        compose.waitUntilExactlyOneExists(hasText("Next: when your day starts") and isEnabled())
+        compose.onNodeWithText("Next: when your day starts").performClick()
 
         compose.waitUntilExactlyOneExists(hasContentDescription("30\u00A0minutes later"))
         compose.onNodeWithContentDescription("30\u00A0minutes later").performClick()

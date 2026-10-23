@@ -296,6 +296,212 @@
     <string name="onboarding_next_plan">After that, the Plan tab builds a taper from it, one week at a time down to zero.</string>
     <string name="onboarding_start">Start logging</string>
 
+    <!-- Settings -->
+    <string name="settings_back_today">Back to Today</string>
+    <string name="settings_back">Back to Settings</string>
+    <string name="settings_what_you_use">What you use</string>
+    <string name="settings_products">Products</string>
+    <plurals name="settings_products_in_use">
+        <item quantity="one">%1$d in use</item>
+        <item quantity="other">%1$d in use</item>
+    </plurals>
+    <plurals name="settings_hidden_count">
+        <item quantity="one">%1$d hidden</item>
+        <item quantity="other">%1$d hidden</item>
+    </plurals>
+    <string name="settings_products_none">None yet</string>
+    <string name="settings_quick_log">Quick log</string>
+    <string name="settings_quick_log_empty">Nothing on it yet</string>
+    <string name="settings_tags">Tags</string>
+    <plurals name="settings_tags_built_in">
+        <item quantity="one">%1$d built in</item>
+        <item quantity="other">%1$d built in</item>
+    </plurals>
+    <plurals name="settings_tags_own">
+        <item quantity="one">%1$d of your own</item>
+        <item quantity="other">%1$d of your own</item>
+    </plurals>
+    <string name="settings_your_day">Your day</string>
+    <string name="settings_day_start">Day start</string>
+    <string name="settings_day_start_detail">A dose at %1$s counts toward the evening before</string>
+    <string name="settings_day_start_midnight">Every dose counts toward the day it\'s taken</string>
+    <string name="settings_backup">Backup</string>
+    <string name="settings_export">Export a backup</string>
+    <string name="settings_export_detail">Everything in one .json file you can restore later</string>
+    <string name="settings_restore">Restore from a backup</string>
+    <string name="settings_restore_detail">Add it to what\'s here, or replace everything</string>
+    <string name="settings_csv">Export doses as CSV</string>
+    <string name="settings_csv_detail">For a spreadsheet. It can\'t be restored from.</string>
+    <string name="settings_backup_foot">You pick where each file goes. The app has no internet access, so nothing leaves the phone unless you send it.</string>
+    <string name="settings_about_section">About</string>
+    <string name="settings_about">About this app</string>
+    <string name="settings_about_detail">Disclaimer, where the product details come from, font licences</string>
+    <string name="settings_version">Version</string>
+    <string name="settings_exported">Backup saved</string>
+    <string name="settings_csv_exported">Doses exported</string>
+    <string name="settings_export_failed">Couldn\'t save the file. Try again, or pick another folder.</string>
+    <string name="settings_read_failed">Couldn\'t read that file.</string>
+    <string name="settings_not_backup">That file isn\'t a backup from this app.</string>
+    <string name="settings_newer_backup">That backup is from a newer version of the app. Update the app, then try again.</string>
+
+    <string name="restore_title">Restore a backup</string>
+    <string name="restore_from_file">From the file you picked</string>
+    <string name="restore_file_detail">Made %1$s. %2$s, %3$s.</string>
+    <plurals name="restore_doses">
+        <item quantity="one">%1$d\u00A0dose</item>
+        <item quantity="other">%1$d\u00A0doses</item>
+    </plurals>
+    <plurals name="restore_products">
+        <item quantity="one">%1$d\u00A0product</item>
+        <item quantity="other">%1$d\u00A0products</item>
+    </plurals>
+    <string name="restore_how">How to restore it</string>
+    <string name="restore_merge">Add to what\'s here</string>
+    <string name="restore_merge_detail">Keeps everything on this phone and adds anything from the backup that\'s missing</string>
+    <string name="restore_replace">Replace everything</string>
+    <string name="restore_replace_detail">Clears this phone, then puts the backup in its place</string>
+    <string name="restore_button">Restore backup</string>
+    <string name="replace_title">Replace everything on this phone?</string>
+    <string name="replace_body">The %1$s, %2$s and tag changes on this phone will be deleted. The backup from %3$s takes their place.</string>
+    <string name="replace_small">This can\'t be undone. If you might want what\'s here now, export a backup first.</string>
+    <string name="replace_confirm">Replace everything</string>
+    <plurals name="restored_merge">
+        <item quantity="one">Added %1$d\u00A0dose from the backup</item>
+        <item quantity="other">Added %1$d\u00A0doses from the backup</item>
+    </plurals>
+    <string name="restored_replace">Backup restored</string>
+
+    <string name="products_title">Products</string>
+    <string name="products_intro">Hidden products leave the log sheet and the quick log. Doses you\'ve logged with them stay in your history.</string>
+    <string name="products_add_catalogue">Add from the catalogue</string>
+    <string name="products_add_catalogue_detail">Search, or browse by brand</string>
+    <string name="products_add_hand">Add by hand</string>
+    <string name="products_add_hand_detail">For anything that isn\'t listed</string>
+    <string name="products_in_use">In use</string>
+    <string name="products_hidden">Hidden</string>
+    <string name="products_hide">Hide</string>
+    <string name="products_show">Show</string>
+    <string name="products_hide_description">Hide %1$s</string>
+    <string name="products_show_description">Show %1$s</string>
+    <string name="products_hidden_detail">Not on the log sheet</string>
+    <string name="products_foot">Tap a product to change its name or pack limit.</string>
+    <string name="products_none">No products yet. Add one from the catalogue or by hand.</string>
+    <string name="limit_per_day">Pack limit %1$s a day</string>
+    <string name="limit_per_hour">Pack limit %1$s an hour</string>
+    <plurals name="limit_per_hours">
+        <item quantity="one">Pack limit %1$s in %2$d\u00A0hour</item>
+        <item quantity="other">Pack limit %1$s in %2$d\u00A0hours</item>
+    </plurals>
+    <string name="limit_and_daily">%1$s, %2$d a day</string>
+    <string name="limit_none">No pack limit set</string>
+    <string name="limit_none_by_hand">Added by hand. No pack limit set.</string>
+
+    <string name="hand_title">Add by hand</string>
+    <string name="hand_detail">For anything the catalogue doesn\'t list</string>
+    <string name="hand_edit_title">Edit product</string>
+    <string name="hand_name">Name</string>
+    <string name="hand_type">Type</string>
+    <string name="hand_strength">Strength</string>
+    <string name="hand_limit">Pack limit</string>
+    <string name="hand_limit_hint">Optional</string>
+    <string name="hand_limit_unit">%1$s a day</string>
+    <string name="hand_limit_help">If a day goes over the pack limit, the app shows a short note. Leave it empty if you\'re not sure.</string>
+    <string name="hand_add">Add product</string>
+    <string name="hand_save">Save product</string>
+    <string name="hand_bad_strength">Type the strength in mg, like 2 or 1.5.</string>
+    <string name="hand_bad_limit">Type a whole number, or leave it empty.</string>
+    <string name="form_other">Other</string>
+    <string name="per_unit_piece">mg a piece</string>
+    <string name="per_unit_lozenge">mg a lozenge</string>
+    <string name="per_unit_patch">mg a patch</string>
+    <string name="per_unit_spray">mg a spray</string>
+    <string name="per_unit_session">mg a session</string>
+    <string name="per_unit_cartridge">mg a cartridge</string>
+    <string name="per_unit_puff">mg a puff</string>
+    <string name="per_unit_tablet">mg a tablet</string>
+    <string name="per_unit_strip">mg a strip</string>
+    <string name="per_unit_pouch">mg a pouch</string>
+    <string name="per_unit_custom">mg a unit</string>
+    <string name="units_piece">pieces</string>
+    <string name="units_lozenge">lozenges</string>
+    <string name="units_patch">patches</string>
+    <string name="units_spray">sprays</string>
+    <string name="units_session">sessions</string>
+    <string name="units_cartridge">cartridges</string>
+    <string name="units_puff">puffs</string>
+    <string name="units_tablet">tablets</string>
+    <string name="units_strip">strips</string>
+    <string name="units_pouch">pouches</string>
+    <string name="units_custom">units</string>
+
+    <string name="catalogue_title">Add from the catalogue</string>
+    <string name="catalogue_intro">Tap a strength to add it. Tap it again to hide it.</string>
+
+    <string name="quick_title">Quick log</string>
+    <string name="quick_intro">One tap on Today logs one of these. Hold a handle and drag to change the order.</string>
+    <string name="quick_on_today">On Today</string>
+    <string name="quick_in_order">In this order</string>
+    <string name="quick_not_on">Not on the quick log</string>
+    <string name="quick_remove">Take %1$s off the quick log</string>
+    <string name="quick_add">Add</string>
+    <string name="quick_add_description">Add %1$s to the quick log</string>
+    <string name="quick_drag">Drag to reorder</string>
+    <string name="quick_move_up">Move up</string>
+    <string name="quick_move_down">Move down</string>
+    <string name="quick_foot">Hidden products don\'t show here. You can bring them back in Products.</string>
+    <string name="quick_empty">Nothing on the quick log yet. Add a product below.</string>
+    <string name="quick_all_on">Every product is on the quick log.</string>
+
+    <string name="tags_title">Tags</string>
+    <string name="tags_intro">Tap a tag to rename it, move it to another group or hide it. Hidden tags leave the log sheet but stay on doses that already have them.</string>
+    <string name="tags_add">Add a tag</string>
+    <string name="tags_key_own">Added by you</string>
+    <string name="tags_key_hidden">Hidden</string>
+    <plurals name="tags_count">
+        <item quantity="one">%1$d tag</item>
+        <item quantity="other">%1$d tags</item>
+    </plurals>
+    <plurals name="tags_yours">
+        <item quantity="one">%1$d yours</item>
+        <item quantity="other">%1$d yours</item>
+    </plurals>
+    <string name="tags_hidden_description">%1$s, hidden</string>
+    <string name="tags_own_description">%1$s, added by you</string>
+    <string name="tag_edit_title">Edit tag</string>
+    <string name="tag_add_title">Add a tag</string>
+    <string name="tag_built_in_as">Built in as “%1$s”</string>
+    <string name="tag_new_detail">It goes on the log sheet in the group you pick</string>
+    <string name="tag_name">Name</string>
+    <string name="tag_clear">Clear name</string>
+    <string name="tag_name_help">The new name shows everywhere, including on doses you\'ve already logged.</string>
+    <string name="tag_group">Group</string>
+    <string name="tag_hide">Hide this tag</string>
+    <string name="tag_hide_detail">It stays on doses that already have it</string>
+    <string name="tag_save">Save tag</string>
+    <string name="tag_add_button">Add tag</string>
+    <string name="tag_reset">Go back to “%1$s”</string>
+
+    <string name="day_title">Day start</string>
+    <string name="day_save">Save day start</string>
+    <string name="day_saved">Day start saved. Doses moved to match.</string>
+
+    <string name="about_title">About</string>
+    <string name="about_app">The Last Hit: Quit NRT</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_not_advice">Not medical advice</string>
+    <string name="about_accepted">You accepted this on %1$s at %2$s.</string>
+    <string name="about_sources_title">Where the product details come from</string>
+    <string name="about_sources">Strengths and daily limits come from each pack\'s leaflet or label: the emc in the UK, DailyMed in the US, and the makers\' and shops\' own sites.</string>
+    <string name="about_sources_pack">If your pack says something different, go with the pack.</string>
+    <string name="about_privacy_title">Privacy</string>
+    <string name="about_privacy">No account, no ads and no tracking. The app has no internet access, so what you log stays on this phone unless you export it.</string>
+    <string name="about_fonts">Fonts</string>
+    <string name="about_font_grotesk">Schibsted Grotesk</string>
+    <string name="about_font_grotesk_detail">SIL Open Font License 1.1. Copyright 2023 The Schibsted Grotesk Project Authors.</string>
+    <string name="about_font_silkscreen">Silkscreen</string>
+    <string name="about_font_silkscreen_detail">SIL Open Font License 1.1. Copyright 2001 The Silkscreen Project Authors.</string>
+    <string name="licence_title">%1$s licence</string>
+
     <!-- Today -->
     <string name="today_title">Today</string>
     <string name="today_youve_had">You\'ve had</string>

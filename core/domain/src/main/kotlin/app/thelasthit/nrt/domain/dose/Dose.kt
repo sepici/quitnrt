@@ -31,6 +31,24 @@ value class Dose(val micrograms: Long) : Comparable<Dose> {
         fun mg(milligrams: Int): Dose = Dose(milligrams * 1000L)
 
         fun mg(milligrams: Double): Dose = Dose(Math.round(milligrams * 1000))
+
+        /**
+         * A strength typed in mg, such as "2" or "1.5", worked out in whole micrograms without
+         * going through floating point. A comma works as the decimal point too. Null for anything
+         * that isn't a positive amount of at most [MAX_TYPED_MG], or finer than a microgram.
+         */
+        fun parseMg(text: String): Dose? {
+            val cleaned = text.trim().replace(',', '.')
+            if (!TYPED_MG.matches(cleaned)) return null
+            val (whole, fraction) = cleaned.split('.').let { it[0] to it.getOrElse(1) { "" } }
+            val micrograms = whole.toLong() * 1000 + fraction.padEnd(3, '0').toLong()
+            return Dose(micrograms).takeIf { it > ZERO && it <= mg(MAX_TYPED_MG) }
+        }
+
+        /** More than any single unit of NRT, so a typo like 200 is refused. */
+        const val MAX_TYPED_MG = 100
+
+        private val TYPED_MG = Regex("""\d{1,3}(\.\d{1,3})?""")
     }
 }
 

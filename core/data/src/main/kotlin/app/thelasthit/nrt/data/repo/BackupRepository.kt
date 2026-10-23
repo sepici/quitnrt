@@ -26,6 +26,9 @@ enum class ImportMode {
 
 data class ImportSummary(val products: Int, val tags: Int, val entries: Int, val skipped: Int)
 
+/** What's on the phone now, for the warning before a backup replaces it. */
+data class StoredCounts(val entries: Int, val products: Int)
+
 class BackupRepository(
     private val database: AppDatabase,
     private val settings: SettingsStore,
@@ -46,6 +49,8 @@ class BackupRepository(
             entries = database.entries().allLiveWithTags().map { it.toBackup() },
         )
     }
+
+    suspend fun counts(): StoredCounts = StoredCounts(database.entries().countLive(), database.products().count())
 
     suspend fun exportCsv(): String = EntriesCsv.write(database.entries().allLiveWithTags().map { it.toDomain() })
 

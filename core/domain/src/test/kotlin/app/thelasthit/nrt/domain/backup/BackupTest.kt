@@ -46,8 +46,11 @@ class BackupTest {
 
     @Test
     fun `other files and newer versions are refused`() {
-        assertThrows<BackupException> { Backup.decode("""{"hello": "world"}""") }
-        assertThrows<BackupException> { Backup.decode(backup.copy(format = "something-else").encode()) }
-        assertThrows<BackupException> { Backup.decode(backup.copy(version = 2).encode()) }
+        assertEquals(BackupException.Reason.NOT_A_BACKUP, assertThrows<BackupException> { Backup.decode("""{"hello": "world"}""") }.reason)
+        assertEquals(
+            BackupException.Reason.NOT_A_BACKUP,
+            assertThrows<BackupException> { Backup.decode(backup.copy(format = "something-else").encode()) }.reason,
+        )
+        assertEquals(BackupException.Reason.NEWER_VERSION, assertThrows<BackupException> { Backup.decode(backup.copy(version = 2).encode()) }.reason)
     }
 }

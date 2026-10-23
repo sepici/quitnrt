@@ -69,4 +69,18 @@ class TagRepositoryTest {
         val uses = data.tags.observeUses(now.minus(TagOrder.USE_WINDOW)).first()
         assertEquals(mapOf("after_meal" to 2, "bored" to 1), uses)
     }
+
+    @Test
+    fun editingRenamesMovesAndHides() = runTest {
+        data.tags.ensureBuiltIns()
+        val coffee = data.tags.all.first().first { it.key == "coffee_tea" }
+        data.tags.edit(coffee, "Morning coffee", TagGroup.HABIT, hidden = true)
+        val edited = data.tags.all.first().first { it.key == "coffee_tea" }
+        assertEquals("Morning coffee", edited.customName)
+        assertEquals(TagGroup.HABIT, edited.group)
+        assertTrue(edited.isHidden)
+
+        data.tags.edit(edited, "", TagGroup.ROUTINE, hidden = false)
+        assertEquals(null, data.tags.all.first().first { it.key == "coffee_tea" }.customName)
+    }
 }

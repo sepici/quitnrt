@@ -43,4 +43,14 @@ class TagRepository(private val dao: TagDao) {
     suspend fun rename(tag: TagEntity, name: String?) = dao.upsert(tag.copy(customName = name?.trim()?.ifBlank { null }))
 
     suspend fun setHidden(tag: TagEntity, hidden: Boolean) = dao.upsert(tag.copy(isHidden = hidden))
+
+    /**
+     * Saves an edited tag. A built-in tag given its own name back, or a blank name, returns to
+     * the built-in name. Moving a tag to another group moves it in the stats too.
+     */
+    suspend fun edit(tag: TagEntity, name: String, group: TagGroup, hidden: Boolean) {
+        val custom = name.trim().ifBlank { null }
+        require(custom != null || tag.isBuiltIn) { "A tag of your own needs a name" }
+        dao.upsert(tag.copy(customName = custom, group = group, isHidden = hidden))
+    }
 }

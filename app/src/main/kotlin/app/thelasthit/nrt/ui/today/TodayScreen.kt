@@ -81,6 +81,7 @@ fun TodayScreen(
     snackbars: SnackbarHostState,
     onOpenSettings: () -> Unit,
     onOpenLair: () -> Unit,
+    onEditQuickLog: () -> Unit = onOpenSettings,
     viewModel: TodayViewModel = graphViewModel { TodayViewModel(it) },
     sheetViewModel: LogSheetViewModel = graphViewModel(key = "log-sheet") { LogSheetViewModel(it) },
 ) {
@@ -121,7 +122,7 @@ fun TodayScreen(
                     sheetViewModel.openNew(it.product.id)
                     sheetOpen = true
                 },
-                onEditQuickLog = onOpenSettings,
+                onEditQuickLog = onEditQuickLog,
             )
         }
         current.labelNote?.let { note -> item { LabelNote(note, onDismiss = viewModel::dismissLabelNote) } }

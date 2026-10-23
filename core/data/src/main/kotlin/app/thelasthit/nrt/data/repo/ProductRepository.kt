@@ -29,6 +29,10 @@ class ProductRepository(
     val shortNames: Flow<Map<String, String>> =
         dao.observeAllIncludingHidden().map { list -> list.associate { it.id to it.shortName } }
 
+    /** Every product, hidden ones included, for Settings. */
+    val everything: Flow<List<UserProduct>> =
+        dao.observeAllIncludingHidden().map { list -> list.map { it.toDomain() }.sortedBy { it.name.lowercase() } }
+
     /** The products on the quick log, in the user's order. */
     val quickLog: Flow<List<UserProduct>> = dao.observeQuickLog().map { list -> list.map { it.toDomain() } }
 
@@ -73,6 +77,27 @@ class ProductRepository(
         )
         dao.upsert(product.toEntity(createdAt = clock.millis()))
         return product
+    }
+
+    /**
+     * Hides a product from the log sheet and the quick log, or brings it back. Doses already
+     * logged with it stay in History.
+     */
+    suspend fun setHidden(id: String, hidden: Boolean) = dao.setHidden(id, hidden)
+
+    /** A new name or pack limit. The dose stays, so entries logged later keep the same strength. */
+    suspend fun update(id: String, name: String, label: LabelLimit) {
+        val existing = dao.get(id)?.toDomain() ?: return
+        require(name.isNotBlank()) { "A product needs a name" }
+        val trimmed = name.trim()
+        val renamed = trimmed != existing.name
+        dao.upsert(
+            existing.copy(
+                name = trimmed,
+                shortName = if (renamed && existing.catalogueId == null) trimmed else existing.shortName,
+                label = label,
+            ).toEntity(createdAt = dao.createdAt(id) ?: clock.millis()),
+        )
     }
 
     /** Sets the quick log to exactly these products, in this order. */

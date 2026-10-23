@@ -45,6 +45,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.thelasthit.nrt.R
+import app.thelasthit.nrt.ui.components.FieldLabel
 import app.thelasthit.nrt.domain.creature.Creature
 import app.thelasthit.nrt.ui.components.Chip
 import app.thelasthit.nrt.ui.components.ChipKind

@@ -11,11 +11,14 @@ const val QUICKMIST = "nicorette-quickmist-uk-1mg"
 const val PATCH_14 = "niquitin-clear-patch-uk-14mg"
 
 /** Set up as if onboarding is done: tags, the mockups' four quick-log products and Gary. */
-fun TestApp.setUp() = runBlocking {
-    graph.tags.ensureBuiltIns()
-    listOf(GUM_2, GUM_4, QUICKMIST, PATCH_14).forEach { graph.products.addFromCatalogue(it) }
-    graph.settings.setDemon("Gary", Creature.DRAGON, "forest")
-    graph.settings.completeOnboarding()
+fun TestApp.setUp() {
+    runBlocking {
+        graph.tags.ensureBuiltIns()
+        graph.settings.setCountry("GB")
+        listOf(GUM_2, GUM_4, QUICKMIST, PATCH_14).forEach { graph.products.addFromCatalogue(it) }
+        graph.settings.setDemon("Gary", Creature.DRAGON, "forest")
+        graph.settings.completeOnboarding()
+    }
 }
 
 /** The week in the Today mockup: 14, 13, 12 and 14 mg Monday to Thursday, and 8 mg so far today. */

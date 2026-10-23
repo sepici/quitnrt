@@ -67,8 +67,8 @@ class TodayTest {
     }
 
     /**
-     * Reads the database directly. It blocks the main thread, so only call it once the screen
-     * shows the change; polling with it starves the save it's waiting for.
+     * Reads the database directly, so only call it once the screen shows the change. A wait that
+     * polls it never syncs with Compose, so the main thread never runs the save being waited for.
      */
     private fun entriesToday(): List<Entry> = runBlocking { app.graph.entries.observeDay(today).first().entries }
 

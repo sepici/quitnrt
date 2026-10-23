@@ -2,6 +2,7 @@ package app.thelasthit.nrt.data
 
 import app.thelasthit.nrt.domain.dose.Dose
 import app.thelasthit.nrt.domain.product.DoseUnit
+import app.thelasthit.nrt.domain.product.LabelLimit
 import app.thelasthit.nrt.domain.product.ProductForm
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -72,5 +73,28 @@ class ProductRepositoryTest {
             mapOf("nicorette-gum-uk-2mg" to "Nicorette gum", "nicorette-quickmist-uk-1mg" to "QuickMist"),
             data.products.shortNames.first(),
         )
+    }
+
+    @Test
+    fun hiddenProductsLeaveTheQuickLogAndComeBack() = runTest {
+        data.products.addFromCatalogue("nicorette-gum-uk-2mg")
+        data.products.addFromCatalogue("nicorette-gum-uk-4mg")
+        data.products.setHidden("nicorette-gum-uk-2mg", true)
+        assertEquals(listOf("nicorette-gum-uk-4mg"), data.products.quickLog.first().map { it.id })
+        assertEquals(2, data.products.everything.first().size)
+
+        data.products.setHidden("nicorette-gum-uk-2mg", false)
+        assertEquals(listOf("nicorette-gum-uk-2mg", "nicorette-gum-uk-4mg"), data.products.quickLog.first().map { it.id })
+    }
+
+    @Test
+    fun anUpdateChangesTheNameAndLimitButNotTheDose() = runTest {
+        val custom = data.products.addCustom("Holiday gum", ProductForm.GUM, Dose.mg(2))
+        data.products.update(custom.id, "Duty free gum", LabelLimit(maxUnitsPerDay = 15))
+        val updated = requireNotNull(data.products.get(custom.id))
+        assertEquals("Duty free gum", updated.name)
+        assertEquals("Duty free gum", updated.shortName)
+        assertEquals(15, updated.label.maxUnitsPerDay)
+        assertEquals(Dose.mg(2), updated.perUnit)
     }
 }

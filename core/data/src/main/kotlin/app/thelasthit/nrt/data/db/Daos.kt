@@ -38,6 +38,15 @@ interface ProductDao {
     @Query("SELECT * FROM products")
     fun observeAllIncludingHidden(): Flow<List<ProductEntity>>
 
+    @Query("UPDATE products SET isHidden = :hidden WHERE id = :id")
+    suspend fun setHidden(id: String, hidden: Boolean)
+
+    @Query("SELECT COUNT(*) FROM products")
+    suspend fun count(): Int
+
+    @Query("SELECT createdAt FROM products WHERE id = :id")
+    suspend fun createdAt(id: String): Long?
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertIgnoringExisting(products: List<ProductEntity>): List<Long>
 
@@ -106,6 +115,9 @@ abstract class EntryDao {
 
     @Query("SELECT MIN(logicalEpochDay) FROM entries WHERE deletedAt IS NULL")
     abstract fun observeFirstDay(): Flow<Long?>
+
+    @Query("SELECT COUNT(*) FROM entries WHERE deletedAt IS NULL")
+    abstract suspend fun countLive(): Int
 
     @Transaction
     @Query("SELECT * FROM entries WHERE deletedAt IS NULL ORDER BY occurredAt")

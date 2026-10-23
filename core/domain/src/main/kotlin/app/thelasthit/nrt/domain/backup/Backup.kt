@@ -95,13 +95,20 @@ data class Backup(
             val backup = try {
                 json.decodeFromString(serializer(), text)
             } catch (e: IllegalArgumentException) {
-                throw BackupException("This file isn't a The Last Hit backup.", e)
+                throw BackupException(BackupException.Reason.NOT_A_BACKUP, "This file isn't a The Last Hit backup.", e)
             }
-            if (backup.format != FORMAT) throw BackupException("This file isn't a The Last Hit backup.")
-            if (backup.version > VERSION) throw BackupException("This backup is from a newer version of the app.")
+            if (backup.format != FORMAT) {
+                throw BackupException(BackupException.Reason.NOT_A_BACKUP, "This file isn't a The Last Hit backup.")
+            }
+            if (backup.version > VERSION) {
+                throw BackupException(BackupException.Reason.NEWER_VERSION, "This backup is from a newer version of the app.")
+            }
             return backup
         }
     }
 }
 
-class BackupException(message: String, cause: Throwable? = null) : Exception(message, cause)
+/** Why a file can't be restored. The app shows its own words for each [reason]. */
+class BackupException(val reason: Reason, message: String, cause: Throwable? = null) : Exception(message, cause) {
+    enum class Reason { NOT_A_BACKUP, NEWER_VERSION }
+}
