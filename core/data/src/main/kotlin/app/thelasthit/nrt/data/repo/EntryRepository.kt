@@ -22,6 +22,7 @@ import java.time.Clock
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 import java.util.UUID
 
@@ -49,16 +50,22 @@ sealed interface LogResult {
     data object TimeInFuture : LogResult
 }
 
+/**
+ * Logging, editing and deleting doses. Every write settles the programme results that are due
+ * first, through [results], so a result counts the logs as they stood when it came due.
+ */
 class EntryRepository(
     private val dao: EntryDao,
     private val products: ProductRepository,
     private val settings: SettingsStore,
     private val clock: Clock,
+    private val results: ResultSettler,
     /** The phone's current zone, read on every log so travel is handled. */
     private val zone: () -> ZoneId = { clock.zone },
     private val newId: () -> String = { UUID.randomUUID().toString() },
 ) {
     suspend fun log(request: LogRequest): LogResult {
+        results.settleDue()
         val now = clock.instant()
         val at = request.at ?: now
         if (!LogTime.isAcceptable(at, now)) return LogResult.TimeInFuture
@@ -85,6 +92,7 @@ class EntryRepository(
      * quantity changes, so editing a note never changes an old dose.
      */
     suspend fun edit(id: String, request: LogRequest): LogResult {
+        results.settleDue()
         val existing = dao.get(id) ?: return LogResult.NotFound
         val now = clock.instant()
         val at = request.at ?: Instant.ofEpochMilli(existing.entry.occurredAt)
@@ -112,9 +120,15 @@ class EntryRepository(
         return LogResult.Saved(updated, labelWarning = null)
     }
 
-    suspend fun delete(id: String) = dao.softDelete(id, clock.millis())
+    suspend fun delete(id: String) {
+        results.settleDue()
+        dao.softDelete(id, clock.millis())
+    }
 
-    suspend fun undoDelete(id: String) = dao.restore(id, clock.millis())
+    suspend fun undoDelete(id: String) {
+        results.settleDue()
+        dao.restore(id, clock.millis())
+    }
 
     /** Deleted entries stay restorable for 30 days. */
     suspend fun purgeDeleted(): Int = dao.purgeDeletedBefore(clock.instant().minus(Duration.ofDays(30)).toEpochMilli())
@@ -154,7 +168,20 @@ class EntryRepository(
             list.associate { LocalDate.ofEpochDay(it.epochDay) to it.doses }
         }
 
-    /** Run after the day start changes: moves every entry to the day it now belongs to. */
+    /**
+     * Changes the day start and moves every entry to the day it now belongs to, once the results
+     * due under the old day start are in.
+     */
+    suspend fun changeDayStart(time: LocalTime) {
+        results.settleDue()
+        settings.setDayStart(time)
+        recalculateLogicalDays(DayBoundary(time))
+    }
+
+    /**
+     * Moves every entry to the day it belongs to under [boundary]. Callers settle results first:
+     * [changeDayStart] does, and so does a restore from backup.
+     */
     suspend fun recalculateLogicalDays(boundary: DayBoundary) {
         dao.allLive().forEach { entity ->
             val day = boundary.logicalDate(Instant.ofEpochMilli(entity.occurredAt), ZoneId.of(entity.zoneId)).toEpochDay()

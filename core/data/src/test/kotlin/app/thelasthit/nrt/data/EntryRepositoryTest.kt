@@ -1,11 +1,13 @@
 package app.thelasthit.nrt.data
 
+import app.thelasthit.nrt.data.repo.EntryRepository
 import app.thelasthit.nrt.data.repo.LogRequest
 import app.thelasthit.nrt.data.repo.LogResult
 import app.thelasthit.nrt.domain.dose.Dose
 import app.thelasthit.nrt.domain.log.EntrySource
 import app.thelasthit.nrt.domain.log.HistoryFilter
 import app.thelasthit.nrt.domain.log.LabelWarning
+import app.thelasthit.nrt.domain.programme.WeekResult
 import app.thelasthit.nrt.domain.time.DayBoundary
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -228,4 +230,76 @@ class EntryRepositoryTest {
         val counts = data.entries.observeDosesPerDay(LocalDate.parse("2026-10-21"), today).first()
         assertEquals(mapOf(today to 2, LocalDate.parse("2026-10-22") to 1), counts)
     }
+
+    // Every write settles the programme's due results first, so a write made after a result is
+    // due can't reach it. Week 1 of the gum plan allows 168 mg, and its result is due at 04:00 on
+    // Sunday 1 November; at 09:00 nothing has looked at it yet.
+
+    @Test
+    fun loggingIntoAWeekWhoseResultIsDueLeavesTheResultAsItWas() = runTest {
+        data.startGumPlan()
+        data.setTime("2026-11-01T09:00")
+        data.chew("2026-10-30T12:00", pieces = 50)
+        assertEquals(WeekResult.MET, data.resultOf(1))
+    }
+
+    @Test
+    fun editingADoseAfterItsResultIsDueLeavesTheResultAsItWas() = runTest {
+        data.startGumPlan()
+        data.setTime("2026-10-30T12:00")
+        val entry = data.chew("2026-10-30T11:00", pieces = 4)
+        data.setTime("2026-11-01T09:00")
+        assertTrue(data.entries.edit(entry.id, LogRequest(GUM_4, quantity = 50)) is LogResult.Saved)
+        assertEquals(WeekResult.MET, data.resultOf(1))
+    }
+
+    @Test
+    fun deletingDosesAfterTheirResultIsDueLeavesTheResultAsItWas() = runTest {
+        data.startGumPlan()
+        data.chewAllWeekOne()
+        data.setTime("2026-11-01T09:00")
+        data.entries.observeRange(PLAN_START, LocalDate.parse("2026-10-30")).first().forEach { data.entries.delete(it.id) }
+        assertEquals(WeekResult.MISSED, data.resultOf(1))
+    }
+
+    @Test
+    fun restoringADeletedDoseAfterItsResultIsDueLeavesTheResultAsItWas() = runTest {
+        data.startGumPlan()
+        data.setTime("2026-10-30T12:00")
+        val entry = data.chew("2026-10-30T11:00", pieces = 50)
+        data.entries.delete(entry.id)
+        data.setTime("2026-11-01T09:00")
+        data.entries.undoDelete(entry.id)
+        assertEquals(WeekResult.MET, data.resultOf(1))
+        assertEquals(entry.id, data.entries.get(entry.id)?.id)
+    }
+
+    @Test
+    fun changingTheDayStartSettlesUnderTheOldOneFirst() = runTest {
+        data.startGumPlan()
+        data.setTime("2026-10-31T03:50")
+        // With the 04:00 day start this counts toward Friday 30 October, in week 1.
+        val entry = data.chew("2026-10-31T03:30", pieces = 50)
+        data.setTime("2026-11-01T09:00")
+        data.entries.changeDayStart(LocalTime.of(3, 0))
+        assertEquals(WeekResult.MISSED, data.resultOf(1))
+        // The dose moves to Saturday all the same, and the setting is kept.
+        assertEquals(LocalDate.parse("2026-10-31"), data.entries.get(entry.id)?.logicalDate)
+        assertEquals(LocalTime.of(3, 0), data.settings.current().dayStart)
+    }
+
+    @Test
+    fun everyWriteSettlesBeforeItWrites() = runTest {
+        // A settler that notes how many doses there were each time it ran.
+        val seen = mutableListOf<Int>()
+        val dao = data.database.entries()
+        val entries = EntryRepository(dao, data.products, data.settings, data.clock, results = { seen += dao.countLive() })
+        val first = (entries.log(LogRequest(gum)) as LogResult.Saved).entry
+        entries.edit(first.id, LogRequest(gum, quantity = 2))
+        entries.delete(first.id)
+        entries.undoDelete(first.id)
+        entries.changeDayStart(LocalTime.of(3, 0))
+        assertEquals(listOf(0, 1, 1, 0, 1), seen)
+    }
 }
+

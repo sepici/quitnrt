@@ -3,17 +3,26 @@ package app.thelasthit.nrt.data
 import app.thelasthit.nrt.data.repo.BackupRepository
 import app.thelasthit.nrt.data.repo.ImportMode
 import app.thelasthit.nrt.data.repo.LogRequest
+import app.thelasthit.nrt.data.repo.SpendResult
+import app.thelasthit.nrt.domain.advice.BreathingPattern
 import app.thelasthit.nrt.domain.backup.Backup
+import app.thelasthit.nrt.domain.creature.Creature
+import app.thelasthit.nrt.domain.programme.MissedWeekChoice
+import app.thelasthit.nrt.domain.programme.ProgrammeStatus
+import app.thelasthit.nrt.domain.programme.WeekResult
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -25,7 +34,7 @@ class BackupRepositoryTest {
     private lateinit var target: TestData
     private val today = LocalDate.parse("2026-10-23")
 
-    private fun backups(data: TestData) = BackupRepository(data.database, data.settings, data.entries, data.clock)
+    private fun backups(data: TestData) = data.backups
 
     @Before
     fun setUp() = runTest {
@@ -94,4 +103,175 @@ class BackupRepositoryTest {
         assertEquals(3, csv.size)
         assertTrue(csv[2].contains("\"After lunch, \"\"finally\"\"\""))
     }
+
+    // Version 2: the programme and the game.
+
+    /**
+     * Two weeks of a gum plan with Gary: week 1 missed and carried on from, week 2 met, which
+     * pays it back, and one hit spent. Plus a badge, gear, a breathing session and the sound off.
+     */
+    private suspend fun TestData.playTwoWeeks() {
+        settings.setDemon("Gary", Creature.DRAGON, "ember")
+        startGumPlan()
+        chewAllWeekOne()
+        setTime("2026-11-01T09:00")
+        assertTrue(programmes.chooseAfterMiss(1, MissedWeekChoice.CARRY_ON))
+        setTime("2026-11-08T09:00")
+        programmes.settle()
+        assertTrue(game.spendHit() is SpendResult.Spent)
+        game.unlockAchievement("first_week_met", london("2026-11-08T04:00"))
+        game.unlockGear("wooden_sword", london("2026-11-08T04:00"))
+        game.equip("wooden_sword")
+        settings.setSoundOn(false)
+        breathing.record(BreathingPattern.BOX, london("2026-11-02T10:00"), Duration.ofSeconds(64), rounds = 4, ranToEnd = true)
+    }
+
+    private suspend fun assertSameGame(expected: TestData, actual: TestData) {
+        assertEquals(expected.programmes.current(), actual.programmes.current())
+        assertEquals(expected.database.game().allLedger(), actual.database.game().allLedger())
+        assertEquals(expected.game.demon(), actual.game.demon())
+        assertEquals(expected.game.achievements.first(), actual.game.achievements.first())
+        assertEquals(expected.game.gear.first(), actual.game.gear.first())
+        assertEquals(expected.breathing.completedCount(), actual.breathing.completedCount())
+    }
+
+    @Test
+    fun aVersion2BackupRestoresTheProgrammeAndTheGame() = runTest {
+        source.playTwoWeeks()
+        target.setTime("2026-11-08T09:00")
+        val summary = target.backups.import(Backup.decode(source.backups.export().encode()), ImportMode.REPLACE)
+        assertEquals(1, summary.programmes)
+
+        assertSameGame(source, target)
+        val record = checkNotNull(target.programmes.current())
+        assertEquals(listOf(WeekResult.CAUGHT_UP, WeekResult.MET), record.plan?.weeks?.take(2)?.map { it.result })
+        assertEquals(MissedWeekChoice.CARRY_ON, record.choices[1]?.choice)
+        assertEquals(1, target.game.demon()?.balance?.banked)
+        assertEquals(110, target.game.demon()?.balance?.hp)
+        val settings = target.settings.current()
+        assertEquals("Gary", settings.demonName)
+        assertFalse(settings.soundOn)
+        assertEquals("wooden_sword", settings.equippedGear)
+    }
+
+    @Test
+    fun mergingAVersion2BackupTwiceAddsItOnce() = runTest {
+        source.playTwoWeeks()
+        target.setTime("2026-11-08T09:00")
+        val backup = source.backups.export()
+        assertEquals(1, target.backups.import(backup, ImportMode.MERGE).programmes)
+        val again = target.backups.import(backup, ImportMode.MERGE)
+        assertEquals(0, again.programmes)
+        assertSameGame(source, target)
+        // Merging keeps the phone's own settings.
+        assertTrue(target.settings.current().soundOn)
+    }
+
+    @Test
+    fun mergingNeverMakesASecondRunningProgramme() = runTest {
+        // The backup has an abandoned plan and a baseline running after it.
+        source.startGumPlan()
+        source.setTime("2026-11-08T09:00")
+        source.programmes.abandon()
+        source.programmes.startNew()
+        // The phone has a plan of its own running.
+        val own = target.startGumPlan()
+
+        val summary = target.backups.import(source.backups.export(), ImportMode.MERGE)
+        assertEquals(1, summary.programmes)
+        assertEquals(own.id, target.programmes.current()?.id)
+        val stored = target.database.programmes().all().map { it.programme.status }
+        assertEquals(listOf(ProgrammeStatus.ACTIVE, ProgrammeStatus.ABANDONED), stored.sorted())
+        // The abandoned plan comes with its demon.
+        assertEquals(2, target.database.game().allDemons().size)
+    }
+
+    @Test
+    fun replacingWipesTheProgrammeAndTheGame() = runTest {
+        target.playTwoWeeks()
+        target.backups.import(source.backups.export(), ImportMode.REPLACE)
+        assertNull(target.programmes.current())
+        assertTrue(target.database.programmes().all().isEmpty())
+        assertTrue(target.database.game().allLedger().isEmpty())
+        assertTrue(target.database.game().allDemons().isEmpty())
+        assertTrue(target.game.achievements.first().isEmpty())
+        assertTrue(target.game.gear.first().isEmpty())
+        assertEquals(0, target.breathing.completedCount())
+    }
+
+    /** [backup] as a version 1 app would have written it: no programmes, game or new settings. */
+    private fun versionOne(backup: Backup): Backup = Backup.decode(
+        backup.copy(
+            version = 1,
+            settings = Backup.Settings(backup.settings.dayStart, backup.settings.country, backup.settings.stoppedSmokingOn),
+            programmes = emptyList(), demons = emptyList(), hitLedger = emptyList(),
+            achievements = emptyList(), gear = emptyList(), breathingSessions = emptyList(),
+        ).encode(),
+    )
+
+    @Test
+    fun aVersion1BackupReplacesTheDataButLeavesTheGameSettings() = runTest {
+        target.playTwoWeeks()
+        val summary = target.backups.import(versionOne(source.backups.export()), ImportMode.REPLACE)
+        assertEquals(2, summary.entries)
+        assertNull(target.programmes.current())
+        val settings = target.settings.current()
+        assertEquals("Gary", settings.demonName)
+        assertFalse(settings.soundOn)
+        // The gear went with the rest of the game, so none is equipped.
+        assertNull(settings.equippedGear)
+    }
+
+    @Test
+    fun aVersion1BackupMergesWithoutTouchingTheProgramme() = runTest {
+        target.playTwoWeeks()
+        val before = target.programmes.current()
+        val summary = target.backups.import(versionOne(source.backups.export()), ImportMode.MERGE)
+        assertEquals(2, summary.entries)
+        assertEquals(0, summary.programmes)
+        assertEquals(before, target.programmes.current())
+        assertEquals(2, target.database.game().allLedger().count { it.hits > 0 })
+    }
+
+    @Test
+    fun mergingDosesIntoAWeekWhoseResultIsDueLeavesTheResultAsItWas() = runTest {
+        source.products.addFromCatalogue(GUM_4)
+        source.setTime("2026-10-31T00:30")
+        source.chew("2026-10-30T12:00", pieces = 50)
+        target.startGumPlan()
+        target.setTime("2026-11-01T09:00")
+        target.backups.import(source.backups.export(), ImportMode.MERGE)
+        assertEquals(WeekResult.MET, target.resultOf(1))
+    }
+
+    @Test
+    fun aRestoreSettlesBeforeItWritesAnything() = runTest {
+        val seen = mutableListOf<Int>()
+        val dao = target.database.entries()
+        val backups = BackupRepository(target.database, target.settings, target.entries, results = { seen += dao.countLive() }, clock = target.clock)
+        target.products.addFromCatalogue("nicorette-quickmist-uk-1mg")
+        target.entries.log(LogRequest("nicorette-quickmist-uk-1mg"))
+        backups.import(source.backups.export(), ImportMode.REPLACE)
+        backups.import(source.backups.export(), ImportMode.MERGE)
+        assertEquals(listOf(1, 2), seen)
+    }
+
+    @Test
+    fun brokenProgrammesAndRowsAreSkipped() = runTest {
+        source.playTwoWeeks()
+        val backup = source.backups.export()
+        val programme = backup.programmes.single()
+        val broken = backup.copy(
+            programmes = listOf(programme.copy(weeks = programme.weeks.drop(1))),
+            achievements = backup.achievements + Backup.Unlock("bad_time", "yesterday"),
+        )
+        val summary = target.backups.import(broken, ImportMode.REPLACE)
+        assertEquals(0, summary.programmes)
+        assertNull(target.programmes.current())
+        // Its demon and ledger go with it, and the achievement with a broken time is left out.
+        assertTrue(target.database.game().allDemons().isEmpty())
+        assertTrue(target.database.game().allLedger().isEmpty())
+        assertEquals(setOf("first_week_met"), target.game.achievements.first().keys)
+    }
 }
+

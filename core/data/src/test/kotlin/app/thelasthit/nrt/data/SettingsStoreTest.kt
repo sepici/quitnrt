@@ -53,4 +53,16 @@ class SettingsStoreTest {
         assertEquals(Creature.DRAGON, settings.demonCreature)
         assertEquals("ember", settings.demonVariant)
     }
+
+    @Test
+    fun soundIsOnUntilSwitchedOffAndGearCanBeEquipped() = runTest {
+        assertTrue(data.settings.current().soundOn)
+        assertNull(data.settings.current().equippedGear)
+        data.settings.setSoundOn(false)
+        data.settings.setEquippedGear("wooden_stick")
+        assertFalse(data.settings.current().soundOn)
+        assertEquals("wooden_stick", data.settings.current().equippedGear)
+        data.settings.setEquippedGear(null)
+        assertNull(data.settings.current().equippedGear)
+    }
 }

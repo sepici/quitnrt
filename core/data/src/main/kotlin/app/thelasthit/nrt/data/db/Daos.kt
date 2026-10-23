@@ -116,6 +116,17 @@ abstract class EntryDao {
     @Query("SELECT MIN(logicalEpochDay) FROM entries WHERE deletedAt IS NULL")
     abstract fun observeFirstDay(): Flow<Long?>
 
+    /** Live entries on logical days from [fromDay] on, without their tags, for programme results. */
+    @Query("SELECT * FROM entries WHERE deletedAt IS NULL AND logicalEpochDay >= :fromDay ORDER BY occurredAt")
+    abstract suspend fun liveFrom(fromDay: Long): List<EntryEntity>
+
+    /** Live entries on logical days [fromDay] to [toDay], without their tags, for the baseline. */
+    @Query("SELECT * FROM entries WHERE deletedAt IS NULL AND logicalEpochDay BETWEEN :fromDay AND :toDay ORDER BY occurredAt")
+    abstract suspend fun liveOn(fromDay: Long, toDay: Long): List<EntryEntity>
+
+    @Query("SELECT * FROM entries WHERE deletedAt IS NULL AND logicalEpochDay BETWEEN :fromDay AND :toDay ORDER BY occurredAt")
+    abstract fun observeLiveOn(fromDay: Long, toDay: Long): Flow<List<EntryEntity>>
+
     @Transaction
     @Query("SELECT * FROM entries WHERE deletedAt IS NULL AND productId = :productId ORDER BY occurredAt DESC")
     abstract fun observeWithProduct(productId: String): Flow<List<EntryWithTags>>

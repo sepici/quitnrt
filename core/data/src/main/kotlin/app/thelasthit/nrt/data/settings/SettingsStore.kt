@@ -28,12 +28,17 @@ data class Settings(
     val stoppedSmokingOn: LocalDate? = null,
     val onboardingComplete: Boolean = false,
     /**
-     * The demon picked in onboarding. It lives here until the programme starts, when it gets its
-     * HP and moves into the database.
+     * The demon picked in onboarding. It lives here until a plan starts, when it gets its HP and
+     * a row in the database (ProgrammeRepository.startPlan). It stays here after that, as the
+     * choice a first plan starts from.
      */
     val demonName: String? = null,
     val demonCreature: Creature = Creature.DRAGON,
     val demonVariant: String? = null,
+    /** The game's sounds. On by default, and quiet in silent mode whatever this says. */
+    val soundOn: Boolean = true,
+    /** The gear shown in the lair, by its key, or null for none picked yet. */
+    val equippedGear: String? = null,
 ) {
     val dayBoundary: DayBoundary get() = DayBoundary(dayStart)
 }
@@ -50,6 +55,8 @@ class SettingsStore(private val store: DataStore<Preferences>) {
             demonName = prefs[DEMON_NAME],
             demonCreature = Creature.fromKey(prefs[DEMON_CREATURE]),
             demonVariant = prefs[DEMON_VARIANT],
+            soundOn = prefs[SOUND_ON] ?: true,
+            equippedGear = prefs[EQUIPPED_GEAR],
         )
     }
 
@@ -78,6 +85,17 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         prefs[DEMON_VARIANT] = variant
     }
 
+    suspend fun setSoundOn(on: Boolean) = store.edit { it[SOUND_ON] = on }
+
+    /** Only gear that's unlocked should be equipped: GameRepository.equip checks that. */
+    suspend fun setEquippedGear(key: String?) = store.edit { prefs ->
+        if (key == null) {
+            prefs.remove(EQUIPPED_GEAR)
+        } else {
+            prefs[EQUIPPED_GEAR] = key
+        }
+    }
+
     companion object {
         private val DAY_START_MINUTES = intPreferencesKey("day_start_minutes")
         private val COUNTRY = stringPreferencesKey("country")
@@ -87,6 +105,8 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         private val DEMON_NAME = stringPreferencesKey("demon_name")
         private val DEMON_CREATURE = stringPreferencesKey("demon_creature")
         private val DEMON_VARIANT = stringPreferencesKey("demon_variant")
+        private val SOUND_ON = booleanPreferencesKey("sound_on")
+        private val EQUIPPED_GEAR = stringPreferencesKey("equipped_gear")
 
         /** Only one DataStore may exist per file, so the app creates this once. */
         fun createDataStore(context: Context): DataStore<Preferences> =

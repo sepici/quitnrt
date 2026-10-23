@@ -50,8 +50,7 @@ class DayStartViewModel(private val graph: DataGraph) : ViewModel() {
     /** Stores the new day start, then moves every dose to the day it now counts toward. */
     fun save(time: LocalTime, then: () -> Unit) {
         viewModelScope.launch {
-            graph.settings.setDayStart(time)
-            graph.entries.recalculateLogicalDays(DayBoundary(time))
+            graph.entries.changeDayStart(time)
             then()
         }
     }
