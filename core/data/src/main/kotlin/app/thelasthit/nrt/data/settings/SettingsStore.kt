@@ -52,7 +52,11 @@ class SettingsStore(private val store: DataStore<Preferences>) {
     suspend fun acceptDisclaimer(at: Instant) = store.edit { it[DISCLAIMER_ACCEPTED_AT] = at.toEpochMilli() }
 
     suspend fun setStoppedSmokingOn(date: LocalDate?) = store.edit { prefs ->
-        if (date == null) prefs.remove(STOPPED_SMOKING_ON) else prefs[STOPPED_SMOKING_ON] = date.toEpochDay()
+        if (date == null) {
+            prefs.remove(STOPPED_SMOKING_ON)
+        } else {
+            prefs[STOPPED_SMOKING_ON] = date.toEpochDay()
+        }
     }
 
     suspend fun completeOnboarding() = store.edit { it[ONBOARDING_COMPLETE] = true }

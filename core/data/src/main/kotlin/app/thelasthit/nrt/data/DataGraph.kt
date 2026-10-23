@@ -2,6 +2,7 @@ package app.thelasthit.nrt.data
 
 import android.content.Context
 import app.thelasthit.nrt.data.db.AppDatabase
+import app.thelasthit.nrt.data.repo.BackupRepository
 import app.thelasthit.nrt.data.repo.EntryRepository
 import app.thelasthit.nrt.data.repo.ProductRepository
 import app.thelasthit.nrt.data.repo.TagRepository
@@ -25,4 +26,5 @@ class DataGraph(
     val products = ProductRepository(database.products(), catalogue = { catalogue }, clock = clock)
     val tags = TagRepository(database.tags())
     val entries = EntryRepository(database.entries(), products, settings, clock, zone = { ZoneId.systemDefault() })
+    val backups = BackupRepository(database, settings, entries, clock)
 }

@@ -108,7 +108,7 @@ class EntryRepository(
             updated.toEntity(createdAt = existing.entry.createdAt, updatedAt = now.toEpochMilli()),
             updated.tagKeys,
         )
-        return LogResult.Saved(updated, warning = null)
+        return LogResult.Saved(updated, labelWarning = null)
     }
 
     suspend fun delete(id: String) = dao.softDelete(id, clock.millis())

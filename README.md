@@ -16,7 +16,8 @@ Everything stays on the phone. The app has no internet permission.
 | Module | What's in it |
 |---|---|
 | `:app` | The phone app (Jetpack Compose) |
-| `:core:domain` | Plain Kotlin rules with no Android code: doses, logical days, label limits. More arrives with each phase. |
+| `:core:domain` | Plain Kotlin rules with no Android code: doses, logical days, label limits, the product catalogue, logging rules and the backup format |
+| `:core:data` | Room database, settings, repositories, and backup export and import |
 
 ## Building
 

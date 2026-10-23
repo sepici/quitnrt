@@ -31,6 +31,15 @@ interface ProductDao {
 
     @Query("UPDATE products SET quickLogPosition = NULL")
     suspend fun clearQuickLog()
+
+    @Query("SELECT * FROM products")
+    suspend fun allIncludingHidden(): List<ProductEntity>
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertIgnoringExisting(products: List<ProductEntity>): List<Long>
+
+    @Query("DELETE FROM products")
+    suspend fun deleteAll()
 }
 
 @Dao
@@ -92,6 +101,19 @@ abstract class EntryDao {
     @Query("SELECT * FROM entries WHERE deletedAt IS NULL")
     abstract suspend fun allLive(): List<EntryEntity>
 
+    @Transaction
+    @Query("SELECT * FROM entries WHERE deletedAt IS NULL ORDER BY occurredAt")
+    abstract suspend fun allLiveWithTags(): List<EntryWithTags>
+
+    @Query("SELECT id FROM entries")
+    abstract suspend fun allIds(): List<String>
+
+    @Query("DELETE FROM entry_tags")
+    abstract suspend fun deleteAllTags()
+
+    @Query("DELETE FROM entries")
+    abstract suspend fun deleteAll()
+
     @Query("UPDATE entries SET logicalEpochDay = :day WHERE id = :id")
     abstract suspend fun setLogicalDay(id: String, day: Long)
 }
@@ -99,7 +121,7 @@ abstract class EntryDao {
 @Dao
 interface TagDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertIgnoringExisting(tags: List<TagEntity>)
+    suspend fun insertIgnoringExisting(tags: List<TagEntity>): List<Long>
 
     @Upsert
     suspend fun upsert(tag: TagEntity)
@@ -109,4 +131,7 @@ interface TagDao {
 
     @Query("SELECT * FROM tags ORDER BY sortOrder")
     suspend fun all(): List<TagEntity>
+
+    @Query("DELETE FROM tags")
+    suspend fun deleteAll()
 }

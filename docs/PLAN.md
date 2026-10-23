@@ -484,7 +484,7 @@ Screenshots of real screens are rendered with Roborazzi (Compose screenshots on 
                 advice ranking, the plain-language matcher, sprite data, watch message types
 ```
 
-- **Pattern:** MVVM with one-way data flow, Kotlin coroutines and Flow, Hilt for dependency injection, and `java.time` (built in from API 26).
+- **Pattern:** MVVM with one-way data flow, Kotlin coroutines and Flow, plain constructor wiring through a `DataGraph` (no dependency injection framework, which keeps the build simple on AGP 9), and `java.time` (built in from API 26).
 - **Libraries:**
   - Room
   - DataStore
