@@ -174,7 +174,15 @@ From PLAN §10 and §19, agreed with the owner on 23 October.
 
 **Slices:**
 1. Domain stats and tests. Done.
-2. Mockups for Insights and the History filter, by the designer agent. In progress.
+2. Mockups for Insights and the History filter. Done and signed off: `docs/design/fieldbook-v2/b/insights*` and `history-filter*`. The owner's calls on them:
+   - The 7-day line starts once there are 7 days to average, rather than averaging fewer days at the start.
+   - Changes against the previous period wait until it's fully logged, and the screen says when they'll start.
+   - Patches stay out of the first dose, as out of every habit: a patch goes on at the same time each day, so it would hide whether the first craving dose comes later.
+   - Above 30 days, the chart shows one column a week, that week's average a day, with no 7-day line.
+   - The calendar shades from the range's lightest day to its heaviest, with the legend in mg. Phase 3 shades against the guide instead.
+   - The History filter takes one product or one tag, confirmed with "Show 48 doses". Days with no match are hidden, and day lines read "1 of 5 doses".
+   - Each chart has a table button that turns it into a plain two-column list of its numbers.
+   - The heat-map ramp: light `#A6A398 #8A877D #6F6C62 #555248 #3C3A30`, dark `#4E4A40 #6D6A5F #8F8B7F #B2AEA2 #D5D2C5`, with `sunk` for none. It passes the chart guidance's ordinal checks in both modes.
 3. The Insights screen and daily chart.
 4. Both heat maps.
 5. Triggers, habits and by product.

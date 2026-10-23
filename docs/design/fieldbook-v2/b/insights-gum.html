@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=412">
+<title>Fieldbook v2 B, Insights, gum only</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="screens.css">
+<style>/* phase 2: the app bundles a true Bold since 23 October, so 700 uses it here */
+@font-face{font-family:'Schibsted Grotesk';src:url('../../../../app/src/main/res/font/schibsted_grotesk_bold.ttf') format('truetype');font-weight:700;font-style:normal;font-display:block}</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5.5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></symbol>
+  <symbol id="i-chevl" viewBox="0 0 24 24"><path d="M14.5 6l-6 6 6 6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.7v.1"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="6.5" y="3" width="11" height="18" rx="2.5"/><path d="M10.5 17.5h3"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></symbol>
+  <symbol id="i-gum" viewBox="0 0 24 24"><rect x="3.5" y="7" width="17" height="10" rx="4"/><path d="M7.5 10.5c1.5-.8 3-.8 4.5 0"/></symbol>
+  <symbol id="i-spray" viewBox="0 0 24 24"><rect x="7" y="9" width="8" height="12" rx="2"/><path d="M9 9V6.5h4V9M13 6.5h2.5"/><path d="M18.5 4.5h.01M20 7h.01M18.5 9h.01"/></symbol>
+  <symbol id="i-patch" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4.5"/><rect x="8.5" y="8.5" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-loz" viewBox="0 0 24 24"><rect x="6.6" y="6.6" width="10.8" height="10.8" rx="2.6" transform="rotate(45 12 12)"/></symbol>
+  <symbol id="i-inh" viewBox="0 0 24 24"><rect x="3" y="9.5" width="18" height="5" rx="2.5"/><path d="M15.5 9.5v5"/></symbol>
+  <symbol id="i-nasal" viewBox="0 0 24 24"><rect x="7" y="11" width="10" height="10" rx="2.5"/><path d="M10.5 11V5.5a1.5 1.5 0 0 1 3 0V11"/></symbol>
+  <symbol id="i-tab" viewBox="0 0 24 24"><ellipse cx="12" cy="10" rx="7" ry="3.5"/><path d="M5 10v3.5c0 1.9 3.1 3.5 7 3.5s7-1.6 7-3.5V10"/></symbol>
+  <symbol id="i-tune" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6.5h16M7 12h10M10 17.5h4"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10.5 11v5.5M13.5 11v5.5"/></symbol>
+  <symbol id="i-grip" viewBox="0 0 24 24"><path d="M9 6.5h.01M15 6.5h.01M9 12h.01M15 12h.01M9 17.5h.01M15 17.5h.01"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></symbol>
+  <symbol id="i-eyeoff" viewBox="0 0 24 24"><path d="M4.5 8.5C3.2 10.2 2.5 12 2.5 12S6 18.5 12 18.5c1.6 0 3-.4 4.2-1M9 6c.9-.3 1.9-.5 3-.5 6 0 9.5 6.5 9.5 6.5s-.7 1.4-2 3M4 4l16 16"/></symbol>
+  <symbol id="i-export" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14"/></symbol>
+  <symbol id="i-restore" viewBox="0 0 24 24"><path d="M12 15V4M7.5 8.5L12 4l4.5 4.5M5 19.5h14"/></symbol>
+  <symbol id="i-table" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2.5"/><path d="M4 10h16M4 14.5h16M10 10v9"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M7 3.5h7l4 4v13H7z"/><path d="M14 3.5v4h4"/></symbol>
+  <symbol id="i-remove" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8 12h8"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.4 5.4 3.4 8.5s-1 6.1-3.4 8.5c-2.4-2.4-3.4-5.4-3.4-8.5s1-6.1 3.4-8.5z"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M14.5 5.5l4 4M4 20l1-5L15.5 4.5a2 2 0 0 1 2.8 0l1.2 1.2a2 2 0 0 1 0 2.8L9 19z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4.5l3 1.5"/></symbol>
+  <symbol id="i-today" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v3.5H8"/><path d="M12 8.5V12l2.5 2"/></symbol>
+  <symbol id="i-insights" viewBox="0 0 24 24"><path d="M5 20v-7M12 20V5M19 20v-10"/></symbol>
+  <symbol id="i-plan" viewBox="0 0 24 24"><path d="M3.5 6.5h5v5h5v5h7"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5.5M6.5 11L12 5.5l5.5 5.5"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v13.5M6.5 13l5.5 5.5 5.5-5.5"/></symbol>
+  <symbol id="i-same" viewBox="0 0 24 24"><path d="M6 12h12"/></symbol>
+  <symbol id="i-lair" viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M5 20v-7a7 7 0 0 1 14 0v7"/><path d="M10 20v-3a2 2 0 0 1 4 0v3"/></symbol>
+</svg>
+<div class="status"><span class="num">15:05</span>
+  <svg width="52" height="14" viewBox="0 0 52 14" fill="currentColor" aria-hidden="true"><path d="M1 13h2v-3H1zM5 13h2V7H5zM9 13h2V4H9zM13 13h2V1h-2z"/><rect x="30.5" y="2.5" width="17" height="9" rx="2" fill="none" stroke="currentColor"/><rect x="32" y="4" width="11" height="6"/><rect x="49" y="5" width="2" height="4"/></svg>
+</div>
+<div class="topbar"><h1>Insights</h1></div>
+<div class="in-filters">
+  <div class="seg in-range" role="radiogroup" aria-label="Range"><button role="radio" aria-checked="false">7 days</button><button class="sel" role="radio" aria-checked="true">30 days</button><button role="radio" aria-checked="false">60 days</button><button class="locked" role="radio" aria-checked="false" aria-disabled="true">90 days</button></div>
+  <p class="in-lock">90&nbsp;days opens tomorrow, after 60 days of logging.</p>
+  <div class="in-types" role="radiogroup" aria-label="Product type"><button class="chip" role="radio" aria-checked="false">All</button><button class="chip sel" role="radio" aria-checked="true"><svg class="i"><use href="#i-check"/></svg>Gum</button><button class="chip" role="radio" aria-checked="false">Mouth spray</button><button class="chip" role="radio" aria-checked="false">Patch</button></div>
+</div>
+<section class="in-sec" aria-label="Gum each day">
+  <div class="in-hd"><h2>Gum each day</h2><button class="iconbtn ghost" aria-label="Show gum each day as a table"><svg class="i"><use href="#i-table"/></svg></button></div>
+  <div class="in-fig"><span class="n">9.5</span><span class="of">mg a day</span></div>
+  <span class="delta"><svg class="i"><use href="#i-up"/></svg>1.8&nbsp;mg more than the 30 days before</span>
+  <p class="in-meta">Average of 29 full days. Today counts once it’s over.</p>
+  <div class="ch" role="img" aria-label="mg each day. Thu 24, 10; Fri 25, 4; Sat 26, 10; Sun 27, 10; Mon 28, 2; Tue 29, 10; Wed 30, 14; Thu 1, 12; Fri 2, 10; Sat 3, 12; Sun 4, 10; Mon 5, 4; Tue 6, 12; Wed 7, 14; Thu 8, 16; Fri 9, 0; Sat 10, 10; Sun 11, 14; Mon 12, 12; Tue 13, 2; Wed 14, 14; Thu 15, 14; Fri 16, 14; Sat 17, 2; Sun 18, 10; Mon 19, 0; Tue 20, 10; Wed 21, 12; Thu 22, 12; Fri 23, 8. Today so far.">
+  <svg width="372" height="172" viewBox="0 0 372 172" aria-hidden="true">
+<line class="base" x1="34" x2="372" y1="142.5" y2="142.5"/>
+<text class="ytick" x="26" y="146.5" text-anchor="end">0</text>
+<line class="grid" x1="34" x2="372" y1="109.5" y2="109.5"/>
+<text class="ytick" x="26" y="113.5" text-anchor="end">5</text>
+<line class="grid" x1="34" x2="372" y1="76.5" y2="76.5"/>
+<text class="ytick" x="26" y="80.5" text-anchor="end">10</text>
+<line class="grid" x1="34" x2="372" y1="43.5" y2="43.5"/>
+<text class="ytick" x="26" y="47.5" text-anchor="end">15</text>
+<line class="grid" x1="34" x2="372" y1="10.5" y2="10.5"/>
+<text class="ytick" x="26" y="14.5" text-anchor="end">20 mg</text>
+<path class="bar" d="M36.13,142.00V79.50A3.50,3.50 0 0 1 39.63,76.00H39.63A3.50,3.50 0 0 1 43.13,79.50V142.00Z"/>
+<path class="bar" d="M47.40,142.00V119.10A3.50,3.50 0 0 1 50.90,115.60H50.90A3.50,3.50 0 0 1 54.40,119.10V142.00Z"/>
+<path class="bar" d="M58.67,142.00V79.50A3.50,3.50 0 0 1 62.17,76.00H62.17A3.50,3.50 0 0 1 65.67,79.50V142.00Z"/>
+<path class="bar" d="M69.93,142.00V79.50A3.50,3.50 0 0 1 73.43,76.00H73.43A3.50,3.50 0 0 1 76.93,79.50V142.00Z"/>
+<path class="bar" d="M81.20,142.00V132.30A3.50,3.50 0 0 1 84.70,128.80H84.70A3.50,3.50 0 0 1 88.20,132.30V142.00Z"/>
+<path class="bar" d="M92.47,142.00V79.50A3.50,3.50 0 0 1 95.97,76.00H95.97A3.50,3.50 0 0 1 99.47,79.50V142.00Z"/>
+<path class="bar" d="M103.73,142.00V53.10A3.50,3.50 0 0 1 107.23,49.60H107.23A3.50,3.50 0 0 1 110.73,53.10V142.00Z"/>
+<path class="bar" d="M115.00,142.00V66.30A3.50,3.50 0 0 1 118.50,62.80H118.50A3.50,3.50 0 0 1 122.00,66.30V142.00Z"/>
+<path class="bar" d="M126.27,142.00V79.50A3.50,3.50 0 0 1 129.77,76.00H129.77A3.50,3.50 0 0 1 133.27,79.50V142.00Z"/>
+<path class="bar" d="M137.53,142.00V66.30A3.50,3.50 0 0 1 141.03,62.80H141.03A3.50,3.50 0 0 1 144.53,66.30V142.00Z"/>
+<path class="bar" d="M148.80,142.00V79.50A3.50,3.50 0 0 1 152.30,76.00H152.30A3.50,3.50 0 0 1 155.80,79.50V142.00Z"/>
+<path class="bar" d="M160.07,142.00V119.10A3.50,3.50 0 0 1 163.57,115.60H163.57A3.50,3.50 0 0 1 167.07,119.10V142.00Z"/>
+<path class="bar" d="M171.33,142.00V66.30A3.50,3.50 0 0 1 174.83,62.80H174.83A3.50,3.50 0 0 1 178.33,66.30V142.00Z"/>
+<path class="bar" d="M182.60,142.00V53.10A3.50,3.50 0 0 1 186.10,49.60H186.10A3.50,3.50 0 0 1 189.60,53.10V142.00Z"/>
+<path class="bar" d="M193.87,142.00V39.90A3.50,3.50 0 0 1 197.37,36.40H197.37A3.50,3.50 0 0 1 200.87,39.90V142.00Z"/>
+<path class="bar" d="M216.40,142.00V79.50A3.50,3.50 0 0 1 219.90,76.00H219.90A3.50,3.50 0 0 1 223.40,79.50V142.00Z"/>
+<path class="bar" d="M227.67,142.00V53.10A3.50,3.50 0 0 1 231.17,49.60H231.17A3.50,3.50 0 0 1 234.67,53.10V142.00Z"/>
+<path class="bar" d="M238.93,142.00V66.30A3.50,3.50 0 0 1 242.43,62.80H242.43A3.50,3.50 0 0 1 245.93,66.30V142.00Z"/>
+<path class="bar" d="M250.20,142.00V132.30A3.50,3.50 0 0 1 253.70,128.80H253.70A3.50,3.50 0 0 1 257.20,132.30V142.00Z"/>
+<path class="bar" d="M261.47,142.00V53.10A3.50,3.50 0 0 1 264.97,49.60H264.97A3.50,3.50 0 0 1 268.47,53.10V142.00Z"/>
+<path class="bar" d="M272.73,142.00V53.10A3.50,3.50 0 0 1 276.23,49.60H276.23A3.50,3.50 0 0 1 279.73,53.10V142.00Z"/>
+<path class="bar" d="M284.00,142.00V53.10A3.50,3.50 0 0 1 287.50,49.60H287.50A3.50,3.50 0 0 1 291.00,53.10V142.00Z"/>
+<path class="bar" d="M295.27,142.00V132.30A3.50,3.50 0 0 1 298.77,128.80H298.77A3.50,3.50 0 0 1 302.27,132.30V142.00Z"/>
+<path class="bar" d="M306.53,142.00V79.50A3.50,3.50 0 0 1 310.03,76.00H310.03A3.50,3.50 0 0 1 313.53,79.50V142.00Z"/>
+<path class="bar" d="M329.07,142.00V79.50A3.50,3.50 0 0 1 332.57,76.00H332.57A3.50,3.50 0 0 1 336.07,79.50V142.00Z"/>
+<path class="bar" d="M340.33,142.00V66.30A3.50,3.50 0 0 1 343.83,62.80H343.83A3.50,3.50 0 0 1 347.33,66.30V142.00Z"/>
+<path class="bar" d="M351.60,142.00V66.30A3.50,3.50 0 0 1 355.10,62.80H355.10A3.50,3.50 0 0 1 358.60,66.30V142.00Z"/>
+<path class="bar sofar" d="M363.62,142.00V92.70A2.75,2.75 0 0 1 366.37,89.95H366.37A2.75,2.75 0 0 1 369.12,92.70V142.00Z"/>
+<text class="xtick" x="84.70" y="162" text-anchor="middle">28 Sep</text>
+<text class="xtick" x="163.57" y="162" text-anchor="middle">5 Oct</text>
+<text class="xtick" x="242.43" y="162" text-anchor="middle">12 Oct</text>
+<text class="xtick" x="321.30" y="162" text-anchor="middle">19 Oct</text>
+<path class="avg" d="M39.63,87.31 L50.90,85.43 L62.17,85.43 L73.43,83.54 L84.70,83.54 L95.97,85.43 L107.23,85.43 L118.50,83.54 L129.77,77.89 L141.03,76.00 L152.30,76.00 L163.57,74.11 L174.83,72.23 L186.10,72.23 L197.37,68.46 L208.63,77.89 L219.90,79.77 L231.17,76.00 L242.43,68.46 L253.70,77.89 L264.97,77.89 L276.23,79.77 L287.50,66.57 L298.77,74.11 L310.03,77.89 L321.30,89.20 L332.57,81.66 L343.83,83.54 L355.10,85.43"/>
+<circle class="dot" cx="355.10" cy="85.43" r="4"/>
+</svg>
+  
+  </div>
+  <div class="keyrow" aria-hidden="true"><span><i class="kb"></i>Each day</span><span><i class="kl"></i>7-day average</span><span><i class="ko"></i>Today, 8&nbsp;mg so far</span></div>
+</section>
+<section class="in-sec" aria-label="When you use gum">
+  <div class="in-hd"><h2>When you use gum</h2><button class="iconbtn ghost" aria-label="Show when you use gum as a table"><svg class="i"><use href="#i-table"/></svg></button></div>
+  <p class="in-meta">Gum doses by hour and day of the week.</p>
+  <div class="seg in-measure" role="radiogroup" aria-label="Shade by"><button class="sel" role="radio" aria-checked="true">Doses</button><button role="radio" aria-checked="false">mg</button></div>
+  <div class="hm" role="img" aria-label="Doses by hour and day. Most often Thursdays from 08:00, 5 doses. Full numbers in the table view.">
+    <div class="hm-cols"><span></span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+        <div class="hm-row"><b>04:00</b><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i></div>
+    <div class="hm-row"><b></b><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i></div>
+    <div class="hm-row"><b></b><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i></div>
+    <div class="hm-row"><b></b><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i></div>
+    <div class="hm-row"><b>08:00</b><i class="h2"></i><i class="h3"></i><i class="h4"></i><i class="h5"></i><i class="h4"></i><i class="h1"></i><i class="h0"></i></div>
+    <div class="hm-row"><b></b><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h2"></i><i class="h4"></i></div>
+    <div class="hm-row"><b></b><i class="h1"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h1"></i><i class="h1"></i><i class="h0"></i></div>
+    <div class="hm-row"><b></b><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i></div>
+    <div class="hm-row"><b>12:00</b><i class="h1"></i><i class="h3"></i><i class="h2"></i><i class="h2"></i><i class="h2"></i><i class="h1"></i><i class="h2"></i></div>
+    <div class="hm-row"><b></b><i class="h2"></i><i class="h0"></i><i class="h2"></i><i class="h3"></i><i class="h2"></i><i class="h2"></i><i class="h2"></i></div>
+    <div class="hm-row"><b></b><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i></div>
+    <div class="hm-row"><b></b><i class="h0"></i><i class="h1"></i><i class="h2"></i><i class="h0"></i><i class="h0"></i><i class="h1"></i><i class="h2"></i></div>
+    <div class="hm-row"><b>16:00</b><i class="h0"></i><i class="h0"></i><i class="h2"></i><i class="h4"></i><i class="h0"></i><i class="h2"></i><i class="h3"></i></div>
+    <div class="hm-row"><b></b><i class="h0"></i><i class="h0"></i><i class="h1"></i><i class="h2"></i><i class="h0"></i><i class="h0"></i><i class="h1"></i></div>
+    <div class="hm-row"><b></b><i class="h0"></i><i class="h2"></i><i class="h0"></i><i class="h1"></i><i class="h1"></i><i class="h1"></i><i class="h1"></i></div>
+    <div class="hm-row"><b></b><i class="h1"></i><i class="h1"></i><i class="h1"></i><i class="h3"></i><i class="h1"></i><i class="h0"></i><i class="h0"></i></div>
+    <div class="hm-row"><b>20:00</b><i class="h0"></i><i class="h0"></i><i class="h2"></i><i class="h1"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i></div>
+    <div class="hm-row"><b></b><i class="h0"></i><i class="h1"></i><i class="h1"></i><i class="h0"></i><i class="h1"></i><i class="h0"></i><i class="h0"></i></div>
+    <div class="hm-row"><b></b><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i></div>
+    <div class="hm-row"><b></b><i class="h0"></i><i class="h0"></i><i class="h2"></i><i class="h0"></i><i class="h1"></i><i class="h0"></i><i class="h0"></i></div>
+    <div class="hm-row"><b>00:00</b><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h2"></i><i class="h2"></i></div>
+    <div class="hm-row"><b></b><i class="h0"></i><i class="h0"></i><i class="h1"></i><i class="h2"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i></div>
+    <div class="hm-row"><b></b><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i></div>
+    <div class="hm-row"><b></b><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i><i class="h0"></i></div>
+    
+  </div>
+  <div class="hscale" aria-hidden="true"><span class="none"><i class="h0"></i>None</span><span class="ramp"><span><i class="h1"></i>1</span><span><i class="h2"></i>2</span><span><i class="h3"></i>3</span><span><i class="h4"></i>4</span><span><i class="h5"></i>5</span></span><span class="unit">doses</span></div>
+  <p class="hint">Each column is a whole day from 04:00, so a dose at 01:20 on Friday sits at the bottom of Thursday.</p>
+</section>
+<section class="in-sec" aria-label="Gum triggers">
+  <div class="in-hd"><h2>Gum triggers</h2></div>
+  <p class="in-meta">Share of gum doses with each tag, against the 30 days before.</p>
+  <ul class="tags">
+    <li><div class="top"><span class="nm">After a meal</span><span class="pc">25%</span></div>
+      <div class="bot"><span class="share"><i style="width:25.0%"></i></span><span class="delta"><svg class="i"><use href="#i-up"/></svg>2 points</span></div></li>
+    <li><div class="top"><span class="nm">Just woke up</span><span class="pc">14%</span></div>
+      <div class="bot"><span class="share"><i style="width:14.4%"></i></span><span class="delta"><svg class="i"><use href="#i-up"/></svg>1 point</span></div></li>
+    <li><div class="top"><span class="nm">With coffee or tea</span><span class="pc">9%</span></div>
+      <div class="bot"><span class="share"><i style="width:8.7%"></i></span><span class="delta"><svg class="i"><use href="#i-down"/></svg>4 points</span></div></li>
+    <li><div class="top"><span class="nm">Before bed</span><span class="pc">9%</span></div>
+      <div class="bot"><span class="share"><i style="width:8.7%"></i></span><span class="delta"><svg class="i"><use href="#i-up"/></svg>5 points</span></div></li>
+    <li><div class="top"><span class="nm">Tired</span><span class="pc">6%</span></div>
+      <div class="bot"><span class="share"><i style="width:5.8%"></i></span><span class="delta"><svg class="i"><use href="#i-up"/></svg>6 points</span></div></li>
+  </ul>
+  <h3 class="in-sub">By group</h3>
+  <div class="groups"><div><b>71%</b><span>Routine</span></div><div><b>8%</b><span>Feelings</span></div><div><b>8%</b><span>Body</span></div><div><b>1%</b><span>People</span></div><div><b>1%</b><span>Habit</span></div></div>
+  <h3 class="in-sub">By time of day</h3>
+  <ul class="tod">
+    <li><span class="when"><b>Morning</b><span>05:00 to 12:00</span></span><span class="what"><b>Just woke up</b><span>54% of morning doses</span></span></li>
+    <li><span class="when"><b>Afternoon</b><span>12:00 to 17:00</span></span><span class="what"><b>After a meal</b><span>51% of afternoon doses</span></span></li>
+    <li><span class="when"><b>Evening</b><span>17:00 to 22:00</span></span><span class="what"><b>Commuting or driving</b><span>26% of evening doses</span></span></li>
+    <li><span class="when"><b>Night</b><span>22:00 to 05:00</span></span><span class="what"><b>Before bed</b><span>90% of night doses</span></span></li>
+  </ul>
+  <p class="in-note"><b>12%</b> of doses had no tag.</p>
+</section>
+<section class="in-sec" aria-label="Gum habits">
+  <div class="in-hd"><h2>Gum habits</h2></div>
+  <p class="in-meta">Against the 30 days before. Gaps only count within a day, between gum doses.</p>
+  <div class="tiles">
+    <div class="tile"><span class="k">First dose</span><span class="v num">09:00</span><span class="delta"><svg class="i"><use href="#i-up"/></svg>4 min later</span></div>
+    <div class="tile"><span class="k">Average gap</span><span class="v num">3&nbsp;<small>h</small> 55&nbsp;<small>min</small></span><span class="delta"><svg class="i"><use href="#i-up"/></svg>13 min longer</span></div>
+    <div class="tile wide"><span class="k">Longest gap</span><span class="v num">10&nbsp;<small>h</small></span>
+      <span class="when">Tuesday 20 October, <span class="num">08:05</span> to <span class="num">18:05</span></span><span class="delta"><svg class="i"><use href="#i-up"/></svg>10 min longer</span></div>
+  </div>
+</section>
+<section class="in-sec" aria-label="Gum calendar">
+  <div class="in-hd"><h2>Gum calendar</h2><button class="iconbtn ghost" aria-label="Show gum calendar as a table"><svg class="i"><use href="#i-table"/></svg></button></div>
+  <p class="in-meta">Each day shaded by gum mg.</p>
+  <div class="cal2" role="img" aria-label="Calendar of mg each day. Full numbers in the table view.">
+    <div class="dow"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+    <div class="grid"><span class="blank"></span><span class="blank"></span><span class="blank"></span><span><s class="c3"><b>24</b></s></span><span><s class="c1"><b>25</b></s></span><span><s class="c3"><b>26</b></s></span><span><s class="c3"><b>27</b></s></span><span><s class="c1"><b>28</b></s></span><span><s class="c3"><b>29</b></s></span><span><s class="c5"><b>30</b></s></span><span><s class="c4"><b>1 Oct</b></s></span><span><s class="c3"><b>2</b></s></span><span><s class="c4"><b>3</b></s></span><span><s class="c3"><b>4</b></s></span><span><s class="c1"><b>5</b></s></span><span><s class="c4"><b>6</b></s></span><span><s class="c5"><b>7</b></s></span><span><s class="c5"><b>8</b></s></span><span><s class="c0"><b>9</b></s></span><span><s class="c3"><b>10</b></s></span><span><s class="c5"><b>11</b></s></span><span><s class="c4"><b>12</b></s></span><span><s class="c1"><b>13</b></s></span><span><s class="c5"><b>14</b></s></span><span><s class="c5"><b>15</b></s></span><span><s class="c5"><b>16</b></s></span><span><s class="c1"><b>17</b></s></span><span><s class="c3"><b>18</b></s></span><span><s class="c0"><b>19</b></s></span><span><s class="c3"><b>20</b></s></span><span><s class="c4"><b>21</b></s></span><span><s class="c4"><b>22</b></s></span><span><s class="c3 today"><b>23</b></s></span><span class="blank"></span><span class="blank"></span></div>
+  </div>
+  <div class="hscale calk" aria-hidden="true"><span class="none"><i class="c0"></i>None</span><span class="bins"><span class="sw"><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i><i class="c5"></i></span><span class="tk"><em style="left:29px">5</em><em style="left:59px">8</em><em style="left:89px">11</em><em style="left:119px">14</em></span></span><span class="unit">mg</span></div><div class="keyrow"><span><i class="ringkey"></i>Today, so far</span></div>
+</section>
+<section class="in-sec" aria-label="Gum products">
+  <div class="in-hd"><h2>Gum products</h2></div>
+  <p class="in-meta">Share of gum mg, and how much a day.</p>
+  <ul class="prods">
+    <li><span class="lead dose"><svg class="i"><use href="#i-gum"/></svg></span><span class="body"><span class="top"><span class="ttl">Nicorette gum 4&nbsp;mg</span><span class="pc">54%</span></span>
+      <span class="sub">1.3 pieces a day</span><span class="share"><i style="width:53.5%"></i></span></span></li>
+    <li><span class="lead dose"><svg class="i"><use href="#i-gum"/></svg></span><span class="body"><span class="top"><span class="ttl">Nicorette gum 2&nbsp;mg</span><span class="pc">46%</span></span>
+      <span class="sub">2.2 pieces a day</span><span class="share"><i style="width:46.5%"></i></span></span></li>
+  </ul>
+</section>
+<div style="height:32px"></div>
+<nav class="tabs">
+  <a><span class="ind"><svg class="i"><use href="#i-today"/></svg></span>Today</a>
+  <a><span class="ind"><svg class="i"><use href="#i-history"/></svg></span>History</a>
+  <a class="on"><span class="ind"><svg class="i"><use href="#i-insights"/></svg></span>Insights</a>
+  <a><span class="ind"><svg class="i"><use href="#i-plan"/></svg></span>Plan</a>
+  <a><span class="ind"><svg class="i"><use href="#i-lair"/></svg></span>Lair</a>
+</nav>
+</body>
+</html>
