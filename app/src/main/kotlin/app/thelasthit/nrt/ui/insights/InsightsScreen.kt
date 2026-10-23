@@ -132,6 +132,8 @@ fun InsightsScreen(
             TopBar()
             Filters(current, onRange = viewModel::pickRange, onType = viewModel::pickType)
             EachDay(current)
+            if (current.onlyPatches) PatchNote() else WhenYouUse(current)
+            CalendarSection(current)
             Spacer(Modifier.height(32.dp))
         }
     }
@@ -492,7 +494,7 @@ private fun summary(intake: DailyIntake, windowDays: Int, weekly: Boolean): Stri
 }
 
 @Composable
-private fun Section(title: String, action: @Composable () -> Unit, content: @Composable ColumnScope.() -> Unit) {
+internal fun Section(title: String, action: @Composable () -> Unit, content: @Composable ColumnScope.() -> Unit) {
     Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 34.dp)) {
         Row(Modifier.fillMaxWidth().heightIn(min = 40.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(
@@ -512,7 +514,7 @@ private fun Section(title: String, action: @Composable () -> Unit, content: @Com
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun Keys(content: @Composable () -> Unit) {
+internal fun Keys(content: @Composable () -> Unit) {
     FlowRow(
         Modifier.padding(top = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(18.dp),
@@ -522,7 +524,7 @@ private fun Keys(content: @Composable () -> Unit) {
 
 /** One key under a chart: a small sample of the mark, then what it means. */
 @Composable
-private fun Key(sample: @Composable () -> Unit, text: String) {
+internal fun Key(sample: @Composable () -> Unit, text: String) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
         Box(Modifier.clipToBounds()) { sample() }
         Text(text, style = LastHit.type.caption, color = LastHit.colors.text2)

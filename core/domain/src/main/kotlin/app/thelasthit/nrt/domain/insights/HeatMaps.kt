@@ -25,6 +25,23 @@ object HeatScale {
         high <= low -> (STEPS + 1) / 2
         else -> (1 + (value - low) * STEPS / (high - low)).toInt().coerceIn(1, STEPS)
     }
+
+    /**
+     * For the legend under [step]: the largest whole value on each step from 1 to [STEPS], or
+     * null for a step no whole value reaches, as with 3 doses at most, which use steps 2, 4 and 5.
+     */
+    fun stepTops(max: Long): List<Long?> = (1..STEPS).map { k ->
+        (max * k / STEPS).takeIf { it >= 1 && step(it, max) == k }
+    }
+
+    /**
+     * For the legend under [stepBetween]: where each step from 2 up starts, as the smallest whole
+     * value on it. Empty when [high] isn't above [low], since every value then takes one step.
+     */
+    fun stepStarts(low: Long, high: Long): List<Long> =
+        if (high <= low) emptyList() else (1 until STEPS).map { k -> low + ceilDiv(k * (high - low), STEPS.toLong()) }
+
+    private fun ceilDiv(a: Long, b: Long): Long = (a + b - 1) / b
 }
 
 /**

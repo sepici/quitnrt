@@ -5,6 +5,7 @@ import app.thelasthit.nrt.domain.insights.CalendarHeat.State
 import app.thelasthit.nrt.domain.log.entry
 import app.thelasthit.nrt.domain.product.ProductForm
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -108,6 +109,36 @@ class HeatMapsTest {
         assertEquals(5, calendar.step(days.getValue(22)))
         assertEquals(5, calendar.step(days.getValue(23)))
         assertEquals(0, calendar.step(days.getValue(16)))
+    }
+
+    @Test
+    fun `the legend names the largest value on each step, and skips steps nothing reaches`() {
+        assertEquals(listOf<Long?>(1, 2, 3, 4, 5), HeatScale.stepTops(5))
+        assertEquals(listOf<Long?>(2, 4, 6, 8, 10), HeatScale.stepTops(10))
+        assertEquals(listOf<Long?>(null, 1, null, 2, 3), HeatScale.stepTops(3))
+        assertEquals(listOf<Long?>(null, null, null, null, 1), HeatScale.stepTops(1))
+        assertEquals(listOf<Long?>(null, null, null, null, null), HeatScale.stepTops(0))
+        for (max in 1L..40L) {
+            HeatScale.stepTops(max).forEachIndexed { index, top ->
+                if (top != null) {
+                    assertEquals(index + 1, HeatScale.step(top, max))
+                    assertTrue(top == max || HeatScale.step(top + 1, max) > index + 1)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `the calendar's legend marks where each step starts`() {
+        // 10 to 20 mg in micrograms: steps start at 12, 14, 16 and 18 mg.
+        assertEquals(listOf(12_000L, 14_000L, 16_000L, 18_000L), HeatScale.stepStarts(10_000, 20_000))
+        assertEquals(emptyList<Long>(), HeatScale.stepStarts(12_000, 12_000))
+        for ((low, high) in listOf(10_000L to 18_000L, 1_875L to 13_125L, 12_000L to 12_500L)) {
+            HeatScale.stepStarts(low, high).forEachIndexed { index, start ->
+                assertEquals(index + 2, HeatScale.stepBetween(start, low, high))
+                assertEquals(index + 1, HeatScale.stepBetween(start - 1, low, high).coerceAtLeast(1))
+            }
+        }
     }
 
     @Test

@@ -62,6 +62,11 @@ data class LastHitColors(
     val onError: Color,
     /** The pressed-in lower edge of the primary button. */
     val primaryEdge: Color,
+    /**
+     * The stone ramp both heat maps share, steps 1 to 5 from the least to the most. Empty is
+     * [sunk]. Dark mode runs from dark to light, so the most still stands out from the page.
+     */
+    val heat: List<Color>,
     /** For the game layer, which draws its own light and dark pixel art. */
     val isDark: Boolean,
 )
@@ -114,6 +119,7 @@ val LightColors = LastHitColors(
     error = Color(0xFFA33A2B),
     onError = Color(0xFFFFFFFF),
     primaryEdge = Color(0xFF06301F),
+    heat = listOf(Color(0xFFA6A398), Color(0xFF8A877D), Color(0xFF6F6C62), Color(0xFF555248), Color(0xFF3C3A30)),
     isDark = false,
 )
 
@@ -165,7 +171,18 @@ val DarkColors = LastHitColors(
     error = Color(0xFFF2A99B),
     onError = Color(0xFF2A0A04),
     primaryEdge = Color(0xFF174F38),
+    heat = listOf(Color(0xFF4E4A40), Color(0xFF6D6A5F), Color(0xFF8F8B7F), Color(0xFFB2AEA2), Color(0xFFD5D2C5)),
     isDark = true,
 )
+
+/** A heat map step's fill: [LastHitColors.sunk] for none, then the ramp. */
+fun LastHitColors.heatFill(step: Int): Color = if (step <= 0) sunk else heat[(step - 1).coerceAtMost(heat.lastIndex)]
+
+/** Text on a heat map step, such as a calendar day's number: dark on the light steps, the page colour on the rest. */
+fun LastHitColors.heatInk(step: Int): Color = when {
+    step <= 0 -> text3
+    step <= 2 -> text
+    else -> bg
+}
 
 val LocalLastHitColors = staticCompositionLocalOf { LightColors }

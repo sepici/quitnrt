@@ -165,7 +165,9 @@ fun ChartTable(rows: List<Pair<String, String>>, modifier: Modifier = Modifier) 
                 Text(label, style = LastHit.type.label.copy(fontSize = 15.sp), color = colors.text, modifier = Modifier.weight(1f))
                 Text(
                     value,
-                    style = LastHit.type.label.copy(fontSize = 15.sp, fontWeight = FontWeight.Bold, fontFeatureSettings = "tnum"),
+                    // No tabular figures: the bundled cuts make the comma and full stop tabular too,
+                    // which leaves a gap before them ("1 dose , 8 mg").
+                    style = LastHit.type.label.copy(fontSize = 15.sp, fontWeight = FontWeight.Bold),
                     color = colors.text,
                 )
             }

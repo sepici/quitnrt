@@ -55,6 +55,9 @@ class InsightsTest {
 
     private fun waitFor(text: String) = compose.waitUntilExactlyOneExists(hasText(text), timeoutMillis = 5_000)
 
+    private fun waitForDescription(text: String) =
+        compose.waitUntilExactlyOneExists(hasContentDescription(text, substring = true), timeoutMillis = 5_000)
+
     @Test
     fun `nothing logged yet says where the charts will come from`() {
         app.setUp()
@@ -110,6 +113,72 @@ class InsightsTest {
         waitFor("Thursday 22 October")
         compose.onNodeWithText("8 mg so far").assertExists()
         compose.onNodeWithContentDescription("Show each day as a chart").assertExists()
+    }
+
+    @Test
+    fun `the hour map names its busiest hour, and its table lists every hour with a dose`() {
+        app.setUp()
+        app.seedWeek()
+        show()
+        // Wednesday's three pieces at 08:15 are one dose, but the most mg of the 08:00 doses.
+        waitForDescription("Most often Wednesdays from 08:00, 1 dose.")
+        compose.onNodeWithText("Doses by hour and day of the week. Patches aren't counted.").assertExists()
+        compose.onNodeWithContentDescription("Show when you use as a table").performScrollTo().performClick()
+        waitFor("Wednesdays, 08:00 to 09:00")
+        compose.onNodeWithText("1 dose, 12 mg").assertExists()
+        compose.onNodeWithText("Tuesdays, 19:00 to 20:00").assertExists()
+    }
+
+    @Test
+    fun `shading by mg names the hour with the most mg`() {
+        app.setUp()
+        app.seedWeek()
+        show()
+        waitForDescription("Most often Wednesdays from 08:00")
+        compose.onNode(hasText("mg") and isSelectable()).performScrollTo().performClick()
+        waitForDescription("The most is on Wednesdays from 08:00, 12 mg.")
+    }
+
+    @Test
+    fun `tapping an hour shows its doses and mg`() {
+        app.setUp()
+        app.seedWeek()
+        show()
+        waitForDescription("Most often Wednesdays from 08:00")
+        compose.tapHour(column = 2, row = 4)
+        waitFor("Wednesdays, 08:00 to 09:00")
+        compose.onNodeWithText("1 dose, 12 mg").assertExists()
+        compose.onNodeWithText("Over the 5 days").assertExists()
+    }
+
+    @Test
+    fun `the calendar shades from the lightest day to the heaviest, and dashes days before the first dose`() {
+        app.setUp()
+        app.seedWeek()
+        show()
+        // Monday to Thursday: 14, 13, 12 and 14 mg. Today's 8 mg so far doesn't set the scale.
+        waitForDescription("from 12 mg on the lightest day with doses to 14 mg on the heaviest.")
+        compose.onNodeWithText("Before your first dose").performScrollTo().assertExists()
+        compose.onNodeWithText("Today, so far").assertExists()
+        // The range starts on Saturday the 17th, so the first week row is the week of the 12th.
+        compose.tapCalendarDay(column = 2, row = 1)
+        waitFor("Wednesday 21 October")
+        compose.onNodeWithText("12 mg").assertExists()
+        compose.onNodeWithContentDescription("Show calendar as a table").performScrollTo().performClick()
+        waitFor("Monday 19 October")
+        compose.onNodeWithText("8 mg so far").assertExists()
+    }
+
+    @Test
+    fun `with only patches, the hour map gives way to a note`() {
+        app.setUp()
+        app.seedWeek()
+        show()
+        waitFor("13.3")
+        compose.onNodeWithText("Patch").performClick()
+        waitFor("The hour map leaves out patches, since a patch releases nicotine steadily.")
+        compose.onNodeWithText("When you use").assertDoesNotExist()
+        compose.onNodeWithText("Calendar").assertExists()
     }
 
     @Test

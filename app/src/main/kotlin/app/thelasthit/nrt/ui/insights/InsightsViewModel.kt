@@ -4,12 +4,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.thelasthit.nrt.data.DataGraph
 import app.thelasthit.nrt.domain.dose.Dose
+import app.thelasthit.nrt.domain.insights.CalendarHeat
 import app.thelasthit.nrt.domain.insights.DailyIntake
+import app.thelasthit.nrt.domain.insights.HourHeatMap
 import app.thelasthit.nrt.domain.insights.InsightRange
 import app.thelasthit.nrt.domain.insights.InsightWindow
 import app.thelasthit.nrt.domain.insights.ProductType
 import app.thelasthit.nrt.domain.insights.ofType
 import app.thelasthit.nrt.domain.log.Entry
+import app.thelasthit.nrt.domain.time.DayBoundary
 import app.thelasthit.nrt.ui.minuteTicks
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -20,9 +23,11 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 
 /** A range button: whether it's open yet, and if not, the day it opens. */
@@ -43,6 +48,14 @@ data class InsightsState(
     val previousAverage: Dose? = null,
     /** Product ID to its short name ("Nicorette gum"). */
     val productNames: Map<String, String> = emptyMap(),
+    /** Where the hour map's rows start. */
+    val dayStart: LocalTime = DayBoundary.DEFAULT_DAY_START,
+    val hours: HourHeatMap? = null,
+    val calendar: CalendarHeat? = null,
+    /** The window has patches beside other doses, and the hour map leaves them out. */
+    val patchesLeftOut: Boolean = false,
+    /** Everything in the window is a patch, so the hour map has nothing to show. */
+    val onlyPatches: Boolean = false,
 ) {
     val isEmpty: Boolean get() = firstDay == null
 
@@ -69,9 +82,11 @@ class InsightsViewModel(
         settings.dayBoundary.logicalDate(instant, zone())
     }.distinctUntilChanged()
 
+    private val dayStart: Flow<LocalTime> = graph.settings.settings.map { it.dayStart }.distinctUntilChanged()
+
     val state: StateFlow<InsightsState?> =
-        combine(today, graph.entries.observeFirstDay(), chosenRange, chosenType) { today, firstDay, chosen, type ->
-            Choice(today, firstDay, chosen, type)
+        combine(today, graph.entries.observeFirstDay(), chosenRange, chosenType, dayStart) { today, firstDay, chosen, type, dayStart ->
+            Choice(today, firstDay, chosen, type, dayStart)
         }.flatMapLatest { choice -> stateFor(choice) }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
@@ -88,7 +103,13 @@ class InsightsViewModel(
         viewModelScope.launch { graph.entries.delete(entry.id) }
     }
 
-    private data class Choice(val today: LocalDate, val firstDay: LocalDate?, val range: InsightRange?, val type: ProductType?)
+    private data class Choice(
+        val today: LocalDate,
+        val firstDay: LocalDate?,
+        val range: InsightRange?,
+        val type: ProductType?,
+        val dayStart: LocalTime,
+    )
 
     private fun stateFor(choice: Choice): Flow<InsightsState> {
         val (today, firstDay) = choice
@@ -100,7 +121,7 @@ class InsightsViewModel(
         // Thirty days once there's that much to show, so a new week doesn't look thin.
         val range = choice.range?.takeIf { it.isUnlocked(history) }
             ?: if (InsightRange.DAYS_30.isUnlocked(history)) InsightRange.DAYS_30 else InsightRange.DAYS_7
-        val base = InsightsState(today, firstDay, ranges, range)
+        val base = InsightsState(today, firstDay, ranges, range, dayStart = choice.dayStart)
         val window = range.window(today, firstDay)
         if (firstDay == null || window == null) return flowOf(base)
         // The period before is as long again, and it covers the 6 days the first averages reach back.
@@ -111,6 +132,8 @@ class InsightsViewModel(
                 if (choice.type == null || choice.type in inUse) inUse else inUse + choice.type
             }
             val chosen = entries.ofType(choice.type)
+            val chosenInWindow = chosen.filter { it.logicalDate in window }
+            val (patches, others) = chosenInWindow.partition { it.isBackground }
             base.copy(
                 types = types,
                 type = choice.type,
@@ -122,6 +145,10 @@ class InsightsViewModel(
                     null
                 },
                 productNames = names,
+                hours = HourHeatMap.of(chosenInWindow, choice.dayStart),
+                calendar = CalendarHeat.of(range, today, firstDay, chosenInWindow),
+                patchesLeftOut = patches.isNotEmpty() && others.isNotEmpty(),
+                onlyPatches = patches.isNotEmpty() && others.isEmpty(),
             )
         }
     }
