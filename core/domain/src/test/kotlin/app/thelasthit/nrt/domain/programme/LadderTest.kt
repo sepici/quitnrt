@@ -1,6 +1,7 @@
 package app.thelasthit.nrt.domain.programme
 
 import app.thelasthit.nrt.domain.dose.Dose
+import app.thelasthit.nrt.domain.product.LabelLimit
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -122,16 +123,60 @@ class LadderTest {
     }
 
     @Test
-    fun `steps over a pack's daily limit are left out`() {
+    fun `a usual day over a pack's daily limit comes down to it at step 1`() {
         // Nicorette gum's pack allows 15 pieces a day.
         val ladder = ladder(usual(GUM_2 to 20))
         assertEquals((15 downTo 1).map { mix(GUM_2 to it) }, ladder.steps)
         assertEquals(1, ladder.top)
-        // The switch from 10 pieces of 4 mg would be 20 pieces of 2 mg, so it's left out too, and
-        // the ladder goes on from 15 pieces.
+        // NiQuitin's lozenge pack allows 15 too. Only the lozenges come down, so step 1 is 70 mg,
+        // rather than the gum's 40 mg going first while the lozenges wait.
+        val both = ladder(usual(LOZENGE_2 to 16, GUM_4 to 10))
+        assertEquals(1, both.top)
+        assertEquals(listOf(mix(GUM_4 to 10, LOZENGE_2 to 15), mix(GUM_4 to 9, LOZENGE_2 to 15)), both.steps.take(2))
+        assertEquals(Dose.mg(70), both.steps.first().total)
+    }
+
+    @Test
+    fun `a switch waits until the lower strength's pieces fit its pack's limit`() {
+        // 10 pieces of 4 mg would switch to 20 of 2 mg, over the 15 a day the pack allows, so the
+        // 4 mg pieces keep coming off until 7 of them switch to 14 of 2 mg.
         val strong = ladder(usual(GUM_4 to 20))
-        assertEquals((15 downTo 10).map { mix(GUM_4 to it) } + (15 downTo 1).map { mix(GUM_2 to it) }, strong.steps)
-        assertTrue(strong.steps.all { it.isWithinLabels })
+        assertEquals((15 downTo 7).map { mix(GUM_4 to it) } + (14 downTo 1).map { mix(GUM_2 to it) }, strong.steps)
+        // A mix of strengths loses its 4 mg pieces one at a time, never 28 mg in one step.
+        val mixed = ladder(usual(GUM_4 to 15, GUM_2 to 15))
+        assertEquals((14 downTo 0).map { mix(GUM_4 to it, GUM_2 to 15) } + (14 downTo 1).map { mix(GUM_2 to it) }, mixed.steps)
+        val tenAndEight = ladder(usual(GUM_4 to 10, GUM_2 to 8))
+        assertEquals((9 downTo 3).map { mix(GUM_4 to it, GUM_2 to 8) } + (14 downTo 1).map { mix(GUM_2 to it) }, tenAndEight.steps)
+        // The user's own 2 mg gum, with a pack limit of 5 a day: 8 pieces of 4 mg switch at 2 pieces.
+        val small2 = GUM_2.copy(label = LabelLimit(maxUnitsPerDay = 5))
+        val own = ladder(usual(GUM_4 to 8), own = listOf(GUM_4, small2))
+        assertEquals((7 downTo 2).map { mix(GUM_4 to it) } + (4 downTo 1).map { mix(small2 to it) }, own.steps)
+    }
+
+    @Test
+    fun `two patches step down a strength at a time, within each pack's limit of one`() {
+        // The 21 mg can't become a second 14 mg, so the 14 mg steps down first, and when neither
+        // can, the weaker one comes off.
+        val pair = ladder(usual(PATCH_21 to 1, PATCH_14 to 1))
+        val expected = listOf(
+            mix(PATCH_21 to 1, PATCH_7 to 1),
+            mix(PATCH_14 to 1, PATCH_7 to 1),
+            mix(PATCH_14 to 1),
+            mix(PATCH_7 to 1),
+        )
+        assertEquals(expected, pair.steps)
+        // Two 21 mg patches are over the limit, so step 1 makes one of them a 14 mg.
+        val two = ladder(usual(PATCH_21 to 2))
+        assertEquals(1, two.top)
+        assertEquals(listOf(mix(PATCH_21 to 1, PATCH_14 to 1)) + expected, two.steps)
+    }
+
+    @Test
+    fun `a tie goes to the stronger unit, even in a form listed later`() {
+        // 14 mg each: the patch's 14 mg is a stronger unit than a 2 mg piece of gum.
+        assertEquals(mix(PATCH_7 to 1, GUM_2 to 7), ladder(usual(PATCH_14 to 1, GUM_2 to 7)).steps.first())
+        // 8 mg each: a 4 mg lozenge is stronger than a 2 mg piece of gum.
+        assertEquals(mix(LOZENGE_4 to 1, GUM_2 to 4), ladder(usual(LOZENGE_4 to 2, GUM_2 to 4)).steps.first())
     }
 
     @Test
@@ -143,19 +188,51 @@ class LadderTest {
         // A hidden one still counts as the user's own, after any shown ones.
         val hidden = ladder(usual(GUM_4 to 2), own = listOf(GUM_4, tesco2.copy(isHidden = true)))
         assertEquals(tesco2.copy(isHidden = true), hidden.steps.last().products.single())
+        val superdrug2 = product("superdrug-gum-2mg").copy(isHidden = true)
+        val shown = ladder(usual(GUM_4 to 2), own = listOf(GUM_4, superdrug2, tesco2))
+        assertEquals(tesco2, shown.steps.last().products.single())
     }
 
     @Test
-    fun `lower strengths come from the same line in the user's market, never a discontinued pack`() {
+    fun `a line with no lower strength steps down through the same brand's other lines`() {
+        // NiQuitin Pre-Quit is 21 mg only. NiQuitin Clear has 14 and 7 mg.
+        val preQuit = product("niquitin-pre-quit-patch-uk-21mg")
+        val alone = ladder(usual(preQuit to 1))
+        assertEquals(listOf(mix(PATCH_14 to 1), mix(PATCH_7 to 1)), alone.steps)
+        assertEquals(listOf(PATCH_14, PATCH_7), alone.newProducts)
+        // With gum, the patch steps down rather than coming off in one go.
+        assertEquals(mix(PATCH_14 to 1, GUM_2 to 4), ladder(usual(preQuit to 1, GUM_2 to 4)).steps.first())
+        // Nicabate Classic in Australia steps down through Nicabate Clear.
+        val classic = product("nicabate-classic-patch-au-21mg")
+        val clear14 = product("nicabate-clear-patch-au-14mg")
+        val clear7 = product("nicabate-clear-patch-au-7mg")
+        assertEquals(listOf(mix(clear14 to 1), mix(clear7 to 1)), ladder(usual(classic to 1), market = "AU").steps)
+        // Another line of the brand counts only where it's sold: Habitrol's 1 mg lozenge is a New
+        // Zealand pack, so the US 2 mg one has nothing lower in the US.
+        val habitrolUs2 = product("habitrol-lozenge-us-2mg")
+        val habitrolNz1 = product("habitrol-lozenge-nz-1mg")
+        assertEquals(listOf(mix(habitrolUs2 to 1)), ladder(usual(habitrolUs2 to 2), market = "US").steps)
+        assertEquals(
+            listOf(mix(habitrolUs2 to 1), mix(habitrolNz1 to 2), mix(habitrolNz1 to 1)),
+            ladder(usual(habitrolUs2 to 2), market = "NZ").steps,
+        )
+    }
+
+    @Test
+    fun `the lines in use count wherever they're sold, but never a discontinued pack`() {
         // NiQuitin gum is discontinued, so its 2 mg can't be bought, and one piece is the bottom.
         val oldStock = product("niquitin-gum-uk-4mg")
         assertEquals(emptyList<Mix>(), ladder(usual(oldStock to 1)).steps)
-        // The US Nicorette lozenge steps to its US 2 mg, which a UK user wouldn't be offered.
+        // The US Nicorette lozenge steps to its US 2 mg, for a UK user too.
         val us4 = product("nicorette-lozenge-us-4mg")
         val us2 = product("nicorette-lozenge-us-2mg")
         assertEquals(listOf(mix(us2 to 1)), ladder(usual(us4 to 1), market = "US").steps)
-        assertEquals(emptyList<Mix>(), ladder(usual(us4 to 1), market = "GB").steps)
-        // Only the same line counts: the 1.5 mg Minis are an older pack, a line of their own, and discontinued.
+        assertEquals(listOf(mix(us2 to 1)), ladder(usual(us4 to 1), market = "GB").steps)
+        // Somewhere else: UK Nicorette gum still switches to its 2 mg, as PLAN's second example does.
+        val elsewhere = ladder(usual(GUM_4 to 8), market = "ZZ")
+        assertEquals(ladder(usual(GUM_4 to 8)).steps, elsewhere.steps)
+        assertTrue(mix(GUM_2 to 8) in elsewhere.steps)
+        // The 1.5 mg Minis are discontinued, so one 2 mg Mini is the bottom.
         val minis2 = product("niquitin-minis-uk-2mg")
         assertEquals(listOf(mix(minis2 to 1)), ladder(usual(minis2 to 2)).steps)
     }
@@ -173,7 +250,18 @@ class LadderTest {
         val usual = usual(GUM_2 to 4)
         assertThrows<IllegalArgumentException> { Ladder(usual, listOf(Mix.NONE)) }
         assertThrows<IllegalArgumentException> { Ladder(usual, listOf(mix(GUM_2 to 2), mix(GUM_2 to 3))) }
-        assertThrows<IllegalArgumentException> { Ladder(usual, listOf(mix(GUM_2 to 16))) }
         assertThrows<IllegalArgumentException> { Ladder(usual, emptyList()).mixAt(1) }
+    }
+
+    @Test
+    fun `a ladder read back still loads after a pack's limit is lowered`() {
+        // Built for 12 pieces a day, then the pack's limit set to 10 in Settings.
+        val built = ladder(usual(GUM_2 to 12))
+        val lowered = GUM_2.copy(label = LabelLimit(maxUnitsPerDay = 10))
+        val stored = Ladder(usual(lowered to 12), built.steps.map { mix(lowered to it.units) })
+        assertEquals(built.size, stored.size)
+        // A week can go no higher than the first step within the new limit.
+        assertEquals(2, stored.top)
+        assertEquals(mix(lowered to 10), stored.mixAt(stored.top))
     }
 }

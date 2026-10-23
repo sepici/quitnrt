@@ -104,9 +104,13 @@ class PlanBuilderTest {
         val programme = plan(usual(GUM_2 to 20))
         assertEquals(mg(28, 24, 20, 16, 12, 10, 8, 6, 4, 2, 0, 0), programme.guides)
         assertTrue(programme.mixes.all { it.isWithinLabels })
+        // 20 pieces of 4 mg: 15 of them at step 1, and the switch waits for 7, which make 14 of 2 mg.
+        // 23 steps for 10 weeks, so weeks 1 to 3 take three steps each.
         val strong = plan(usual(GUM_4 to 20))
+        assertEquals(mg(52, 40, 28, 26, 22, 18, 14, 10, 6, 2, 0, 0), strong.guides)
+        assertEquals(mix(GUM_4 to 7), strong.week(3).target.mix)
+        assertEquals(mix(GUM_2 to 13), strong.week(4).target.mix)
         assertTrue(strong.mixes.all { it.isWithinLabels })
-        assertTrue(strong.mixes.all { it.unitsOf(GUM_2.id) <= 15 && it.unitsOf(GUM_4.id) <= 15 })
     }
 
     @Test
@@ -140,7 +144,12 @@ class PlanBuilderTest {
         val microtab = product("nicorette-microtab-uk-2mg")
         val invisi = product("nicorette-invisipatch-uk-25mg")
         val pouch = UserProduct("pouch", null, "Pouch 6 mg", "Pouch", ProductForm.POUCH, ProductForm.POUCH.defaultUnit, Dose.mg(6))
-        val pool = listOf(GUM_2, GUM_4, SPRAY, PATCH_21, PATCH_14, LOZENGE_4, inhalator, mint, nasal, microtab, invisi, pouch)
+        // A patch whose lower strengths are in another line of its brand, gum whose 2 mg pack
+        // allows more than its 4 mg one, and a lozenge whose 1 mg is sold in another country.
+        val preQuit = product("niquitin-pre-quit-patch-uk-21mg")
+        val nicotinell4 = product("nicotinell-gum-uk-4mg")
+        val thrive2 = product("thrive-lozenge-ca-2mg")
+        val pool = listOf(GUM_2, GUM_4, SPRAY, PATCH_21, PATCH_14, LOZENGE_4, inhalator, mint, nasal, microtab, invisi, pouch, preQuit, nicotinell4, thrive2)
         val usualDays = buildList {
             for (first in pool) {
                 val most = if (first.form.defaultUnit == PATCH_21.form.defaultUnit) 2 else 24
@@ -154,13 +163,24 @@ class PlanBuilderTest {
             // Mixed strengths of one kind.
             for (strong in 1..12) for (weak in 1..12) add(usual(GUM_4 to strong, GUM_2 to weak))
             for (strong in 1..12) for (weak in 1..12) add(usual(GUM_4 to strong, GUM_2 to weak, SPRAY to weak))
+            // Up to and over the packs' limit of 15 a day.
+            for (strong in listOf(8, 15, 20)) for (weak in listOf(5, 15, 20)) add(usual(GUM_4 to strong, GUM_2 to weak))
             add(usual(PATCH_21 to 1, PATCH_14 to 1))
+            add(usual(PATCH_21 to 1, PATCH_14 to 1, PATCH_7 to 1))
+            add(usual(PATCH_21 to 2, PATCH_14 to 1))
             add(usual(PATCH_21 to 2, GUM_4 to 10))
         }
         var played = 0
         for (usual in usualDays) {
             val ladder = ladder(usual)
             assertEquals(1, ladder.mixAt(ladder.size).units, "$usual ends at one unit")
+            assertEquals(if (usual.mix.isWithinLabels) 0 else 1, ladder.top, "$usual: ${ladder.steps}")
+            // From the top, no step drops more than the strongest unit in the mix before it.
+            for (step in ladder.top until ladder.size) {
+                val before = ladder.mixAt(step)
+                val drop = before.total.micrograms - ladder.mixAt(step + 1).total.micrograms
+                assertTrue(drop <= before.items.maxOf { it.product.perUnit.micrograms }, "$usual, step ${step + 1}: ${ladder.steps}")
+            }
             for (length in ProgrammeLength.entries) {
                 val programme = Programme.create(ladder, length, START)
                 val case = "$usual over ${length.weeks} weeks: ${programme.mixes}"
