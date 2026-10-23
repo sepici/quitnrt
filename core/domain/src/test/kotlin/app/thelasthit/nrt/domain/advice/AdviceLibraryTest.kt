@@ -3,6 +3,7 @@ package app.thelasthit.nrt.domain.advice
 import app.thelasthit.nrt.domain.catalogue.Markets
 import app.thelasthit.nrt.domain.log.BuiltInTags
 import app.thelasthit.nrt.domain.log.TagGroup
+import app.thelasthit.nrt.domain.product.ProductForm
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -82,6 +83,72 @@ class AdviceLibraryTest {
     }
 
     @Test
+    fun `after a slip doesn't assume a slip on an ordinary dose`() {
+        val slip = library.find("after_a_slip")!!
+        assertFalse(slip.suitsAnyTime)
+        assertTrue(slip.suits("low", TagGroup.FEELINGS))
+        for (key in listOf("happy", "bored", "after_meal", "coffee_tea", "strong_craving")) {
+            assertFalse(slip.suits(key, BuiltInTags.find(key)!!.group), "after_a_slip suits $key")
+        }
+        assertFalse(slip.suits("my_own_tag", TagGroup.ROUTINE))
+    }
+
+    /** PLAN §9, "What goes with what": each trigger and the strategies that must suit it. */
+    private val planTable: Map<String, List<String>> = buildMap {
+        val calming = listOf("breathing_timer", "short_walk", "muscle_relaxation", "ride_the_wave")
+        listOf("stressed", "anxious", "angry", "after_argument").forEach { put(it, calming) }
+        // Brush your teeth is a step of leave_the_table, and the coffee rule for gum and lozenges is gum_and_drinks.
+        put("after_meal", listOf("dose_before_meal", "leave_the_table", "short_walk", "gum_and_drinks"))
+        put("coffee_tea", listOf("leave_the_table", "short_walk", "gum_and_drinks", "swap_drink"))
+        listOf("happy", "excited", "celebrating").forEach { put(it, listOf("another_treat", "milestone_treats")) }
+        listOf("bored", "screen_time", "autopilot").forEach { put(it, listOf("busy_hands", "change_rooms", "dose_decision")) }
+        listOf("drink", "socialising").forEach { put(it, listOf("drinks_limit")) }
+        put("woke_up", listOf("morning_routine"))
+        listOf("withdrawal", "strong_craving").forEach { put(it, listOf("four_ds", "ask_about_pace")) }
+    }
+
+    @Test
+    fun `each trigger in PLAN's table is suited by the strategies the table gives it`() {
+        val missing = planTable.flatMap { (key, expected) ->
+            val group = BuiltInTags.find(key)!!.group
+            expected.filterNot { library.find(it)!!.suits(key, group) }.map { "$key: $it" }
+        }
+        assertTrue(missing.isEmpty(), "not suited: $missing")
+    }
+
+    @Test
+    fun `the 4 Ds suits any tag, built-in or added, in any group`() {
+        val fourDs = library.find("four_ds")!!
+        BuiltInTags.all.forEach { assertTrue(fourDs.suits(it.key, it.group), it.key) }
+        TagGroup.entries.forEach { assertTrue(fourDs.suits("my_own_tag", it), "$it") }
+    }
+
+    @Test
+    fun `stress advice stays off the good moments, and pace advice off hunger and tiredness`() {
+        val breathing = library.find("breathing_timer")!!
+        for (key in listOf("happy", "excited", "celebrating", "relieved")) {
+            assertFalse(breathing.suits(key, TagGroup.FEELINGS), "breathing_timer suits $key")
+        }
+        val pace = library.find("ask_about_pace")!!
+        for (key in listOf("hungry", "tired", "cant_focus")) {
+            assertFalse(pace.suits(key, TagGroup.BODY), "ask_about_pace suits $key")
+        }
+        assertTrue(pace.suits("withdrawal", TagGroup.BODY) && pace.suits("strong_craving", TagGroup.BODY))
+    }
+
+    @Test
+    fun `gum and lozenge advice applies only to gum and lozenges`() {
+        val gum = library.find("gum_and_drinks")!!
+        assertEquals(setOf(ProductForm.GUM, ProductForm.LOZENGE, ProductForm.MINI_LOZENGE), gum.forms)
+        assertTrue(gum.appliesTo(ProductForm.MINI_LOZENGE))
+        assertFalse(gum.appliesTo(ProductForm.MOUTH_SPRAY))
+        assertFalse(gum.appliesTo(ProductForm.POUCH))
+        val fourDs = library.find("four_ds")!!
+        assertTrue(fourDs.forms.isEmpty())
+        ProductForm.entries.forEach { assertTrue(fourDs.appliesTo(it), "$it") }
+    }
+
+    @Test
     fun `the breathing and delay timers are the two interactive strategies`() {
         val breathing = library.opening(Interactive.BREATHING_TIMER)
         val delay = library.opening(Interactive.DELAY_TIMER)
@@ -112,6 +179,11 @@ class AdviceLibraryTest {
             lines.forEach { assertTrue(it.phone != null || it.web != null, "${it.name} has no way to reach it") }
         }
         assertTrue(library.quitlinesFor(Markets.ELSEWHERE).isEmpty())
+        library.quitlines.mapNotNull { it.web }.forEach { assertTrue(it.startsWith("https://"), it) }
+        assertEquals(
+            "https://www.stopsmokingni.info/ways-quit/local-help-and-support",
+            library.quitlinesFor("GB").single { it.region == "Northern Ireland" }.web,
+        )
         val uk = library.quitlinesFor("GB").map { it.region }
         assertEquals(listOf("England", "Scotland", "Wales", "Northern Ireland"), uk)
         assertEquals("0300 123 1044", library.quitlinesFor("GB").first().phone)
@@ -132,5 +204,27 @@ class AdviceLibraryTest {
         assertThrows<IllegalArgumentException> { AdviceLibrary.parse(file(strategy("loose", tags = "[]"))) }
         assertThrows<IllegalArgumentException> { AdviceLibrary.parse(file(strategy("unsourced", sources = "[]"))) }
         assertThrows<IllegalArgumentException> { AdviceLibrary.parse(file(strategy("Not-Snake"))) }
+    }
+
+    @Test
+    fun `a file with an unknown or repeated form is refused`() {
+        val source = """{"publisher": "NHS", "title": "Page", "url": "https://www.nhs.uk/", "read": "2026-10-23"}"""
+        fun file(forms: String) = """{"version": 1, "strategies": [{"key": "formed", "title": "Title", "body": "Body.",
+            "steps": ["Step."], "tags": ["bored"], "groups": [], "forms": $forms, "sources": [$source]}], "quitlines": []}"""
+
+        assertEquals(setOf(ProductForm.GUM), AdviceLibrary.parse(file("[\"GUM\"]")).strategies.single().forms)
+        assertThrows<IllegalArgumentException> { AdviceLibrary.parse(file("[\"CHEWING_GUM\"]")) }
+        assertThrows<IllegalArgumentException> { AdviceLibrary.parse(file("[\"GUM\", \"GUM\"]")) }
+    }
+
+    @Test
+    fun `a quitline site that isn't a full https address is refused`() {
+        val source = """{"publisher": "NHS", "title": "Page", "url": "https://www.nhs.uk/", "read": "2026-10-23"}"""
+        fun file(web: String) = """{"version": 1, "strategies": [], "quitlines": [{"country": "GB", "region": null,
+            "name": "Line", "phone": null, "web": "$web", "source": $source}]}"""
+
+        assertEquals("https://example.org/help", AdviceLibrary.parse(file("https://example.org/help")).quitlines.single().web)
+        assertThrows<IllegalArgumentException> { AdviceLibrary.parse(file("example.org")) }
+        assertThrows<IllegalArgumentException> { AdviceLibrary.parse(file("http://example.org")) }
     }
 }

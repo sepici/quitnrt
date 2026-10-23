@@ -1,6 +1,7 @@
 package app.thelasthit.nrt.domain.advice
 
 import app.thelasthit.nrt.domain.log.TagGroup
+import app.thelasthit.nrt.domain.product.ProductForm
 import kotlinx.serialization.Serializable
 
 /** The shape of `advice/strategies.json`. */
@@ -18,6 +19,8 @@ internal data class AdviceFile(
         val steps: List<String>,
         val tags: List<String>,
         val groups: List<TagGroup>,
+        /** Left out when the strategy is about every form. */
+        val forms: List<ProductForm> = emptyList(),
         val interactive: Interactive? = null,
         val sources: List<SourceEntry>,
     )

@@ -86,9 +86,12 @@
     "Remind yourself it will pass."
    ],
    "tags": [
+    "stressed",
+    "anxious",
+    "angry",
+    "after_argument",
     "strong_craving",
-    "withdrawal",
-    "anxious"
+    "withdrawal"
    ],
    "groups": [
     "BODY"
@@ -133,7 +136,7 @@
   {
    "key": "reasons_list",
    "title": "Write down your reasons",
-   "body": "On a hard day it helps to see, in your own words, why you're coming off NRT.",
+   "body": "When an urge comes, it helps to see, in your own words, why you're coming off NRT.",
    "steps": [
     "Write 3 reasons you want to stop using NRT.",
     "Keep them where you'll see them, like your lock screen or the fridge.",
@@ -179,13 +182,7 @@
    "tags": [
     "low"
    ],
-   "groups": [
-    "FEELINGS",
-    "ROUTINE",
-    "PEOPLE",
-    "BODY",
-    "HABIT"
-   ],
+   "groups": [],
    "sources": [
     {
      "publisher": "NHS Better Health",
@@ -249,9 +246,7 @@
     "strong_craving",
     "before_bed"
    ],
-   "groups": [
-    "FEELINGS"
-   ],
+   "groups": [],
    "interactive": "BREATHING_TIMER",
    "sources": [
     {
@@ -279,9 +274,11 @@
    ],
    "tags": [
     "stressed",
+    "anxious",
     "angry",
     "after_argument",
     "after_meal",
+    "coffee_tea",
     "work_break",
     "withdrawal",
     "bored",
@@ -317,6 +314,7 @@
     "stressed",
     "anxious",
     "angry",
+    "after_argument",
     "before_bed"
    ],
    "groups": [],
@@ -384,10 +382,10 @@
      "read": "2026-10-23"
     },
     {
-     "publisher": "HSE Ireland",
-     "title": "Cravings and withdrawal when you stop smoking",
-     "url": "https://www2.hse.ie/living-well/quit-smoking/get-help-to-quit/cravings-withdrawal/",
-     "read": "2026-10-23"
+     "publisher": "Smokefree.gov, National Cancer Institute",
+     "title": "How to stay smokefree",
+     "url": "https://smokefree.gov/challenges-when-quitting/stick-with-it/how-to-stay-smokefree",
+     "read": "2026-10-24"
     }
    ]
   },
@@ -397,8 +395,8 @@
    "body": "Cutting down is worth marking. Spending what you save on NRT gives each week something to show for it.",
    "steps": [
     "Work out what a week of NRT costs you.",
-    "Each week you cut down, put the difference aside.",
-    "Choose something to spend it on when the plan ends."
+    "Each week you cut down, spend some of the difference on a small treat.",
+    "Save the rest for something bigger when the plan ends."
    ],
    "tags": [
     "happy",
@@ -409,16 +407,16 @@
    "groups": [],
    "sources": [
     {
-     "publisher": "CDC",
-     "title": "7 common withdrawal symptoms",
-     "url": "https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/7-common-withdrawal-symptoms/index.html",
-     "read": "2026-10-23"
+     "publisher": "Smokefree Veterans, National Cancer Institute",
+     "title": "Celebrate successes",
+     "url": "https://veterans.smokefree.gov/quit-smoking-vet/celebrate-successes",
+     "read": "2026-10-24"
     },
     {
-     "publisher": "HSE Ireland",
-     "title": "Cravings and withdrawal when you stop smoking",
-     "url": "https://www2.hse.ie/living-well/quit-smoking/get-help-to-quit/cravings-withdrawal/",
-     "read": "2026-10-23"
+     "publisher": "Quit, Cancer Council Victoria",
+     "title": "Your quit-for-good checklist",
+     "url": "https://www.quit.org.au/en/staying-quit/your-quit-for-good-checklist",
+     "read": "2026-10-24"
     }
    ]
   },
@@ -574,14 +572,15 @@
   {
    "key": "leave_the_table",
    "title": "Get up from the table",
-   "body": "The end of a meal is a common cue. Doing something different straight away breaks it.",
+   "body": "The end of a meal, or of a coffee or tea, is a common cue. Doing something different straight away breaks it.",
    "steps": [
-    "Get up as soon as you've finished eating.",
+    "Get up as soon as you've finished.",
     "Brush your teeth or chew ordinary sugar-free gum.",
     "Clear the table, wash up or go for a short walk."
    ],
    "tags": [
-    "after_meal"
+    "after_meal",
+    "coffee_tea"
    ],
    "groups": [],
    "sources": [
@@ -607,6 +606,11 @@
     "after_meal"
    ],
    "groups": [],
+   "forms": [
+    "GUM",
+    "LOZENGE",
+    "MINI_LOZENGE"
+   ],
    "sources": [
     {
      "publisher": "CDC",
@@ -789,7 +793,7 @@
    "body": "If a dose usually follows a workout, fill those minutes with water and a stretch instead.",
    "steps": [
     "Drink a full glass of water straight after.",
-    "Stretch for a few minutes while your breathing settles.",
+    "Stretch for about 5\u00a0minutes to cool down.",
     "Then check whether the urge is still there."
    ],
    "tags": [
@@ -797,6 +801,12 @@
    ],
    "groups": [],
    "sources": [
+    {
+     "publisher": "NHS",
+     "title": "How to stretch after exercising",
+     "url": "https://www.nhs.uk/live-well/exercise/how-to-stretch-after-exercising/",
+     "read": "2026-10-24"
+    },
     {
      "publisher": "NHS",
      "title": "Self-help tips to fight tiredness",
@@ -951,9 +961,7 @@
     "withdrawal",
     "strong_craving"
    ],
-   "groups": [
-    "BODY"
-   ],
+   "groups": [],
    "sources": [
     {
      "publisher": "NHS Better Health",
@@ -1108,7 +1116,7 @@
    "region": "Northern Ireland",
    "name": "Local stop smoking services",
    "phone": null,
-   "web": "stopsmokingni.info",
+   "web": "https://www.stopsmokingni.info/ways-quit/local-help-and-support",
    "source": {
     "publisher": "NHS",
     "title": "NHS stop smoking services help you quit",

@@ -2,6 +2,7 @@ package app.thelasthit.nrt.domain.advice
 
 import app.thelasthit.nrt.domain.log.BuiltInTags
 import app.thelasthit.nrt.domain.log.TagGroup
+import app.thelasthit.nrt.domain.product.ProductForm
 import kotlinx.serialization.json.Json
 import java.time.LocalDate
 import java.util.Locale
@@ -67,6 +68,8 @@ class AdviceLibrary internal constructor(
             require(unknown.isEmpty()) { "$key names tags that don't exist: $unknown" }
             require(entry.tags.toSet().size == entry.tags.size) { "$key lists a tag twice" }
             require(entry.groups.toSet().size == entry.groups.size) { "$key lists a group twice" }
+            // Form names are checked as the file is read: one that isn't a ProductForm fails there.
+            require(entry.forms.toSet().size == entry.forms.size) { "$key lists a form twice" }
             require(entry.sources.isNotEmpty()) { "$key has no source" }
             return Strategy(
                 key = key,
@@ -75,6 +78,7 @@ class AdviceLibrary internal constructor(
                 steps = entry.steps,
                 tags = entry.tags.toSet(),
                 groups = entry.groups.toSet(),
+                forms = entry.forms.toSet(),
                 interactive = entry.interactive,
                 sources = entry.sources.map { source(it, key) },
             )
@@ -85,6 +89,9 @@ class AdviceLibrary internal constructor(
             require(Regex("[A-Z]{2}").matches(entry.country)) { "Quitline country \"${entry.country}\" isn't an ISO code" }
             require(entry.name.isNotBlank()) { "The $where quitline needs a name" }
             require(!entry.phone.isNullOrBlank() || !entry.web.isNullOrBlank()) { "The $where quitline needs a number or a site" }
+            require(entry.web == null || entry.web.startsWith("https://")) {
+                "The $where quitline has a site that isn't an https address: ${entry.web}"
+            }
             return Quitline(
                 country = entry.country,
                 region = entry.region,
@@ -107,7 +114,8 @@ class AdviceLibrary internal constructor(
  * One way through a moment, such as box breathing or swapping the morning coffee.
  *
  * A strategy suits the tags it names and every tag in the groups it names, which takes in the
- * tags people add themselves. One that names every group suits any time ([suitsAnyTime]).
+ * tags people add themselves ([suits]). One that names every group suits any time ([suitsAnyTime]).
+ * A group is only named when the text fits every tag in it, the happy ones included.
  */
 data class Strategy(
     /** Stable, in lower_snake_case. Anything stored about a strategy uses this. */
@@ -121,12 +129,20 @@ data class Strategy(
     /** Built-in tag keys, from [BuiltInTags]. */
     val tags: Set<String>,
     val groups: Set<TagGroup>,
+    /** The product forms the advice is about, such as gum and lozenges, or empty for every form. */
+    val forms: Set<ProductForm>,
     /** What the strategy opens besides its text, or null for text only. */
     val interactive: Interactive?,
     /** Where the advice comes from. Never empty. */
     val sources: List<AdviceSource>,
 ) {
     val suitsAnyTime: Boolean get() = groups.containsAll(TagGroup.entries)
+
+    /** Whether this suits the tag with [key] in [group], a built-in tag or one people added. */
+    fun suits(key: String, group: TagGroup): Boolean = key in tags || group in groups
+
+    /** Whether this applies to someone using [form]. */
+    fun appliesTo(form: ProductForm): Boolean = forms.isEmpty() || form in forms
 }
 
 /** The two strategies that are more than text. */
@@ -151,6 +167,7 @@ data class Quitline(
     val region: String?,
     val name: String,
     val phone: String?,
+    /** A full https address, which the app can open as a link. */
     val web: String?,
     val source: AdviceSource,
 )

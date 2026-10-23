@@ -1,5 +1,7 @@
 package app.thelasthit.nrt.domain.advice
 
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -36,14 +38,33 @@ class AdviceCopyTest {
         )
     }
 
-    @Test
-    fun `none of the banned phrases`() {
+    private val bannedPatterns: List<Pair<String, Regex>> by lazy {
         val list = javaClass.getResourceAsStream("/copy-lint/banned.txt")?.bufferedReader()?.use { it.readLines() }
             ?: error("copy-lint/banned.txt isn't on the test classpath")
         val banned = list.map { it.trim() }.filter { it.isNotEmpty() && !it.startsWith("#") }
         assertTrue(banned.size > 20, "only ${banned.size} banned phrases")
-        val patterns = banned.map { it to Regex("\\b" + Regex.escape(it) + "\\b", RegexOption.IGNORE_CASE) }
-        assertNone(problems { text -> patterns.firstOrNull { (_, regex) -> regex.containsMatchIn(text) }?.let { "\"${it.first}\"" } })
+        banned.map { it to Regex("\\b" + Regex.escape(it) + "\\b", RegexOption.IGNORE_CASE) }
+    }
+
+    /**
+     * The banned phrase in [text], if any. The list is written with straight apostrophes, so curly
+     * ones are read as straight first, or "let’s" would get past "let's".
+     */
+    private fun bannedPhraseIn(text: String): String? {
+        val plain = text.replace(Char(0x2019), '\'').replace(Char(0x2018), '\'')
+        return bannedPatterns.firstOrNull { (_, regex) -> regex.containsMatchIn(plain) }?.first
+    }
+
+    @Test
+    fun `none of the banned phrases`() {
+        assertNone(problems { text -> bannedPhraseIn(text)?.let { "\"$it\"" } })
+    }
+
+    @Test
+    fun `a banned phrase is caught with a curly apostrophe too`() {
+        assertEquals("let's", bannedPhraseIn("Let${Char(0x2019)}s go."))
+        assertEquals("you've got this", bannedPhraseIn("You${Char(0x2019)}ve got this."))
+        assertNull(bannedPhraseIn("Take 20 slow breaths."))
     }
 
     @Test
