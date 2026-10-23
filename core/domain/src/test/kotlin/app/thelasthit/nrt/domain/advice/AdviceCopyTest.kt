@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 /**
- * The advice is app text, so it follows docs/STYLE.md. checkCopy only reads strings.xml, so these
+ * The advice is app text, so it follows docs/STYLE.md. checkCopy only reads the strings files, so these
  * tests apply its rules, and a few more of STYLE's, to the bundled strategies.
  */
 class AdviceCopyTest {

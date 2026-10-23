@@ -2,7 +2,8 @@
 // no em or en dashes, and none of the phrases listed in config/copy-lint/banned.txt.
 
 val stringFiles = fileTree(rootDir) {
-    include("**/src/*/res/values*/strings.xml")
+    // strings.xml plus each feature's own file, such as strings_plan.xml.
+    include("**/src/*/res/values*/strings*.xml")
     exclude("**/build/**")
 }
 val bannedList = file("config/copy-lint/banned.txt")

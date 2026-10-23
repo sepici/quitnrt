@@ -8,9 +8,9 @@ Last updated: 24 October 2026, while the build runs unattended towards a testing
 |---|---|
 | 0. Foundation and direction | Done. Gradle set-up, CI, copy lint, style guide, design direction chosen, first creature signed off |
 | 1. Logging | **Done.** Domain rules, catalogue, data layer, backup, theme, sprites, plus **onboarding, Today, the log sheet, History, Settings and the lair**, reviewed, with the owner's calls on the reviews applied. |
-| 2. Insights | **Slices 1 to 6 done:** the stats, every Insights section and the History filter. Slice 7, the reviews, is next. |
+| 2. Insights | **Done.** The stats, every Insights section and the History filter, reviewed by the copy agent and the fresh-eyes reviewer, with their findings fixed. Calls that touch signed-off designs wait for the owner. |
 | 3. Programme | **Slice 1 in progress.** The rules are in `domain/programme`, being reworked for the mix-based taper (P3-6). The data for phases 3 to 5 comes next, in one migration. Mockups have the owner's green light, and are being updated for the mix. |
-| 4. Demon and achievements | **Art done, waiting for the owner's look:** the seven other creatures with defeat frames for all eight, and the gear and badge icons. |
+| 4. Demon and achievements | **Art and rules done.** The seven other creatures with defeat frames for all eight, the gear and badge icons (waiting for the owner's look), and the game rules in `domain/game`. |
 | 5. Advice | **Slice 1 done:** the content library. The rules are being built. Mockups have the owner's green light. |
 | 6. Quick-log | **Slice 1 done:** the matcher and the deep-link parser. Links and shortcuts are being built. |
 | 7, 9 | Not started, except the release build (phase 9), which is being built. Wear OS (8) comes after release. |
@@ -37,6 +37,17 @@ Nothing blocks the build. These are worth a look when you're next in:
     - A breathing session counts towards the badges when it runs to the end, in whole rounds. Pausing is fine.
     - The screen stays on while a timer runs. The delay timer keeps counting from its start if you leave, and buzzes at the end. There's no ongoing notification until phase 6.
     - The breathing animation sits on the hero green block, not the success green.
+- **Phase 2 review calls** that would change signed-off designs, so they wait for you (recommendation in brackets):
+  - The green on selected states and primary buttons, which the reviewer read against "green only means at or under" (keep it: it's the hero's forest green, not the success green; look again once phase 3 puts both on screen).
+  - Heat-map shading, stretched from the lightest day to the heaviest, gives decimal step labels and makes 12 and 14 mg look like opposite ends (whole-mg steps of 1, 2 or 5 mg from the lowest day, and dose steps of 1 to 5+ on the hour map).
+  - The History filter sheet's product row scrolls and hides the last chips (wrap it, since it lists only products with doses).
+  - Body and Habit share a row in the filter sheet (give each its own).
+  - By group shows five tiles, most at 0% (show only groups with doses, and one line for the rest).
+  - Single-choice chips show a check mark that shifts the row (drop the check there; keep it on multi-select tags).
+  - Under about 20 doses, tag and group shares read as percentages (show counts, "3 of 16 doses").
+  - History rows read "13:40, After a meal" (a middle dot: "13:40 · After a meal").
+  - Left as they are: icons in tinted circles and centred empty states until there are pixel product icons, habit tiles, full day headers under a filter, full-bleed day rules, and the share bars' edges.
+- **Badge thresholds and gear (P4-4, tuned 24 October):** streaks are now 10, 21 and 40 days, the last weeks-met tier is 10, and "Logged on 30 days" is 28. The war hammer comes at half the programme's hits and the lightning bow when the final taper week is met, so gear keeps its order at every length. PLAN §8 has the new numbers. A week under its allowance needs every day logged, so a day with genuinely nothing can't be logged and that week won't count as under.
 - **The art (P4-1):** `art/previews/line-up.png` and the creature sheets, plus `icons-gear.png`, `icons-badges.png` and `icons-3x.png`. Once the creatures are signed off, `Creature.isDrawn` flips and onboarding offers all eight.
 - **Before release:** review the advice content (P5-1) and the sounds and haptics on your phone.
 
@@ -234,9 +245,22 @@ From PLAN §10 and §19, agreed with the owner on 23 October.
    - A filter button in History's top bar opens a sheet with one product or one tag. Only products and tags with doses are listed, most used first, and tags fold after 4 per group behind "More".
    - Under a filter, a chip names it and clears it, with the count beside it. Days with no match are hidden, day totals count only the matches, and day lines read "1 of 5 doses". A page is 30 days with a match.
    - `HistoryFilter.matches` (`domain/log`) is the rule, and `EntryRepositoryTest` checks the SQL in `observeMatching` against it.
-7. Copy and fresh-eyes reviews.
+7. Copy and fresh-eyes reviews. Done on 24 October.
+   - The copy agent's wording throughout: "From 1 November, you'll see changes against the week before.", "First dose and gaps, against the 30 days before.", "Used on 6 of 29 days", "mg from gum", "Each day runs from 04:00".
+   - Tips sit under a calendar row, with a pointer and a tight shadow. A picked day has a ring inside its square, so only today has the outer ring. The calendar runs edge to edge in 48 dp rows, and the 1st puts its month on a line of its own.
+   - The hour map dashes weekdays the window hasn't reached (`HourHeatMap.daysOf`), and a long press then a slide moves the pick.
+   - Days with no doses are a tick on the baseline. Averages keep one decimal (`Dose.averageText`).
+   - At large font the range buttons go two by two, the product chips wrap, and habit tiles stack.
+   - Every sheet has the mockups' 56% scrim, plus a hairline edge in dark mode (`sheetScrim`, `Modifier.sheetEdge`).
 
 ## Phases 3 to 6: built so far (24 October)
+
+- **Game rules** (`domain/game`), on the game's own inputs (`GameRecord`, `GameProgramme`, `GameWeek`, `BreathingSession`), so the programme can be mapped onto them:
+  - `HitLedger`: hits for weeks met and catch-up, a hit costs 10 HP, and the 5× attack costs 5 banked hits for 50. HP is max − 10 × spent, and 0 is the defeat. Only weeks earn hits, so no achievement deals damage.
+  - `AchievementRules`: a rule for every badge. `Gear.unlockedBy` and `Loadout`: only unlocked gear can be equipped.
+  - `NewUnlocks.since` (P4-2): what's new against the stored keys, as one summary card when more than 3 arrive at once.
+  - PLAN's two 12-week runs end at exactly 0 HP.
+  - For the mapping: set `endedOn` from an abandoned programme and keep every planned week; leave restored entries (`createdAt` set at restore) out of `GameRecord.loggedAt`, or a restore would unlock "Honest ledger".
 
 - **Programme rules** (`domain/programme`): the baseline, the plan builder, the clock, results with the 24-hour grace period, carry on, repeat, overtime, hits and HP. Being reworked for the mix-based taper (P3-6). The data layer must call `Programme.settle` for due results before any entry write, since the domain can't tell when an entry was written: that ordering is what keeps a result fixed once it's in.
 - **Creatures** (`resources/creatures/`): the imp, bear, kraken, goblin, slime, wraith and serpent, each with idle1, idle2, hurt, rough, barely and defeat1 to defeat4, in the dragon's four variants. The dragon gained defeat frames; its signed-off frames are unchanged.

@@ -267,16 +267,16 @@ Achievements unlock **pixel badges**, and some also unlock **gear**. They never 
 ### 8.1 Badges
 | Group | Achievements |
 |---|---|
-| **Logging** | First entry. Logged on 3, 7, 14, 30, 60 and 90 days. Logging streaks of 7, 14 and 30 days. Baseline done. "Honest ledger" (backdated a forgotten entry). Tagged 25 and 100 entries. |
-| **Matching the plan** | First day within the daily guide. First week met. 3, 6 and 9 weeks met. "Back in step" (caught up after a missed week). Halfway (daily guide at half the baseline or less). Down a strength (e.g. 4 mg to 2 mg gum). Final taper week reached. |
+| **Logging** | First entry. Logged on 3, 7, 14, 28, 60 and 90 days. Logging streaks of 10, 21 and 40 days. Baseline done. "Honest ledger" (backdated a forgotten entry). Tagged 25 and 100 entries. |
+| **Matching the plan** | First day within the daily guide. First week met. 3, 6 and 10 weeks met. "Back in step" (caught up after a missed week). Halfway (daily guide at half the baseline or less). Down a strength (e.g. 4 mg to 2 mg gum). Final taper week reached. |
 | **Beating the plan** | A week at least 10% under its allowance. 5 days under the daily guide in one week. 3 weeks in a row under the allowance. |
 | **Habits** | First dose 30 minutes later than your baseline average, across a whole week. Average gap between doses 30 minutes longer than baseline. Top trigger's share down by a third against baseline. 1, 10 and 25 breathing sessions done. |
 | **The end** | Demon defeated. |
 
-The exact thresholds will be tuned during building so they come at a steady pace across a typical 12-week programme.
+The thresholds were tuned on 24 October (P4-4) by simulating 12-week runs day by day (`UnlockPaceTest`), so badges come at a steady pace: at most 14 days without one, plus 7 for each missed week in the gap, and no more than 3 in a day or 6 in a week. PLAN's first numbers bunched the streaks with the logged-days tiers and left a gap at the end. A day counts once its 24-hour late-log window is over, and the weeks-under badges need every day of the week logged.
 
 ### 8.2 Gear
-Gear changes how your hits look and sound and is purely cosmetic. Unlocks run roughly in order of difficulty: wooden stick (start), wooden sword, iron sword, axe, war hammer, fire staff, lightning bow and legendary blade. You equip whatever you've unlocked in the lair.
+Gear changes how your hits look and sound and is purely cosmetic. Unlocks run roughly in order of difficulty: wooden stick (start), wooden sword (first day within the guide), iron sword (first week met), axe (3 weeks met), war hammer (half the programme's hits earned), fire staff (final taper week reached), lightning bow (final taper week met) and legendary blade (demon defeated). That order holds for every programme length. You equip whatever you've unlocked in the lair.
 
 ### 8.3 Achievement unlock moment
 A small pixel toast with the badge and its name. Gear unlocks get a short "new gear" card. Each one is also logged in a trophy shelf in the lair.
