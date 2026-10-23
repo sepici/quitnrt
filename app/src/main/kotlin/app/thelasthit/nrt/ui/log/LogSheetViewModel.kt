@@ -77,6 +77,9 @@ class LogSheetViewModel(
 
     private val form = MutableStateFlow(LogForm())
 
+    /** The edited entry's product, kept on the sheet even if it has since been hidden. */
+    private val editingProduct = MutableStateFlow<UserProduct?>(null)
+
     /** When the sheet opened. "Now" means this until the user saves. */
     private val openedAt = MutableStateFlow(graph.clock.instant())
 
@@ -95,7 +98,9 @@ class LogSheetViewModel(
 
     val state: StateFlow<LogSheetState?> = combine(
         form,
-        combine(graph.products.quickLog, graph.products.all) { quick, all -> quick to all },
+        combine(graph.products.quickLog, graph.products.all, editingProduct) { quick, all, editing ->
+            quick to (all + listOfNotNull(editing)).distinctBy { it.id }
+        },
         tagGroups,
         todayTotal,
         openedAt,
@@ -116,12 +121,15 @@ class LogSheetViewModel(
     /** Starts a fresh dose, optionally with a product picked, such as from a long press on a pill. */
     fun openNew(productId: String? = null) {
         openedAt.value = graph.clock.instant()
+        editingProduct.value = null
         form.value = LogForm(productId = productId)
     }
 
     /** Opens an existing entry for editing. */
     fun openEdit(entry: Entry) {
         openedAt.value = graph.clock.instant()
+        editingProduct.value = null
+        viewModelScope.launch { editingProduct.value = graph.products.get(entry.productId) }
         form.value = LogForm(
             editing = entry,
             productId = entry.productId,

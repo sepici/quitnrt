@@ -36,6 +36,12 @@ data class Entry(
 
     /** Patches release steadily, so they stay out of "last dose", spacing and trigger stats. */
     val isBackground: Boolean get() = form.isBackground
+
+    /** The date on the clock when it was taken, in its own zone. */
+    val calendarDate: LocalDate get() = occurredAt.atZone(zone).toLocalDate()
+
+    /** Taken after midnight but before the day start, so it counts toward the evening before. */
+    val countsTowardEveningBefore: Boolean get() = calendarDate != logicalDate
 }
 
 /** Whether a dose was taken on schedule or because of a craving. */

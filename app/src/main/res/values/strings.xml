@@ -169,6 +169,28 @@
     <string name="demon_hp">HP</string>
     <string name="demon_band_description">%1$s, lurking until your plan starts. Open the lair</string>
 
+    <!-- Entries, wherever they're listed -->
+    <string name="entry_title_quantity">%1$s, %2$s</string>
+    <string name="entry_time_next_day">%1$s %2$s</string>
+
+    <!-- History -->
+    <string name="history_title">History</string>
+    <string name="history_day_start">Each day runs from %1$s.</string>
+    <string name="history_today">Today</string>
+    <plurals name="history_day_meta">
+        <item quantity="one">%1$s, %2$d\u00A0dose</item>
+        <item quantity="other">%1$s, %2$d\u00A0doses</item>
+    </plurals>
+    <string name="history_so_far">so far</string>
+    <string name="history_day_description">%1$s, %2$s\u00A0mg</string>
+    <string name="history_today_description">Today, %1$s\u00A0mg so far</string>
+    <string name="history_delete">Delete</string>
+    <string name="history_deleted">Deleted %1$s\u00A0mg %2$s from %3$s</string>
+    <string name="history_saved">Changes saved</string>
+    <string name="history_show_earlier">Show earlier days</string>
+    <string name="history_empty_title">Nothing logged yet</string>
+    <string name="history_empty_body">Your first dose will show up here, grouped by day with a total for each.</string>
+
     <!-- Log sheet -->
     <string name="log_title">Log a dose</string>
     <string name="log_title_edit">Edit dose</string>

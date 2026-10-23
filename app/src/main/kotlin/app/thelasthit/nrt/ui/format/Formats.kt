@@ -45,6 +45,10 @@ fun DateTimeFormatter.formatAt(instant: Instant, zone: ZoneId = ZoneId.systemDef
 /** "Friday 23 October", as the Today title shows it. */
 val DayTitleFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.UK)
 
+/** "22 October", and with the year for another year, as History's day headers show them. */
+val DayMonthFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM", Locale.UK)
+val DayMonthYearFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
+
 /** "Wed 21 Oct", for a picked time on the log sheet. */
 val ShortDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE d MMM", Locale.UK)
 

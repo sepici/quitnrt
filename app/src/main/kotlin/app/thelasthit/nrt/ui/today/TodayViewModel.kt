@@ -13,9 +13,9 @@ import app.thelasthit.nrt.domain.log.LabelWarning
 import app.thelasthit.nrt.domain.log.WeekSummary
 import app.thelasthit.nrt.domain.product.PillLabel
 import app.thelasthit.nrt.domain.product.UserProduct
+import app.thelasthit.nrt.ui.minuteTicks
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -72,14 +71,8 @@ class TodayViewModel(
     val duplicate: StateFlow<PendingDuplicate?> = _duplicate.asStateFlow()
     val logged: Flow<Logged> = _logged.receiveAsFlow()
 
-    /** Every minute on the minute, for "1 h 25 min ago" and for the day rolling over. */
-    private val now: StateFlow<Instant> = flow {
-        while (true) {
-            val instant = clock.instant()
-            emit(instant)
-            delay(60_000 - instant.toEpochMilli() % 60_000)
-        }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), clock.instant())
+    private val now: StateFlow<Instant> = minuteTicks(clock)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), clock.instant())
 
     private val today: Flow<LocalDate> = combine(now, graph.settings.settings) { instant, settings ->
         settings.dayBoundary.logicalDate(instant, zone())
@@ -93,13 +86,9 @@ class TodayViewModel(
     }
 
     private val lists: Flow<Triple<List<QuickLogPill>, Map<String, String>, Map<String, TagEntity>>> =
-        combine(graph.products.quickLog, graph.products.all, graph.tags.all) { quickLog, all, tags ->
+        combine(graph.products.quickLog, graph.products.shortNames, graph.tags.all) { quickLog, names, tags ->
             val labels = PillLabel.of(quickLog)
-            Triple(
-                quickLog.map { QuickLogPill(it, labels.getValue(it.id)) },
-                all.associate { it.id to it.shortName } + quickLog.associate { it.id to it.shortName },
-                tags.associateBy { it.key },
-            )
+            Triple(quickLog.map { QuickLogPill(it, labels.getValue(it.id)) }, names, tags.associateBy { it.key })
         }
 
     val state: StateFlow<TodayState?> = combine(now, days, lists, graph.settings.settings, labelNote) { instant, (day, week), (pills, names, tags), settings, note ->

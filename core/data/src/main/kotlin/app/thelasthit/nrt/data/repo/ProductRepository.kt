@@ -25,6 +25,13 @@ class ProductRepository(
 ) {
     val all: Flow<List<UserProduct>> = dao.observeAll().map { list -> list.map { it.toDomain() } }
 
+    /**
+     * Every product's short name ("Nicorette gum"), hidden ones included, so an old entry still
+     * reads well after its product is hidden.
+     */
+    val shortNames: Flow<Map<String, String>> =
+        dao.observeAllIncludingHidden().map { list -> list.associate { it.id to it.shortName } }
+
     /** The products on the quick log, in the user's order. */
     val quickLog: Flow<List<UserProduct>> = dao.observeQuickLog().map { list -> list.map { it.toDomain() } }
 

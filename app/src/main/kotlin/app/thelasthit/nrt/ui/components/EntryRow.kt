@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -23,11 +24,18 @@ import app.thelasthit.nrt.domain.log.Entry
 import app.thelasthit.nrt.ui.format.formatAt
 import app.thelasthit.nrt.ui.format.icon
 import app.thelasthit.nrt.ui.format.mgText
+import app.thelasthit.nrt.ui.format.plural
 import app.thelasthit.nrt.ui.format.rememberTimeFormatter
 import app.thelasthit.nrt.ui.format.tagText
 import app.thelasthit.nrt.ui.theme.LastHit
+import java.time.format.TextStyle
+import java.util.Locale
 
-/** One logged dose: the product, the time with its tags, and the mg. */
+/**
+ * One logged dose: the product (with the amount when it's more than one), the time with its
+ * tags, and the mg. A dose after midnight that counts toward the evening before names its day:
+ * "01:20 Friday".
+ */
 @Composable
 fun EntryRow(
     entry: Entry,
@@ -36,7 +44,17 @@ fun EntryRow(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
 ) {
-    val time = rememberTimeFormatter().formatAt(entry.occurredAt, entry.zone)
+    val clock = rememberTimeFormatter().formatAt(entry.occurredAt, entry.zone)
+    val time = if (entry.countsTowardEveningBefore) {
+        stringResource(R.string.entry_time_next_day, clock, entry.calendarDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.UK))
+    } else {
+        clock
+    }
+    val title = if (entry.quantity > 1) {
+        stringResource(R.string.entry_title_quantity, name, pluralStringResource(entry.unit.plural, entry.quantity, entry.quantity))
+    } else {
+        name
+    }
     val tagNames = entry.tagKeys.map { key -> tags[key]?.let { tagText(it) } ?: tagText(key) }.sorted()
     val detail = (listOf(time) + tagNames).joinToString(", ")
     Row(
@@ -51,7 +69,7 @@ fun EntryRow(
         IconTile(entry.form.icon)
         Column(Modifier.weight(1f)) {
             Text(
-                name,
+                title,
                 style = LastHit.type.title.copy(fontWeight = FontWeight.ExtraBold),
                 color = LastHit.colors.text,
                 maxLines = 2,

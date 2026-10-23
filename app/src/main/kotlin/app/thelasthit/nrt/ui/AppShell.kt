@@ -34,6 +34,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import app.thelasthit.nrt.R
+import app.thelasthit.nrt.ui.history.HistoryScreen
 import app.thelasthit.nrt.ui.theme.LastHit
 import app.thelasthit.nrt.ui.today.TodayScreen
 
@@ -113,7 +114,11 @@ fun AppShell() {
                     onOpenLair = { navController.navigateTo(TopLevelDestination.Lair) },
                 )
             }
-            TopLevelDestination.entries.filter { it != TopLevelDestination.Today }.forEach { destination ->
+            composable(TopLevelDestination.History.route) {
+                HistoryScreen(snackbars = snackbars)
+            }
+            val placeholders = listOf(TopLevelDestination.Insights, TopLevelDestination.Plan, TopLevelDestination.Lair)
+            placeholders.forEach { destination ->
                 composable(destination.route) {
                     PlaceholderScreen(title = stringResource(destination.label))
                 }

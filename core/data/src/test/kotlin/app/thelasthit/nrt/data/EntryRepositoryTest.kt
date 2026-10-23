@@ -140,4 +140,15 @@ class EntryRepositoryTest {
         data.entries.recalculateLogicalDays(DayBoundary(earlier))
         assertEquals(today, data.entries.get(entry.id)?.logicalDate)
     }
+
+    @Test
+    fun theFirstDaySkipsDeletedEntries() = runTest {
+        assertNull(data.entries.observeFirstDay().first())
+        val old = saved(LogRequest(gum, at = london("2026-10-20T09:00")))
+        saved(LogRequest(gum, at = london("2026-10-22T09:00")))
+        assertEquals(LocalDate.parse("2026-10-20"), data.entries.observeFirstDay().first())
+
+        data.entries.delete(old.entry.id)
+        assertEquals(LocalDate.parse("2026-10-22"), data.entries.observeFirstDay().first())
+    }
 }

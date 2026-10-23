@@ -130,6 +130,9 @@ class EntryRepository(
     fun observeRange(from: LocalDate, to: LocalDate): Flow<List<Entry>> =
         dao.observeDays(from.toEpochDay(), to.toEpochDay()).map { list -> list.map { it.toDomain() } }
 
+    /** The first logical day with a live entry, or null when nothing is logged. */
+    fun observeFirstDay(): Flow<LocalDate?> = dao.observeFirstDay().map { day -> day?.let(LocalDate::ofEpochDay) }
+
     /** Run after the day start changes: moves every entry to the day it now belongs to. */
     suspend fun recalculateLogicalDays(boundary: DayBoundary) {
         dao.allLive().forEach { entity ->

@@ -63,4 +63,14 @@ class ProductRepositoryTest {
         assertEquals(DoseUnit.POUCH, pouch.unit)
         assertEquals(pouch, data.products.get(pouch.id))
     }
+
+    @Test
+    fun shortNamesCoverEveryProduct() = runTest {
+        data.products.addFromCatalogue("nicorette-gum-uk-2mg")
+        data.products.addFromCatalogue("nicorette-quickmist-uk-1mg", addToQuickLog = false)
+        assertEquals(
+            mapOf("nicorette-gum-uk-2mg" to "Nicorette gum", "nicorette-quickmist-uk-1mg" to "QuickMist"),
+            data.products.shortNames.first(),
+        )
+    }
 }

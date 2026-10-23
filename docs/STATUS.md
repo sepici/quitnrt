@@ -1,16 +1,16 @@
 # Status and handover
 
-Last updated: 23 October 2026, after Today and the log sheet were built in the local session.
+Last updated: 23 October 2026, after Today, the log sheet and History were built in the local session.
 
 ## Where things are
 
 | Phase | State |
 |---|---|
 | 0. Foundation and direction | Done. Gradle set-up, CI, copy lint, style guide, design direction chosen, first creature signed off |
-| 1. Logging | **Over half done.** Domain rules, catalogue, data layer, backup, theme, sprites and settings, plus app wiring, **Today and the log sheet**. History, onboarding, Settings and the lair are next. |
+| 1. Logging | **Mostly done.** Domain rules, catalogue, data layer, backup, theme, sprites and settings, plus app wiring, **Today, the log sheet and History**. Onboarding, Settings and the lair are next. |
 | 2 to 9 | Not started |
 
-The full check passes locally: copy rules, 75 domain tests, 23 data tests, 19 app UI, screenshot and format tests, debug APK, Android lint.
+The full check passes locally: copy rules, 79 domain tests, 25 data tests, 30 app UI, screenshot and format tests, debug APK, Android lint.
 
 ## Decisions made since `docs/PLAN.md` was written
 
@@ -80,10 +80,12 @@ Build against the B mockups. All strings go in `strings.xml` and pass `checkCopy
    - Tags put the most used in the last 30 days first (`TagOrder`), and each group folds after 4 behind "More". Selected tags always show.
    - "Pick a time" is a date then a time. Days after today can't be picked, and a future time is flagged at once.
    - The duplicate question is "Logged twice in a minute. Keep both?", with "Keep both" or "Discard this one".
-5. **History:**
-   - entries grouped by logical day with totals
-   - tap to edit (the log sheet in edit mode)
-   - swipe to delete, with Undo
+5. **History.** Done, from the signed-off `history*` mockups, without the guide ticks or filter.
+   - Entries are grouped by logical day, each with its total ("so far" for today), 30 days at a time with "Show earlier days".
+   - Tap an entry to edit it in the log sheet. Its time stays, and a hidden product can still be edited.
+   - Swipe left to delete, with Undo. Screen readers get Delete as an action.
+   - A dose after midnight that counts toward the evening before names its clock day: "01:20 Friday".
+   - Rows show the amount when it's more than one: "QuickMist, 2 sprays".
 6. **Settings:**
    - products: add from the catalogue or by hand, hide
    - quick log: add, remove, reorder

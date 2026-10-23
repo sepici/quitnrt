@@ -35,6 +35,9 @@ interface ProductDao {
     @Query("SELECT * FROM products")
     suspend fun allIncludingHidden(): List<ProductEntity>
 
+    @Query("SELECT * FROM products")
+    fun observeAllIncludingHidden(): Flow<List<ProductEntity>>
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertIgnoringExisting(products: List<ProductEntity>): List<Long>
 
@@ -100,6 +103,9 @@ abstract class EntryDao {
 
     @Query("SELECT * FROM entries WHERE deletedAt IS NULL")
     abstract suspend fun allLive(): List<EntryEntity>
+
+    @Query("SELECT MIN(logicalEpochDay) FROM entries WHERE deletedAt IS NULL")
+    abstract fun observeFirstDay(): Flow<Long?>
 
     @Transaction
     @Query("SELECT * FROM entries WHERE deletedAt IS NULL ORDER BY occurredAt")
