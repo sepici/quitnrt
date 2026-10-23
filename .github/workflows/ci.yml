@@ -37,6 +37,9 @@ jobs:
       - name: Data layer tests
         run: ./gradlew :core:data:testDebugUnitTest
 
+      - name: App UI tests
+        run: ./gradlew :app:testDebugUnitTest
+
       - name: Build debug APK
         run: ./gradlew :app:assembleDebug
 

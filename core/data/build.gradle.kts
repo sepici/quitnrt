@@ -25,10 +25,11 @@ room {
 dependencies {
     api(project(":core:domain"))
 
-    implementation(libs.androidx.room.runtime)
+    // Room and DataStore types appear in DataGraph's and SettingsStore's constructors.
+    api(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
-    implementation(libs.androidx.datastore.preferences)
+    api(libs.androidx.datastore.preferences)
 
     testImplementation(libs.junit4)
     testImplementation(libs.robolectric)

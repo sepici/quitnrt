@@ -1,6 +1,7 @@
 package app.thelasthit.nrt.data
 
 import android.content.Context
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import app.thelasthit.nrt.data.db.AppDatabase
 import app.thelasthit.nrt.data.repo.BackupRepository
 import app.thelasthit.nrt.data.repo.EntryRepository
@@ -8,6 +9,10 @@ import app.thelasthit.nrt.data.repo.ProductRepository
 import app.thelasthit.nrt.data.repo.TagRepository
 import app.thelasthit.nrt.data.settings.SettingsStore
 import app.thelasthit.nrt.domain.catalogue.Catalogue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import java.io.File
 import java.time.Clock
 import java.time.ZoneId
 
@@ -27,4 +32,16 @@ class DataGraph(
     val tags = TagRepository(database.tags())
     val entries = EntryRepository(database.entries(), products, settings, clock, zone = { ZoneId.systemDefault() })
     val backups = BackupRepository(database, settings, entries, clock)
+
+    companion object {
+        /** An in-memory database and a throwaway settings file, for UI tests. */
+        fun inMemory(context: Context, clock: Clock = Clock.systemUTC()): DataGraph {
+            val file = File(context.cacheDir, "settings-${System.nanoTime()}.preferences_pb")
+            val store = PreferenceDataStoreFactory.create(
+                scope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
+                produceFile = { file },
+            )
+            return DataGraph(context, clock, AppDatabase.inMemory(context), SettingsStore(store))
+        }
+    }
 }

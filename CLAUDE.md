@@ -38,12 +38,13 @@ each week met into a hit on a pixel-art creature that stands for the habit.
 
 | Module | Contents |
 |---|---|
-| `:app` | Compose UI, theme in `ui/theme` |
+| `:app` | Compose UI, theme in `ui/theme`. UI tests and Roborazzi screenshots run on Robolectric |
 | `:core:domain` | Rules, catalogue (`resources/catalogue/products.json`), sprites (`resources/creatures/`), backup format |
 | `:core:data` | Room, DataStore settings, repositories, backup import/export (Robolectric tests) |
 
 ```
-./gradlew checkCopy :core:domain:test :core:data:testDebugUnitTest :app:assembleDebug :app:lintDebug
+./gradlew checkCopy :core:domain:test :core:data:testDebugUnitTest :app:testDebugUnitTest :app:assembleDebug :app:lintDebug
+./gradlew :app:recordRoborazziDebug              # screenshots into app/build/outputs/roborazzi/
 ./gradlew :app:installDebug                      # onto a connected phone
 ./gradlew -PjvmOnly :core:domain:test checkCopy  # without the Android SDK (cloud sandboxes)
 ```

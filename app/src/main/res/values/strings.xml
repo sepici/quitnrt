@@ -9,4 +9,8 @@
     <string name="nav_lair">Lair</string>
 
     <string name="placeholder_body">This screen arrives in a later build.</string>
+
+    <string name="onboarding_placeholder_title">Set-up</string>
+    <string name="onboarding_placeholder_body">Set-up arrives in a later build. For now you can go straight to the app.</string>
+    <string name="onboarding_placeholder_skip">Go to the app</string>
 </resources>

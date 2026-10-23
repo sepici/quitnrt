@@ -40,11 +40,11 @@ The plan has most of these already; this list is the quick reference.
 
 Build against the B mockups. All strings go in `strings.xml` and pass `checkCopy`.
 
-1. **App wiring.**
-   - An `Application` class that creates one `DataGraph`.
-   - On start: `tags.ensureBuiltIns()` and `entries.purgeDeleted()`.
-   - ViewModels via `viewModelFactory { initializer { } }`, which needs `androidx.lifecycle:lifecycle-viewmodel-compose`.
-   - `AppRoot` shows onboarding until `settings.onboardingComplete`.
+1. **App wiring.** Done.
+   - `LastHitApp` holds one `DataGraph` and runs `tags.ensureBuiltIns()` and `entries.purgeDeleted()` on start.
+   - ViewModels come from `graphViewModel { graph -> ... }` in `ui/GraphViewModel.kt`.
+   - `AppRoot` shows onboarding until `settings.onboardingComplete`. Until onboarding is built, a placeholder offers "Go to the app".
+   - UI tests run on Robolectric with `TestApp` (an in-memory `DataGraph`). `captureLooks` in the tests renders a screen in light and dark, at normal and 1.3× font, for Roborazzi.
 2. **Onboarding:**
    1. welcome and disclaimer (must be accepted; store the time)
    2. when you stopped smoking or vaping. If under about 8 weeks ago, a gentle note that most courses run 8 to 12 weeks. Never blocking.
@@ -91,21 +91,21 @@ The owner asked for agents on UI/UX, colour, tone and copy, so nothing ends up l
 
 ## Setting up locally
 
-1. Install a current Android Studio that supports AGP 9.4 (it bundles a suitable JDK).
+1. Install a current Android Studio that supports AGP 9.4. It bundles a suitable JDK: if the `java` on your PATH is older than 17, point `JAVA_HOME` at Android Studio's `jbr` folder.
 2. Clone `main` into a folder outside iCloud or OneDrive, since synced folders fight Gradle's build files:
    ```
    git clone https://github.com/sepici/quitnrt
    ```
 3. Run the full check:
    ```
-   ./gradlew checkCopy :core:domain:test :core:data:testDebugUnitTest :app:assembleDebug :app:lintDebug
+   ./gradlew checkCopy :core:domain:test :core:data:testDebugUnitTest :app:testDebugUnitTest :app:assembleDebug :app:lintDebug
    ```
 4. **Phone (Android 16):** turn on Developer options and USB debugging, then `./gradlew :app:installDebug`.
 5. **Galaxy Watch 4** (Wear OS 6), needed from phase 8: Developer options, then Wireless debugging, then `adb pair` and `adb connect`.
 
 ## Loose ends
 
-- **Room schema.** It's generated into `core/data/schemas/` on build. Commit the generated `1.json` so later migrations can be checked against it.
+- **Room schema.** `core/data/schemas/` holds the generated schemas; `1.json` is committed. Commit each new version alongside its migration.
 - **Mockup fonts aren't in the repo.** The mockups only show the real fonts in the screenshots; the app bundles its own copies.
 - **Sprites in dark mode.** The mockups add a 1 px light rim around sprites in dark mode. Do this in the sprite renderer (phase 4), and watch the seam where the feet meet the rock.
 - **Scratch tools.** The design tools that rebuild mockups and boards are in `docs/design/*/tools/`. `docs/design/tools/shot.mjs` expects Playwright at `/opt/node-tools`; point it at a local Playwright install.
