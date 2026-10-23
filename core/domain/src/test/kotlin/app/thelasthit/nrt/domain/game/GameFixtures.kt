@@ -27,6 +27,21 @@ internal val EXAMPLE_2_USUAL_DAY = listOf(gum4(8))
 internal val EXAMPLE_2_PLAN: List<List<MixUnit>> =
     listOf(listOf(gum4(6)), listOf(gum4(4))) + (8 downTo 1).map { listOf(gum2(it)) } + listOf(emptyList(), emptyList())
 
+/** Example 2's ladder: 4 mg pieces one at a time down to 4, the switch to 8 of 2 mg, then down to 1. */
+private val EXAMPLE_2_LADDER: List<MixUnit> = (7 downTo 4).map { gum4(it) } + (8 downTo 1).map { gum2(it) }
+
+/**
+ * Example 2 over any of PLAN 6.2's lengths, by its rule for spreading the steps over the taper
+ * weeks, then 2 NRT-free weeks. A fixture for the game's tests, written out here so they don't
+ * depend on how the programme builds its plans.
+ */
+internal fun example2Plan(weeks: Int): List<List<MixUnit>> {
+    val taper = weeks - 2
+    val k = EXAMPLE_2_LADDER.size
+    val steps = (1..taper).map { w -> if (k >= taper) w * (k / taper) + minOf(w, k % taper) else (k * w + taper - 1) / taper }
+    return steps.map { listOf(EXAMPLE_2_LADDER[it - 1]) } + listOf(emptyList(), emptyList())
+}
+
 /** The start of logical day [date]. */
 internal fun startOf(date: LocalDate): Instant = BOUNDARY.window(date, ZONE).start
 

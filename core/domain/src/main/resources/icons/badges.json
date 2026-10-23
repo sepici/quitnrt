@@ -1,7 +1,7 @@
 {
   "size": 16,
   "colours": {"k": "#0b2017", "G": "#124f39", "g": "#1f7a50", "v": "#4fae70", "u": "#9a6508", "y": "#f2a922", "Y": "#ffe27a", "w": "#6b4423", "W": "#b07a43", "t": "#d9a866", "c": "#f3e4b6", "h": "#fbf8e8", "e": "#a6a398", "r": "#6b2b2d", "R": "#a3453a", "n": "#2e4466", "b": "#4a6f98", "i": "#86acc7"},
-  "groups": {"logging": ["first_entry", "logged_days_3", "logged_days_7", "logged_days_14", "logged_days_30", "logged_days_60", "logged_days_90", "streak_10", "streak_21", "streak_40", "baseline_done", "honest_ledger", "tagged_25", "tagged_100"], "matching": ["first_day_in_guide", "first_week_met", "weeks_met_3", "weeks_met_6", "weeks_met_10", "back_in_step", "halfway", "down_a_strength", "final_taper_week"], "beating": ["week_under_by_10", "five_days_under", "three_weeks_under"], "habits": ["later_first_dose", "longer_gaps", "top_trigger_down", "breathing_1", "breathing_10", "breathing_25"], "end": ["demon_defeated"]},
+  "groups": {"logging": ["first_entry", "logged_days_3", "logged_days_7", "logged_days_14", "logged_days_28", "logged_days_60", "logged_days_90", "streak_10", "streak_21", "streak_40", "baseline_done", "honest_ledger", "tagged_25", "tagged_100"], "matching": ["first_day_in_guide", "first_week_met", "weeks_met_3", "weeks_met_6", "weeks_met_10", "back_in_step", "halfway", "down_a_strength", "final_taper_week"], "beating": ["week_under_by_10", "five_days_under", "three_weeks_under"], "habits": ["later_first_dose", "longer_gaps", "top_trigger_down", "breathing_1", "breathing_10", "breathing_25"], "end": ["demon_defeated"]},
   "icons": {
     "first_entry": [
       ".kkkkkkkkkkkkkk.",
@@ -75,7 +75,7 @@
       "kceeeeeeeeeeek..",
       ".kkkkkkkkkkkk..."
     ],
-    "logged_days_30": [
+    "logged_days_28": [
       ".kkkkkkkkkkkkkk.",
       "kWWhWWWWWWWWhWwk",
       "kwwwwwwwwwwwwwwk",
@@ -84,9 +84,9 @@
       "khccccccccccccek",
       "khccwwwcwwwcccek",
       "khccctwtwtwtccek",
-      "khcccwwtwtwtccek",
-      "khccccwtwtwtccek",
       "khccwwwtwwwtccek",
+      "khccwtttwtwtccek",
+      "khccwwwcwwwtccek",
       "khccctttctttccek",
       "khccccccccccccek",
       "khcccccccccccek.",

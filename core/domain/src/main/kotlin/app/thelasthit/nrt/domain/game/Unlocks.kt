@@ -23,14 +23,14 @@ data class NewUnlocks(val achievements: List<Achievement>, val gear: List<Gear>)
 
         /**
          * What [record] unlocks beyond the keys already stored. Stored keys this version doesn't
-         * know are ignored. Gear follows every badge ever stored, not only those that hold now,
-         * so editing old logs never takes a weapon away. The stick is there from the start and
-         * never counts as new.
+         * know are ignored. Gear that comes with a badge follows every badge ever stored, not
+         * only those that hold now, so editing old logs never takes a weapon away. The stick is
+         * there from the start and never counts as new.
          */
         fun since(storedAchievements: Set<String>, storedGear: Set<String>, record: GameRecord): NewUnlocks {
             val stored = storedAchievements.mapNotNullTo(mutableSetOf()) { Achievement.fromKey(it) }
             val newBadges = AchievementRules.unlocked(record).filterNot { it in stored }
-            val gear = Gear.unlockedWith(stored + newBadges)
+            val gear = Gear.unlockedWith(stored + newBadges, record)
                 .filterNot { it.isStarter || it.key in storedGear }
             return NewUnlocks(newBadges, gear)
         }

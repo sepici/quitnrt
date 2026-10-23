@@ -704,14 +704,14 @@ GLYPHS = {
 }
 
 # The achievements of PLAN 8.1, in its order: (key, group, glyph[, options for badge_icon]). Tiers
-# show their number. The streaks (10, 21, 40) and the last weeks-met tier (10) were tuned from
-# PLAN's numbers by the pace test in domain/game (UnlockPaceTest).
+# show their number. The streaks (10, 21, 40), the logged-days tier of 28 and the last weeks-met
+# tier (10) were tuned from PLAN's numbers by the pace test in domain/game (UnlockPaceTest).
 BADGES = [
     ('first_entry', 'logging', GLYPHS['pencil'], NO_SHADOW),
     ('logged_days_3', 'logging', number(3)),
     ('logged_days_7', 'logging', number(7)),
     ('logged_days_14', 'logging', number(14)),
-    ('logged_days_30', 'logging', number(30)),
+    ('logged_days_28', 'logging', number(28)),
     ('logged_days_60', 'logging', number(60)),
     ('logged_days_90', 'logging', number(90)),
     ('streak_10', 'logging', shadowed_above(number(10), CHAIN)),
@@ -744,7 +744,7 @@ BADGES = [
 
 BADGE_NAMES = {
     'first_entry': 'First entry', 'logged_days_3': 'Logged on 3 days', 'logged_days_7': 'Logged on 7 days',
-    'logged_days_14': 'Logged on 14 days', 'logged_days_30': 'Logged on 30 days',
+    'logged_days_14': 'Logged on 14 days', 'logged_days_28': 'Logged on 28 days',
     'logged_days_60': 'Logged on 60 days', 'logged_days_90': 'Logged on 90 days',
     'streak_10': '10 days in a row', 'streak_21': '21 days in a row', 'streak_40': '40 days in a row',
     'baseline_done': 'Baseline done', 'honest_ledger': 'Honest ledger',

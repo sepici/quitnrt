@@ -7,15 +7,16 @@ package app.thelasthit.nrt.domain.game
  *
  * Some thresholds were tuned so badges come at a steady pace (ROADMAP P4-4, `UnlockPaceTest`).
  * The streaks are 10, 21 and 40 days rather than PLAN's 7, 14 and 30. For anyone who logs every
- * day, those matched the logged-days tiers and landed on the same days. The last weeks-met tier
- * is 10 rather than 9, so a badge still comes in the NRT-free weeks.
+ * day, those matched the logged-days tiers and landed on the same days. The logged-days tier of
+ * 30 is 28: after a 7-day baseline, day 30 is always week 3's result, which brings 3 weeks met
+ * too. The last weeks-met tier is 10 rather than 9, so a badge still comes in the NRT-free weeks.
  */
 enum class Achievement(val key: String, val group: Group) {
     FIRST_ENTRY("first_entry", Group.LOGGING),
     LOGGED_3_DAYS("logged_days_3", Group.LOGGING),
     LOGGED_7_DAYS("logged_days_7", Group.LOGGING),
     LOGGED_14_DAYS("logged_days_14", Group.LOGGING),
-    LOGGED_30_DAYS("logged_days_30", Group.LOGGING),
+    LOGGED_28_DAYS("logged_days_28", Group.LOGGING),
     LOGGED_60_DAYS("logged_days_60", Group.LOGGING),
     LOGGED_90_DAYS("logged_days_90", Group.LOGGING),
     STREAK_10_DAYS("streak_10", Group.LOGGING),

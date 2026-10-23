@@ -143,11 +143,20 @@ data class GameWeek(
 /**
  * A programme as the game sees it: the [baseline], its [weeks] back to back (none while the
  * baseline runs), and the demon's [ledger].
+ *
+ * An abandoned programme keeps every week it was planned with, so the demon keeps its max HP and
+ * can't be defeated by the hits it had. [endedOn] says where it stopped.
  */
 data class GameProgramme(
     val baseline: GameBaseline,
     val weeks: List<GameWeek> = emptyList(),
     val ledger: HitLedger = HitLedger(HitLedger.HP_PER_HIT * weeks.count { it.earnsHit }),
+    /**
+     * The logical day the user abandoned it, or null while it runs and once it's complete. That
+     * day and the ones after it are outside the programme, so the rules don't hold later logs up
+     * against its guides, and its weeks with no result by then never get one.
+     */
+    val endedOn: LocalDate? = null,
 ) {
     init {
         weeks.forEachIndexed { index, week ->
@@ -166,6 +175,9 @@ data class GameProgramme(
                 else -> Unit
             }
         }
+        if (endedOn != null) {
+            require(weeks.none { it.hasResult && it.startDate >= endedOn }) { "A week after the end on $endedOn has a result" }
+        }
         require(ledger.maxHp == maxHp) { "The ledger's ${ledger.maxHp} HP isn't the weeks' $maxHp" }
         val earnable = earnedHits.map { it.kind to it.week }.toSet()
         require(ledger.rows.filter { it.kind.isEarned }.all { (it.kind to it.week) in earnable }) {
@@ -174,6 +186,9 @@ data class GameProgramme(
     }
 
     val startDate: LocalDate? get() = weeks.firstOrNull()?.startDate
+
+    /** Whether [date] comes before the programme was abandoned, if it was. */
+    fun ranOn(date: LocalDate): Boolean = endedOn == null || date < endedOn
 
     /** One hit for each week that puts HP on the demon, so squaring every week takes it to 0. */
     val hitsOnOffer: Int get() = weeks.count { it.earnsHit }
