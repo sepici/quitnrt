@@ -2,8 +2,13 @@ package app.thelasthit.nrt.domain.game
 
 /**
  * The achievements of PLAN 8.1, in its order. Each unlocks a badge, and none deals damage. The
- * [key] names the badge in `icons/badges.json` and is what gets stored. The rules that unlock
- * them come with the hit ledger.
+ * [key] names the badge in `icons/badges.json` and is what gets stored. [AchievementRules] has
+ * the rule behind each.
+ *
+ * Some thresholds were tuned so badges come at a steady pace (ROADMAP P4-4, `UnlockPaceTest`).
+ * The streaks are 10, 21 and 40 days rather than PLAN's 7, 14 and 30. For anyone who logs every
+ * day, those matched the logged-days tiers and landed on the same days. The last weeks-met tier
+ * is 10 rather than 9, so a badge still comes in the NRT-free weeks.
  */
 enum class Achievement(val key: String, val group: Group) {
     FIRST_ENTRY("first_entry", Group.LOGGING),
@@ -13,9 +18,9 @@ enum class Achievement(val key: String, val group: Group) {
     LOGGED_30_DAYS("logged_days_30", Group.LOGGING),
     LOGGED_60_DAYS("logged_days_60", Group.LOGGING),
     LOGGED_90_DAYS("logged_days_90", Group.LOGGING),
-    STREAK_7_DAYS("streak_7", Group.LOGGING),
-    STREAK_14_DAYS("streak_14", Group.LOGGING),
-    STREAK_30_DAYS("streak_30", Group.LOGGING),
+    STREAK_10_DAYS("streak_10", Group.LOGGING),
+    STREAK_21_DAYS("streak_21", Group.LOGGING),
+    STREAK_40_DAYS("streak_40", Group.LOGGING),
     BASELINE_DONE("baseline_done", Group.LOGGING),
 
     /** Backdated a forgotten entry. */
@@ -27,7 +32,7 @@ enum class Achievement(val key: String, val group: Group) {
     FIRST_WEEK_MET("first_week_met", Group.MATCHING),
     WEEKS_MET_3("weeks_met_3", Group.MATCHING),
     WEEKS_MET_6("weeks_met_6", Group.MATCHING),
-    WEEKS_MET_9("weeks_met_9", Group.MATCHING),
+    WEEKS_MET_10("weeks_met_10", Group.MATCHING),
 
     /** Caught up after a missed week. */
     BACK_IN_STEP("back_in_step", Group.MATCHING),
