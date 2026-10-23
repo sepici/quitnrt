@@ -1,10 +1,14 @@
-# QuitNRT implementation plan
+# The Last Hit: Quit NRT, implementation plan
 
 Status: **draft for review**. No app code gets written until this plan is approved.
 
-QuitNRT is an Android app for logging nicotine replacement therapy (NRT), seeing what triggers it,
-and following a programme that brings the daily dose down to zero. Alongside it runs a small game:
-you name your addiction, pick a pixel-art creature for it, and beat it down one week at a time.
+The Last Hit: Quit NRT is an Android app for people who quit smoking or vaping with nicotine
+replacement therapy (NRT) and are now hooked on the NRT itself. It logs NRT use, shows what
+triggers it, and runs a programme that brings the daily dose down to zero. Alongside it runs a
+small game: you name your addiction, pick a pixel-art creature for it, and beat it down one week
+at a time. The final week's hit is the last hit.
+
+"The Last Hit" is the family name. Apps for other habits could follow as "The Last Hit: Quit …".
 
 ---
 
@@ -12,6 +16,9 @@ you name your addiction, pick a pixel-art creature for it, and beat it down one 
 
 | Topic | Decision |
 |---|---|
+| Name | **The Last Hit: Quit NRT** in the store (22 characters, under Play's 30). **The Last Hit** under the icon. |
+| App ID | Working ID **`app.thelasthit.nrt`**. It assumes the `thelasthit.app` domain, and other apps in the family would follow the same pattern. It's easy to change any time before the first Play upload, and permanent after that. |
+| Audience | People who already quit smoking or vaping using NRT and now want off the NRT. **No vape logging.** Nicotine pouches are allowed as a hidden extra because they're close to pure nicotine. |
 | Voice and AI logging | **On-device first.** Widget, Quick Settings tile, app shortcuts and deep links now, plus **Android AppFunctions** (Android's on-device version of MCP) so Gemini can log once Google opens it to all apps. No server, and data never leaves the phone. |
 | Audience | **Personal first, ready for the Play Store later.** APK built by CI and installed by hand, with disclaimers, privacy and structure kept clean for a later release. |
 | Programme | **Guided plan** with a fixed weekly schedule. The last **2 weeks are always NRT-free**. |
@@ -22,7 +29,9 @@ you name your addiction, pick a pixel-art creature for it, and beat it down one 
 | Look | **Calm, readable app with a pixel-art game layer** (demon, badges, gear, small moments). |
 | Language | **British English** (programme, colour, favourite). Time and date formats follow the phone. |
 | Builds | You're allowing `dl.google.com` so the app can be built and screenshotted inside the dev container. |
-| Test devices | Phone on Android 16 or newer, plus a Wear OS watch. |
+| Test devices | Phone on Android 16 or newer, plus a **Galaxy Watch 4 on One UI 8 Watch (Wear OS 6)**. |
+| Day start | 04:00, changeable in Settings. |
+| Catalogue | Real products from the big brands, UK shop own-brands and the US, Canada, Australia and New Zealand, researched with sources (§3). |
 | Deferred | Resisted-craving log, cost and money-saved tracking, cloud sync and remote MCP server, iOS. |
 | Dose unit | Goals and charts use **labelled mg** (what the pack says). An estimated absorbed figure is optional. |
 | Stack | Kotlin and Jetpack Compose, native Android. AppFunctions only exists for Kotlin/Jetpack. |
@@ -32,7 +41,7 @@ you name your addiction, pick a pixel-art creature for it, and beat it down one 
 ## 1. Scope
 
 ### In v1
-1. Product catalogue covering gum, lozenges, patches, inhaler, sprays, microtabs and other (pre-seeded, editable).
+1. Product catalogue of real brands and shop own-brands (gum, lozenges, patches, inhalator, sprays, microtabs), plus generic products.
 2. Logging with quantity, backdated date and time, tags, craving strength, planned or craving flag, and a note.
 3. History with edit, delete and undo.
 4. Insights: daily intake over 7, 30, 60 and 90 days, an hour by weekday heat map, a calendar heat map, trigger stats and habit stats.
@@ -57,7 +66,7 @@ you name your addiction, pick a pixel-art creature for it, and beat it down one 
 
 | Term | Meaning |
 |---|---|
-| **Product** | One specific NRT item: form, strength and unit. For example "Gum 2 mg (piece)", "Inhaler 15 mg cartridge (puff)" or "Patch 21 mg, 24 h". |
+| **Product** | One specific NRT item: form, strength and unit. For example "Gum 2 mg (piece)", "Nicorette Inhalator 15 mg (session)" or "Patch 21 mg, 24 h". |
 | **Entry** | One logged use: a product and a quantity at a point in time, with tags. It keeps a **snapshot** of the mg, so editing a product later never rewrites history. |
 | **Logical day** | The day an entry counts toward. A **day start** setting (default 04:00) means a gum at 01:30 counts toward the previous evening. |
 | **Background dose** | Patches. They count toward the day they were applied, but stay out of the hourly heat map, spacing stats and trigger stats, since a patch releases steadily rather than answering a craving. |
@@ -69,24 +78,31 @@ you name your addiction, pick a pixel-art creature for it, and beat it down one 
 
 ## 3. Product catalogue
 
-Pre-seeded products. Onboarding asks which ones you use. Those become **favourites** and the rest stay hidden until you turn them on.
+Most people use more than one product, often from more than one brand, so the catalogue lists real products by brand. The research behind it is in `docs/research/catalogue/`, with sources: emc leaflets, FDA labels, and brand and retailer sites. It ships inside the app as a data file and is updated with app releases.
 
-| Form | Seeded strengths | Logged unit |
-|---|---|---|
-| Gum | 2 mg, 4 mg | piece |
-| Lozenge and mini lozenge | 1.5 mg, 2 mg, 4 mg | piece |
-| Patch, 24 h | 7, 14, 21 mg | patch (background) |
-| Patch, 16 h | 10, 15, 25 mg | patch (background) |
-| Inhaler | 10 mg and 15 mg cartridges | puff, or a whole cartridge |
-| Mouth spray | 1 mg per spray | spray |
-| Nasal spray | 0.5 mg per spray | spray |
-| Sublingual tablet (microtab) | 2 mg | tablet |
-| Nicotine pouch | custom mg (hidden by default, not licensed NRT) | pouch |
-| Other | custom mg | custom |
+### What's in it
+| Group | Products |
+|---|---|
+| **Nicorette** (UK) | Gum 2/4 mg, Cools lozenge 2/4 mg, Fruit lozenge 2 mg, Invisi Patch 10/15/25 mg (16 h), QuickMist mouth spray 1 mg, Inhalator 15 mg, Nasal spray 0.5 mg, Microtab 2 mg |
+| **NiQuitin** (UK) | Clear Patch 7/14/21 mg (24 h), Minis 2/4 mg, Lozenges 2/4 mg |
+| **Nicotinell** (UK) | 24 hour patch 7/14/21 mg, Gum 2/4 mg, Mint lozenge 1/2 mg, Rapid Relief mouth spray 1 mg |
+| **Boots NicAssist** | Gum 2/4 mg, Lozenge 1/2 mg, Translucent patch 10/15/25 mg (16 h), Microtab 2 mg, Nasal spray 0.5 mg |
+| **Shop own-brand** | Gum 2/4 mg and lozenges 2/4 mg from Superdrug, Tesco, Asda, Sainsbury's, Morrisons and Galpharm. Several of these come from the same manufacturer |
+| **US** | Nicorette gum, lozenge and mini lozenge 2/4 mg, NicoDerm CQ and Habitrol 7/14/21 mg patches, Nicotrol NS, and store brands (CVS Health, Walgreens, Equate, Kirkland Signature, up&up) |
+| **Canada, Australia, New Zealand** | Local Nicorette, Nicotinell, NicoDerm, Habitrol, Thrive, Nicabate, QuitX and pharmacy brands |
+| **Legacy** | Discontinued items stay findable for people using up old stock, marked as such: NiQuitin gum and Strips, the NicAssist 24 h patch, mouth spray and inhalator, and the Nicotrol inhaler |
+| **Generic** | Any form at any strength, for anything not listed |
+| **Nicotine pouch** | Hidden by default. Logged as a generic pouch with the mg typed in, because strengths vary a lot between brands and the research couldn't verify them. Brand names appear only as labels |
+
+### Picking your products
+- Onboarding shows products for your phone's region first (UK by default), with a "show other countries" option for travellers and online buyers.
+- Pick by brand, or search (e.g. "niquitin minis 4"). Pick as many as you use. They become your favourites.
+- Each product carries its **label daily maximum**, e.g. "15 pieces" or "64 sprays, no more than 4 an hour". If a day's logs go over it, the app shows a calm note suggesting a word with a pharmacist. The programme never schedules above it.
+- Flavours are listed on the product but don't create separate entries, since they don't change the dose.
 
 Dose maths:
 - `mgTotal = quantity × mgPerUnit`, saved on the entry at the time of logging.
-- **Inhaler:** `mgPerUnit = cartridgeMg / puffsPerCartridge`. The puffs-per-cartridge default is a rough figure and can be edited per product.
+- **Inhalator:** the UK leaflet gives no puffs per cartridge. It says one 15 mg cartridge gives about eight 5-minute sessions. So by default the inhalator logs **sessions** (an eighth of a cartridge, about 1.9 mg labelled) or **whole cartridges**. Puffs are available if you set your own puffs per cartridge.
 - **Patch:** the full labelled dose counts on the day it went on. An optional **removed early** setting scales it by hours worn.
 - **Estimated absorbed** (optional, off by default): a rough per-form factor shown as "about x mg absorbed". The factors come from product labelling and are shown with a disclaimer. Goals never use them.
 
@@ -97,7 +113,7 @@ Dose maths:
 ### Log sheet
 It opens from Today, the widget, the tile, a shortcut or a deep link.
 - **Product:** favourites as chips, plus "More".
-- **Quantity:** a stepper. Puffs step in fives.
+- **Quantity:** a stepper.
 - **Time:** **now** by default. Quick buttons for 15 min ago, 30 min ago, 1 h ago, 2 h ago and yesterday, plus a full date and time picker. Future times are refused, with a few minutes' leeway.
 - **Tags:** grouped chips, pick as many as apply (see §5). Your most used tags come first.
 - **Craving strength:** optional, 1 to 5.
@@ -311,7 +327,7 @@ Each chart has a written summary for screen readers.
 | **Home-screen widget** (Glance) | Today's mg against the daily guide, plus 2 or 3 favourite buttons. A tap logs **instantly** without opening the app and briefly shows "Logged" with Undo. A setting can open a quick tag picker after logging. |
 | **Quick Settings tile** | A tap logs your default product and posts a short-lived notification with **Undo**. It can be set to open the log sheet instead. |
 | **App shortcuts** (long-press the icon) | Your top 3 favourites and "Log". Also declared so Google Assistant can trigger them where it still exists. Not something we rely on. |
-| **Deep link** | `quitnrt://log?product=gum-2mg&qty=1&at=2026-10-23T15:00&tags=stressed,after-meal`. Lets Routines, Tasker or an NFC sticker on your gum pack log an entry. Checked, and logged through the same path as the app. |
+| **Deep link** | `lasthit://log?product=nicorette-gum-2mg&qty=1&at=2026-10-23T15:00&tags=stressed,after-meal`. Lets Routines, Tasker or an NFC sticker on your gum pack log an entry. Checked, and logged through the same path as the app. |
 
 Every entry records where it came from (app, widget, tile, shortcut, deep link, AppFunction or watch). That helps with debugging and duplicate checks.
 
@@ -326,13 +342,13 @@ Functions (each described in KDoc so the agent knows what it does):
 
 | Function | Purpose |
 |---|---|
-| `logNrtUsage(productDescription, quantity = 1, time = now, tags = [], cravingStrength?)` | Handles requests like "Log a 2 mg nicotine gum" or "Log 10 inhaler puffs at 3 pm, stressed". Returns the saved entry, the week so far against its allowance, and a possible-duplicate flag. |
+| `logNrtUsage(productDescription, quantity = 1, time = now, tags = [], cravingStrength?)` | Handles requests like "Log a 2 mg nicotine gum" or "Log an inhalator session at 3 pm, stressed". Returns the saved entry, the week so far against its allowance, and a possible-duplicate flag. |
 | `listNrtProducts()` | Your products, so the agent can tell them apart. |
 | `getNrtSummary()` | Today's mg against the daily guide, the week against its allowance, last dose time, demon HP and banked hits. |
 | `undoLastNrtEntry()` | Undoes the most recent entry. |
 | `getNrtAdvice(tag?)` | The best strategy for a trigger, or for your current top trigger. |
 
-`productDescription` and the tags go through a **plain-language matcher** in `:core:domain`, shared with deep links. It handles phrases like "2mg nicotine gum", "two 4 mg gums", "nicorette 4", "21mg patch", "10 puffs inhaler" and "mouth spray". If a phrase is ambiguous, it returns the candidates so the agent can ask you.
+`productDescription` and the tags go through a **plain-language matcher** in `:core:domain`, shared with deep links. It handles phrases like "2mg nicotine gum", "two 4 mg gums", "nicorette 4", "21mg patch", "two sprays of QuickMist" and "inhalator session". If a phrase is ambiguous, it returns the candidates so the agent can ask you.
 
 ---
 
@@ -373,7 +389,8 @@ The bottom bar has **Today, History, Insights, Plan and Lair**. Advice sits insi
 
 - **Onboarding:**
   - welcome and disclaimer (must be accepted)
-  - your products
+  - when you stopped smoking or vaping. If it was under about 8 weeks ago, a gentle note says most NRT courses run 8 to 12 weeks and a pharmacist can help with timing. It doesn't block anything
+  - your products, by brand or search
   - **name your demon and pick a creature**
   - day start and optional wake time
   - reminders
@@ -485,8 +502,8 @@ Screenshots of real screens are rendered with Roborazzi (Compose screenshots on 
 ### Data model (Room)
 
 ```
-products(id, name, form, strengthMg, unitLabel, mgPerUnit, cartridgeMg?, puffsPerCartridge?,
-         ratedHours?, isBackground, isFavourite, isHidden, sortOrder, absorptionFactor?, createdAt)
+products(id, catalogueId?, brand?, line?, name, form, strengthMg, unitLabel, mgPerUnit, cartridgeMg?,
+         unitsPerCartridge?, ratedHours?, labelMaxPerDay?, labelMaxPerHour?, market?, isBackground, isFavourite, isHidden, sortOrder, absorptionFactor?, createdAt)
 
 entries(id UUID, productId, productNameSnapshot, mgPerUnitSnapshot, quantity, mgTotal,
         occurredAt (epoch ms UTC), zoneId, logicalDate, kind (PLANNED|CRAVING|UNSPECIFIED),
@@ -570,7 +587,7 @@ Each phase ends with a working build you can install and a short checklist to tr
 
 - **`:core:domain` unit tests** (JUnit 5, run in the dev container and in CI):
   - logical-day edge cases: 01:30 with a 04:00 day start, clock changes, changing time zone mid-day, changing the day start
-  - dose maths: inhaler puffs, a patch removed early
+  - dose maths: inhalator sessions and cartridges, a patch removed early, label maximum checks
   - plan builder: unit rounding, extra units taken early, allowances never going up, 2 NRT-free weeks, extensions
   - weekly results: allowance edges, the 24-hour grace period, catch-up across several missed weeks, overtime
   - demon: HP and hit ledger, 5× attacks, the defeat condition, a 12-week run where every week is met that ends exactly at 0 HP, a run with misses and catch-up that also ends at 0
@@ -590,11 +607,8 @@ Each phase ends with a working build you can install and a short checklist to tr
 
 ## 21. Open questions (defaults in brackets)
 
-1. **App ID.** It's permanent once on the Play Store. [`com.quitnrt.app`, or one based on a domain you own]
-2. **App name** under the icon. [QuitNRT]
-3. **Your products today**, so the defaults and examples fit. [Gum 2 mg and 4 mg]
-4. **Watch model**, to check its Wear OS version. [Any Wear OS 3+ watch]
-5. **Day start** [04:00] and **evening check-in** [21:30].
-6. **Default programme length** [12 weeks, including the 2 NRT-free weeks].
-7. **Catch-up across several missed weeks.** [Meeting a week pays back every missed week since your last met one, not just the week before. You're back in step either way.]
-8. **Creature list.** [Dragon, Demon, Bear, Kraken, Goblin, Slime, Wraith, Serpent]
+1. **Domain.** Check availability at a registrar. If `thelasthit.app` is free, it keeps the working app ID `app.thelasthit.nrt` as is. [Register `thelasthit.app` before the first Play upload]
+2. **Catch-up across several missed weeks.** [Meeting a week pays back every missed week since your last met one]
+3. **Creature list.** [Dragon, Demon, Bear, Kraken, Goblin, Slime, Wraith, Serpent]
+4. **Evening check-in time.** [21:30]
+5. **Default programme length.** [12 weeks, including the 2 NRT-free weeks]

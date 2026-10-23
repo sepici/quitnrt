@@ -1,0 +1,1872 @@
+[
+  {
+    "brand": "Nicorette",
+    "line": "Gum (US)",
+    "form": "GUM",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "piece",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Original",
+      "Mint",
+      "White Ice Mint",
+      "Spearmint Burst",
+      "Fruit Chill",
+      "Cinnamon Surge"
+    ],
+    "labelMaxPerDay": "24 pieces",
+    "dosingNotes": "Use 4 mg if first cigarette is within 30 min of waking, otherwise 2 mg. Weeks 1-6: 1 piece every 1-2 h (at least 9/day); weeks 7-9: 1 every 2-4 h; weeks 10-12: 1 every 4-8 h; stop at end of week 12. Chew slowly until tingle, then park between cheek and gum; no eating/drinking 15 min before or while chewing.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.nicorette.com/shop/gum/",
+      "https://drugs.com/dosage/nicorette.html",
+      "https://www.walgreens.com/q/nicorette+gum"
+    ],
+    "notes": "US Nicorette is a Haleon brand (outside the US Nicorette is Kenvue). Original and Mint are uncoated; the other four are dual-coated. Walgreens also lists a 'Fresh Mint'; not confirmed on nicorette.com. Market difference: US strength choice uses time to first cigarette and a 24/day max; Canada uses >25 cigarettes/day and 20/day; AU/NZ use <20 or >=20 cigarettes/day and 20 (2 mg) / 10 (4 mg) per day."
+  },
+  {
+    "brand": "Nicorette",
+    "line": "Lozenge (US)",
+    "form": "LOZENGE",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Mint",
+      "Ice Mint (coated)"
+    ],
+    "labelMaxPerDay": "20 lozenges; no more than 5 in any 6 hours",
+    "dosingNotes": "Use 4 mg if first cigarette is within 30 min of waking, otherwise 2 mg. Weeks 1-6: 1 every 1-2 h (at least 9/day); weeks 7-9: 1 every 2-4 h; weeks 10-12: 1 every 4-8 h. One at a time; let dissolve, do not chew or swallow.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://drugs.com/pro/nicorette-lozenge.html",
+      "https://guidelinecentral.com/drug/fdee1637-8049-4bc5-b196-b6d854c9f9f3/NICORETTE",
+      "https://www.kroger.com/p/p/0030766981238",
+      "https://ndclist.com/ndc0135-0511"
+    ],
+    "notes": "Coated Ice Mint lozenge seen in 2 mg (Kroger) and 4 mg (HEB) packs. A contract manufacturer's chart lists Nicorette lozenges in Cherry and Cinnamon too, but no Nicorette-branded cherry or cinnamon pack was confirmed (cherry/cinnamon seen only on store brands). Canada's Nicorette lozenge label differs: 15/day max."
+  },
+  {
+    "brand": "Nicorette",
+    "line": "Mini Lozenge (US)",
+    "form": "MINI_LOZENGE",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Mint"
+    ],
+    "labelMaxPerDay": "20 lozenges; no more than 5 in any 6 hours (verify on pack)",
+    "dosingNotes": "Use 4 mg if first cigarette is within 30 min of waking, otherwise 2 mg. Weeks 1-6: 1 every 1-2 h (at least 9/day); weeks 7-9: 1 every 2-4 h; weeks 10-12: 1 every 4-8 h. One at a time; let dissolve, do not chew or swallow.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://hannaford.com/groceries/product/nicorette-mini-lozenge-2mg-mint-81-ct-box/239780",
+      "https://heb.com/product-detail/nicorette-mini-lozenge-stop-smoking-aid-4-mg/1911943",
+      "https://ndclist.com/ndc/0135-0508"
+    ],
+    "notes": "NDC 0135-0508 (NDA022360) is a mint oval 10 mm lozenge, i.e. the mini. The US mini Drug Facts limit was not seen directly; it is taken to match the standard US lozenge (20/day). The 15/day figure on some retailer pages comes from the Canadian label."
+  },
+  {
+    "brand": "NicoDerm CQ",
+    "line": "Clear Patch",
+    "form": "PATCH_24H",
+    "strengthsMg": [
+      7,
+      14,
+      21
+    ],
+    "unit": "patch",
+    "mgPerUnitNote": "Labelled as mg delivered over 24 h",
+    "wearHours": 24,
+    "flavours": [],
+    "labelMaxPerDay": "1 patch per 24 h; never more than one patch at a time",
+    "dosingNotes": "More than 10 cigarettes/day: Step 1 21 mg weeks 1-6, Step 2 14 mg weeks 7-8, Step 3 7 mg weeks 9-10. 10 or fewer/day: Step 2 for 6 weeks, then Step 3 for 2 weeks. Wear 16 or 24 h: if you crave cigarettes on waking, wear 24 h; if you have vivid dreams, remove at bedtime and apply a new patch in the morning.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.drugs.com/dosage/nicoderm-cq.html",
+      "https://haleonhealthpartner.com/en-us/respiratory-health/brands/nicotine-replacement-therapy/nicoderm-cq/nicoderm-cq-dosing-administration",
+      "https://www.guidelinecentral.com/drug/93b2d1b9-83c1-40b5-b6af-90c38c8d6cef/NICODERM",
+      "https://www.accessdata.fda.gov/drugsatfda_docs/label/2015/020165Orig1s036lbl.pdf"
+    ],
+    "notes": "Haleon (US). Labelling still mentions an opaque NicoDerm CQ patch (the MRI-burn warning covers the opaque patch only), but only the Clear patch was confirmed on sale. Canada's 'NicoDerm' (Kenvue) is a separate entry."
+  },
+  {
+    "brand": "Habitrol",
+    "line": "Patch (US)",
+    "form": "PATCH_24H",
+    "strengthsMg": [
+      7,
+      14,
+      21
+    ],
+    "unit": "patch",
+    "mgPerUnitNote": "",
+    "wearHours": 24,
+    "flavours": [],
+    "labelMaxPerDay": "1 patch per 24 h",
+    "dosingNotes": "More than 10 cigarettes/day: Step 1 21 mg weeks 1-4, Step 2 14 mg weeks 5-6, Step 3 7 mg weeks 7-8. 10 or fewer/day: Step 2 for 6 weeks, then Step 3 for 2 weeks.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://otclabels.com/lib/otc/otc-meds/habitrol-step-1-1/",
+      "https://www.guidelinecentral.com/drug/051be7ae-6504-c2d8-7424-2e328e4fcfc2",
+      "https://www.walmart.com/ip/106393709"
+    ],
+    "notes": "Dr. Reddy's. Same 7/14/21 mg strengths as NicoDerm CQ, but a shorter course (Step 1 is 4 weeks, against 6 for NicoDerm CQ)."
+  },
+  {
+    "brand": "Habitrol",
+    "line": "Gum (US)",
+    "form": "GUM",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "piece",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Coated Mint",
+      "Coated Cinnamon"
+    ],
+    "labelMaxPerDay": "24 pieces (standard US nicotine gum Drug Facts; not seen on the Habitrol pack itself)",
+    "dosingNotes": "Use 4 mg if first cigarette is within 30 min of waking, otherwise 2 mg. Weeks 1-6: 1 piece every 1-2 h (at least 9/day); weeks 7-9: 1 every 2-4 h; weeks 10-12: 1 every 4-8 h; stop at end of week 12. Chew slowly until tingle, then park between cheek and gum; no eating/drinking 15 min before or while chewing.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://otclabels.com/lib/otc/otc-meds/habitrol-nicotine-polacrilex-gum-4-mg-coated-mint/",
+      "https://otclabels.com/lib/otc/otc-meds/habitrol-nicotine-polacrilex-4-mg-coated-cinnamon/",
+      "https://digitaledition.chaindrugreview.com/articles/habitrol-products-help-people-quit-smoking"
+    ],
+    "notes": "Dr. Reddy's, sugar-free. A search summary of DailyMed listings also mentioned a fruit flavour, but no fruit label was seen, so it is left out."
+  },
+  {
+    "brand": "Habitrol",
+    "line": "Lozenge (US)",
+    "form": "LOZENGE",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Original",
+      "Mint"
+    ],
+    "labelMaxPerDay": "20 lozenges; no more than 5 in any 6 hours (standard US lozenge label)",
+    "dosingNotes": "Use 4 mg if first cigarette is within 30 min of waking, otherwise 2 mg. Weeks 1-6: 1 every 1-2 h (at least 9/day); weeks 7-9: 1 every 2-4 h; weeks 10-12: 1 every 4-8 h. One at a time; let dissolve, do not chew or swallow.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=87714b79-05b3-f3c2-6505-5923e4f48871",
+      "https://ndclist.com/ndc/43598-987/label",
+      "https://otclabels.com/lib/otc/otc-meds/habitrol-lozenge-original-flavor/page/2/",
+      "https://www.amazon.com/Habitrol-Nicotine-Lozenge-Smoking-Flavor/dp/B08XBWGF9H"
+    ],
+    "notes": "Dr. Reddy's polacrilex lozenge, launched in the US in 2020. 'Original' contains menthol and peppermint oil. NDC listings reportedly include cherry, but no cherry label was seen."
+  },
+  {
+    "brand": "Nicotrol",
+    "line": "Inhaler (Rx)",
+    "form": "INHALATOR",
+    "strengthsMg": [
+      10
+    ],
+    "unit": "cartridge",
+    "mgPerUnitNote": "10 mg nicotine per cartridge, about 4 mg delivered. Label PK: intensive use (80 deep inhalations over 20 min) releases on average 4 mg, of which about 2 mg is absorbed systemically.",
+    "wearHours": null,
+    "flavours": [],
+    "labelMaxPerDay": "16 cartridges (unless directed by a doctor)",
+    "dosingNotes": "Prescription only. Individualised: 6-16 cartridges/day for up to 12 weeks, then reduce gradually over 6-12 weeks. Not recommended beyond 6 months.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "discontinued",
+    "sources": [
+      "https://www.accessdata.fda.gov/drugsatfda_docs/label/2024/020714s019lbl.pdf",
+      "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?audience=consumer&setid=f32f9c92-cbb4-483b-9e70-0b6e4567824f",
+      "https://cdn.pfizer.com/pfizercom/DHCP_Letter_Nicotrol_Inhaler_5.30.2023.pdf",
+      "https://www.ashp.org/drug-shortages/current-shortages/drug-shortage-detail.aspx?id=1002",
+      "https://www.goodrx.com/health-topic/nicotine/is-nicotrol-inhaler-available"
+    ],
+    "notes": "Pfizer stopped selling it around September 2023 because a resin needed for the mouthpiece was unavailable; ASHP lists it as discontinued. Keep it only for legacy users. Market difference: US and Canada cartridges are 10 mg (4 mg delivered); AU, NZ and UK Nicorette Inhalator cartridges are 15 mg."
+  },
+  {
+    "brand": "Nicotrol",
+    "line": "NS Nasal Spray (Rx)",
+    "form": "NASAL_SPRAY",
+    "strengthsMg": [
+      0.5
+    ],
+    "unit": "spray",
+    "mgPerUnitNote": "10 mg/mL; each 50 microlitre spray = 0.5 mg; 1 dose = 2 sprays (one per nostril) = 1 mg. A 10 mL bottle holds about 200 sprays.",
+    "wearHours": null,
+    "flavours": [],
+    "labelMaxPerDay": "5 doses (10 sprays) per hour; 40 doses (80 sprays = 40 mg) per day",
+    "dosingNotes": "Prescription only. 1-2 doses per hour, at least 8 doses/day. Label table gives a maximum duration of 3 months; use beyond 6 months is not recommended.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.accessdata.fda.gov/drugsatfda_docs/label/2024/020385s012lbl.pdf",
+      "https://www.pfizermedical.com/nicotrol-nasal-spray/dosage-admin",
+      "https://www.drugs.com/pro/nicotrol-ns.html",
+      "https://www.goodrx.com/nicotrol/how-to-use-nicotrol-nasal-spray"
+    ],
+    "notes": "Pfizer kept supplying NS after the inhaler was discontinued (2023 DHCP letter, ASHP). No 2025-26 shortage notice was found."
+  },
+  {
+    "brand": "CVS Health",
+    "line": "Nicotine Gum",
+    "form": "GUM",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "piece",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Original",
+      "Mint",
+      "Ice Mint",
+      "Fruit",
+      "Cinnamon"
+    ],
+    "labelMaxPerDay": "24 pieces (US gum Drug Facts)",
+    "dosingNotes": "Use 4 mg if first cigarette is within 30 min of waking, otherwise 2 mg. Weeks 1-6: 1 piece every 1-2 h (at least 9/day); weeks 7-9: 1 every 2-4 h; weeks 10-12: 1 every 4-8 h; stop at end of week 12. Chew slowly until tingle, then park between cheek and gum; no eating/drinking 15 min before or while chewing.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.cvs.com/shop/health-medicine/stop-smoking/nicotine-gum/q/CVS/br",
+      "https://www.cvs.com/shop/cvs-health-sugar-free-nicotine-gum-fruit-prodid-394374?skuId=406059"
+    ],
+    "notes": "US store brands are ANDA generics of the Nicorette/NicoDerm CQ reference products, so label strengths and limits mirror the reference label; confirm on the specific pack. Flavour availability varies by store and changes often."
+  },
+  {
+    "brand": "CVS Health",
+    "line": "Nicotine Lozenge",
+    "form": "LOZENGE",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Mint",
+      "Cherry",
+      "Cinnamon",
+      "Ice Mint (coated)"
+    ],
+    "labelMaxPerDay": "20 lozenges; no more than 5 in 6 hours",
+    "dosingNotes": "Use 4 mg if first cigarette is within 30 min of waking, otherwise 2 mg. Weeks 1-6: 1 every 1-2 h (at least 9/day); weeks 7-9: 1 every 2-4 h; weeks 10-12: 1 every 4-8 h. One at a time; let dissolve, do not chew or swallow.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://dailymed.nlm.nih.gov/dailymed/fda/fdaDrugXsl.cfm?setid=54b181ea-41fc-46b6-9611-5473973c82d9",
+      "https://www.cvs.com/shop/cvs-sugar-free-nicotine-lozenges-mint-prodid-331733",
+      "https://www.cvs.com/shop/health-medicine/stop-smoking/q/CVS/br"
+    ],
+    "notes": "US store brands are ANDA generics of the Nicorette/NicoDerm CQ reference products, so label strengths and limits mirror the reference label; confirm on the specific pack. Flavour availability varies by store and changes often."
+  },
+  {
+    "brand": "CVS Health",
+    "line": "Nicotine Mini Lozenge",
+    "form": "MINI_LOZENGE",
+    "strengthsMg": [
+      4
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Mint",
+      "Cinnamon"
+    ],
+    "labelMaxPerDay": "20 lozenges; no more than 5 in 6 hours (US label; verify)",
+    "dosingNotes": "Use 4 mg if first cigarette is within 30 min of waking, otherwise 2 mg. Weeks 1-6: 1 every 1-2 h (at least 9/day); weeks 7-9: 1 every 2-4 h; weeks 10-12: 1 every 4-8 h. One at a time; let dissolve, do not chew or swallow.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.cvs.com/shop/cvs-health-sugar-free-nicotine-4mg-lozenges-cinnamon-108-ct-prodid-1310083",
+      "https://www.cvs.com/shop/health-medicine/stop-smoking/nicotine-gum/q/Lozenges/fm"
+    ],
+    "notes": "Only 4 mg minis were confirmed (mint 81 ct, cinnamon 108 ct). A 2 mg mini is likely but was not verified. US store brands are ANDA generics of the Nicorette/NicoDerm CQ reference products, so label strengths and limits mirror the reference label; confirm on the specific pack. Flavour availability varies by store and changes often."
+  },
+  {
+    "brand": "CVS Health",
+    "line": "Nicotine Transdermal System",
+    "form": "PATCH_24H",
+    "strengthsMg": [
+      7,
+      14,
+      21
+    ],
+    "unit": "patch",
+    "mgPerUnitNote": "",
+    "wearHours": 24,
+    "flavours": [],
+    "labelMaxPerDay": "1 patch per 24 h",
+    "dosingNotes": "Step 1/2/3 schedule follows whichever reference product the pack copies: NicoDerm CQ-type 6+2+2 weeks or Habitrol-type 4+2+2 weeks. Check the pack.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.cvs.com/shop/health-medicine/stop-smoking/q/CVS/br"
+    ],
+    "notes": "Steps 1-3 (21/14/7 mg) are listed. Whether it is a clear patch was not confirmed. US store brands are ANDA generics of the Nicorette/NicoDerm CQ reference products, so label strengths and limits mirror the reference label; confirm on the specific pack. Flavour availability varies by store and changes often."
+  },
+  {
+    "brand": "Walgreens",
+    "line": "Nicotine Gum",
+    "form": "GUM",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "piece",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Original",
+      "Mint (coated)",
+      "Fruit Freeze (coated)"
+    ],
+    "labelMaxPerDay": "24 pieces (US gum Drug Facts)",
+    "dosingNotes": "Use 4 mg if first cigarette is within 30 min of waking, otherwise 2 mg. Weeks 1-6: 1 piece every 1-2 h (at least 9/day); weeks 7-9: 1 every 2-4 h; weeks 10-12: 1 every 4-8 h; stop at end of week 12. Chew slowly until tingle, then park between cheek and gum; no eating/drinking 15 min before or while chewing.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.walgreens.com/list/smoking-cessation-gums",
+      "https://www.amazon.com/Nicotine-Patches-Health-Household-Walgreens/s?keywords=Nicotine+Patches&rh=n%3A3760901%2Cp_89%3AWalgreens&c=ts&ts_id=3760901"
+    ],
+    "notes": "US store brands are ANDA generics of the Nicorette/NicoDerm CQ reference products, so label strengths and limits mirror the reference label; confirm on the specific pack. Flavour availability varies by store and changes often."
+  },
+  {
+    "brand": "Walgreens",
+    "line": "Nicotine Lozenge",
+    "form": "LOZENGE",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Cinnamon",
+      "Ice Mint (coated)"
+    ],
+    "labelMaxPerDay": "20 lozenges; no more than 5 in 6 hours",
+    "dosingNotes": "Use 4 mg if first cigarette is within 30 min of waking, otherwise 2 mg. Weeks 1-6: 1 every 1-2 h (at least 9/day); weeks 7-9: 1 every 2-4 h; weeks 10-12: 1 every 4-8 h. One at a time; let dissolve, do not chew or swallow.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.amazon.com/Walgreens-Nicotine-Lozenge-Cinnamon-Lozenges/dp/B008M6FUTK",
+      "https://www.amazon.com/clp/B01MT69Z8Y",
+      "https://www.walgreens.com/q/nicorette+lozenges"
+    ],
+    "notes": "Coated Ice Mint was seen at 2 mg. US store brands are ANDA generics of the Nicorette/NicoDerm CQ reference products, so label strengths and limits mirror the reference label; confirm on the specific pack. Flavour availability varies by store and changes often."
+  },
+  {
+    "brand": "Walgreens",
+    "line": "Nicotine Mini Lozenge",
+    "form": "MINI_LOZENGE",
+    "strengthsMg": [
+      4
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Mint"
+    ],
+    "labelMaxPerDay": "20 lozenges; no more than 5 in 6 hours (US label; verify)",
+    "dosingNotes": "Use 4 mg if first cigarette is within 30 min of waking, otherwise 2 mg. Weeks 1-6: 1 every 1-2 h (at least 9/day); weeks 7-9: 1 every 2-4 h; weeks 10-12: 1 every 4-8 h. One at a time; let dissolve, do not chew or swallow.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.walgreens.com/q/nicorette+lozenges"
+    ],
+    "notes": "Only a 4 mg mint mini was confirmed. US store brands are ANDA generics of the Nicorette/NicoDerm CQ reference products, so label strengths and limits mirror the reference label; confirm on the specific pack. Flavour availability varies by store and changes often."
+  },
+  {
+    "brand": "Walgreens",
+    "line": "Nicotine Transdermal System (Clear)",
+    "form": "PATCH_24H",
+    "strengthsMg": [
+      7,
+      14,
+      21
+    ],
+    "unit": "patch",
+    "mgPerUnitNote": "",
+    "wearHours": 24,
+    "flavours": [],
+    "labelMaxPerDay": "1 patch per 24 h",
+    "dosingNotes": "Start with Step 1 if you smoke more than 10/day; Step 3 follows Step 2. Sold as 14-patch (2-week) kits. Total course length was not seen on the Walgreens label.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://otclabels.com/lib/otc/otc-meds/nicotine-transdermal-system-6/"
+    ],
+    "notes": "Clear patches; label revision 12/2023. US store brands are ANDA generics of the Nicorette/NicoDerm CQ reference products, so label strengths and limits mirror the reference label; confirm on the specific pack. Flavour availability varies by store and changes often."
+  },
+  {
+    "brand": "Equate (Walmart)",
+    "line": "Nicotine Gum",
+    "form": "GUM",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "piece",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Original (uncoated)",
+      "Fruit",
+      "Mint",
+      "Cinnamon",
+      "Ice Mint"
+    ],
+    "labelMaxPerDay": "24 pieces (US gum Drug Facts)",
+    "dosingNotes": "Use 4 mg if first cigarette is within 30 min of waking, otherwise 2 mg. Weeks 1-6: 1 piece every 1-2 h (at least 9/day); weeks 7-9: 1 every 2-4 h; weeks 10-12: 1 every 4-8 h; stop at end of week 12. Chew slowly until tingle, then park between cheek and gum; no eating/drinking 15 min before or while chewing.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.walmart.com/browse/health-and-medicine/equate-stop-smoking-aids/976760_9602210_1964418",
+      "https://www.walmart.com/browse/health/fsa-hsa-eligible-smoking-cessation/equate/976760_6120851_9813121/YnJhbmQ6RXF1YXRl"
+    ],
+    "notes": "Flavoured variants were seen mainly at 4 mg; Original at 2 and 4 mg. US store brands are ANDA generics of the Nicorette/NicoDerm CQ reference products, so label strengths and limits mirror the reference label; confirm on the specific pack. Flavour availability varies by store and changes often."
+  },
+  {
+    "brand": "Equate (Walmart)",
+    "line": "Nicotine Lozenge",
+    "form": "LOZENGE",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Mint",
+      "Cherry",
+      "Cinnamon",
+      "Ice Mint (coated)"
+    ],
+    "labelMaxPerDay": "20 lozenges; no more than 5 in 6 hours",
+    "dosingNotes": "Use 4 mg if first cigarette is within 30 min of waking, otherwise 2 mg. Weeks 1-6: 1 every 1-2 h (at least 9/day); weeks 7-9: 1 every 2-4 h; weeks 10-12: 1 every 4-8 h. One at a time; let dissolve, do not chew or swallow.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.walmart.com/ip/Equate-Nicotine-Lozenge-2-mg-Stop-Smoking-Aid-Mint-Flavor-108-Count/10324742",
+      "https://www.walmart.com/ip/Equate-Nicotine-Lozenge-2-mg-Cherry-Flavor-Stop-Smoking-Aid-108-Count/13284382",
+      "https://www.drugs.com/pro/equate-nicotine-lozenge.html"
+    ],
+    "notes": "US store brands are ANDA generics of the Nicorette/NicoDerm CQ reference products, so label strengths and limits mirror the reference label; confirm on the specific pack. Flavour availability varies by store and changes often."
+  },
+  {
+    "brand": "Equate (Walmart)",
+    "line": "Mini Nicotine Lozenge",
+    "form": "MINI_LOZENGE",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Mint",
+      "Cherry Ice",
+      "Citrus (2 mg)",
+      "Citrus Lime (4 mg)"
+    ],
+    "labelMaxPerDay": "20 lozenges; no more than 5 in 6 hours (US label; verify)",
+    "dosingNotes": "Use 4 mg if first cigarette is within 30 min of waking, otherwise 2 mg. Weeks 1-6: 1 every 1-2 h (at least 9/day); weeks 7-9: 1 every 2-4 h; weeks 10-12: 1 every 4-8 h. One at a time; let dissolve, do not chew or swallow.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.walmart.com/ip/Equate-Mini-Nicotine-Lozenge-4-mg-Cherry-Ice-Flavor-108-Count/689324018",
+      "https://www.walmart.com/browse/health-and-medicine/equate-stop-smoking-aids/976760_9602210_1964418"
+    ],
+    "notes": "US store brands are ANDA generics of the Nicorette/NicoDerm CQ reference products, so label strengths and limits mirror the reference label; confirm on the specific pack. Flavour availability varies by store and changes often."
+  },
+  {
+    "brand": "Equate (Walmart)",
+    "line": "Nicotine Transdermal System Clear",
+    "form": "PATCH_24H",
+    "strengthsMg": [
+      21
+    ],
+    "unit": "patch",
+    "mgPerUnitNote": "",
+    "wearHours": 24,
+    "flavours": [],
+    "labelMaxPerDay": "1 patch per 24 h",
+    "dosingNotes": "Equate Step 1 label: the full Step 1 course is 42 patches (6 weeks), i.e. the NicoDerm CQ-type schedule.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://products.withsilver.app/walmart/12556780-Equate-Nicotine-Transdermal-System-Step-1-Clear-Patches-21-mg-14",
+      "https://otclabels.com/lib/otc/otc-meds/nicotine-transdermal-system-6/"
+    ],
+    "notes": "Only the Step 1 21 mg clear patch (7 and 14 ct) was confirmed. Step 2/3 (14/7 mg) are implied by the step naming but were not verified, so they are not listed."
+  },
+  {
+    "brand": "Kirkland Signature (Costco)",
+    "line": "Quit Nicotine Gum",
+    "form": "GUM",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "piece",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Original",
+      "Ice Mint (coated)"
+    ],
+    "labelMaxPerDay": "24 pieces (US gum Drug Facts)",
+    "dosingNotes": "Use 4 mg if first cigarette is within 30 min of waking, otherwise 2 mg. Weeks 1-6: 1 piece every 1-2 h (at least 9/day); weeks 7-9: 1 every 2-4 h; weeks 10-12: 1 every 4-8 h; stop at end of week 12. Chew slowly until tingle, then park between cheek and gum; no eating/drinking 15 min before or while chewing.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.costcobusinessdelivery.com/p/-/kirkland-signature-quit-coated-nicotine-gum-4-mg-ice-mint-300-ct/100301203",
+      "https://www.costcobusinessdelivery.com/p/-/kirkland-signature-quit-coated-nicotine-gum-2-mg-ice-mint-300-ct/100301184",
+      "https://dailymed.nlm.nih.gov/dailymed/fda/fdaDrugXsl.cfm?setid=cb462e10-124e-4ea3-9261-8c1fc7a9e1a6"
+    ],
+    "notes": "Sold as 'Quit 2'/'Quit 4': coated Ice Mint in 300 ct packs, Original in 380 ct packs. No Kirkland nicotine patch was found (Costco sells NicoDerm CQ). US store brands are ANDA generics of the Nicorette/NicoDerm CQ reference products, so label strengths and limits mirror the reference label; confirm on the specific pack. Flavour availability varies by store and changes often."
+  },
+  {
+    "brand": "Kirkland Signature (Costco)",
+    "line": "Quit Nicotine Lozenge",
+    "form": "LOZENGE",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Mint",
+      "Cherry"
+    ],
+    "labelMaxPerDay": "20 lozenges; no more than 5 in 6 hours",
+    "dosingNotes": "Use 4 mg if first cigarette is within 30 min of waking, otherwise 2 mg. Weeks 1-6: 1 every 1-2 h (at least 9/day); weeks 7-9: 1 every 2-4 h; weeks 10-12: 1 every 4-8 h. One at a time; let dissolve, do not chew or swallow.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.costco.com/Kirkland-Signature-Quit-Lozenges,-270-Pieces.product.906476.html",
+      "https://www.costco.com/p/-/kirkland-signature-quit-2mg-or-4mg-cherry-lozenges-270-pieces/100516618",
+      "https://dailymed.nlm.nih.gov/dailymed/fda/fdaDrugXsl.cfm?setid=33098a72-9146-4547-9d0b-ff28c8c80030"
+    ],
+    "notes": "270-piece packs; cherry is online-only. US store brands are ANDA generics of the Nicorette/NicoDerm CQ reference products, so label strengths and limits mirror the reference label; confirm on the specific pack. Flavour availability varies by store and changes often."
+  },
+  {
+    "brand": "up&up (Target)",
+    "line": "Nicotine Gum",
+    "form": "GUM",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "piece",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Mint (uncoated)"
+    ],
+    "labelMaxPerDay": "24 pieces (US gum Drug Facts)",
+    "dosingNotes": "Use 4 mg if first cigarette is within 30 min of waking, otherwise 2 mg. Weeks 1-6: 1 piece every 1-2 h (at least 9/day); weeks 7-9: 1 every 2-4 h; weeks 10-12: 1 every 4-8 h; stop at end of week 12. Chew slowly until tingle, then park between cheek and gum; no eating/drinking 15 min before or while chewing.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.target.com/p/nicotine-4mg-gum-stop-smoking-aid-mint-flavor-170ct-up-38-up-8482/-/A-53046725"
+    ],
+    "notes": "US store brands are ANDA generics of the Nicorette/NicoDerm CQ reference products, so label strengths and limits mirror the reference label; confirm on the specific pack. Flavour availability varies by store and changes often."
+  },
+  {
+    "brand": "up&up (Target)",
+    "line": "Nicotine Mini Lozenge",
+    "form": "MINI_LOZENGE",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Mint",
+      "Cherry Ice (2 mg)",
+      "Citrus (4 mg)",
+      "Mint (coated, 4 mg)"
+    ],
+    "labelMaxPerDay": "20 lozenges; no more than 5 in 6 hours (US label; verify)",
+    "dosingNotes": "Use 4 mg if first cigarette is within 30 min of waking, otherwise 2 mg. Weeks 1-6: 1 every 1-2 h (at least 9/day); weeks 7-9: 1 every 2-4 h; weeks 10-12: 1 every 4-8 h. One at a time; let dissolve, do not chew or swallow.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.target.com/p/nicotine-2mg-mini-lozenge-cherry-ice-108ct-up-38-up-8482/-/A-94738942",
+      "https://www.target.com/p/nicotine-4mg-mini-lozenge-stop-smoking-aid-mint-81ct-up-38-up-8482/-/A-76153428",
+      "https://www.target.com/p/4mg-mini-coated-lozenge-mint-80ct-up-38-up-8482/-/A-89142066"
+    ],
+    "notes": "DailyMed also lists an up&up full-size nicotine polacrilex lozenge (setid 18911ff0-cd34-47ac-be8f-d5b553d2f87c), but its strengths and flavours were not confirmed, so it has no separate entry. US store brands are ANDA generics of the Nicorette/NicoDerm CQ reference products, so label strengths and limits mirror the reference label; confirm on the specific pack. Flavour availability varies by store and changes often."
+  },
+  {
+    "brand": "up&up (Target)",
+    "line": "Nicotine Clear Patch",
+    "form": "PATCH_24H",
+    "strengthsMg": [
+      21
+    ],
+    "unit": "patch",
+    "mgPerUnitNote": "",
+    "wearHours": 24,
+    "flavours": [],
+    "labelMaxPerDay": "1 patch per 24 h",
+    "dosingNotes": "Follow the step schedule on the pack.",
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.target.com/p/nicotine-stop-smoking-aid-clear-patches-clear-step-1-up-38-up-8482/-/A-11045257"
+    ],
+    "notes": "Only Step 1 21 mg (14 ct) was confirmed; 14 and 7 mg not verified. US store brands are ANDA generics of the Nicorette/NicoDerm CQ reference products, so label strengths and limits mirror the reference label; confirm on the specific pack. Flavour availability varies by store and changes often."
+  },
+  {
+    "brand": "Rite Aid",
+    "line": "Store-brand NRT (gum, lozenge, patch)",
+    "form": "OTHER",
+    "strengthsMg": [],
+    "unit": null,
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [],
+    "labelMaxPerDay": null,
+    "dosingNotes": null,
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": true,
+    "status": "discontinued",
+    "sources": [
+      "https://abc17news.com/money/cnn-business-consumer/2025/10/04/rite-aid-has-closed-its-final-doors-after-63-years-in-business/",
+      "https://p2pi.com/rite-aid-officially-closes-all-stores"
+    ],
+    "notes": "Rite Aid closed all its remaining stores in early October 2025 after its second bankruptcy (May 2025). No current Rite Aid-brand NRT exists. Map legacy users to the generic US strengths (gum and lozenge 2/4 mg, patch 7/14/21 mg). Individual Rite Aid SKUs were not researched."
+  },
+  {
+    "brand": "Nicorette",
+    "line": "Gum (Canada)",
+    "form": "GUM",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "piece",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Fresh Fruit",
+      "Cinnamon",
+      "Extreme Chill",
+      "ULTRA Fresh Mint",
+      "Spearmint"
+    ],
+    "labelMaxPerDay": "20 pieces",
+    "dosingNotes": "2 mg if you smoke 25 or fewer cigarettes/day; 4 mg if more than 25. Chew one piece when you feel the urge to smoke, one piece at a time, chew-and-park.",
+    "markets": [
+      "CA"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://kenvuepro.com/en-ca/smoking-cessation/products/nicorette-gum",
+      "https://www.nicorette.ca/products/gum",
+      "https://well.ca/products/nicorette-gum-mint-4mg_201971.html",
+      "https://kenvuepro.com/en-ca/clinical-resources/smoking-cessation-hcp-faq"
+    ],
+    "notes": "Kenvue (Canada). nicorette.ca names the five flavours slightly differently (Fruit, Mint, Peppermint, Spearmint, Cinnamon). Differs from the US: Canada caps at 20/day (US 24) and picks strength by cigarettes/day (US uses time to first cigarette)."
+  },
+  {
+    "brand": "Nicorette",
+    "line": "Lozenge (Canada)",
+    "form": "LOZENGE",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Mint",
+      "Fresh Fruit"
+    ],
+    "labelMaxPerDay": "15 lozenges",
+    "dosingNotes": "2 mg if 25 or fewer cigarettes/day; 4 mg if more than 25. Weeks 1-6: 1 every 1-2 h; weeks 7-9: 1 every 2-4 h; weeks 10-12: 1 every 4-8 h. Do not bite, chew or swallow.",
+    "markets": [
+      "CA"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://kenvuepro.com/en-ca/smoking-cessation/products/nicorette-lozenge",
+      "https://www.nicorette.ca/products/lozenge",
+      "https://voila.ca/products/nicorette-mint-2-mg-80-lozenge/335604EA",
+      "https://well.ca/products/nicorette-2mg-nicotine-replacement_307936.html"
+    ],
+    "notes": "Canadian max is 15/day (US 20/day)."
+  },
+  {
+    "brand": "Nicorette",
+    "line": "Mini Lozenge (Canada)",
+    "form": "MINI_LOZENGE",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Mint"
+    ],
+    "labelMaxPerDay": "15 lozenges",
+    "dosingNotes": "2 mg if 25 or fewer cigarettes/day; 4 mg if more than 25. Same 12-week schedule as the Canadian lozenge.",
+    "markets": [
+      "CA"
+    ],
+    "licensedNrt": true,
+    "status": "uncertain",
+    "sources": [
+      "https://well.ca/products/nicorette-mini-lozenges-2mg_40546.html",
+      "https://well.ca/produits/40548.html",
+      "https://www.diabetescarecommunity.ca/wp-content/uploads/2018/03/en_JJN1736_ProductGuide.pdf"
+    ],
+    "notes": "Listed in a 2018 Canadian product guide and on well.ca, but missing from the current nicorette.ca product list, and one 4 mg listing is marked 'No Longer Available'. May be discontinued."
+  },
+  {
+    "brand": "Nicorette",
+    "line": "QuickMist Mouth Spray (Canada)",
+    "form": "MOUTH_SPRAY",
+    "strengthsMg": [
+      1
+    ],
+    "unit": "spray",
+    "mgPerUnitNote": "1 mg nicotine per spray",
+    "wearHours": null,
+    "flavours": [
+      "Mint",
+      "Spearmint",
+      "Berry"
+    ],
+    "labelMaxPerDay": "64 sprays; max 2 sprays at a time and 4 per hour",
+    "dosingNotes": "1-2 sprays when a craving starts. 12-week reduction guide on pack.",
+    "markets": [
+      "CA"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.nicorette.ca/products/quickmist-spray",
+      "https://well.ca/products/nicorette-quickmist-spray-berry-duo_189241.html",
+      "https://well.ca/products/nicorette-quickmist-mouth-spray_298131.html",
+      "https://kenvuepro.com/en-ca/clinical-resources/smoking-cessation-hcp-faq"
+    ],
+    "notes": "Kenvue. 'Unique Mild Spearmint' and 'Cool Berry' (Duo Pack) are retailer names."
+  },
+  {
+    "brand": "Nicorette",
+    "line": "QuickMist SmartTrack (Canada)",
+    "form": "MOUTH_SPRAY",
+    "strengthsMg": [
+      1
+    ],
+    "unit": "spray",
+    "mgPerUnitNote": "1 mg nicotine per spray (assumed same as QuickMist)",
+    "wearHours": null,
+    "flavours": [
+      "Mint"
+    ],
+    "labelMaxPerDay": "64 sprays (assumed same as QuickMist; not seen on SmartTrack label)",
+    "dosingNotes": "As QuickMist; pairs with a companion app for a personalised quit plan.",
+    "markets": [
+      "CA"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.nicorette.ca/products"
+    ],
+    "notes": "App-connected version of QuickMist; also listed on nicorette.com.au. Strength not stated on the product page seen."
+  },
+  {
+    "brand": "Nicorette",
+    "line": "Inhaler (Canada)",
+    "form": "INHALATOR",
+    "strengthsMg": [
+      10
+    ],
+    "unit": "cartridge",
+    "mgPerUnitNote": "10 mg per cartridge (porous plug); each cartridge delivers 4 mg. About 20 min of frequent continuous puffing per cartridge. Puffs per cartridge not stated on the Canadian sources seen.",
+    "wearHours": null,
+    "flavours": [],
+    "labelMaxPerDay": "12 cartridges",
+    "dosingNotes": "At least 6 cartridges/day for the first 3-12 weeks, then reduce gradually over 6-12 weeks; stop when down to 1-2/day. Do not puff for more than 20 consecutive minutes per session.",
+    "markets": [
+      "CA"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://kenvuepro.com/en-ca/smoking-cessation/products/nicorette-inhaler",
+      "https://www.brunet.ca/en/health/medication-dictionary/nicorette-inhaler-cartridge-10mg/02241742/",
+      "https://well.ca/products/nicorette-inhaler_1615.html",
+      "https://www.uniprix.com/en/drug-database/02241742/nicorette-inhaler"
+    ],
+    "notes": "DIN 02241742; non-medicinal ingredients ethanol and menthol. Same 10 mg / 4 mg-delivered cartridge as the discontinued US Nicotrol, but with a lower daily max (12 vs 16). AU/NZ/UK use a 15 mg cartridge."
+  },
+  {
+    "brand": "NicoDerm",
+    "line": "Clear Patch (Canada)",
+    "form": "PATCH_24H",
+    "strengthsMg": [
+      7,
+      14,
+      21
+    ],
+    "unit": "patch",
+    "mgPerUnitNote": "",
+    "wearHours": 24,
+    "flavours": [],
+    "labelMaxPerDay": "1 patch per 24 h",
+    "dosingNotes": "More than 10 cigarettes/day: 21 mg weeks 1-6, 14 mg weeks 7-8, 7 mg weeks 9-10. Under 10/day, under 45 kg, or cardiovascular disease: 14 mg for 6 weeks, then 7 mg for 2-4 weeks. Reassess if needed beyond 6 months.",
+    "markets": [
+      "CA"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://kenvuepro.com/en-ca/smoking-cessation/products/nicoderm-nicotine-patch",
+      "https://voila.ca/products/nicoderm-step-1-anti-smoking-aid-21-mg-7-clear-patches/67572EA",
+      "https://magasiner.familiprix.com/p/000000000000266916"
+    ],
+    "notes": "Kenvue's Canadian brand, sold as 'NicoDerm' (US 'NicoDerm CQ' is Haleon). The 7 mg step for lighter smokers is 2-4 weeks in Canada, against 2 weeks in the US."
+  },
+  {
+    "brand": "Habitrol",
+    "line": "Patch (Canada)",
+    "form": "PATCH_24H",
+    "strengthsMg": [
+      7,
+      14,
+      21
+    ],
+    "unit": "patch",
+    "mgPerUnitNote": "",
+    "wearHours": 24,
+    "flavours": [],
+    "labelMaxPerDay": "1 patch per 24 h",
+    "dosingNotes": "Canadian retailer text: under 20 cigarettes/day, start at Step 2 (14 mg) for 6-8 weeks, then Step 3 (7 mg) for 3-4 weeks. If cravings persist on 14 mg, try 21 mg.",
+    "markets": [
+      "CA"
+    ],
+    "licensedNrt": true,
+    "status": "uncertain",
+    "sources": [
+      "https://well.ca/products/habitrol-7_2102.html",
+      "https://finance.yahoo.com/news/dr-reddys-rdy-acquire-haleons-142500542.html"
+    ],
+    "notes": "Dr. Reddy's has owned Habitrol Canada since buying Haleon's non-US NRT business (deal announced 2024). Only the Step 3 listing was confirmed at a Canadian retailer, so current availability of all three steps is uncertain. Habitrol gum and lozenges were not confirmed for Canada."
+  },
+  {
+    "brand": "Thrive",
+    "line": "Nicotine Gum",
+    "form": "GUM",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "piece",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Fresh Spearmint",
+      "Cool Mint",
+      "Fruit Explosion"
+    ],
+    "labelMaxPerDay": "20 pieces",
+    "dosingNotes": "2 mg if you smoke less than a pack a day, 4 mg if more. Most people need about 10 pieces/day. Chew until a strong taste, park, repeat for about 30 min.",
+    "markets": [
+      "CA"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://well.ca/products/thrive-complete-2mg-nicotine_171736.html",
+      "https://well.ca/products/thrive-complete-nicotine-replacement_171735.html",
+      "https://mednow.ca/products/thrive-nicotine-polacrilex-gum-4mg",
+      "https://mednow.ca/products/thrive-nicotine-polacrilex-gum-2mg"
+    ],
+    "notes": "Still sold at Canadian retailers in 2026. Dr. Reddy's has owned Thrive since buying Haleon's NRT business in 2024. 'Thrive Complete' is the current pack name for some SKUs. One non-label Canadian source quotes 30/day for 2 mg; the pack label says 20."
+  },
+  {
+    "brand": "Thrive",
+    "line": "Nicotine Lozenge",
+    "form": "LOZENGE",
+    "strengthsMg": [
+      1,
+      2
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Peppermint"
+    ],
+    "labelMaxPerDay": "1 mg: 25 lozenges; 2 mg: 15 lozenges",
+    "dosingNotes": "1 mg (Regular) if you smoke less than a pack a day; 2 mg (Extra Strength) if more. Most people need about 10/day. One at a time.",
+    "markets": [
+      "CA"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.walmart.ca/en/ip/thrive-nicotine-lozenges-1mg-regular-strength/6000208370067",
+      "https://www.walmart.ca/en/ip/thrive-lozenges-2mg-regular-strength-nicotine-replacement/10141831",
+      "https://www.familiprix.com/en/medications/thrive-1mg-lozenge-80007461",
+      "https://magasiner.familiprix.com/p/000000000000444182",
+      "https://shop.rexall.ca/store/rexall/products/17876606-2-mg-extra-strength-peppermint-nicotine-lozenges-108-ct"
+    ],
+    "notes": "Uses 1/2 mg strengths (Nicotinell-type), unlike the 2/4 mg Nicorette lozenge in Canada. Zehrs also lists 'Peppermint Chill'. Some sizes show out of stock at well.ca."
+  },
+  {
+    "brand": "Life Brand (Shoppers Drug Mart)",
+    "line": "Nicotine Gum",
+    "form": "GUM",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "piece",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Ice Mint (2 mg)",
+      "Mint Chill (4 mg)"
+    ],
+    "labelMaxPerDay": "",
+    "dosingNotes": "",
+    "markets": [
+      "CA"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.shoppersdrugmart.ca/life-brand-lb-nicotine-gum-2mg-ice-mint/p/BB_057800868309?variantCode=057800868309",
+      "https://www.shoppersdrugmart.ca/life-brand-lb-nic-gum-4mg-mint-chill/p/BB_057800868354?variantCode=057800868354"
+    ],
+    "notes": "Store brand. Label maximum not seen; Canadian nicotine gum labels typically say 20/day. Full flavour range not researched."
+  },
+  {
+    "brand": "Life Brand (Shoppers Drug Mart)",
+    "line": "Mini Nicotine Lozenge",
+    "form": "MINI_LOZENGE",
+    "strengthsMg": [
+      2
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [],
+    "labelMaxPerDay": "",
+    "dosingNotes": "",
+    "markets": [
+      "CA"
+    ],
+    "licensedNrt": true,
+    "status": "uncertain",
+    "sources": [
+      "https://www.skipthedishes.com/shoppers-drug-mart-2410-22nd-st-w/health-wellness-smoking-cessation"
+    ],
+    "notes": "Seen only as a 2 mg, 81-lozenge pack on a delivery-app listing of a Shoppers store. A 4 mg version was not confirmed."
+  },
+  {
+    "brand": "Life Brand (Shoppers Drug Mart)",
+    "line": "Nicotine Clear Patch",
+    "form": "PATCH_24H",
+    "strengthsMg": [
+      14
+    ],
+    "unit": "patch",
+    "mgPerUnitNote": "",
+    "wearHours": 24,
+    "flavours": [],
+    "labelMaxPerDay": "1 patch per 24 h",
+    "dosingNotes": "",
+    "markets": [
+      "CA"
+    ],
+    "licensedNrt": true,
+    "status": "uncertain",
+    "sources": [
+      "https://www.shoppersdrugmart.ca/life-brand-lb-nicotne-ptch-14mg-stp-2-clr/p/BB_057800893547?variantCode=057800893547"
+    ],
+    "notes": "Only the Step 2 14 mg clear patch was confirmed. Step 1 (21 mg) and Step 3 (7 mg) are implied by the step naming but were not verified, so they are not listed."
+  },
+  {
+    "brand": "Rexall",
+    "line": "Nic-Assist Nicotine Gum",
+    "form": "GUM",
+    "strengthsMg": [
+      2
+    ],
+    "unit": "piece",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Fresh Mint",
+      "Cinnamon (coated)"
+    ],
+    "labelMaxPerDay": "",
+    "dosingNotes": "",
+    "markets": [
+      "CA"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://well.ca/products/rexall-nic-assist-nicotine-gum_193864.html",
+      "https://www.ubereats.com/ca/product/b/69ec29fa-9b01-5ea0-913e-050f3ae03823",
+      "https://veterans.gc.ca/fr/node/102793"
+    ],
+    "notes": "Rexall pharmacy store brand (Canada); NIC-ASSIST GUM 2MG has DIN 80015240. A 4 mg Canadian SKU was not confirmed. The 4 mg 'Rexall' gum sold at Dollar General is a separate US product line."
+  },
+  {
+    "brand": "Nicorette",
+    "line": "Gum (AU)",
+    "form": "GUM",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "piece",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Classic",
+      "Icy Mint",
+      "Freshfruit"
+    ],
+    "labelMaxPerDay": "AU PI: not more than 20 pieces of 2 mg or 10 pieces of 4 mg (text seen truncated). Some retailer copies of pack directions say 10 pieces/day; check the pack.",
+    "dosingNotes": "Most smokers need about 8-12 x 2 mg or 4-6 x 4 mg pieces/day. 2 mg for lighter smokers (under 20 cigarettes/day), 4 mg for heavier. Can be used to stop abruptly or to cut down first.",
+    "markets": [
+      "AU"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://medsinfo.com.au/api/documents/Nicorette_Gum_PI?format=pdf",
+      "https://www.nicorette.com.au/products/nicotine-gum",
+      "https://www.chemistwarehouse.com.au/buy/6578/nicorette-quit-smoking-regular-strength-nicotine-gum-classic-30-pack",
+      "https://www.chemistwarehouse.com.au/buy/124002/nicorette-quit-smoking-extra-strength-nicotine-gum-icy-mint-exclusive-size-315-pack",
+      "https://www.goodpricepharmacy.com.au/nicorette-gum-4mg-freshfruit-30-pack-9300607012118"
+    ],
+    "notes": "Kenvue. NZ availability was not checked."
+  },
+  {
+    "brand": "Nicorette",
+    "line": "Cooldrops Lozenge",
+    "form": "LOZENGE",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Icy Mint"
+    ],
+    "labelMaxPerDay": "15 lozenges",
+    "dosingNotes": "2 mg for under 20 cigarettes/day, 4 mg for more than 20. Also used for cutting down (same 15/day max).",
+    "markets": [
+      "AU",
+      "NZ"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.chemistwarehouse.com.au/buy/85765/nicorette-quit-smoking-regular-strength-cooldrops-nicotine-lozenge-icy-mint-8-x-20-pack",
+      "https://www.chemistwarehouse.com.au/buy/163442/nicorette-cooldrops-icy-mint-4mg-40-lozenges",
+      "https://medsafe.govt.nz/profs/Datasheet/n/nicorettecooldrops.pdf"
+    ],
+    "notes": "Sugar-free. A Medsafe (NZ) datasheet exists, also with a 15/day maximum."
+  },
+  {
+    "brand": "Nicorette",
+    "line": "Fruitdrops Lozenge",
+    "form": "LOZENGE",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Fruit"
+    ],
+    "labelMaxPerDay": "15 lozenges (as Cooldrops; not seen on the Fruitdrops listing itself)",
+    "dosingNotes": "2 mg for under 20 cigarettes/day, 4 mg for more than 20.",
+    "markets": [
+      "AU"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.chemistwarehouse.com.au/buy/88357/nicorette-quit-smoking-regular-strength-nicotine-lozenge-fruitdrops-8-x-20-pack",
+      "https://www.chemistwarehouse.com.au/buy/88358/nicorette-quit-smoking-extra-strength-nicotine-lozenge-fruitdrops-8-x-20-pack"
+    ],
+    "notes": "Sugar-free fruit sibling of Cooldrops."
+  },
+  {
+    "brand": "Nicorette",
+    "line": "16hr Invisipatch",
+    "form": "PATCH_16H",
+    "strengthsMg": [
+      10,
+      15,
+      25
+    ],
+    "unit": "patch",
+    "mgPerUnitNote": "Labelled as mg delivered over 16 h; the 25 mg patch contains 39.37 mg nicotine",
+    "wearHours": 16,
+    "flavours": [],
+    "labelMaxPerDay": "1 patch per day (worn about 16 h)",
+    "dosingNotes": "More than 15 cigarettes/day: Step 1 25 mg weeks 1-8, Step 2 15 mg weeks 9-10, Step 3 10 mg weeks 11-12. 15 or fewer/day: start at Step 2 (15 mg), then Step 3 (exact weeks per pack).",
+    "markets": [
+      "AU"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.chemistwarehouse.com.au/buy/68092/nicorette-quit-smoking-nicotine-16-hour-invisipatch-step-1-25mg-7-pack",
+      "https://www.chemistwarehouse.com.au/buy/68090/nicorette-quit-smoking-nicotine-16-hour-invisipatch-step-2-7-pack",
+      "https://www.chemistwarehouse.com.au/buy/68091/nicorette-quit-smoking-nicotine-16-hour-invisipatch-step-3-7-pack",
+      "https://www.nationalpharmacies.com.au/product/nicorette-quit-smoking-16hr-invisipatch-step-1-25mg-14-pack/",
+      "https://www.nicorette.com.au/products/nicotine-patch"
+    ],
+    "notes": "Strengths differ by market: Nicorette's AU (and UK) patch is 16 h at 10/15/25 mg, while US/CA/NZ 24 h patches are 7/14/21 mg. Can be combined with 2 mg gum, QuickMist, lozenge or Inhalator."
+  },
+  {
+    "brand": "Nicorette",
+    "line": "QuickMist Mouth Spray (AU)",
+    "form": "MOUTH_SPRAY",
+    "strengthsMg": [
+      1
+    ],
+    "unit": "spray",
+    "mgPerUnitNote": "1 mg nicotine per spray; 150 sprays per 13.2 mL unit",
+    "wearHours": null,
+    "flavours": [
+      "Freshmint",
+      "Cool Berry"
+    ],
+    "labelMaxPerDay": "64 sprays in 24 h; max 2 sprays per episode and 4 per hour (over 16 h)",
+    "dosingNotes": "1-2 sprays when a craving occurs. Not for under-12s.",
+    "markets": [
+      "AU"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.safetyandquality.gov.au/medicine-finder/nicorette-quickmist",
+      "https://www.chemistwarehouse.com.au/buy/67195/nicorette-quit-smoking-quickmist-nicotine-mouth-spray-freshmint-150-pack",
+      "https://www.chemistwarehouse.com.au/buy/88350/nicorette-quit-smoking-quickmist-nicotine-mouth-spray-cool-berry-2-x-150-sprays",
+      "https://www.nicorette.com.au/products"
+    ],
+    "notes": "nicorette.com.au also lists QuickMist SmartTrack (app-connected)."
+  },
+  {
+    "brand": "Nicorette",
+    "line": "Inhalator 15 mg",
+    "form": "INHALATOR",
+    "strengthsMg": [
+      15
+    ],
+    "unit": "cartridge",
+    "mgPerUnitNote": "15 mg nicotine per cartridge. About 40 min of intense or frequent puffing per cartridge (UK SmPC: about eight 5-minute sessions). Puff guidance: 8-10x as many puffs as a cigarette (e.g. 64-80 puffs where a cigarette takes 8). Delivered amount (via search summary of the Medsafe datasheet, not read directly): continuous rapid inhalation over 40 min releases up to about 7 mg, about 50% absorbed systemically (about 4 mg). Sources conflict on this figure; treat it as unverified.",
+    "wearHours": null,
+    "flavours": [],
+    "labelMaxPerDay": "6 cartridges",
+    "dosingNotes": "AU PI: 3-6 cartridges/day; heavy smokers up to 6. With a patch, usually 2-3/day. Use whenever there is an urge to smoke. Inhale more often below 15°C.",
+    "markets": [
+      "AU",
+      "NZ"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://medsinfo.com.au/api/documents/Nicorette_Inhalator_PI?format=pdf",
+      "https://www.medsafe.govt.nz/profs/datasheet/n/nicoretteihaler.pdf",
+      "https://www.medicines.org.uk/emc/product/4707/smpc",
+      "https://www.chemistwarehouse.co.nz/buy/67160/nicorette-inhalator-15mg-20",
+      "https://bloomsthechemist.com.au/nicorette-inhalator-15mg-20-pack",
+      "https://www.nicorette.com.au/products/nicotine-inhalator"
+    ],
+    "notes": "Kenvue. 15 mg cartridge (AU/NZ, also UK/IE) against 10 mg in Canada and the discontinued US Nicotrol."
+  },
+  {
+    "brand": "Nicabate",
+    "line": "Clear Patch",
+    "form": "PATCH_24H",
+    "strengthsMg": [
+      7,
+      14,
+      21
+    ],
+    "unit": "patch",
+    "mgPerUnitNote": "",
+    "wearHours": 24,
+    "flavours": [],
+    "labelMaxPerDay": "1 patch per 24 h",
+    "dosingNotes": "More than 10 cigarettes/day (some listings say 10 or more): Step 1 21 mg for 6 weeks, Step 2 14 mg for 2 weeks, Step 3 7 mg for 2-4 weeks. Combination option: 21 mg patch plus 2 mg gum or mini lozenge for 12 weeks, then step down.",
+    "markets": [
+      "AU"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.safetyandquality.gov.au/medicine-finder/nicabate-clear-transdermal-patches",
+      "https://www.chemistwarehouse.com.au/buy/39829/nicabate-clear-patch-quit-smoking-step-1-21mg-7-patches",
+      "https://www.bloomsthechemist.com.au/nicabate-clear-patch-21mg-step-1-7-pack/",
+      "https://finance.yahoo.com/news/dr-reddys-rdy-acquire-haleons-142500542.html"
+    ],
+    "notes": "Dr. Reddy's has owned Nicabate since buying Haleon's non-US NRT business in 2024. The 21 mg strength also comes in 14-patch packs."
+  },
+  {
+    "brand": "Nicabate",
+    "line": "P (Classic) Patch",
+    "form": "PATCH_24H",
+    "strengthsMg": [
+      21
+    ],
+    "unit": "patch",
+    "mgPerUnitNote": "",
+    "wearHours": 24,
+    "flavours": [],
+    "labelMaxPerDay": "1 patch per 24 h",
+    "dosingNotes": "As Nicabate Clear.",
+    "markets": [
+      "AU"
+    ],
+    "licensedNrt": true,
+    "status": "uncertain",
+    "sources": [
+      "https://www.choicepharmacy.com.au/shop/smoking-cessation/nicabate-p-classic-21mg-patches-28-pack/",
+      "https://www.chemistwarehouse.com.au/buy/65714/nicabate-p-patch-quit-smoking-21mg-28-patches",
+      "https://healthdirect.gov.au/medicines/brand/amt,9751000168104/nicabate-p"
+    ],
+    "notes": "Non-clear 'Classic' Nicabate P patch; only 21 mg (28-pack) was confirmed on sale."
+  },
+  {
+    "brand": "Nicabate",
+    "line": "Gum (Extra Fresh Mint)",
+    "form": "GUM",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "piece",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Extra Fresh Mint (coated)"
+    ],
+    "labelMaxPerDay": "2 mg: 20 pieces; 4 mg: 10 pieces",
+    "dosingNotes": "2 mg if fewer than 20 cigarettes/day, 4 mg if 20 or more. Roughly 8-10 pieces/day at first, then 4-6/day for 2 weeks, then 1-3/day for 2 weeks (12 weeks in all). One piece at a time.",
+    "markets": [
+      "AU"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.safetyandquality.gov.au/medicine-finder/nicabate-gum",
+      "https://www.nationalpharmacies.com.au/product/nicabate-stop-smoking-nicotine-4mg-extra-strength-extra-fresh-mint-coated-chewing-gum-200-pack/",
+      "https://www.amcal.com.au/shop/product/mmc-o100004951/nicabate-gum-extra-strength-extra-fresh-mint-4mg-100-pack/"
+    ],
+    "notes": "Dr. Reddy's."
+  },
+  {
+    "brand": "Nicabate",
+    "line": "Minis (mini lozenge)",
+    "form": "MINI_LOZENGE",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Mint"
+    ],
+    "labelMaxPerDay": "15 lozenges (2 mg or 4 mg); no more than 1 per hour",
+    "dosingNotes": "2 mg if under 20 cigarettes/day, 4 mg if 20 or more. Weeks 1-6: 1 every 1-2 h; weeks 7-9: 1 every 2-4 h; weeks 10-12: 1 every 4-8 h. Do not use 4 mg with Nicabate patches.",
+    "markets": [
+      "AU"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://medsinfo.com.au/api/documents/Nicabate_Mini_Lozenges_bilayer_mint_flavour_PI?format=pdf",
+      "https://www.nationalpharmacies.com.au/product/nicabate-minis-quit-smoking-lozenge-2-mg-regular-strength-mint-20-pack/",
+      "https://www.bloomsthechemist.com.au/nicabate-minis-4mg-mint-lozenges-20-pack",
+      "https://medsinfo.com.au/api/searchapi/Nicabate_Minis_GC_PI?format=pdf"
+    ],
+    "notes": "Current retail SKUs are a 2/4 mg bilayer mint mini. An older Nicabate Minis PI lists 1.5 mg and 4 mg (1.5 mg max 20/day), probably superseded; keep 1.5 mg only as a legacy option. A full-size Nicabate lozenge was not found on current sale."
+  },
+  {
+    "brand": "QuitX",
+    "line": "Patch",
+    "form": "PATCH_24H",
+    "strengthsMg": [
+      7,
+      14,
+      21
+    ],
+    "unit": "patch",
+    "mgPerUnitNote": "",
+    "wearHours": 24,
+    "flavours": [],
+    "labelMaxPerDay": "1 patch per 24 h",
+    "dosingNotes": "Step 1 21 mg, Step 2 14 mg, Step 3 7 mg over a 12-week program, one patch a day.",
+    "markets": [
+      "AU"
+    ],
+    "licensedNrt": true,
+    "status": "uncertain",
+    "sources": [
+      "https://www.safetyandquality.gov.au/medicine-finder/quitx-patches",
+      "https://tga.gov.au/node/435469"
+    ],
+    "notes": "A TGA record shows the QuitX Step 1 21 mg sachet (new formulation) cancelled (s30(1)(c)), and no current retail listing was found. May be discontinued."
+  },
+  {
+    "brand": "QuitX",
+    "line": "Chewing Gum",
+    "form": "GUM",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "piece",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Freshmint (coated)",
+      "Classic (uncoated)"
+    ],
+    "labelMaxPerDay": "",
+    "dosingNotes": "4 mg if 20 or more cigarettes/day, otherwise 2 mg.",
+    "markets": [
+      "AU"
+    ],
+    "licensedNrt": true,
+    "status": "uncertain",
+    "sources": [
+      "https://mydr.com.au/medicines/quitx-coated-chewing-gum/",
+      "https://mydr.com.au/medicines/quitx-chewing-gum-freshmint-and-classic-flavour-2mg-4mg/"
+    ],
+    "notes": "Medicine-information pages are about 2.5 years old; no current retail listing found. The daily maximum was not captured. No QuitX lozenge was found."
+  },
+  {
+    "brand": "Nicotinell",
+    "line": "Patch (AU)",
+    "form": "PATCH_24H",
+    "strengthsMg": [
+      7,
+      14,
+      21
+    ],
+    "unit": "patch",
+    "mgPerUnitNote": "",
+    "wearHours": 24,
+    "flavours": [],
+    "labelMaxPerDay": "1 patch per 24 h",
+    "dosingNotes": "20 or more cigarettes/day: start at 21 mg (sources say 3-4 weeks or 4 weeks), then 14 mg for about 4 weeks, then 7 mg for about 4 weeks (about 12 weeks in all). Under 20/day: start at 14 mg. Do not use for more than 3 months.",
+    "markets": [
+      "AU"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://nicotinell.com.au/",
+      "https://nicotinell.com.au/wp-content/uploads/2019/11/Nicotinell-Patch-PI.pdf",
+      "https://www.perrigo.com.au/nicotinell-landing",
+      "https://www.chemistwarehouse.com.au/buy/54257/nicotinell-patch-21mg-7-patches",
+      "https://www.healthylife.com.au/products/nicotinell-patch-21mg-28-day-pbs-pack-patches"
+    ],
+    "notes": "The AU PI uses the legacy names Nicotinell 30/20/10 for the 21/14/7 mg patches. Sponsor shown as Perrigo Australia on TGA/Perrigo pages. A 28-day PBS pack exists, but PBS status was unclear."
+  },
+  {
+    "brand": "Nicotinell",
+    "line": "Gum (AU)",
+    "form": "GUM",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "piece",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Mint",
+      "Fruit"
+    ],
+    "labelMaxPerDay": "4 mg: up to 10 pieces (one retailer copy); 2 mg max not confirmed for AU",
+    "dosingNotes": "4 mg if 20 or more cigarettes/day, otherwise 2 mg. 4 mg is not for use with patches; 2 mg can be combined with a patch.",
+    "markets": [
+      "AU"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.goodpricepharmacy.com.au/nicotinell-gum-2mg-mint-216-pack",
+      "https://www.goodpricepharmacy.com.au/nicotinell-gum-2mg-fruit-96-pack",
+      "https://www.tga.gov.au/node/545261",
+      "https://tga.gov.au/node/462857",
+      "https://superpharmacyplus.com.au/nicotinell-chewing-gum-4mg-fruit-96-pieces/"
+    ],
+    "notes": "TGA entries name the flavours 'ice mint' and 'tropical fruit' (coated). For comparison, Habitrol gum in NZ (same Nicotinell-family product) caps at 20 x 2 mg or 10 x 4 mg."
+  },
+  {
+    "brand": "Nicotinell",
+    "line": "Lozenge (AU)",
+    "form": "LOZENGE",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Icy Blast",
+      "Peppermint"
+    ],
+    "labelMaxPerDay": "15 lozenges; one at a time",
+    "dosingNotes": "2 mg Regular / 4 mg Extra Strength.",
+    "markets": [
+      "AU"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://nicotinell.com.au/nicotinell-lozenges/",
+      "https://bloomsthechemist.com.au/Nicotinell-Lozenges-2mg-Icy-Blast-72-Pack",
+      "https://www.bloomsthechemist.com.au/Nicotinell-Lozenges-4mg-Icy-Blast-72-Pack/",
+      "https://www.perrigo.com.au/nicotinell-landing"
+    ],
+    "notes": "Strengths differ by market: AU Nicotinell lozenges are 2/4 mg, while the UK Nicotinell and NZ Habitrol / CA Thrive lozenges are 1/2 mg."
+  },
+  {
+    "brand": "Nicotinell",
+    "line": "Mini Lozenge (AU)",
+    "form": "MINI_LOZENGE",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [],
+    "labelMaxPerDay": "15 lozenges; one at a time",
+    "dosingNotes": "4 mg for 20 or more cigarettes/day.",
+    "markets": [
+      "AU"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.bloomsthechemist.com.au/nicotinell-mini-lozenge-2mg-81-pack/",
+      "https://www.bloomsthechemist.com.au/nicotinell-mini-lozenge-4mg-81-pack/"
+    ],
+    "notes": "81-pack. Flavour not captured."
+  },
+  {
+    "brand": "Habitrol",
+    "line": "Patch (NZ)",
+    "form": "PATCH_24H",
+    "strengthsMg": [
+      7,
+      14,
+      21
+    ],
+    "unit": "patch",
+    "mgPerUnitNote": "",
+    "wearHours": 24,
+    "flavours": [],
+    "labelMaxPerDay": "1 patch per 24 h",
+    "dosingNotes": "More than 20 cigarettes/day: start at Step 1. Medsafe datasheet: Step 1 for 3-4 weeks, then Step 2 for 3-4 weeks, then Step 3 for 3-4 weeks (retailers describe 4+4+4 = 12 weeks).",
+    "markets": [
+      "NZ"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.Medsafe.govt.nz/profs/Datasheet/h/HabitrolTTS.pdf",
+      "https://www.netpharmacy.co.nz/products/habitrol-patches-step-1-21mg",
+      "https://healthify.nz/medicines-a-z/n/nicotine-replacement-therapy",
+      "https://www.pharmac.govt.nz/news-and-resources/consultations-and-decisions/decision-to-award-sole-supply-for-nicotine-replacement-therapy-nrt"
+    ],
+    "notes": "Pharmac-funded brand ($5 for a 4-week supply at pharmacies, or free via stop-smoking services, per Healthify). Sole supply was confirmed only to 2020; the current tender status was not verified. Dr. Reddy's since 2024."
+  },
+  {
+    "brand": "Habitrol",
+    "line": "Gum (NZ)",
+    "form": "GUM",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "piece",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Fruit",
+      "Mint"
+    ],
+    "labelMaxPerDay": "2 mg: 20 pieces; 4 mg: 10 pieces; no more than 1 piece per hour",
+    "dosingNotes": "Normally 8-12 x 2 mg or 4-6 x 4 mg pieces/day.",
+    "markets": [
+      "NZ"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://medsafe.govt.nz/profs/Datasheet/h/habitrolgum.pdf",
+      "https://healthify.nz/medicines-a-z/n/nicotine-gum"
+    ],
+    "notes": "Pharmac-funded brand."
+  },
+  {
+    "brand": "Habitrol",
+    "line": "Lozenge (NZ)",
+    "form": "LOZENGE",
+    "strengthsMg": [
+      1,
+      2
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [
+      "Mint"
+    ],
+    "labelMaxPerDay": "1 mg: 25 lozenges; 2 mg: 15 lozenges",
+    "dosingNotes": "Usually 8-12/day. With a Step 1 patch: 4-12 x 1 mg lozenges/day (max 12); do not use 2 mg with Habitrol patches.",
+    "markets": [
+      "NZ"
+    ],
+    "licensedNrt": true,
+    "status": "current",
+    "sources": [
+      "https://www.medsafe.govt.nz/profs/datasheet/h/Habitrollozenge.pdf",
+      "https://www.chemistwarehouse.co.nz/buy/95634/habitrol-1mg-36-lozenges",
+      "https://www.bargainchemist.co.nz/products/habitrol-lozenges-2mg-mint-36-pack"
+    ],
+    "notes": "The Medsafe datasheet seen is v6.0 (Jan 2019). 1/2 mg strengths, unlike the 2/4 mg US Habitrol lozenge."
+  },
+  {
+    "brand": "Pharmacy Care",
+    "line": "Nicotine Patch",
+    "form": "PATCH_24H",
+    "strengthsMg": [
+      21
+    ],
+    "unit": "patch",
+    "mgPerUnitNote": "",
+    "wearHours": 24,
+    "flavours": [],
+    "labelMaxPerDay": "1 patch per 24 h",
+    "dosingNotes": "Step 1 21 mg/24 h (52.5 mg content), 7-pack.",
+    "markets": [
+      "AU"
+    ],
+    "licensedNrt": true,
+    "status": "uncertain",
+    "sources": [
+      "https://www.discountdrugstores.com.au/shop/product/mmc-o100010661/pharmacy-care-nicotine-patch-21mg-7pk/",
+      "https://cateschemist.com/products/pharmacy-care-nicotine-patches-21mg-7-pack",
+      "https://www.nps.org.au/assets/medicines/00d44538-9685-46a7-9517-ab8e00a375a9.pdf",
+      "https://www.tga.gov.au/resources/artg/231853"
+    ],
+    "notes": "AU pharmacy own brand (Discount Drug Stores and others). Step 2 14 mg is shown cancelled on the TGA register; Step 3 7 mg has an ARTG entry of unknown status. Pharmacy Care nicotine lozenges (2/4 mg) and mint gum (2/4 mg) have CMI/ARTG records, but their current status is conflicting or unknown, so they have no entries. Chemists' Own, Terry White, Pharmacy Choice and Chemist Warehouse own brands were not found."
+  },
+  {
+    "brand": "ZYN",
+    "line": "Nicotine Pouches (US)",
+    "form": "POUCH",
+    "strengthsMg": [
+      3,
+      6
+    ],
+    "unit": "pouch",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [],
+    "labelMaxPerDay": null,
+    "dosingNotes": null,
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": false,
+    "status": "uncertain",
+    "sources": [],
+    "notes": "UNVERIFIED: the shared web-search budget ran out before Part B could be researched, and brand sites were not reachable from this environment. Values come from background knowledge and must be checked against current brand or retailer pages before use. US ZYN is sold in 3 mg and 6 mg; the FDA granted marketing authorisation for ZYN pouches in January 2025."
+  },
+  {
+    "brand": "ZYN",
+    "line": "Nicotine Pouches (UK)",
+    "form": "POUCH",
+    "strengthsMg": [],
+    "unit": "pouch",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [],
+    "labelMaxPerDay": null,
+    "dosingNotes": null,
+    "markets": [
+      "UK"
+    ],
+    "licensedNrt": false,
+    "status": "uncertain",
+    "sources": [],
+    "notes": "UNVERIFIED: the shared web-search budget ran out before Part B could be researched, and brand sites were not reachable from this environment. Values come from background knowledge and must be checked against current brand or retailer pages before use. UK strengths not established; left empty rather than guessed."
+  },
+  {
+    "brand": "VELO",
+    "line": "Nicotine Pouches (UK)",
+    "form": "POUCH",
+    "strengthsMg": [],
+    "unit": "pouch",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [],
+    "labelMaxPerDay": null,
+    "dosingNotes": null,
+    "markets": [
+      "UK"
+    ],
+    "licensedNrt": false,
+    "status": "uncertain",
+    "sources": [],
+    "notes": "UNVERIFIED: the shared web-search budget ran out before Part B could be researched, and brand sites were not reachable from this environment. Values come from background knowledge and must be checked against current brand or retailer pages before use. BAT brand with a wide, frequently changing UK strength range; left empty rather than guessed."
+  },
+  {
+    "brand": "VELO",
+    "line": "Nicotine Pouches (US)",
+    "form": "POUCH",
+    "strengthsMg": [],
+    "unit": "pouch",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [],
+    "labelMaxPerDay": null,
+    "dosingNotes": null,
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": false,
+    "status": "uncertain",
+    "sources": [],
+    "notes": "UNVERIFIED: the shared web-search budget ran out before Part B could be researched, and brand sites were not reachable from this environment. Values come from background knowledge and must be checked against current brand or retailer pages before use. Reynolds (BAT) US range, including any 'VELO Plus' line; strengths not established."
+  },
+  {
+    "brand": "Nordic Spirit",
+    "line": "Nicotine Pouches (UK)",
+    "form": "POUCH",
+    "strengthsMg": [],
+    "unit": "pouch",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [],
+    "labelMaxPerDay": null,
+    "dosingNotes": null,
+    "markets": [
+      "UK"
+    ],
+    "licensedNrt": false,
+    "status": "uncertain",
+    "sources": [],
+    "notes": "UNVERIFIED: the shared web-search budget ran out before Part B could be researched, and brand sites were not reachable from this environment. Values come from background knowledge and must be checked against current brand or retailer pages before use. JTI brand; UK strength tiers not established. US availability not checked."
+  },
+  {
+    "brand": "on!",
+    "line": "Nicotine Pouches (US)",
+    "form": "POUCH",
+    "strengthsMg": [
+      2,
+      4,
+      8
+    ],
+    "unit": "pouch",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [],
+    "labelMaxPerDay": null,
+    "dosingNotes": null,
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": false,
+    "status": "uncertain",
+    "sources": [],
+    "notes": "UNVERIFIED: the shared web-search budget ran out before Part B could be researched, and brand sites were not reachable from this environment. Values come from background knowledge and must be checked against current brand or retailer pages before use. Altria (Helix) brand; US strengths recalled as 2/4/8 mg. Any higher-strength 'on! PLUS' line and UK availability were not checked."
+  },
+  {
+    "brand": "Rogue",
+    "line": "Nicotine Pouches (US)",
+    "form": "POUCH",
+    "strengthsMg": [
+      3,
+      6
+    ],
+    "unit": "pouch",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [],
+    "labelMaxPerDay": null,
+    "dosingNotes": null,
+    "markets": [
+      "US"
+    ],
+    "licensedNrt": false,
+    "status": "uncertain",
+    "sources": [],
+    "notes": "UNVERIFIED: the shared web-search budget ran out before Part B could be researched, and brand sites were not reachable from this environment. Values come from background knowledge and must be checked against current brand or retailer pages before use. Swisher brand; US strengths recalled as 3/6 mg. UK availability not checked."
+  },
+  {
+    "brand": "Lyft",
+    "line": "Nicotine Pouches",
+    "form": "POUCH",
+    "strengthsMg": [],
+    "unit": "pouch",
+    "mgPerUnitNote": "",
+    "wearHours": null,
+    "flavours": [],
+    "labelMaxPerDay": null,
+    "dosingNotes": null,
+    "markets": [
+      "UK"
+    ],
+    "licensedNrt": false,
+    "status": "uncertain",
+    "sources": [],
+    "notes": "UNVERIFIED: the shared web-search budget ran out before Part B could be researched, and brand sites were not reachable from this environment. Values come from background knowledge and must be checked against current brand or retailer pages before use. BAT's Lyft brand is understood to have been rebranded as VELO in the UK and Europe around 2021, which would make it discontinued. Keep it only as a legacy alias that maps to VELO."
+  }
+]

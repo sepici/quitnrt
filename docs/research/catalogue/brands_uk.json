@@ -1,0 +1,517 @@
+[
+  {
+    "brand": "Nicorette",
+    "line": "Invisi Patch (InvisiPatch)",
+    "form": "PATCH_16H",
+    "strengthsMg": [
+      10,
+      15,
+      25
+    ],
+    "unit": "patch",
+    "mgPerUnitNote": "Nominal nicotine released per 16 h: 25 mg (22.5 cm2, Step 1), 15 mg (13.5 cm2, Step 2), 10 mg (9 cm2, Step 3)",
+    "wearHours": 16,
+    "flavours": null,
+    "labelMaxPerDay": "1 patch",
+    "dosingNotes": "Apply on waking, remove at bedtime (approx. 16 h). Most smokers/vapers: 25 mg daily for 8 weeks, then 15 mg for 2 weeks, then 10 mg for 2 weeks. Lighter smokers and light-to-moderate vapers start on 15 mg. Move to 15 mg if side effects on 25 mg persist beyond a few days.",
+    "markets": [
+      "UK",
+      "IE"
+    ],
+    "status": "current",
+    "sources": [
+      "https://www.medicines.org.uk/emc/product/6435/smpc",
+      "https://www.medicines.org.uk/emc/product/6436/smpc",
+      "https://www.medicines.org.uk/emc/product/6437/smpc",
+      "https://www.nicorette.co.uk/products/nicorette-invisipatch-step1-25mg",
+      "https://medicines.ie/medicines/nicorette-invisi-extra-strength-25mg-patch-33054/doc-history"
+    ],
+    "notes": "The UK SmPCs were updated 2024 to 2026. The 2026 version gives 2 weeks on 10 mg in the main course, while the 2024 lighter-smoker path gave 4 weeks. In Ireland the 25 mg is sold as 'Nicorette Invisi Extra Strength 25mg Patch'. I found no Nicorette 24 h patch on the UK market."
+  },
+  {
+    "brand": "Nicorette",
+    "line": "Gum",
+    "form": "GUM",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "piece",
+    "mgPerUnitNote": "2 mg or 4 mg nicotine per piece",
+    "wearHours": null,
+    "flavours": [
+      "Icy White",
+      "Freshmint",
+      "Fruitfusion",
+      "Original"
+    ],
+    "labelMaxPerDay": "15 pieces",
+    "dosingNotes": "Chew one piece when there is an urge to smoke or vape. 2 mg for 20 or fewer cigarettes a day, 4 mg for more than 20 (brand site). Maximum 15 pieces a day (SmPC).",
+    "markets": [
+      "UK"
+    ],
+    "status": "current",
+    "sources": [
+      "https://www.medicines.org.uk/emc/product/6461/smpc",
+      "https://www.medicines.org.uk/emc/product/6460/smpc",
+      "https://www.medicines.org.uk/emc/product/6205/smpc",
+      "https://www.medicines.org.uk/emc/product/6206/smpc",
+      "https://www.medicines.org.uk/emc/product/6208/smpc",
+      "https://www.medicines.org.uk/emc/product/6209/smpc",
+      "https://www.medicines.org.uk/emc/product/1089/smpc",
+      "https://www.medicines.org.uk/emc/product/1323/smpc",
+      "https://www.nicorette.co.uk/products/nicorette-gum-icy-white-2mg-105",
+      "https://www.nicorette.co.uk/products/nicorette-gum-fruit-2mg-105",
+      "https://www.boots.com/nicorette-original-2mg-gum-105-pieces-10013991"
+    ],
+    "notes": "All four flavours have UK SmPCs in both 2 mg and 4 mg. Original (unflavoured, emc 1089/1323, SmPC updated Nov 2025) is still listed by Boots and other UK pharmacies, but Superdrug shows the 4 mg 105 pack as no longer available online, so Original may be winding down. The 15-piece maximum is confirmed in the Icy White SmPCs and on retail and brand labelling for the others."
+  },
+  {
+    "brand": "Nicorette",
+    "line": "Cools Lozenge",
+    "form": "LOZENGE",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "2 mg or 4 mg nicotine (as nicotine resinate) per lozenge",
+    "wearHours": null,
+    "flavours": [
+      "Icy Mint"
+    ],
+    "labelMaxPerDay": "15 lozenges",
+    "dosingNotes": "Most patients need 8 to 12 lozenges a day, not to exceed 15 (SmPC). Use 4 mg if smoking more than 20 cigarettes a day, or for heavy vapers (frequent vaping or high-strength e-liquid).",
+    "markets": [
+      "UK",
+      "IE"
+    ],
+    "status": "current",
+    "sources": [
+      "https://www.medicines.org.uk/emc/product/4110/smpc",
+      "https://www.medicines.org.uk/emc/product/4114/smpc",
+      "https://www.nicorette.co.uk/products/nicorette-lozenge-icy-white-2mg-80",
+      "https://kenvuepro.com/en-gb/brands/nicorette/products/nicorette-cools-4mg-lozenge-80s",
+      "https://www.medicines.ie/medicines/nicorette-cools-4mg-lozenge-33042/doc-history"
+    ],
+    "notes": "The 4 mg SmPC was updated on emc in June 2026. Retail copy says the 4 mg lozenge comes in mint only. Nicorette's UK URLs still use 'icy-white' for this lozenge."
+  },
+  {
+    "brand": "Nicorette",
+    "line": "Fruit Lozenge",
+    "form": "LOZENGE",
+    "strengthsMg": [
+      2
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "2 mg nicotine (as nicotine resinate) per lozenge",
+    "wearHours": null,
+    "flavours": [
+      "Fruit"
+    ],
+    "labelMaxPerDay": "15 lozenges",
+    "dosingNotes": "Most patients need 8 to 12 lozenges a day, not to exceed 15 (SmPC). Intended for 20 or fewer cigarettes a day (retail label).",
+    "markets": [
+      "UK"
+    ],
+    "status": "current",
+    "sources": [
+      "https://www.medicines.org.uk/emc/product/9438/smpc",
+      "https://www.nicorette.co.uk/products/nicorette-lozenge-fruit-2mg-80",
+      "https://www.boots.com/nicorette-fruit-2mg-lozenge-160-lozenges-10347033"
+    ],
+    "notes": "This is a separate product from Cools. It comes in 2 mg only, in packs of 40, 80 and 160."
+  },
+  {
+    "brand": "Nicorette",
+    "line": "QuickMist Mouthspray",
+    "form": "MOUTH_SPRAY",
+    "strengthsMg": [
+      1
+    ],
+    "unit": "spray",
+    "mgPerUnitNote": "1 mg nicotine per spray; 150 sprays per dispenser (single or Duo 2 x 150)",
+    "wearHours": null,
+    "flavours": [
+      "Freshmint",
+      "Spearmint",
+      "Cool Berry"
+    ],
+    "labelMaxPerDay": "64 sprays (max 2 sprays per dosing episode, max 4 sprays per hour)",
+    "dosingNotes": "1 spray when cravings start, with a second if needed. Do not exceed 2 sprays per dose, 4 sprays per hour, or 64 sprays in any 24 h (4 per hour over 16 h).",
+    "markets": [
+      "UK"
+    ],
+    "status": "current",
+    "sources": [
+      "https://www.medicines.org.uk/emc/product/5956/smpc",
+      "https://www.medicines.org.uk/emc/product/101601/smpc",
+      "https://www.medicines.org.uk/emc/product/9312/smpc",
+      "https://www.nicorette.co.uk/products/nicorette-quickmist-mouthspray-spearmint-duo",
+      "https://www.nicorette.co.uk/products/nicorette-quickmist-mouthspray-spearmint-single",
+      "https://www.boots.com/nicorette-quickmist-cool-berry-1mg-spray-mouthspray-duo-pack-10255948"
+    ],
+    "notes": "Each flavour has its own UK SmPC: Freshmint (original, emc 5956), Cool Berry (9312) and Spearmint (101601, newer). nicorette.co.uk now leads with Spearmint, and its single-pack page is titled 'Fresh Mint' while its URL says 'spearmint'. Freshmint is still widely stocked by retailers. I found no official statement that Spearmint replaces Freshmint. The Cool Berry SmPC snippet I saw confirmed the 4-per-hour limit. The 64 per day figure comes from the Freshmint and Spearmint SmPCs and the Cool Berry retail pack. Sweden sells the spray as 'Nicorette Pepparmint'."
+  },
+  {
+    "brand": "Nicorette",
+    "line": "Inhalator",
+    "form": "INHALATOR",
+    "strengthsMg": [
+      15
+    ],
+    "unit": "cartridge",
+    "mgPerUnitNote": "15 mg nicotine per cartridge; each cartridge gives approx. eight 5-minute sessions, or about 40 minutes of intense use",
+    "wearHours": null,
+    "flavours": null,
+    "labelMaxPerDay": "6 cartridges",
+    "dosingNotes": "Inhale when there is an urge to smoke. Maximum 6 cartridges a day. A puff delivers less nicotine than a cigarette puff, so it must be puffed more often than a cigarette.",
+    "markets": [
+      "UK"
+    ],
+    "status": "current",
+    "sources": [
+      "https://www.medicines.org.uk/emc/product/4707/smpc",
+      "https://www.medicines.org.uk/emc/files/pil.4707.pdf",
+      "https://www.nicorette.co.uk/products/nicorette-inhalator-15mg-20",
+      "https://www.nicorette.co.uk/products/nicorette-inhalator-15mg-36",
+      "https://kenvuepro.com/en-gb/brands/nicorette/products/nicorette-inhalator-15mg-20s"
+    ],
+    "notes": "Packs of 4, 20 and 36 cartridges. Still on nicorette.co.uk and at UK pharmacies, although Savers no longer lists it online. A New Zealand datasheet says one cartridge replaces about 7 cigarettes, but that is not UK SmPC wording. The older 10 mg cartridge is no longer listed."
+  },
+  {
+    "brand": "Nicorette",
+    "line": "Nasal Spray",
+    "form": "NASAL_SPRAY",
+    "strengthsMg": [
+      0.5
+    ],
+    "unit": "spray",
+    "mgPerUnitNote": "0.5 mg nicotine per spray (50 microlitres of 10 mg/ml); 1 dose = 1 spray into each nostril = 1 mg; 10 ml bottle",
+    "wearHours": null,
+    "flavours": null,
+    "labelMaxPerDay": "64 sprays / 32 mg (max 1 spray per nostril twice an hour)",
+    "dosingNotes": "1 spray into each nostril when craving, up to twice an hour. Daily limit 32 mg (64 sprays), which equals 2 sprays to each nostril every hour for 16 h.",
+    "markets": [
+      "UK"
+    ],
+    "status": "current",
+    "sources": [
+      "https://www.medicines.org.uk/emc/product/6207/smpc",
+      "https://www.nicorette.co.uk/products/nicorette-nasal-spray-10ml",
+      "https://kenvuepro.com/en-gb/brands/nicorette/products/nicorette-nasal-spray-10ml",
+      "https://www.superdrug.com/health/smoking-control/nicorette-inhalator-and-mouthspray/dnr-nicorette-nasal-spray-nicotine-10ml-stop-smoking-aid/p/759241"
+    ],
+    "notes": "Still on nicorette.co.uk and the Kenvue UK professional site, and stocked by Weldricks and Morrisons. Superdrug marks its listing 'DNR' and no longer available online, which may mean it is being phased out at some retailers. Recheck its status before launch."
+  },
+  {
+    "brand": "Nicorette",
+    "line": "Microtab",
+    "form": "MICROTAB",
+    "strengthsMg": [
+      2
+    ],
+    "unit": "tablet",
+    "mgPerUnitNote": "2 mg nicotine (as nicotine beta-cyclodextrin complex) per sublingual tablet",
+    "wearHours": null,
+    "flavours": null,
+    "labelMaxPerDay": "40 tablets (1 per hour, or 2 per hour for heavy smokers)",
+    "dosingNotes": "Place under the tongue and let it dissolve (about 30 min). Do not chew or swallow. 1 tablet per hour, or 2 per hour for people smoking more than 20 a day, heavy vapers, or anyone who fails on 1 per hour. Most need 8 to 12 or 16 to 24 a day, not to exceed 40.",
+    "markets": [
+      "UK"
+    ],
+    "status": "current",
+    "sources": [
+      "https://www.medicines.org.uk/emc/product/6182/smpc",
+      "https://www.nicorette.co.uk/products/nicorette-microtab-2mg-100",
+      "https://docetp.mpa.se/LMF/Nicorette%20Microtab%202mg%20sublingual%20tablet%20ENG%20SmPC_09001bee807a51b4.pdf"
+    ],
+    "notes": "The UK SmPC was updated on emc in April 2026, and the brand site sells packs of 100. EU difference: the Swedish SmPC also has a 4 mg Microtab and caps use at 30 tablets a day. The UK has only the 2 mg, with a cap of 40."
+  },
+  {
+    "brand": "NiQuitin",
+    "line": "Clear Patch",
+    "form": "PATCH_24H",
+    "strengthsMg": [
+      21,
+      14,
+      7
+    ],
+    "unit": "patch",
+    "mgPerUnitNote": "Nominal nicotine delivered per 24 h: 21 mg (Step 1), 14 mg (Step 2), 7 mg (Step 3)",
+    "wearHours": 24,
+    "flavours": null,
+    "labelMaxPerDay": "1 patch",
+    "dosingNotes": "Apply once a day at the same time, ideally soon after waking. Remove after 24 h and apply a new patch to a fresh site, and do not reuse a site for 7 days. The patch may be taken off before bed, but 24 h wear is recommended for morning cravings. Course: 21 mg for 6 weeks, then 14 mg for 2 weeks, then 7 mg for 2 weeks. Smokers of fewer than 10 a day start at 14 mg.",
+    "markets": [
+      "UK",
+      "IE"
+    ],
+    "status": "current",
+    "sources": [
+      "https://www.ncsct.co.uk/library/view/pdf/NiQuitin%20Clear%2021mg%20Transdermal%20Patch.pdf",
+      "https://www.ncsct.co.uk/library/view/pdf/NiQuitin%20Clear%2014mg%20Transdermal%20Patch.pdf",
+      "https://www.ncsct.co.uk/library/view/pdf/NiQuitin%20Clear%207mg%20patch.pdf",
+      "https://www.niquitin.co.uk/product/nicotine-patches/",
+      "https://www.boots.com/niquitin-cq-24-hour-clear-patches-step-1-10012812",
+      "https://www.niquitin.ie/product/nicotine-patches/"
+    ],
+    "notes": "I could not open the emc page itself. The SmPC text comes from the NCSCT-hosted UK SmPC PDFs and the Swedish SmPC, which has the same schedule. The brand is owned by Perrigo, formerly Omega Pharma, and was previously GSK's. Older packs say 'NiQuitin CQ'."
+  },
+  {
+    "brand": "NiQuitin",
+    "line": "Pre-Quit Clear Patch",
+    "form": "PATCH_24H",
+    "strengthsMg": [
+      21
+    ],
+    "unit": "patch",
+    "mgPerUnitNote": "21 mg nicotine per 24 h",
+    "wearHours": 24,
+    "flavours": null,
+    "labelMaxPerDay": "1 patch",
+    "dosingNotes": "Sold for cutting down cigarettes before a quit date (reduce-to-quit). I did not retrieve the posology for this pack.",
+    "markets": [
+      "UK"
+    ],
+    "status": "uncertain",
+    "sources": [
+      "https://www.niquitin.co.uk/product/pre-quit-nicotine-patches/",
+      "https://www.chemist-4-u.com/niquitin-pre-quit-clear-21mg-patch-7-patches"
+    ],
+    "notes": "This pack is listed on niquitin.co.uk and at Chemist4U, but I could not confirm current stock or find its own SmPC. It appears to be the same 21 mg/24 h Clear patch, packaged for reduce-to-quit."
+  },
+  {
+    "brand": "NiQuitin",
+    "line": "Minis",
+    "form": "MINI_LOZENGE",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "2 mg or 4 mg nicotine (as nicotine resinate) per mini lozenge",
+    "wearHours": null,
+    "flavours": [
+      "Mint",
+      "Citrus"
+    ],
+    "labelMaxPerDay": "15 lozenges",
+    "dosingNotes": "Let it dissolve fully (about 10 min). Do not chew or swallow. Usually 8 to 12 a day, up to 15. Stop when down to 1 or 2 a day. 4 mg if the first cigarette is within 30 min of waking (retail copy says more than 20 a day). Seek help if still using after 9 months.",
+    "markets": [
+      "UK"
+    ],
+    "status": "current",
+    "sources": [
+      "https://www.niquitin.co.uk/product/nicotine-mini-lozenges/",
+      "https://www.ncsct.co.uk/library/view/pdf/NiQuitin%20Minis%20Mint%204mg%20Lozenges.pdf",
+      "https://www.boots.com/niquitin-minis-mint-2mg-nicotine-60-lozenges-10339992",
+      "https://www.boots.com/niquitin-minis-4mg-60-lozenges-10093026",
+      "https://www.boots.com/niquitin-minis-citrus-4mg-60-lozenges-10367479",
+      "https://www.chemist-4-u.com/niquitin-minis-citrus-4mg-60-lozenges-1",
+      "https://dmd-browser.nhsbsa.nhs.uk/amp/view/57608"
+    ],
+    "notes": "Mint comes in 2 mg and 4 mg, and Citrus in 4 mg (Boots) and 2 mg (Chemist4U and Savers, often out of stock). The former 1.5 mg Mint Mini is marked discontinued in NHS dm+d. Several retailer URLs that used to say '1.5mg' now sell the 2 mg, so the 2 mg appears to have replaced it. Treat a 1.5 mg pack as legacy stock. I could not open the emc SmPC for the 2 mg Mini, so its maximum of 15 comes from the Boots label. The 4 mg maximum comes from the NCSCT-hosted SmPC. The Netherlands also sells a 2 mg NiQuitin Mini."
+  },
+  {
+    "brand": "NiQuitin",
+    "line": "Lozenges",
+    "form": "LOZENGE",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "2 mg or 4 mg nicotine per lozenge (standard-size compressed lozenge)",
+    "wearHours": null,
+    "flavours": [
+      "Mint"
+    ],
+    "labelMaxPerDay": "15 lozenges",
+    "dosingNotes": "Do not exceed 15 lozenges a day (SmPC). Weeks 1 to 6: at least 9 a day and no more than 15, then taper. 2 mg if the first cigarette is more than 30 min after waking, 4 mg if within 30 min.",
+    "markets": [
+      "UK"
+    ],
+    "status": "current",
+    "sources": [
+      "https://www.niquitin.co.uk/product/nicotine-tablet-lozenges/",
+      "https://www.ncsct.co.uk/library/view/pdf/NiQuitin%20Mint%202mg%20Lozenges.pdf",
+      "https://www.boots.com/niquitin-mint-2mg-lozenge-132-lozenges-10268057",
+      "https://www.chemistdirect.co.uk/niquitin-lozenge-4mg-mint/prd-1lj"
+    ],
+    "notes": "Packs of 72 and 132 are common at UK retail, and the SmPC also lists 12, 36, 144 and 204. The niquitin.co.uk lozenge page appears old, so current status rests mainly on retailer listings from Boots, Morrisons and Chemist Direct."
+  },
+  {
+    "brand": "NiQuitin",
+    "line": "Extra Fresh Mint Gum",
+    "form": "GUM",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "piece",
+    "mgPerUnitNote": "2 mg or 4 mg nicotine (as nicotine resinate) per piece",
+    "wearHours": null,
+    "flavours": [
+      "Extra Fresh Mint"
+    ],
+    "labelMaxPerDay": "15 pieces",
+    "dosingNotes": "Not more than 15 pieces a day (SmPC). 4 mg for smokers whose first cigarette is within 30 min of waking.",
+    "markets": [
+      "UK"
+    ],
+    "status": "discontinued",
+    "sources": [
+      "https://www.ncsct.co.uk/library/view/pdf/NiQuitin%20Extra%20Fresh%20Mint%204mg%20Medicated%20Chewing%20Gum.pdf",
+      "https://www.ncsct.co.uk/library/view/pdf/NiQuitin%20Extra%20Fresh%20Mint%202mg%20Medicated%20Chewing%20Gum.pdf",
+      "https://www.expresschemist.co.uk/niquitinextrafreshmint4mggum.html",
+      "https://www.hpra.ie/find-a-medicine/for-human-use/authorised-medicines/details/25398"
+    ],
+    "notes": "I marked this discontinued from indirect evidence; I found no official withdrawal notice. It is not listed on niquitin.co.uk, which shows only patches, Minis and lozenges. UK retailers show it as no longer available or out of stock, and Ireland lists NiQuitin Fresh Mint 4 mg gum as not marketed. It launched in 2017 (Boots first) and its UK SmPC dates from 2019. NiQuitin gum is still sold in several EU markets, for example Freshmint in France, Menthol 4 mg in Poland and Icy Fresh Mint in Croatia."
+  },
+  {
+    "brand": "NiQuitin",
+    "line": "Strips",
+    "form": "ORAL_FILM",
+    "strengthsMg": [
+      2.5
+    ],
+    "unit": "strip",
+    "mgPerUnitNote": "2.5 mg nicotine per oral film",
+    "wearHours": null,
+    "flavours": [
+      "Mint"
+    ],
+    "labelMaxPerDay": null,
+    "dosingNotes": null,
+    "markets": [
+      "UK"
+    ],
+    "status": "discontinued",
+    "sources": [
+      "https://dmd-browser.nhsbsa.nhs.uk/amp/view/84818",
+      "https://dmd-browser.nhsbsa.nhs.uk/ampp/view/102394"
+    ],
+    "notes": "NHS dm+d lists NiQuitin Strips Mint 2.5mg oral films (60 pack, Omega Pharma) as discontinued from 17 Jan 2018. I did not verify the label maximum per day, so it is left null. Keep this only so users with legacy stock can find it."
+  },
+  {
+    "brand": "Nicotinell",
+    "line": "24 Hour Patch (TTS)",
+    "form": "PATCH_24H",
+    "strengthsMg": [
+      21,
+      14,
+      7
+    ],
+    "unit": "patch",
+    "mgPerUnitNote": "Nominal nicotine delivered per 24 h: 21 mg (TTS 30, Step 1), 14 mg (TTS 20, Step 2; 35 mg content), 7 mg (TTS 10, Step 3; 17.5 mg content)",
+    "wearHours": 24,
+    "flavours": null,
+    "labelMaxPerDay": "1 patch",
+    "dosingNotes": "One patch every 24 h. Use a different site each day and wait 7 days before reusing a site. Heavier smokers (more than 20 a day) start on 21 mg, lighter smokers on 14 mg. Each step lasts 3 to 4 weeks, and the full course is usually about 3 months. In pregnancy, remove the patch before bed.",
+    "markets": [
+      "UK"
+    ],
+    "status": "current",
+    "sources": [
+      "https://www.medicines.org.uk/emc/product/388/smpc",
+      "https://www.medicines.org.uk/emc/product/389/smpc",
+      "https://www.medicines.org.uk/emc/product/390/smpc",
+      "https://www.medicines.org.uk/emc/files/pil.389.pdf",
+      "https://www.nicotinell.co.uk/products/nicotinell-patch-step-1-7s"
+    ],
+    "notes": "There is no 16 h Nicotinell patch in the UK. See the brand-ownership note on the Rapid Relief spray entry."
+  },
+  {
+    "brand": "Nicotinell",
+    "line": "Gum",
+    "form": "GUM",
+    "strengthsMg": [
+      2,
+      4
+    ],
+    "unit": "piece",
+    "mgPerUnitNote": "2 mg or 4 mg nicotine per piece",
+    "wearHours": null,
+    "flavours": [
+      "Mint",
+      "Fruit"
+    ],
+    "labelMaxPerDay": "2 mg: 24 pieces; 4 mg: 15 pieces (max 1 piece per hour)",
+    "dosingNotes": "Usually 8 to 12 pieces a day. The 2 mg gum allows up to 24 a day and no more than 1 per hour (SmPC updated Feb 2026). The 4 mg allows up to 15 a day and is meant for strongly dependent smokers or those who failed on NRT before. Cut down gradually after 3 months.",
+    "markets": [
+      "UK",
+      "IE"
+    ],
+    "status": "current",
+    "sources": [
+      "https://www.medicines.org.uk/emc/product/6259/smpc",
+      "https://www.medicines.org.uk/emc/product/6254/smpc",
+      "https://www.medicines.org.uk/emc/product/6253/smpc",
+      "https://www.medicines.org.uk/emc/product/6257/smpc",
+      "https://www.nicotinell.co.uk/products/nicotinell-gum-2mg-mint-96-pieces",
+      "https://www.boots.com/nicotinell-fruit-2mg-chewing-gum-204-pieces-10086625",
+      "https://assets.hpra.ie/products/Human/19590/Licence_PA25456-003-001_27052026130752.pdf"
+    ],
+    "notes": "The maximum depends on strength. Some UK retail pages say 'no more than 25 pieces of 2 mg', but the current SmPC says 24. I applied the 1-per-hour rule to the 2 mg only, where I confirmed it. Icemint (2 mg and 4 mg) and Liquorice used to be sold. Retailers now show Icemint as no longer available, and Liquorice is only mentioned in old Boots copy, so both are left out of the flavour list. Sweden sells a 'Fruktmint' flavour."
+  },
+  {
+    "brand": "Nicotinell",
+    "line": "Mint Lozenge",
+    "form": "LOZENGE",
+    "strengthsMg": [
+      1,
+      2
+    ],
+    "unit": "lozenge",
+    "mgPerUnitNote": "1 mg or 2 mg nicotine per compressed lozenge",
+    "wearHours": null,
+    "flavours": [
+      "Mint"
+    ],
+    "labelMaxPerDay": "1 mg: 24 lozenges; 2 mg: 15 lozenges (max 1 lozenge per hour)",
+    "dosingNotes": "One lozenge at a time, no more than 1 per hour, usually 8 to 12 a day. Maximum 24 a day for the 1 mg and 15 a day for the 2 mg. With a 21 mg patch, use no more than 15 of the 1 mg a day (1 mg PIL).",
+    "markets": [
+      "UK"
+    ],
+    "status": "current",
+    "sources": [
+      "https://www.medicines.org.uk/emc/product/2254/smpc",
+      "https://www.medicines.org.uk/emc/product/1190/smpc",
+      "https://www.medicines.org.uk/emc/files/pil.2254.pdf",
+      "https://www.medicines.org.uk/emc/files/pil.1190.pdf",
+      "https://www.boots.com/nicotinell-mint-1mg-lozenge%E2%80%93204-lozenges-10246692",
+      "https://www.superdrug.com/health/smoking-control/stop-smoking-lozenges/nicotinell-lozenge-stop-smoking-aid-2-mg-mint-204-pieces/p/766509"
+    ],
+    "notes": "Many retailer pages and some EU SmPC versions give 30 a day for the 1 mg. The current UK SmPC and PIL say 24. I found no UK Nicotinell 4 mg lozenge; 4 mg mint lozenges on UK retail are NiQuitin."
+  },
+  {
+    "brand": "Nicotinell",
+    "line": "Rapid Relief Oral Spray",
+    "form": "MOUTH_SPRAY",
+    "strengthsMg": [
+      1
+    ],
+    "unit": "spray",
+    "mgPerUnitNote": "1 mg nicotine per spray; 13.2 ml bottle = 150 sprays; packs of 1 or 2 bottles",
+    "wearHours": null,
+    "flavours": [
+      "Spicy Mint"
+    ],
+    "labelMaxPerDay": "64 sprays (max 2 sprays per dosing episode, max 4 sprays per hour)",
+    "dosingNotes": "1 to 2 sprays when you would normally smoke or vape or when cravings arise, with a second spray if one does not control cravings within a few minutes. Up to 4 sprays per hour, no more than 2 per episode, and 64 in any 24 h. Adults only; not recommended under 18.",
+    "markets": [
+      "UK",
+      "IE"
+    ],
+    "status": "current",
+    "sources": [
+      "https://www.medicines.org.uk/emc/product/100169/smpc",
+      "https://www.medicines.org.uk/emc/files/pil.100169.pdf",
+      "https://www.nicotinell.co.uk/products",
+      "https://www.sainsburys.co.uk/groceries/product/nicotinell-nicotine-spray-mint-flavour-150-sprays-1mg",
+      "https://assets.hpra.ie/products/Human/39344/Licence_PA25456-006-001_29082025102346.pdf"
+    ],
+    "notes": "This is a newer product (around 2025), sold as 'Nicotinell Oral Spray 1mg' or 'Rapid Relief Mint' and in single or Duo packs. The SmPC calls the flavour 'spicy mint' and retailers say 'Mint'. Unlike Nicorette QuickMist it is adults only. The emc lists the UK licence holder as Dr. Reddy's Laboratories (UK) Ltd, consistent with Haleon's 2024 sale of its non-US NRT business, including Nicotinell, to Dr. Reddy's. Other Nicotinell SmPCs may show either holder depending on update date."
+  }
+]
