@@ -19,12 +19,13 @@ each week met into a hit on a pixel-art creature that stands for the habit.
 
 ## Conventions
 
+- **No network access.** The app has no INTERNET permission, on purpose: everything stays on the
+  phone. Don't add network libraries, analytics or crash reporting.
 - **App text:**
   - British English and sentence case.
   - No em or en dashes.
   - No emoji, and no marketing words.
-  
-  `./gradlew checkCopy` enforces the mechanical parts; `docs/STYLE.md` covers the rest.
+  - `./gradlew checkCopy` enforces the mechanical parts; `docs/STYLE.md` covers the rest.
 - **Colour rules:** nicotine used is the neutral `used` tone, never green or marigold. The guide is
   a marker or line, never a fill. Green only means "at or under the guide". Marigold is the game layer.
 - **Doses** are the `Dose` type in whole micrograms. Never use floating-point mg for sums or checks.

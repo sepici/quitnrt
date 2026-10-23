@@ -99,7 +99,7 @@ The owner asked for agents on UI/UX, colour, tone and copy, so nothing ends up l
    ```
 3. Run the full check:
    ```
-   ./gradlew checkCopy :core:domain:test :core:data:testDebugUnitTest :app:assembleDebug
+   ./gradlew checkCopy :core:domain:test :core:data:testDebugUnitTest :app:assembleDebug :app:lintDebug
    ```
 4. **Phone (Android 16):** turn on Developer options and USB debugging, then `./gradlew :app:installDebug`.
 5. **Galaxy Watch 4** (Wear OS 6), needed from phase 8: Developer options, then Wireless debugging, then `adb pair` and `adb connect`.
