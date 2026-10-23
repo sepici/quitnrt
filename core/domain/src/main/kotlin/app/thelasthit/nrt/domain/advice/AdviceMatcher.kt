@@ -53,11 +53,17 @@ data class LoggedTip(
  * Picks strategies from [library] for someone's triggers.
  *
  * For a tag, a strategy that names the tag comes first, then one that names its group, then the
- * ones for any time. Within each, a strategy written for fewer moments comes first, as it's more
- * about this one, and then the library's own order. Strategies about one kind of product, such as
- * gum, are kept to people who use it. After a slip is left out unless the caller passes a [Slip].
+ * ones for any time. Among the tag's own, the ones [planOrder] gives it lead, in that order. After
+ * them, and within the other levels, a strategy written for fewer moments comes first, as it's
+ * more about this one, and then the library's own order. Strategies about one kind of product,
+ * such as gum, are kept to people who use it. After a slip is left out unless the caller passes a
+ * [Slip].
  */
-class AdviceMatcher(private val library: AdviceLibrary) {
+class AdviceMatcher(
+    private val library: AdviceLibrary,
+    /** For a tag, the strategies that lead its own, best first. PLAN §9's table by default. */
+    private val planOrder: Map<String, List<String>> = PLAN_ORDER,
+) {
 
     private val order: Map<String, Int> = library.strategies.withIndex().associate { (index, strategy) -> strategy.key to index }
 
@@ -66,7 +72,15 @@ class AdviceMatcher(private val library: AdviceLibrary) {
         strategy.key to BuiltInTags.all.count { strategy.suits(it.key, it.group) }
     }
 
-    private val ranking: Comparator<StrategyMatch> = compareBy<StrategyMatch> { it.level }
+    /** Where [match] comes among the tag [key]'s own by [planOrder], or last when it isn't there. */
+    private fun planPlace(key: String, match: StrategyMatch): Int {
+        if (match.level != MatchLevel.TAG) return Int.MAX_VALUE
+        val place = planOrder[key]?.indexOf(match.strategy.key) ?: -1
+        return if (place < 0) Int.MAX_VALUE else place
+    }
+
+    private fun ranking(key: String): Comparator<StrategyMatch> = compareBy<StrategyMatch> { it.level }
+        .thenBy { planPlace(key, it) }
         .thenBy { breadth.getValue(it.strategy.key) }
         .thenBy { order.getValue(it.strategy.key) }
 
@@ -78,7 +92,7 @@ class AdviceMatcher(private val library: AdviceLibrary) {
         library.strategies
             .filter { (slip != null || it.key != AFTER_A_SLIP) && it.appliesToAny(forms) }
             .mapNotNull { strategy -> levelOf(strategy, key, group)?.let { StrategyMatch(strategy, it) } }
-            .sortedWith(ranking)
+            .sortedWith(ranking(key))
 
     /**
      * Up to [each] strategies for each of [triggers], in their order. A strategy that an earlier
@@ -143,7 +157,9 @@ class AdviceMatcher(private val library: AdviceLibrary) {
         }
         val interactiveFirst = compareBy<Pair<String, StrategyMatch>> { (_, match) -> match.level }
             .thenBy { (_, match) -> if (match.level == MatchLevel.TAG && match.strategy.interactive != null) 0 else 1 }
-            .thenBy(ranking) { it.second }
+            .thenBy { (key, match) -> planPlace(key, match) }
+            .thenBy { (_, match) -> breadth.getValue(match.strategy.key) }
+            .thenBy { (_, match) -> order.getValue(match.strategy.key) }
             .thenBy { it.first }
         return candidates.minWithOrNull(interactiveFirst)?.let { (key, match) -> LoggedTip(match.strategy, key, slip = null) }
     }
@@ -186,6 +202,24 @@ class AdviceMatcher(private val library: AdviceLibrary) {
 
         /** The strategy for after a slip, which only comes up when the caller says there was one. */
         const val AFTER_A_SLIP = "after_a_slip"
+
+        /**
+         * PLAN §9, "What goes with what": for each trigger in the table, the strategies it gives,
+         * in its order. Brushing your teeth is a step of leave_the_table, and the advice on coffee
+         * with gum and lozenges is gum_and_drinks. For any other moment, the 4 Ds already lead the
+         * any-time strategies, being first in the library.
+         */
+        val PLAN_ORDER: Map<String, List<String>> = buildMap {
+            val calming = listOf("breathing_timer", "short_walk", "muscle_relaxation", "ride_the_wave")
+            listOf("stressed", "anxious", "angry", "after_argument").forEach { put(it, calming) }
+            put("after_meal", listOf("dose_before_meal", "leave_the_table", "short_walk", "gum_and_drinks"))
+            put("coffee_tea", listOf("leave_the_table", "short_walk", "gum_and_drinks"))
+            listOf("happy", "excited", "celebrating").forEach { put(it, listOf("another_treat", "milestone_treats")) }
+            listOf("bored", "screen_time", "autopilot").forEach { put(it, listOf("busy_hands", "change_rooms", "dose_decision")) }
+            listOf("drink", "socialising").forEach { put(it, listOf("drinks_limit")) }
+            put("woke_up", listOf("morning_routine"))
+            listOf("withdrawal", "strong_craving").forEach { put(it, listOf("four_ds", "ask_about_pace")) }
+        }
     }
 }
 

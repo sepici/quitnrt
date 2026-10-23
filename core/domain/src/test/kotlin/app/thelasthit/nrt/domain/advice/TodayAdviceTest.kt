@@ -43,7 +43,7 @@ class TodayAdviceTest {
     fun `it turns daily through the top trigger's first 3, and a date always gives the same one`() {
         val days = (0L..5L).map { advise(meals, firstOfRotation.plusDays(it))!!.strategy.key }
         assertEquals(
-            listOf("dose_before_meal", "leave_the_table", "gum_and_drinks", "dose_before_meal", "leave_the_table", "gum_and_drinks"),
+            listOf("dose_before_meal", "leave_the_table", "short_walk", "dose_before_meal", "leave_the_table", "short_walk"),
             days,
         )
         assertEquals(advise(meals, firstOfRotation.plusDays(1)), advise(meals, firstOfRotation.plusDays(1)))
@@ -51,9 +51,10 @@ class TodayAdviceTest {
 
     @Test
     fun `the rotation keeps to the products in use`() {
-        val spray = setOf(ProductForm.MOUTH_SPRAY)
-        val days = (0L..2L).map { advise(meals, firstOfRotation.plusDays(it), spray)!!.strategy.key }
-        assertEquals(listOf("dose_before_meal", "leave_the_table", "busy_mouth"), days)
+        val cravings = daily("21:00", 14, setOf("strong_craving")) + daily("10:00", 14)
+        fun rotation(forms: Set<ProductForm>) = (0L..2L).map { advise(cravings, firstOfRotation.plusDays(it), forms)!!.strategy.key }
+        assertEquals(listOf("four_ds", "ask_about_pace", "use_it_right"), rotation(gum))
+        assertEquals(listOf("four_ds", "ask_about_pace", "distraction_list"), rotation(setOf(ProductForm.MOUTH_SPRAY)))
     }
 
     @Test

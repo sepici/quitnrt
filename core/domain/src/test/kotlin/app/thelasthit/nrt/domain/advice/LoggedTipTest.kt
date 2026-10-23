@@ -18,10 +18,10 @@ class LoggedTipTest {
     @Test
     fun `stressed gets the breathing timer, as an interactive strategy that names the tag comes first`() {
         assertEquals(LoggedTip(AdviceLibrary.bundled().find("breathing_timer")!!, "stressed", slip = null), tip("stressed"))
-        // Without that rule, relaxing the muscles would come first, being for fewer moments.
-        assertEquals("muscle_relaxation", matcher.matches("stressed", TagGroup.FEELINGS, setOf(ProductForm.GUM)).first().strategy.key)
         assertEquals("breathing_timer", tip("after_argument")!!.strategy.key)
         assertEquals("delay_timer", tip("autopilot")!!.strategy.key)
+        // Without that rule, keeping your hands busy would come first, as PLAN's table has it.
+        assertEquals("busy_hands", matcher.matches("autopilot", TagGroup.HABIT, setOf(ProductForm.GUM)).first().strategy.key)
     }
 
     @Test
@@ -48,9 +48,19 @@ class LoggedTipTest {
 
     @Test
     fun `the dose's own form decides advice about one kind of product`() {
-        assertEquals("gum_and_drinks", tip("drink")!!.strategy.key)
-        assertEquals("gum_and_drinks", tip("drink", form = ProductForm.MINI_LOZENGE)!!.strategy.key)
-        assertEquals("ready_line", tip("drink", form = ProductForm.MOUTH_SPRAY)!!.strategy.key)
+        val matcher = AdviceMatcher(
+            library(
+                strategy("chewing", tags = listOf("drink"), forms = listOf(ProductForm.GUM, ProductForm.MINI_LOZENGE)),
+                strategy("any_form", tags = listOf("drink", "socialising")),
+            ),
+        )
+        fun drinkTip(form: ProductForm) = matcher.afterLogging(entry("2026-10-23T21:05", form = form, tags = setOf("drink")), builtInGroups)!!.strategy.key
+        assertEquals("chewing", drinkTip(ProductForm.GUM))
+        assertEquals("chewing", drinkTip(ProductForm.MINI_LOZENGE))
+        assertEquals("any_form", drinkTip(ProductForm.MOUTH_SPRAY))
+        // In the bundled advice, deciding your limit leads for a drink, whatever the form.
+        assertEquals("drinks_limit", tip("drink")!!.strategy.key)
+        assertEquals("drinks_limit", tip("drink", form = ProductForm.MOUTH_SPRAY)!!.strategy.key)
     }
 
     @Test

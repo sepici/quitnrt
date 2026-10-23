@@ -1,5 +1,6 @@
 package app.thelasthit.nrt.domain.advice
 
+import app.thelasthit.nrt.domain.insights.InsightWindow
 import app.thelasthit.nrt.domain.log.Entry
 import java.time.LocalDate
 import java.time.LocalTime
@@ -53,7 +54,7 @@ data class TimingTip(
     val shift: Shift,
     /** Doses with [tag] in the advice window. */
     val doses: Int,
-    /** In order through the logical day. One for each usual time, never more. */
+    /** In order through the logical day. At most one for each meal, and never two for the same dose. */
     val slots: List<TimingSlot>,
     /** Doses with [tag] in each half hour of the logical day, from the day start: 48 counts. */
     val halfHours: List<Int>,
@@ -65,15 +66,20 @@ data class TimingTip(
 /**
  * Timing tips from the advice window's doses, with patches left out.
  *
+ * A usual time is the busiest [SPAN_MINUTES] of the day for a tag, with doses on at least
+ * [MIN_DAYS] different days and on at least half the days with any dose ([MIN_DAY_SHARE]), so it's
+ * a daily habit. Its time is their median, by the clock where each was taken.
+ *
  * - **After a meal:** when at least a quarter of doses are tagged After a meal, each usual time
  *   is rounded to the half hour, and the tip moves the dose half an hour before it, before the
- *   meal. A usual time where most doses were the day's first is left alone, since a tip never
- *   brings the first dose of the day earlier.
- * - **Just woke up:** the usual time of those doses, rounded to the quarter hour, and the tip
- *   moves the first dose 15 minutes later.
- *
- * A usual time is the busiest 90 minutes of the day for the tag, with doses on at least
- * [MIN_DAYS] different days; its time is their median, by the clock where each was taken.
+ *   meal. Each meal gets one slot at most, and the doses either side of a slot belong to it, so
+ *   one dose a day at a time that varies is never split in two. A slot is left out when, on any
+ *   of its days, the new time would come before that day's first dose, since a tip never brings
+ *   the first dose of the day earlier.
+ * - **Just woke up:** from the doses tagged Just woke up that were the day's first, over the
+ *   window's last [RECENT_DAYS] days, so the tip moves on each week once it's followed. Their
+ *   usual time is rounded to the quarter hour, and the tip moves the first dose 15 minutes later.
+ *   It's left out when that's still earlier than the window's median first dose.
  */
 object TimingTips {
     /** How wide a usual time can be. */
@@ -82,29 +88,24 @@ object TimingTips {
     /** Doses on this many different days make a usual time. */
     const val MIN_DAYS = 4
 
+    /** A usual time also needs doses on this share of the days with any dose. */
+    const val MIN_DAY_SHARE = 0.5
+
+    /** The wake-up tip reads the usual time off this many of the window's latest days. */
+    const val RECENT_DAYS = 7
+
+    /** The most after-meal slots: breakfast, lunch and dinner. */
+    const val MAX_SLOTS = 3
+
+    const val AFTER_MEAL = "after_meal"
+    const val WOKE_UP = "woke_up"
+
     private const val DAY_MINUTES = 24 * 60
     private const val HALF_HOUR = 30
-
-    private class Rule(
-        val tag: String,
-        val strategy: String,
-        val shift: Shift,
-        /** Minutes to round the usual time to, and to move it by. */
-        val step: Int,
-        /** Whether the tag needs at least a quarter of all doses. */
-        val needsQuarter: Boolean,
-        val maxSlots: Int,
-        val meals: Boolean,
-    )
-
-    private val RULES = listOf(
-        Rule("after_meal", "dose_before_meal", Shift.EARLIER, step = 30, needsQuarter = true, maxSlots = 3, meals = true),
-        // One wake-up a day, so one usual time.
-        Rule("woke_up", "morning_routine", Shift.LATER, step = 15, needsQuarter = false, maxSlots = 1, meals = false),
-    )
+    private const val QUARTER_HOUR = 15
 
     /** The tags that can have a timing tip. */
-    val tags: Set<String> = RULES.map { it.tag }.toSet()
+    val tags: Set<String> = setOf(AFTER_MEAL, WOKE_UP)
 
     /**
      * The tips from [entries] over the advice window ending before [today], in the order of
@@ -112,35 +113,80 @@ object TimingTips {
      */
     fun of(entries: List<Entry>, today: LocalDate, dayStart: LocalTime): List<TimingTip> {
         val window = AdviceWindow.of(today)
-        val doses = entries.filter { !it.isBackground && it.logicalDate in window }
-        val firsts = doses.groupBy { it.logicalDate }.values.map { day -> day.minBy { it.occurredAt }.id }.toSet()
-        return RULES.mapNotNull { tip(it, doses, firsts, dayStart) }
+        val doses = entries.filter { !it.isBackground && it.logicalDate in window }.map { Timed(minutesAfter(it, dayStart), it) }
+        val firsts = doses.groupBy { it.entry.logicalDate }.mapValues { (_, day) -> day.minBy { it.entry.occurredAt } }
+        return listOfNotNull(afterMeal(doses, firsts, dayStart), wokeUp(doses, firsts, window, dayStart))
     }
 
+    /** A dose and when it was taken, in minutes from the day start. */
     private class Timed(val minutes: Int, val entry: Entry)
 
-    private fun tip(rule: Rule, doses: List<Entry>, firsts: Set<String>, dayStart: LocalTime): TimingTip? {
-        val tagged = doses.filter { rule.tag in it.tagKeys }
-        if (tagged.isEmpty() || (rule.needsQuarter && tagged.size * 4 < doses.size)) return null
-        var left = tagged.map { Timed(minutesAfter(it, dayStart), it) }.sortedBy { it.minutes }
+    private fun afterMeal(doses: List<Timed>, firsts: Map<LocalDate, Timed>, dayStart: LocalTime): TimingTip? {
+        val tagged = doses.filter { AFTER_MEAL in it.entry.tagKeys }
+        if (tagged.isEmpty() || tagged.size * 4 < doses.size) return null
+        val doseDays = doses.days()
+        var left = tagged.sortedBy { it.minutes }
         val slots = mutableListOf<Pair<Int, TimingSlot>>()
-        while (slots.size < rule.maxSlots) {
-            val busiest = busiest(left) ?: break
-            if (busiest.days() < MIN_DAYS) break
-            left = left - busiest.toSet()
-            slot(rule, busiest, firsts, dayStart)?.let { slots += it }
+        while (slots.size < MAX_SLOTS) {
+            val members = busiest(left)?.takeIf { isUsual(it, doseDays) } ?: break
+            // The doses either side are the same dose, on days it came a little earlier or later.
+            val from = members.first().minutes - SPAN_MINUTES
+            val to = members.last().minutes + SPAN_MINUTES
+            left = left.filter { it.minutes < from || it.minutes > to }
+
+            val usual = round(median(members), HALF_HOUR, tiesEarlier = true)
+            val suggested = usual - HALF_HOUR
+            // A move across the day start would put the dose on another day.
+            if (suggested < 0) continue
+            if (members.any { firsts.getValue(it.entry.logicalDate).minutes > suggested }) continue
+            val suggestedTime = dayStart.plusMinutes(suggested.toLong())
+            val meal = Meal.at(suggestedTime)
+            if (meal != null && slots.any { it.second.meal == meal }) continue
+            slots += suggested to TimingSlot(dayStart.plusMinutes(usual.toLong()), suggestedTime, members.size, members.days(), meal)
         }
+        return tipOf(AFTER_MEAL, "dose_before_meal", Shift.EARLIER, tagged, slots)
+    }
+
+    private fun wokeUp(doses: List<Timed>, firsts: Map<LocalDate, Timed>, window: InsightWindow, dayStart: LocalTime): TimingTip? {
+        val tagged = doses.filter { WOKE_UP in it.entry.tagKeys }
+        if (tagged.isEmpty()) return null
+        val since = window.end.minusDays(RECENT_DAYS - 1L)
+        val recentDays = doses.filter { it.entry.logicalDate >= since }.days()
+        val mornings = firsts.values.filter { it.entry.logicalDate >= since && WOKE_UP in it.entry.tagKeys }.sortedBy { it.minutes }
+        val members = busiest(mornings)?.takeIf { isUsual(it, recentDays) } ?: return null
+
+        val usual = round(median(members), QUARTER_HOUR, tiesEarlier = false)
+        val suggested = usual + QUARTER_HOUR
+        if (suggested >= DAY_MINUTES || suggested < median(firsts.values.toList())) return null
+        val slot = TimingSlot(
+            usual = dayStart.plusMinutes(usual.toLong()),
+            suggested = dayStart.plusMinutes(suggested.toLong()),
+            doses = members.size,
+            days = members.days(),
+            meal = null,
+        )
+        return tipOf(WOKE_UP, "morning_routine", Shift.LATER, tagged, listOf(suggested to slot))
+    }
+
+    /** The tip for [tag] with [slots], each with its place in the logical day, or null with none. */
+    private fun tipOf(tag: String, strategy: String, shift: Shift, tagged: List<Timed>, slots: List<Pair<Int, TimingSlot>>): TimingTip? {
         if (slots.isEmpty()) return null
         val halfHours = IntArray(DAY_MINUTES / HALF_HOUR)
-        tagged.forEach { halfHours[minutesAfter(it, dayStart) / HALF_HOUR]++ }
+        tagged.forEach { halfHours[it.minutes / HALF_HOUR]++ }
         return TimingTip(
-            tag = rule.tag,
-            strategy = rule.strategy,
-            shift = rule.shift,
+            tag = tag,
+            strategy = strategy,
+            shift = shift,
             doses = tagged.size,
             slots = slots.sortedBy { it.first }.map { it.second },
             halfHours = halfHours.toList(),
         )
+    }
+
+    /** Whether [members] come often enough to be a usual time, against the [doseDays] with any dose. */
+    private fun isUsual(members: List<Timed>, doseDays: Int): Boolean {
+        val days = members.days()
+        return days >= MIN_DAYS && days >= doseDays * MIN_DAY_SHARE
     }
 
     /**
@@ -153,23 +199,10 @@ object TimingTips {
         .maxWithOrNull(compareBy<Triple<List<Timed>, Int, Int>> { it.second }.thenBy { it.third }.thenByDescending { it.first.first().minutes })
         ?.first
 
-    /** The slot for [members], with its place in the logical day, or null when the tip can't apply. */
-    private fun slot(rule: Rule, members: List<Timed>, firsts: Set<String>, dayStart: LocalTime): Pair<Int, TimingSlot>? {
-        if (rule.shift == Shift.EARLIER && members.count { it.entry.id in firsts } * 2 > members.size) return null
-        val minutes = members.map { it.minutes }.sorted()
-        val median = (minutes[(minutes.size - 1) / 2] + minutes[minutes.size / 2]) / 2
-        val usual = round(median, rule.step, tiesEarlier = rule.shift == Shift.EARLIER)
-        val suggested = if (rule.shift == Shift.EARLIER) usual - rule.step else usual + rule.step
-        // A move across the day start would put the dose on another day.
-        if (suggested < 0 || suggested >= DAY_MINUTES) return null
-        val suggestedTime = dayStart.plusMinutes(suggested.toLong())
-        return suggested to TimingSlot(
-            usual = dayStart.plusMinutes(usual.toLong()),
-            suggested = suggestedTime,
-            doses = members.size,
-            days = members.days(),
-            meal = if (rule.meals) Meal.at(suggestedTime) else null,
-        )
+    /** The median minute of [doses], halfway between the middle two when there's an even number. */
+    private fun median(doses: List<Timed>): Int {
+        val minutes = doses.map { it.minutes }.sorted()
+        return (minutes[(minutes.size - 1) / 2] + minutes[minutes.size / 2]) / 2
     }
 
     /** [minutes] to the nearest [step]. Halfway goes earlier for a tip that moves a dose earlier. */

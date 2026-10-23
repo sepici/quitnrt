@@ -95,9 +95,42 @@ class TimingTipsTest {
     @Test
     fun `a tip never brings the day's first dose earlier`() {
         assertNull(tip(daily("08:30", 14, meal) + daily("13:00", 14)))
-        // A meal dose that's the first only now and then still moves.
-        val mostlyNot = daily("13:00", 6, meal) + daily("10:00", 5)
-        assertEquals(time("12:30"), tip(mostlyNot)!!.lead.suggested)
+        // Not even on one day in six.
+        assertNull(tip(daily("13:00", 6, meal) + daily("10:00", 5)))
+        // A breakfast dose that's the first on half the days.
+        assertNull(tip(daily("08:30", 6, meal) + daily("07:00", 3)))
+        // Nor when the new time would come before an earlier dose that day.
+        assertNull(tip(daily("08:30", 6, meal) + daily("08:10", 6)))
+
+        // A meal dose that was the day's first, but before the new time, is moved later: that's fine.
+        val earlyLunch = daily("13:00", 13, meal) + daily("10:00", 13) + daily("12:10", 1, meal, skip = 13)
+        assertEquals(time("12:30"), tip(earlyLunch)!!.lead.suggested)
+    }
+
+    @Test
+    fun `one meal dose a day at a time that varies is one slot, not two`() {
+        val spread = daily(
+            "12:00", "12:10", "12:20", "12:30", "12:40", "12:50", "13:00", "13:10", "13:20", "13:30", "13:40", "13:50", "14:00", "14:10",
+            tags = meal,
+        )
+        val tip = tip(spread + background)!!
+        assertEquals(1, tip.slots.size, "${tip.slots}")
+        assertEquals(Meal.LUNCH, tip.lead.meal)
+
+        // Two clusters a meal apart on alternate days are still the one lunch.
+        val twoTimes = daily("12:00", "13:40", "12:00", "13:40", "12:00", "13:40", "12:00", "13:40", "12:00", "13:40", "12:00", "13:40", "12:00", "13:40", tags = meal)
+        val lunch = tip(twoTimes + background)!!
+        assertEquals(listOf(Meal.LUNCH), lunch.slots.map { it.meal })
+        assertEquals(time("11:30"), lunch.lead.suggested)
+    }
+
+    @Test
+    fun `a usual time needs doses on at least half the days with doses`() {
+        // After a meal on 4 of 12 days is a quarter of the doses, but not a daily habit.
+        val someDays = daily("13:00", 4, meal) + daily("10:00", 12)
+        assertEquals(16, someDays.size)
+        assertNull(tip(someDays))
+        assertEquals(time("12:30"), tip(daily("13:00", 6, meal) + daily("10:00", 12))!!.lead.suggested)
     }
 
     @Test
@@ -112,6 +145,36 @@ class TimingTipsTest {
         assertEquals(time("09:30"), tip(daily("09:08", 5, setOf("woke_up")), tag = "woke_up")!!.lead.suggested)
         assertEquals(time("09:15"), tip(daily("09:07", 5, setOf("woke_up")), tag = "woke_up")!!.lead.suggested)
         assertNull(tip(daily("09:00", 3, setOf("woke_up")), tag = "woke_up"))
+    }
+
+    private val wokeUp = setOf("woke_up")
+
+    @Test
+    fun `the wake-up tip never brings the usual first dose earlier`() {
+        // Woke up at 9 on the last 4 days, but the first dose came at 11 on the 10 before.
+        assertNull(tip(daily("09:00", 4, wokeUp) + daily("11:00", 10, skip = 4), tag = "woke_up"))
+        // The same 4 mornings spread through the fortnight.
+        val mornings = setOf(1, 5, 9, 13)
+        val spread = (1..14).map { day ->
+            val woke = day in mornings
+            entry("${TODAY.minusDays(day.toLong())}T${if (woke) "09:00" else "11:00"}", tags = if (woke) wokeUp else emptySet())
+        }
+        assertNull(tip(spread, tag = "woke_up"))
+    }
+
+    @Test
+    fun `the wake-up tip only counts a dose that was the day's first`() {
+        // An earlier dose comes first each day, so the 9 o'clock one isn't the first dose to push later.
+        assertNull(tip(daily("09:00", 7, wokeUp) + daily("06:30", 7), tag = "woke_up"))
+    }
+
+    @Test
+    fun `once followed for a week, the wake-up tip moves on another 15 minutes`() {
+        val lastWeek = daily("09:15", 7, wokeUp)
+        val weekBefore = daily("09:00", 7, wokeUp, skip = 7)
+        val tip = tip(lastWeek + weekBefore, tag = "woke_up")!!
+        assertEquals(listOf(TimingSlot(time("09:15"), time("09:30"), doses = 7, days = 7, meal = null)), tip.slots)
+        assertEquals(14, tip.doses)
     }
 
     @Test
