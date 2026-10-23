@@ -108,4 +108,20 @@ class DayBoundaryTest {
             }
         }
     }
+
+    @Test
+    fun `the late dose example sits before the day start`() {
+        assertEquals(LocalTime.of(1, 30), DayBoundary().lateDoseExample)
+        assertEquals(LocalTime.of(3, 30), DayBoundary(LocalTime.of(6, 0)).lateDoseExample)
+        assertEquals(LocalTime.of(0, 30), DayBoundary(LocalTime.of(1, 0)).lateDoseExample)
+        assertEquals(null, DayBoundary(LocalTime.MIDNIGHT).lateDoseExample)
+    }
+
+    @Test
+    fun `the day start moves in half hours between midnight and six`() {
+        assertEquals(LocalTime.of(4, 30), DayBoundary.step(LocalTime.of(4, 0), 1))
+        assertEquals(LocalTime.of(3, 0), DayBoundary.step(LocalTime.of(4, 0), -2))
+        assertEquals(LocalTime.of(6, 0), DayBoundary.step(LocalTime.of(5, 30), 3))
+        assertEquals(LocalTime.MIDNIGHT, DayBoundary.step(LocalTime.of(0, 30), -4))
+    }
 }

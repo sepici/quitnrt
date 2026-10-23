@@ -1,13 +1,13 @@
 # Status and handover
 
-Last updated: 23 October 2026, after Today, the log sheet and History were built in the local session.
+Last updated: 23 October 2026, after onboarding, Today, the log sheet and History were built in the local session.
 
 ## Where things are
 
 | Phase | State |
 |---|---|
 | 0. Foundation and direction | Done. Gradle set-up, CI, copy lint, style guide, design direction chosen, first creature signed off |
-| 1. Logging | **Mostly done.** Domain rules, catalogue, data layer, backup, theme, sprites and settings, plus app wiring, **Today, the log sheet and History**. Onboarding, Settings and the lair are next. |
+| 1. Logging | **Mostly done.** Domain rules, catalogue, data layer, backup, theme, sprites and settings, plus app wiring, **onboarding, Today, the log sheet and History**. Settings and the lair are next. |
 | 2 to 9 | Not started |
 
 The full check passes locally: copy rules, 79 domain tests, 25 data tests, 30 app UI, screenshot and format tests, debug APK, Android lint.
@@ -58,14 +58,12 @@ Build against the B mockups. All strings go in `strings.xml` and pass `checkCopy
    - ViewModels come from `graphViewModel { graph -> ... }` in `ui/GraphViewModel.kt`.
    - `AppRoot` shows onboarding until `settings.onboardingComplete`. Until onboarding is built, a placeholder offers "Go to the app".
    - UI tests run on Robolectric with `TestApp` (an in-memory `DataGraph`). `captureLooks` in the tests renders a screen in light and dark, at normal and 1.3× font, for Roborazzi.
-2. **Onboarding:**
-   1. welcome and disclaimer (must be accepted; store the time)
-   2. when you stopped smoking or vaping. If under about 8 weeks ago, a gentle note that most courses run 8 to 12 weeks. Never blocking.
-   3. country, defaulting to the phone's region
-   4. your products: by brand or search, using `Catalogue.forMarket` and `search`. Picks go on the quick log in order.
-   5. **name your demon**: name, creature (dragon only for now), and colour from the sprite's palette variants
-   6. day start (04:00 default)
-   7. done
+2. **Onboarding.** Done, from the signed-off `onboarding-*` mockups. Nothing but the disclaimer's acceptance time is stored until "Finish set-up", which writes the stop date, country, products (in pick order, onto the quick log), demon and day start together.
+   - The country defaults to the phone's region. "Somewhere else" stores `ZZ` (`Markets.ELSEWHERE`), which gets only the generic products.
+   - Products are picked by brand or search. "Show other countries" adds every market's products, marked with their country ("US pack").
+   - The stop date can be skipped. Under 8 weeks in, a note mentions the usual course length, and nothing blocks.
+   - The day start moves in half hours from midnight to 06:00, with a diagram of what counts toward Thursday.
+   - The summary calls the demon "it": "Gary is lurking. It shows itself when your plan starts." The mockup said "he", but the demon could be named Mildred.
 3. **Today.** Done, from B's `today.html`. Agreed with the owner before building:
    - **No meter until phase 3.** With no guide there's nothing to measure against, so the hero shows the mg and "3 doses so far".
    - **Quick-log pills:** a tap logs one unit now, with Undo in the snackbar. A long press opens the log sheet on that product.

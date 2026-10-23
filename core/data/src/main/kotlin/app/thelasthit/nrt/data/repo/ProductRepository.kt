@@ -5,9 +5,6 @@ import app.thelasthit.nrt.data.db.toDomain
 import app.thelasthit.nrt.data.db.toEntity
 import app.thelasthit.nrt.domain.catalogue.Catalogue
 import app.thelasthit.nrt.domain.dose.Dose
-import app.thelasthit.nrt.domain.dose.DoseMath
-import app.thelasthit.nrt.domain.dose.InhalatorUnit
-import app.thelasthit.nrt.domain.log.LogChecks
 import app.thelasthit.nrt.domain.product.DoseUnit
 import app.thelasthit.nrt.domain.product.LabelLimit
 import app.thelasthit.nrt.domain.product.ProductForm
@@ -38,8 +35,8 @@ class ProductRepository(
     suspend fun get(id: String): UserProduct? = dao.get(id)?.toDomain()
 
     /**
-     * Adds a catalogue product to the user's list (or returns it if it's already there). The
-     * inhalator is logged by session, so its dose and label limit are converted from cartridges.
+     * Adds a catalogue product to the user's list (or returns it if it's already there), through
+     * [app.thelasthit.nrt.domain.catalogue.CatalogueProduct.toUserProduct].
      */
     suspend fun addFromCatalogue(catalogueId: String, addToQuickLog: Boolean = true): UserProduct {
         dao.get(catalogueId)?.let { existing ->
@@ -47,20 +44,7 @@ class ProductRepository(
             return requireNotNull(dao.get(catalogueId)).toDomain()
         }
         val item = requireNotNull(catalogue().find(catalogueId)) { "Unknown catalogue product $catalogueId" }
-        val unit = item.form.defaultUnit
-        val isInhalator = item.form == ProductForm.INHALATOR
-        val product = UserProduct(
-            id = item.id,
-            catalogueId = item.id,
-            name = item.displayName,
-            shortName = item.shortName,
-            form = item.form,
-            unit = unit,
-            perUnit = if (isInhalator) DoseMath.inhalatorPerUnit(item.strength, InhalatorUnit.SESSION) else item.strength,
-            label = LogChecks.limitInLoggedUnit(item.label, item.unit, unit),
-            cartridge = if (isInhalator) item.strength else null,
-            quickLogPosition = if (addToQuickLog) nextQuickLogPosition() else null,
-        )
+        val product = item.toUserProduct(quickLogPosition = if (addToQuickLog) nextQuickLogPosition() else null)
         dao.upsert(product.toEntity(createdAt = clock.millis()))
         return product
     }

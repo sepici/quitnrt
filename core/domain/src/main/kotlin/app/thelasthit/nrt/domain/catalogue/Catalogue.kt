@@ -1,10 +1,14 @@
 package app.thelasthit.nrt.domain.catalogue
 
 import app.thelasthit.nrt.domain.dose.Dose
+import app.thelasthit.nrt.domain.dose.DoseMath
+import app.thelasthit.nrt.domain.dose.InhalatorUnit
+import app.thelasthit.nrt.domain.log.LogChecks
 import app.thelasthit.nrt.domain.product.DoseUnit
 import app.thelasthit.nrt.domain.product.LabelLimit
 import app.thelasthit.nrt.domain.product.ProductForm
 import app.thelasthit.nrt.domain.product.RollingLimit
+import app.thelasthit.nrt.domain.product.UserProduct
 import kotlinx.serialization.json.Json
 import java.time.Duration
 import java.util.Locale
@@ -45,6 +49,22 @@ class Catalogue internal constructor(val products: List<CatalogueProduct>) {
             .sortedWith(
                 compareBy<CatalogueProduct> { if (local != null && local in it.markets) 0 else 1 }
                     .thenBy { it.status == ProductStatus.DISCONTINUED }
+                    .thenBy { it.kind.ordinal },
+            )
+    }
+
+    /**
+     * What onboarding and Settings browse: [country]'s products, or with [otherCountries] every
+     * country's, local ones first. Generic products always come last. No discontinued packs.
+     */
+    fun browse(country: String, otherCountries: Boolean = false): List<CatalogueProduct> {
+        if (!otherCountries) return forMarket(country)
+        val local = country.uppercase(Locale.ROOT)
+        return products
+            .filter { it.status != ProductStatus.DISCONTINUED }
+            .sortedWith(
+                compareBy<CatalogueProduct> { it.kind == LineKind.GENERIC }
+                    .thenBy { if (it.markets.isEmpty() || local in it.markets) 0 else 1 }
                     .thenBy { it.kind.ordinal },
             )
     }
@@ -95,6 +115,27 @@ data class CatalogueProduct(
     /** For example "Nicorette gum 2 mg" or "NiQuitin Minis 1.5 mg". */
     val displayName: String get() = "$shortName ${formatMg(strength)} mg"
 
+    /**
+     * This product as one of the user's own. The inhalator is logged by session, so its dose and
+     * label limit are converted from cartridges.
+     */
+    fun toUserProduct(quickLogPosition: Int? = null): UserProduct {
+        val loggedUnit = form.defaultUnit
+        val isInhalator = form == ProductForm.INHALATOR
+        return UserProduct(
+            id = id,
+            catalogueId = id,
+            name = displayName,
+            shortName = shortName,
+            form = form,
+            unit = loggedUnit,
+            perUnit = if (isInhalator) DoseMath.inhalatorPerUnit(strength, InhalatorUnit.SESSION) else strength,
+            label = LogChecks.limitInLoggedUnit(label, unit, loggedUnit),
+            cartridge = if (isInhalator) strength else null,
+            quickLogPosition = quickLogPosition,
+        )
+    }
+
     internal fun matches(word: String): Boolean {
         word.toDoubleOrNull()?.let { number -> return number == strength.milligrams }
         if (word == "mg") return true
@@ -137,6 +178,21 @@ data class CatalogueProduct(
             val mg = dose.milligrams
             return if (mg == Math.floor(mg)) mg.toLong().toString() else mg.toString()
         }
+    }
+}
+
+/** One line of a brand, such as Nicorette gum, with its strengths from weakest up. */
+data class CatalogueLine(val lineId: String, val products: List<CatalogueProduct>) {
+    init {
+        require(products.isNotEmpty() && products.all { it.lineId == lineId }) { "A line needs its own products" }
+    }
+
+    val first: CatalogueProduct get() = products.first()
+
+    companion object {
+        /** Groups [products] into lines, in the order each line first appears. */
+        fun group(products: List<CatalogueProduct>): List<CatalogueLine> =
+            products.groupBy { it.lineId }.map { (id, inLine) -> CatalogueLine(id, inLine.sortedBy { it.strength }) }
     }
 }
 

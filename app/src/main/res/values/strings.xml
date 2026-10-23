@@ -10,9 +10,6 @@
 
     <string name="placeholder_body">This screen arrives in a later build.</string>
 
-    <string name="onboarding_placeholder_title">Set-up</string>
-    <string name="onboarding_placeholder_body">Set-up arrives in a later build. For now you can go straight to the app.</string>
-    <string name="onboarding_placeholder_skip">Go to the app</string>
 
     <string name="settings_title">Settings</string>
     <string name="action_undo">Undo</string>
@@ -131,6 +128,173 @@
     <string name="tag_hungry">Hungry</string>
     <string name="tag_cant_focus">Can\'t focus</string>
     <string name="tag_autopilot">On autopilot</string>
+
+    <!-- Onboarding. Button labels name the next step. -->
+    <string name="onboarding_step_count">%1$d of %2$d</string>
+    <string name="onboarding_back">Back</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_app_sub">Quit NRT</string>
+    <string name="onboarding_welcome_body">Log your NRT, see what sets off cravings, and taper to zero a week at a time.</string>
+    <string name="onboarding_before_title">Before you start</string>
+    <string name="onboarding_point_advice_lead">This app isn\'t medical advice.</string>
+    <string name="onboarding_point_advice">It helps you keep track and plan. It can\'t tell you what\'s right for your body.</string>
+    <string name="onboarding_point_pharmacist_lead">Talk to a pharmacist or GP</string>
+    <string name="onboarding_point_pharmacist">before you change how you use NRT, especially if you\'re pregnant, breastfeeding or living with a heart condition.</string>
+    <string name="onboarding_point_safer_lead">NRT for longer is far safer than smoking.</string>
+    <string name="onboarding_point_safer">If cutting down gets hard, you can slow the plan down.</string>
+    <string name="onboarding_privacy">Everything you log stays on this phone. The app has no internet access.</string>
+    <string name="onboarding_accept">Accept and set up</string>
+    <string name="onboarding_accept_note">You can read this again in Settings, under About.</string>
+
+    <string name="onboarding_stopped_title">When did you stop smoking or vaping?</string>
+    <string name="onboarding_stopped_body">A rough date is fine.</string>
+    <string name="onboarding_stopped_today">Today</string>
+    <plurals name="onboarding_stopped_days">
+        <item quantity="one">%1$d\u00A0day ago</item>
+        <item quantity="other">%1$d\u00A0days ago</item>
+    </plurals>
+    <plurals name="onboarding_stopped_weeks">
+        <item quantity="one">%1$d\u00A0week ago</item>
+        <item quantity="other">%1$d\u00A0weeks ago</item>
+    </plurals>
+    <string name="onboarding_course_title">Most NRT courses run 8 to 12\u00A0weeks</string>
+    <plurals name="onboarding_course_weeks">
+        <item quantity="one">You\'re %1$d\u00A0week in. A pharmacist can help you decide when to start cutting down. You can carry on setting up either way.</item>
+        <item quantity="other">You\'re %1$d\u00A0weeks in. A pharmacist can help you decide when to start cutting down. You can carry on setting up either way.</item>
+    </plurals>
+    <string name="onboarding_course_days">You\'ve only just stopped. A pharmacist can help you decide when to start cutting down. You can carry on setting up either way.</string>
+    <string name="onboarding_next_country">Next: your country</string>
+
+    <string name="onboarding_country_title">Where do you buy your NRT?</string>
+    <string name="onboarding_country_body">This sets which products you see first. You can still add products from other countries.</string>
+    <string name="onboarding_your_region">Your phone\'s region</string>
+    <string name="country_gb">United Kingdom</string>
+    <string name="country_ie">Ireland</string>
+    <string name="country_us">United States</string>
+    <string name="country_ca">Canada</string>
+    <string name="country_au">Australia</string>
+    <string name="country_nz">New Zealand</string>
+    <string name="country_elsewhere">Somewhere else</string>
+    <string name="country_gb_brands">Nicorette, NiQuitin, Nicotinell, Boots and shop own-brands</string>
+    <string name="country_ie_brands">Nicorette, NiQuitin and Nicotinell</string>
+    <string name="country_us_brands">Nicorette, NicoDerm CQ, Habitrol and store brands</string>
+    <string name="country_ca_brands">Nicorette, NicoDerm, Habitrol, Thrive and pharmacy brands</string>
+    <string name="country_au_brands">Nicorette, Nicabate, Nicotinell, QuitX and pharmacy brands</string>
+    <string name="country_nz_brands">Nicorette and Habitrol</string>
+    <string name="country_elsewhere_brands">Plain gum, lozenges, patches and sprays at any strength</string>
+    <string name="country_gb_short">UK</string>
+    <string name="country_ie_short">Ireland</string>
+    <string name="country_us_short">US</string>
+    <string name="country_ca_short">Canada</string>
+    <string name="country_au_short">Australia</string>
+    <string name="country_nz_short">New Zealand</string>
+    <string name="onboarding_next_products">Next: your products</string>
+
+    <string name="onboarding_products_title">What do you use?</string>
+    <string name="onboarding_products_body">Pick every product you use. They go on your quick log in the order you pick them.</string>
+    <string name="onboarding_search_hint">Search, like niquitin minis 4</string>
+    <string name="onboarding_clear_search">Clear search</string>
+    <string name="onboarding_any_brand">Any brand</string>
+    <plurals name="onboarding_product_count">
+        <item quantity="one">%1$d product</item>
+        <item quantity="other">%1$d products</item>
+    </plurals>
+    <plurals name="onboarding_match_count">
+        <item quantity="one">%1$d match</item>
+        <item quantity="other">%1$d matches</item>
+    </plurals>
+    <string name="onboarding_no_matches">Nothing matches. Try fewer words, or just the brand.</string>
+    <string name="onboarding_every_flavour">%1$s. Every flavour logs the same.</string>
+    <string name="onboarding_foreign_pack">%1$s. %2$s pack.</string>
+    <string name="onboarding_discontinued">Older pack, no longer sold</string>
+    <string name="onboarding_add">Add</string>
+    <string name="onboarding_added">Added</string>
+    <string name="onboarding_pick_description">%1$s, number %2$d on your quick log</string>
+    <string name="onboarding_other_countries">Show other countries</string>
+    <string name="onboarding_other_countries_detail">For products bought online or abroad</string>
+    <string name="onboarding_tray_title">On your quick log</string>
+    <plurals name="onboarding_tray_count">
+        <item quantity="one">%1$d picked</item>
+        <item quantity="other">%1$d picked</item>
+    </plurals>
+    <string name="onboarding_tray_empty">Nothing yet. You can add products later in Settings.</string>
+    <string name="onboarding_next_demon">Next: name your demon</string>
+    <string name="form_detail_gum">Per piece</string>
+    <string name="form_detail_lozenge">Per lozenge</string>
+    <string name="form_detail_mini_lozenge">Per mini lozenge</string>
+    <string name="form_detail_patch_16h">16-hour patch</string>
+    <string name="form_detail_patch_24h">24-hour patch</string>
+    <string name="form_detail_spray">Per spray</string>
+    <string name="form_detail_inhalator">Per cartridge, logged in 5-minute sessions</string>
+    <string name="form_detail_microtab">Per tablet, under the tongue</string>
+    <string name="form_detail_strip">Per strip</string>
+    <string name="form_detail_pouch">Per pouch</string>
+    <string name="form_detail_other">Per unit</string>
+
+    <string name="onboarding_demon_title">Name your demon</string>
+    <string name="onboarding_demon_body">It stands for the habit. Each week you stick to your plan lands a hit on it.</string>
+    <string name="onboarding_name">Name</string>
+    <string name="onboarding_name_hint">Give it a name</string>
+    <string-array name="onboarding_name_ideas">
+        <item>Nigel</item>
+        <item>The Itch</item>
+        <item>Old Smokey</item>
+        <item>Mildred</item>
+        <item>Big Craig</item>
+    </string-array>
+    <string name="onboarding_creature">Creature</string>
+    <string name="onboarding_creature_hint">Only the dragon is drawn so far. The others arrive in later updates.</string>
+    <string name="onboarding_creature_locked">%1$s, not drawn yet</string>
+    <string name="creature_dragon">Dragon</string>
+    <string name="creature_demon">Demon</string>
+    <string name="creature_bear">Bear</string>
+    <string name="creature_kraken">Kraken</string>
+    <string name="creature_goblin">Goblin</string>
+    <string name="creature_slime">Slime</string>
+    <string name="creature_wraith">Wraith</string>
+    <string name="creature_serpent">Serpent</string>
+    <string name="onboarding_colour">Colour</string>
+    <string name="variant_forest">Forest</string>
+    <string name="variant_ember">Ember</string>
+    <string name="variant_moss">Moss</string>
+    <string name="variant_frost">Frost</string>
+    <string name="onboarding_demon_kind">%1$s %2$s</string>
+    <string name="onboarding_demon_flavour">%1$s doesn\'t like being named.</string>
+    <string name="onboarding_next_day">Next: when your day starts</string>
+
+    <string name="onboarding_day_title">When does your day start?</string>
+    <string name="onboarding_day_body">With %1$s, a dose at %2$s counts toward the evening before.</string>
+    <string name="onboarding_day_body_midnight">With midnight, every dose counts toward the day it\'s taken.</string>
+    <string name="onboarding_day_label">Day starts at</string>
+    <string name="onboarding_day_default">The default</string>
+    <string name="onboarding_day_earlier">30\u00A0minutes earlier</string>
+    <string name="onboarding_day_later">30\u00A0minutes later</string>
+    <string name="onboarding_day_caption">Thursday</string>
+    <string name="onboarding_day_caption_note">as the app counts it</string>
+    <string name="onboarding_day_midnight">Midnight</string>
+    <string name="onboarding_day_start_thursday">%1$s Thursday</string>
+    <string name="onboarding_day_start_friday">%1$s Friday</string>
+    <string name="onboarding_day_example">A dose at %1$s on Friday morning still counts toward Thursday.</string>
+    <string name="onboarding_day_diagram">Thursday runs from %1$s Thursday to %1$s Friday. A dose at %2$s on Friday morning falls inside it.</string>
+    <string name="onboarding_day_hint">You can change this later in Settings. Doses you\'ve already logged move to match.</string>
+    <string name="onboarding_finish">Finish set-up</string>
+
+    <string name="onboarding_done_title">You\'re set up</string>
+    <string name="onboarding_done_body">Here\'s what you chose. You can change any of it in Settings.</string>
+    <string name="onboarding_done_flavour">%1$s is lurking. It shows itself when your plan starts.</string>
+    <string name="onboarding_done_description">%1$s HP not shown yet.</string>
+    <string name="onboarding_summary_stopped">Stopped on</string>
+    <string name="onboarding_summary_country">Country</string>
+    <string name="onboarding_summary_quick_log">Quick log</string>
+    <string name="onboarding_summary_demon">Demon</string>
+    <string name="onboarding_summary_day">Day starts</string>
+    <string name="onboarding_summary_not_set">Not set</string>
+    <string name="onboarding_summary_nothing">Nothing yet</string>
+    <string name="onboarding_summary_demon_value">%1$s, %2$s</string>
+    <string name="onboarding_next_title">What happens now</string>
+    <string name="onboarding_next_week">Log every dose for a week, the way you normally would. That week shows where you\'re starting from.</string>
+    <string name="onboarding_next_plan">After that, the Plan tab builds a taper from it, one week at a time down to zero.</string>
+    <string name="onboarding_start">Start logging</string>
 
     <!-- Today -->
     <string name="today_title">Today</string>

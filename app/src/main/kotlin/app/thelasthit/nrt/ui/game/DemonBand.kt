@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -57,7 +58,7 @@ fun DemonBand(
                 role = Role.Button
             },
     ) {
-        LurkingScene(GameArt.band, creature, Modifier.fillMaxSize())
+        CreatureScene(GameArt.band, creature, variant = null, Modifier.fillMaxSize())
         Column(
             Modifier
                 .fillMaxWidth()
@@ -89,30 +90,72 @@ fun DemonBand(
 }
 
 /**
- * A backdrop with the creature as a dark shape on its rock, watching with marigold eyes. In dark
- * mode the shape gets the backdrop's light rim, or it would vanish into the night sky.
+ * A backdrop with the creature on its rock: in [variant]'s colours, or with no variant as a
+ * lurking dark shape watching with marigold eyes. In dark mode the creature gets the backdrop's
+ * light rim, or it would vanish into the night sky.
  */
 @Composable
-fun LurkingScene(backdrop: Backdrop, creature: Creature, modifier: Modifier = Modifier) {
-    val colors = LastHit.colors
-    val dark = colors.isDark
+fun CreatureScene(backdrop: Backdrop, creature: Creature, variant: String?, modifier: Modifier = Modifier) {
+    val dark = LastHit.colors.isDark
     val image = remember(backdrop, dark) { GameArt.backdrop(backdrop, dark) }
-    val sheet = remember(creature) { GameArt.sheet(creature) }
-    val shape = remember(sheet, dark) {
-        GameArt.silhouette(sheet, SpriteFrame.IDLE_1, if (dark) LurkDark else LurkLight, eyes = colors.marigold)
-    }
-    val rim = remember(sheet, dark) {
-        backdrop.rim(dark)?.let { GameArt.silhouette(sheet, SpriteFrame.IDLE_1, Color(it)) }
-    }
+    val sprite = rememberCreature(creature, variant)
+    val rim = rememberRim(creature, backdrop.rim(dark))
     Canvas(modifier) {
         val (scale, origin) = drawBackdrop(backdrop, image)
         val at = origin + Offset(backdrop.spriteX * scale, backdrop.spriteY * scale)
         rim?.let { drawRim(it, at, scale, 1.dp.toPx()) }
-        drawPixels(shape, at, scale)
+        drawPixels(sprite, at, scale)
     }
 }
 
-private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawRim(rim: ImageBitmap, at: Offset, scale: Float, width: Float) {
+/** The creature on its own, filling [modifier]'s square, as tiles and swatches show it. */
+@Composable
+fun CreatureImage(creature: Creature, variant: String?, modifier: Modifier = Modifier) {
+    val dark = LastHit.colors.isDark
+    val sprite = rememberCreature(creature, variant)
+    val rim = rememberRim(creature, GameArt.band.rim(dark))
+    Canvas(modifier) {
+        val scale = minOf(size.width, size.height) / sprite.width
+        val at = Offset((size.width - sprite.width * scale) / 2, (size.height - sprite.height * scale) / 2)
+        rim?.let { drawRim(it, at, scale, 1.dp.toPx()) }
+        drawPixels(sprite, at, scale)
+    }
+}
+
+/** The creature as a flat shape in [colour], watching with marigold eyes, as on the welcome screen. */
+@Composable
+fun CreatureSilhouette(creature: Creature, colour: Color, modifier: Modifier = Modifier) {
+    val eyes = LastHit.colors.marigold
+    val sheet = remember(creature) { GameArt.sheet(creature) }
+    val shape = remember(sheet, colour, eyes) { GameArt.silhouette(sheet, SpriteFrame.IDLE_1, colour, eyes) }
+    Canvas(modifier) {
+        val scale = minOf(size.width, size.height) / shape.width
+        drawPixels(shape, Offset(size.width - shape.width * scale, size.height - shape.height * scale), scale)
+    }
+}
+
+/** The creature's idle frame in [variant], or lurking when there's no variant. */
+@Composable
+private fun rememberCreature(creature: Creature, variant: String?): ImageBitmap {
+    val colors = LastHit.colors
+    val dark = colors.isDark
+    val sheet = remember(creature) { GameArt.sheet(creature) }
+    return remember(sheet, variant, dark) {
+        if (variant == null) {
+            GameArt.silhouette(sheet, SpriteFrame.IDLE_1, if (dark) LurkDark else LurkLight, eyes = colors.marigold)
+        } else {
+            GameArt.sprite(sheet, SpriteFrame.IDLE_1, variant)
+        }
+    }
+}
+
+@Composable
+private fun rememberRim(creature: Creature, rim: Int?): ImageBitmap? {
+    val sheet = remember(creature) { GameArt.sheet(creature) }
+    return remember(sheet, rim) { rim?.let { GameArt.silhouette(sheet, SpriteFrame.IDLE_1, Color(it)) } }
+}
+
+private fun DrawScope.drawRim(rim: ImageBitmap, at: Offset, scale: Float, width: Float) {
     for (offset in listOf(Offset(width, 0f), Offset(-width, 0f), Offset(0f, width), Offset(0f, -width))) {
         drawPixels(rim, at + offset, scale)
     }

@@ -34,8 +34,33 @@ class DayBoundary(val dayStart: LocalTime = DEFAULT_DAY_START) {
         }
     }
 
+    /**
+     * A time after midnight that still counts toward the day before, for explaining the setting:
+     * 01:30 with a 04:00 day start. Null when the day starts at midnight, as nothing carries over.
+     */
+    val lateDoseExample: LocalTime?
+        get() {
+            val minutes = dayStart.toSecondOfDay() / 60
+            if (minutes == 0) return null
+            // Two and a half hours before, or halfway back to midnight for an early day start.
+            val before = if (minutes >= 180) 150 else minutes / 2
+            return dayStart.minusMinutes(before.toLong())
+        }
+
     companion object {
         val DEFAULT_DAY_START: LocalTime = LocalTime.of(4, 0)
+
+        /** The day start can be set from midnight to 06:00, in steps of half an hour. */
+        val EARLIEST: LocalTime = LocalTime.MIDNIGHT
+        val LATEST: LocalTime = LocalTime.of(6, 0)
+        const val STEP_MINUTES = 30L
+
+        /** [time] moved by [steps] half hours, kept between [EARLIEST] and [LATEST]. */
+        fun step(time: LocalTime, steps: Int): LocalTime {
+            val minutes = (time.toSecondOfDay() / 60 + steps * STEP_MINUTES)
+                .coerceIn(EARLIEST.toSecondOfDay() / 60L, LATEST.toSecondOfDay() / 60L)
+            return LocalTime.ofSecondOfDay(minutes * 60)
+        }
     }
 }
 

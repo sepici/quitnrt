@@ -4,13 +4,11 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.TestApp
 import app.thelasthit.nrt.ui.theme.LastHitTheme
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,11 +29,8 @@ class AppRootTest {
     fun `set-up shows until it's done`() {
         compose.setContent { LastHitTheme { AppRoot() } }
 
-        compose.waitUntilExactlyOneExists(hasText(text(R.string.onboarding_placeholder_skip)))
-        compose.onNodeWithText(text(R.string.onboarding_placeholder_skip)).performClick()
-
-        compose.waitUntilExactlyOneExists(hasText(text(R.string.nav_history)))
-        assertTrue(runBlocking { app.graph.settings.current().onboardingComplete })
+        compose.waitUntilExactlyOneExists(hasText(text(R.string.onboarding_accept)))
+        compose.onNodeWithText(text(R.string.nav_history)).assertDoesNotExist()
     }
 
     @Test
@@ -45,6 +40,6 @@ class AppRootTest {
         compose.setContent { LastHitTheme { AppRoot() } }
 
         compose.waitUntilExactlyOneExists(hasText(text(R.string.nav_history)))
-        compose.onNodeWithText(text(R.string.onboarding_placeholder_skip)).assertDoesNotExist()
+        compose.onNodeWithText(text(R.string.onboarding_accept)).assertDoesNotExist()
     }
 }
