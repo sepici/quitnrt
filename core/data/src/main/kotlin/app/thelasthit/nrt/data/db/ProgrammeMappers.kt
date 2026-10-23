@@ -4,6 +4,7 @@ import app.thelasthit.nrt.data.repo.Demon
 import app.thelasthit.nrt.data.repo.ProgrammeRecord
 import app.thelasthit.nrt.domain.dose.Dose
 import app.thelasthit.nrt.domain.programme.BaselineSource
+import app.thelasthit.nrt.domain.programme.HitBalance
 import app.thelasthit.nrt.domain.programme.Ladder
 import app.thelasthit.nrt.domain.programme.Mix
 import app.thelasthit.nrt.domain.programme.MixItem
@@ -12,10 +13,12 @@ import app.thelasthit.nrt.domain.programme.ProgrammeLength
 import app.thelasthit.nrt.domain.programme.ProgrammeWeek
 import app.thelasthit.nrt.domain.programme.UsualDay
 import app.thelasthit.nrt.domain.programme.WeekChoice
+import app.thelasthit.nrt.domain.programme.WeekGoals
 import app.thelasthit.nrt.domain.programme.WeekTarget
 import app.thelasthit.nrt.domain.product.UserProduct
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 
 /**
  * The product a mix's row stands for: the user's product as it is now, with the strength the mix
@@ -68,6 +71,9 @@ internal fun Programme.toWeekEntities(
             dailyGuideMicrograms = week.target.dailyGuide.micrograms,
             weeklyAllowanceMicrograms = week.target.weeklyAllowance.micrograms,
             isNrtFree = week.isNrtFree,
+            maxUnitsPerDay = week.goals.maxUnitsPerDay,
+            minGapMinutes = week.goals.minGapMinutes,
+            firstDoseNotBeforeMinuteOfDay = week.goals.firstDoseNotBefore?.let { it.hour * 60 + it.minute },
             result = week.result,
             resultAt = week.resultAt?.toEpochMilli(),
             choice = choice?.choice,
@@ -79,6 +85,13 @@ internal fun Programme.toWeekEntities(
     }
     return weekRows to unitRows
 }
+
+/** The ledger's sums as they are, held within what a balance can be if the ledger was ever out of step. */
+internal fun DemonWithLedger.balance() = HitBalance(
+    maxHp = demon.maxHp.coerceAtLeast(0),
+    earned = earned.coerceAtLeast(0),
+    spent = spent.coerceIn(0, earned.coerceAtLeast(0)),
+)
 
 internal fun DemonEntity.toDomain() = Demon(
     id = id,
@@ -122,6 +135,11 @@ internal fun ProgrammeWithParts.toRecord(products: Map<String, UserProduct>): Pr
                 kind = week.kind,
                 result = week.result,
                 resultAt = week.resultAt?.let(Instant::ofEpochMilli),
+                goals = WeekGoals(
+                    maxUnitsPerDay = week.maxUnitsPerDay,
+                    minGapMinutes = week.minGapMinutes,
+                    firstDoseNotBefore = week.firstDoseNotBeforeMinuteOfDay?.let { LocalTime.ofSecondOfDay(it * 60L) },
+                ),
             )
         }
         Programme(Ladder(usual, steps), length, programmeWeeks)

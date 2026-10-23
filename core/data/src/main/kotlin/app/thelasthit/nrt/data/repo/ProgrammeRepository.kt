@@ -6,6 +6,7 @@ import app.thelasthit.nrt.data.db.DemonEntity
 import app.thelasthit.nrt.data.db.EntryEntity
 import app.thelasthit.nrt.data.db.HitLedgerEntity
 import app.thelasthit.nrt.data.db.ProgrammeEntity
+import app.thelasthit.nrt.data.db.balance
 import app.thelasthit.nrt.data.db.toDomain
 import app.thelasthit.nrt.data.db.toEntities
 import app.thelasthit.nrt.data.db.toEntity
@@ -15,6 +16,7 @@ import app.thelasthit.nrt.data.settings.SettingsStore
 import app.thelasthit.nrt.domain.catalogue.Catalogue
 import app.thelasthit.nrt.domain.catalogue.Markets
 import app.thelasthit.nrt.domain.creature.Creature
+import app.thelasthit.nrt.domain.product.UserProduct
 import app.thelasthit.nrt.domain.programme.BaselineDays
 import app.thelasthit.nrt.domain.programme.BaselineSource
 import app.thelasthit.nrt.domain.programme.EarnedHit
@@ -187,12 +189,20 @@ class ProgrammeRepository(
      * Keeps [usual] as the day the plan steps down from: the measured one confirmed or edited,
      * or one typed in, product by product. A typed day needs no baseline, so it starts a
      * programme when there's none. A measured one keeps the days it came from.
+     *
+     * Its products that aren't in the user's list yet are added, off the quick log, so the day
+     * reads back as the products themselves: a catalogue one keeps its pack limits and the line
+     * the plan finds lower strengths in.
      */
     suspend fun keepUsualDay(usual: UsualDay): ProgrammeRecord = mutex.withLock {
         val today = clock().today
         database.withTransaction {
             val row = dao.currentRow() ?: newProgramme(baselineStartedOn = null).also { dao.insert(it) }
             check(row.status == ProgrammeStatus.BASELINE) { "The usual day can't change once the plan has started" }
+            val now = clock.millis()
+            for (product in usual.mix.products) {
+                if (productDao.get(product.id) == null) addProduct(product, hidden = false, now)
+            }
             val measured = if (usual.source == BaselineSource.MEASURED) {
                 measure(row, today, entries.liveOn(today.minusDays(BaselineDays.DAYS.toLong()).toEpochDay(), today.toEpochDay()))
                     .takeIf { it.isReady }
@@ -232,8 +242,8 @@ class ProgrammeRepository(
     /**
      * Starts [plan], from [buildPlan] and perhaps edited week by week. The products its steps
      * switch to are added to the user's products, or shown again if hidden, without joining the
-     * quick log. The demon gets a row of its own with 10 HP for each week: [look], or else the
-     * last demon back for a rematch, or the one picked in onboarding.
+     * quick log. The demon gets a row of its own with 10 HP for each week: [look], or else
+     * [nextDemon].
      */
     suspend fun startPlan(plan: Programme, look: DemonLook? = null): ProgrammeRecord = mutex.withLock {
         val now = clock()
@@ -274,9 +284,12 @@ class ProgrammeRepository(
         checkNotNull(loadCurrent())
     }
 
-    /** The demon a new plan starts with: the last one back for a rematch, or the one picked in onboarding. */
+    /**
+     * The demon a new plan starts with, from settings: the one picked in onboarding, or the last
+     * programme's back for a rematch, since closing a programme puts its demon there. A restyle
+     * before the plan starts ([GameRepository.restyleDemon]) changes it.
+     */
     suspend fun nextDemon(): DemonLook {
-        game.latestDemon()?.let { return DemonLook(it.name, it.creature, it.variant) }
         val current = settings.current()
         return DemonLook(current.demonName, current.demonCreature, current.demonVariant)
     }
@@ -372,12 +385,24 @@ class ProgrammeRepository(
 
     // Ending.
 
-    /** Closes the current programme once it's complete, after the victory. False if it isn't. */
+    // Ending. A programme that closes leaves its demon in settings, as the one the next plan
+    // starts with (PLAN §6.5: the same one back for round two, unless it's restyled first).
+
+    /**
+     * Closes the current programme once it's complete and its demon is defeated: every hit
+     * spent, so it's at 0 HP (PLAN §6.5). The defeat's time is set here if it isn't yet. False
+     * if it isn't complete, or the demon still has HP.
+     */
     suspend fun end(): Boolean {
         mutex.withLock {
             settleLocked()
-            val row = dao.currentRow()?.takeIf { it.status == ProgrammeStatus.COMPLETE } ?: return false
-            dao.update(row.copy(endedAt = clock.millis()))
+            val closed = database.withTransaction {
+                val row = dao.currentRow()?.takeIf { it.status == ProgrammeStatus.COMPLETE } ?: return@withTransaction null
+                if (!defeatLocked(row)) return@withTransaction null
+                dao.update(row.copy(endedAt = clock.millis()))
+                Closed(game.demonOf(row.id))
+            } ?: return false
+            keepLook(closed.demon)
             return true
         }
     }
@@ -391,31 +416,54 @@ class ProgrammeRepository(
             settleLocked()
             val row = dao.currentRow()?.takeIf { it.status != ProgrammeStatus.COMPLETE } ?: return false
             dao.update(row.copy(status = ProgrammeStatus.ABANDONED, endedAt = clock.millis()))
+            keepLook(game.demonOf(row.id))
             return true
         }
     }
 
     /**
-     * Starts a new programme from current use (PLAN §6.5). The current one closes, complete or
-     * abandoned, and a baseline starts today, which the last 7 full days can fill at once.
+     * Starts a new programme from current use (PLAN §6.5). The current one closes, abandoned, or
+     * complete once its demon is defeated as [end] says, and a baseline starts today, which the
+     * last 7 full days can fill at once. Refused while a complete programme's demon has HP left.
      */
     suspend fun startNew(): ProgrammeRecord = mutex.withLock {
         settleLocked()
         val today = clock().today
-        database.withTransaction {
-            dao.currentRow()?.let { row ->
+        val closed = database.withTransaction {
+            val closed = dao.currentRow()?.let { row ->
                 val ended = clock.millis()
-                dao.update(
-                    if (row.status == ProgrammeStatus.COMPLETE) {
-                        row.copy(endedAt = ended)
-                    } else {
-                        row.copy(status = ProgrammeStatus.ABANDONED, endedAt = ended)
-                    },
-                )
+                if (row.status == ProgrammeStatus.COMPLETE) {
+                    check(defeatLocked(row)) { "The demon still has HP: spend the hits before starting again" }
+                    dao.update(row.copy(endedAt = ended))
+                } else {
+                    dao.update(row.copy(status = ProgrammeStatus.ABANDONED, endedAt = ended))
+                }
+                Closed(game.demonOf(row.id))
             }
             dao.insert(newProgramme(baselineStartedOn = today))
+            closed
         }
+        keepLook(closed?.demon)
         checkNotNull(loadCurrent())
+    }
+
+    /** A programme just closed, with its demon if it had one. */
+    private class Closed(val demon: DemonEntity?)
+
+    /**
+     * Lands the defeat of [row]'s demon if it's at 0 HP, keeping the first time it fell. True
+     * when it's defeated, or there's no demon to fight.
+     */
+    private suspend fun defeatLocked(row: ProgrammeEntity): Boolean {
+        val demon = game.currentDemon()?.takeIf { it.demon.programmeId == row.id } ?: return game.demonOf(row.id) == null
+        if (demon.balance().hp > 0) return false
+        game.setDefeated(demon.demon.id, clock.millis())
+        return true
+    }
+
+    /** Puts a closed programme's demon in settings, as the one the next plan starts with. */
+    private suspend fun keepLook(demon: DemonEntity?) {
+        if (demon != null) settings.setDemon(demon.name, demon.creature, demon.variant)
     }
 
     // Helpers.
@@ -436,23 +484,33 @@ class ProgrammeRepository(
     /**
      * Makes sure every product [plan] uses is in the user's list. Lower strengths from the
      * catalogue are added, hidden ones the steps use are shown again, and a usual-day product
-     * that's gone comes back hidden, so the plan always reads.
+     * that's gone comes back hidden, so the plan always reads. Each is looked up as it comes, so
+     * a product the steps have just added is never added again.
      */
     private suspend fun addProductsFor(plan: Programme) {
-        val stored = productDao.allIncludingHidden().associateBy { it.id }
         val now = clock.millis()
         for (product in plan.ladder.steps.flatMap { it.products }.distinctBy { it.id }) {
-            val existing = stored[product.id]
-            val catalogueId = product.catalogueId
+            val existing = productDao.get(product.id)
             when {
-                existing == null && catalogueId != null && catalogue().find(catalogueId) != null ->
-                    products.addFromCatalogue(catalogueId, addToQuickLog = false)
-                existing == null -> productDao.upsert(product.copy(quickLogPosition = null, isHidden = false).toEntity(now))
+                existing == null -> addProduct(product, hidden = false, now)
                 existing.isHidden -> productDao.setHidden(product.id, false)
             }
         }
         for (product in plan.usualDay.mix.products) {
-            if (product.id !in stored) productDao.upsert(product.copy(quickLogPosition = null, isHidden = true).toEntity(now))
+            if (productDao.get(product.id) == null) addProduct(product, hidden = true, now)
+        }
+    }
+
+    /**
+     * Adds [product] to the user's list, off the quick log: from the catalogue when it's one of
+     * the catalogue's, with its pack limits, or else as it is.
+     */
+    private suspend fun addProduct(product: UserProduct, hidden: Boolean, now: Long) {
+        if (catalogue().find(product.id) != null) {
+            products.addFromCatalogue(product.id, addToQuickLog = false)
+            if (hidden) productDao.setHidden(product.id, true)
+        } else {
+            productDao.upsert(product.copy(quickLogPosition = null, isHidden = hidden).toEntity(now))
         }
     }
 

@@ -18,6 +18,7 @@ import app.thelasthit.nrt.data.db.ProgrammeWeekUnitEntity
 import app.thelasthit.nrt.data.db.ProgrammeWithParts
 import app.thelasthit.nrt.data.db.TagEntity
 import app.thelasthit.nrt.data.db.UnitsColumns
+import app.thelasthit.nrt.data.db.balance
 import app.thelasthit.nrt.data.db.toDomain
 import app.thelasthit.nrt.data.db.toEntities
 import app.thelasthit.nrt.data.db.toRecord
@@ -41,15 +42,40 @@ enum class ImportMode {
     REPLACE,
 }
 
-/** What a restore added. [skipped] counts entries that were already there or couldn't be read. */
-data class ImportSummary(val products: Int, val tags: Int, val entries: Int, val skipped: Int, val programmes: Int = 0)
+/**
+ * What a restore added. [skipped] counts entries that were already there or couldn't be read.
+ * [programmesSkipped] counts programmes still running in the backup that a merge left out,
+ * because the phone's own stays current (see [BackupRepository.import]): only replacing
+ * everything brings them in.
+ */
+data class ImportSummary(
+    val products: Int,
+    val tags: Int,
+    val entries: Int,
+    val skipped: Int,
+    val programmes: Int = 0,
+    val programmesSkipped: Int = 0,
+)
 
-/** What's on the phone now, for the warning before a backup replaces it. */
-data class StoredCounts(val entries: Int, val products: Int)
+/** What's on the phone now, for the warning before a backup replaces it: everything a replace deletes. */
+data class StoredCounts(
+    val entries: Int,
+    val products: Int,
+    /** Where the current programme is, or null when there's none. */
+    val currentProgramme: ProgrammeStatus?,
+    /** The current programme's demon, with its HP and banked hits, once its plan has started. */
+    val demon: DemonState?,
+    /** Every programme, the current one and those closed. */
+    val programmes: Int,
+    val achievements: Int,
+    val gear: Int,
+    val breathingSessions: Int,
+)
 
 /**
  * Backups in JSON (format version 2, which still reads version 1 files) and the entries as CSV.
- * A restore settles the programme results that are due first, since it writes entries.
+ * An export and a restore both settle the programme results that are due first: the export so
+ * the file has them, and the restore since it writes entries.
  */
 class BackupRepository(
     private val database: AppDatabase,
@@ -58,41 +84,66 @@ class BackupRepository(
     private val results: ResultSettler,
     private val clock: Clock,
 ) {
+    /**
+     * The whole backup, read in one transaction so the file is one moment's data: a week's
+     * result and the hit it earned, and the entries it counted, always come together.
+     */
     suspend fun export(): Backup {
+        results.settleDue()
         val current = settings.current()
         val game = database.game()
-        return Backup(
-            exportedAt = clock.instant().toString(),
-            settings = Backup.Settings(
-                dayStart = current.dayStart.toString(),
-                country = current.country,
-                stoppedSmokingOn = current.stoppedSmokingOn?.toString(),
-                demonName = current.demonName,
-                demonCreature = current.demonName?.let { current.demonCreature.key },
-                demonVariant = current.demonVariant,
-                soundOn = current.soundOn,
-                equippedGear = current.equippedGear,
-            ),
-            products = database.products().allIncludingHidden().map { it.toBackup() },
-            tags = database.tags().all().map { it.toBackup() },
-            entries = database.entries().allLiveWithTags().map { it.toBackup() },
-            programmes = database.programmes().all().map { it.toBackup() },
-            demons = game.allDemons().map { it.toBackup() },
-            hitLedger = game.allLedger().map { it.toBackup() },
-            achievements = game.achievements().map { Backup.Unlock(it.key, Instant.ofEpochMilli(it.unlockedAt).toString()) },
-            gear = game.gear().map { Backup.Unlock(it.key, Instant.ofEpochMilli(it.unlockedAt).toString()) },
-            breathingSessions = database.breathing().all().map { it.toBackup() },
-        )
+        return database.withTransaction {
+            Backup(
+                exportedAt = clock.instant().toString(),
+                settings = Backup.Settings(
+                    dayStart = current.dayStart.toString(),
+                    country = current.country,
+                    stoppedSmokingOn = current.stoppedSmokingOn?.toString(),
+                    demonName = current.demonName,
+                    demonCreature = if (current.demonName != null || current.demonVariant != null) current.demonCreature.key else null,
+                    demonVariant = current.demonVariant,
+                    soundOn = current.soundOn,
+                    equippedGear = current.equippedGear,
+                ),
+                products = database.products().allIncludingHidden().map { it.toBackup() },
+                tags = database.tags().all().map { it.toBackup() },
+                entries = database.entries().allLiveWithTags().map { it.toBackup() },
+                programmes = database.programmes().all().map { it.toBackup() },
+                demons = game.allDemons().map { it.toBackup() },
+                hitLedger = game.allLedger().map { it.toBackup() },
+                achievements = game.achievements().map { Backup.Unlock(it.key, Instant.ofEpochMilli(it.unlockedAt).toString()) },
+                gear = game.gear().map { Backup.Unlock(it.key, Instant.ofEpochMilli(it.unlockedAt).toString()) },
+                breathingSessions = database.breathing().all().map { it.toBackup() },
+            )
+        }
     }
 
-    suspend fun counts(): StoredCounts = StoredCounts(database.entries().countLive(), database.products().count())
+    suspend fun counts(): StoredCounts {
+        results.settleDue()
+        return database.withTransaction {
+            val game = database.game()
+            StoredCounts(
+                entries = database.entries().countLive(),
+                products = database.products().count(),
+                currentProgramme = database.programmes().currentRow()?.status,
+                demon = game.currentDemon()?.let { DemonState(it.demon.toDomain(), it.balance()) },
+                programmes = database.programmes().count(),
+                achievements = game.achievements().size,
+                gear = game.gear().size,
+                breathingSessions = database.breathing().count(),
+            )
+        }
+    }
 
     suspend fun exportCsv(): String = EntriesCsv.write(database.entries().allLiveWithTags().map { it.toDomain() })
 
     /**
-     * Restores [backup]. Merging adds what isn't on the phone and changes nothing that is. A
-     * programme still running in the backup is only added when none is running on the phone,
-     * so there's never more than one. Replacing wipes everything first, settings included.
+     * Restores [backup]. Merging adds what isn't on the phone and changes nothing that is, with
+     * one exception for the programme, since only one can run at a time. A plan still running in
+     * the backup takes over from a baseline on the phone, which closes as abandoned: a baseline
+     * holds nothing the entries don't, and they merge too. When the phone has a plan of its own
+     * running, or both are at their baselines, the phone's stays, and the backup's is counted in
+     * [ImportSummary.programmesSkipped]. Replacing wipes everything first, settings included.
      */
     suspend fun import(backup: Backup, mode: ImportMode): ImportSummary {
         results.settleDue()
@@ -137,14 +188,27 @@ class BackupRepository(
             }
 
             val programmeIds = database.programmes().allIds().toSet()
-            var running = database.programmes().currentRow() != null
+            var phone = database.programmes().currentRow()
+            var running = phone != null
             val added = mutableSetOf<String>()
+            var programmesSkipped = 0
             // The latest running programme in the backup is the one that can be added.
             for (parts in programmes.sortedByDescending { it.programme.createdAt }) {
                 val id = parts.programme.id
                 if (id in programmeIds) continue
                 if (parts.programme.endedAt == null) {
-                    if (running) continue
+                    val baseline = phone?.takeIf { it.status == ProgrammeStatus.BASELINE }
+                    when {
+                        !running -> Unit
+                        baseline != null && parts.programme.status != ProgrammeStatus.BASELINE -> {
+                            database.programmes().update(baseline.copy(status = ProgrammeStatus.ABANDONED, endedAt = now))
+                            phone = null
+                        }
+                        else -> {
+                            programmesSkipped++
+                            continue
+                        }
+                    }
                     running = true
                 }
                 database.programmes().insertWhole(parts)
@@ -155,7 +219,7 @@ class BackupRepository(
             game.insertAchievements(achievements)
             game.insertGear(gear)
             database.breathing().insertIgnoringExisting(sessions)
-            ImportSummary(productsAdded, tagsAdded, entriesAdded, skipped, programmes = added.size)
+            ImportSummary(productsAdded, tagsAdded, entriesAdded, skipped, programmes = added.size, programmesSkipped = programmesSkipped)
         }
 
         if (mode == ImportMode.REPLACE) {
@@ -164,10 +228,8 @@ class BackupRepository(
             restored.country?.let { settings.setCountry(it) }
             settings.setStoppedSmokingOn(restored.stoppedSmokingOn?.let { runCatching { LocalDate.parse(it) }.getOrNull() })
             // Version 1 files have none of these, so the phone keeps its own.
-            val demonName = restored.demonName
-            val demonVariant = restored.demonVariant
-            if (demonName != null && demonVariant != null) {
-                settings.setDemon(demonName, Creature.fromKey(restored.demonCreature), demonVariant)
+            if (restored.demonName != null || restored.demonCreature != null || restored.demonVariant != null) {
+                settings.setDemon(restored.demonName, Creature.fromKey(restored.demonCreature), restored.demonVariant)
             }
             restored.soundOn?.let { settings.setSoundOn(it) }
             // Only gear the backup unlocked can stay equipped, since the phone's own is gone.
@@ -310,6 +372,9 @@ private fun ProgrammeWithParts.toBackup(): Backup.Programme {
                 resultAt = week.resultAt?.instantText(),
                 choice = week.choice,
                 choiceAt = week.choiceAt?.instantText(),
+                maxUnitsPerDay = week.maxUnitsPerDay,
+                minGapMinutes = week.minGapMinutes,
+                firstDoseNotBefore = week.firstDoseNotBeforeMinuteOfDay?.let { LocalTime.ofSecondOfDay(it * 60L).toString() },
             )
         },
     )
@@ -347,6 +412,8 @@ private fun Backup.Programme.toParts(): ProgrammeWithParts? = runCatching {
                 programmeId = id, number = week.number, startDate = start, endDate = start + 6, kind = week.kind,
                 ladderStep = week.step, dailyGuideMicrograms = week.dailyGuideMicrograms,
                 weeklyAllowanceMicrograms = week.weeklyAllowanceMicrograms, isNrtFree = week.step == null,
+                maxUnitsPerDay = week.maxUnitsPerDay, minGapMinutes = week.minGapMinutes,
+                firstDoseNotBeforeMinuteOfDay = week.firstDoseNotBefore?.let { LocalTime.parse(it) }?.let { it.hour * 60 + it.minute },
                 result = week.result, resultAt = week.resultAt?.let(::epochMillis),
                 choice = week.choice, choiceAt = week.choiceAt?.let(::epochMillis),
             )

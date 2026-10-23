@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "fc9203b2edc7d3f3e978027d2b2ff51f",
+    "identityHash": "ac2666312c804fc452693198f7248897",
     "entities": [
       {
         "tableName": "products",
@@ -577,7 +577,7 @@
       },
       {
         "tableName": "programme_weeks",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`programmeId` TEXT NOT NULL, `number` INTEGER NOT NULL, `startDate` INTEGER NOT NULL, `endDate` INTEGER NOT NULL, `kind` TEXT NOT NULL, `ladderStep` INTEGER, `dailyGuideMicrograms` INTEGER NOT NULL, `weeklyAllowanceMicrograms` INTEGER NOT NULL, `isNrtFree` INTEGER NOT NULL, `result` TEXT NOT NULL, `resultAt` INTEGER, `choice` TEXT, `choiceAt` INTEGER, PRIMARY KEY(`programmeId`, `number`), FOREIGN KEY(`programmeId`) REFERENCES `programmes`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`programmeId` TEXT NOT NULL, `number` INTEGER NOT NULL, `startDate` INTEGER NOT NULL, `endDate` INTEGER NOT NULL, `kind` TEXT NOT NULL, `ladderStep` INTEGER, `dailyGuideMicrograms` INTEGER NOT NULL, `weeklyAllowanceMicrograms` INTEGER NOT NULL, `isNrtFree` INTEGER NOT NULL, `maxUnitsPerDay` INTEGER, `minGapMinutes` INTEGER, `firstDoseNotBeforeMinuteOfDay` INTEGER, `result` TEXT NOT NULL, `resultAt` INTEGER, `choice` TEXT, `choiceAt` INTEGER, PRIMARY KEY(`programmeId`, `number`), FOREIGN KEY(`programmeId`) REFERENCES `programmes`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "programmeId",
@@ -631,6 +631,21 @@
             "columnName": "isNrtFree",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "maxUnitsPerDay",
+            "columnName": "maxUnitsPerDay",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "minGapMinutes",
+            "columnName": "minGapMinutes",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "firstDoseNotBeforeMinuteOfDay",
+            "columnName": "firstDoseNotBeforeMinuteOfDay",
+            "affinity": "INTEGER"
           },
           {
             "fieldPath": "result",
@@ -1009,7 +1024,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'fc9203b2edc7d3f3e978027d2b2ff51f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ac2666312c804fc452693198f7248897')"
     ]
   }
 }

@@ -49,6 +49,9 @@ abstract class ProgrammeDao {
     @Query("SELECT id FROM programmes")
     abstract suspend fun allIds(): List<String>
 
+    @Query("SELECT COUNT(*) FROM programmes")
+    abstract suspend fun count(): Int
+
     @Query("DELETE FROM programmes")
     abstract suspend fun deleteAll()
 
@@ -120,10 +123,6 @@ interface GameDao {
 
     @Query("SELECT * FROM demons WHERE programmeId = :programmeId")
     suspend fun demonOf(programmeId: String): DemonEntity?
-
-    /** The most recent demon, for a rematch with the same one. */
-    @Query("SELECT * FROM demons ORDER BY createdAt DESC LIMIT 1")
-    suspend fun latestDemon(): DemonEntity?
 
     @Query("UPDATE demons SET maxHp = :maxHp WHERE programmeId = :programmeId")
     suspend fun setMaxHp(programmeId: String, maxHp: Int)
@@ -233,6 +232,9 @@ interface BreathingDao {
 
     @Query("SELECT * FROM breathing_sessions ORDER BY startedAt")
     suspend fun all(): List<BreathingSessionEntity>
+
+    @Query("SELECT COUNT(*) FROM breathing_sessions")
+    suspend fun count(): Int
 
     @Query("DELETE FROM breathing_sessions")
     suspend fun deleteAll()

@@ -11,6 +11,7 @@ import app.thelasthit.nrt.domain.programme.MissedWeekChoice
 import app.thelasthit.nrt.domain.programme.ProgrammeStatus
 import app.thelasthit.nrt.domain.programme.WeekKind
 import app.thelasthit.nrt.domain.programme.WeekResult
+import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -80,6 +81,7 @@ class BackupTest {
                             weeklyAllowanceMicrograms = 154_000, units = listOf(gum.copy(unitsPerDay = 11)),
                             result = WeekResult.MISSED, resultAt = "2026-11-01T04:00:00Z",
                             choice = MissedWeekChoice.CARRY_ON, choiceAt = "2026-11-01T09:00:00Z",
+                            maxUnitsPerDay = 11, minGapMinutes = 90, firstDoseNotBefore = "07:30",
                         ),
                         Backup.Week(number = 12, startDate = "2027-01-09", kind = WeekKind.PLANNED, dailyGuideMicrograms = 0, weeklyAllowanceMicrograms = 0),
                     ),
@@ -93,6 +95,18 @@ class BackupTest {
         )
         assertEquals(full, Backup.decode(full.encode()))
         assertTrue("\"weeklyAllowanceUg\": 154000" in full.encode())
+        assertTrue("\"firstDoseNotBefore\": \"07:30\"" in full.encode())
+    }
+
+    @Test
+    fun `a week written before the extra goals has them all off`() {
+        val text = """
+            { "number": 1, "startDate": "2026-10-24", "step": 1, "dailyGuideUg": 22000, "weeklyAllowanceUg": 154000 }
+        """.trimIndent()
+        val week = Json.decodeFromString(Backup.Week.serializer(), text)
+        assertEquals(null, week.maxUnitsPerDay)
+        assertEquals(null, week.minGapMinutes)
+        assertEquals(null, week.firstDoseNotBefore)
     }
 
     @Test

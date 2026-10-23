@@ -59,7 +59,7 @@ internal class TestData(start: Instant = london("2026-10-23T15:05")) {
     val tags = TagRepository(database.tags())
     val programmes = ProgrammeRepository(database, products, settings, catalogue = { catalogue }, clock = clock)
     val entries = EntryRepository(database.entries(), products, settings, clock, results = programmes)
-    val game = GameRepository(database, settings, clock)
+    val game = GameRepository(database, settings, results = programmes, clock = clock)
     val breathing = BreathingRepository(database.breathing())
     val backups = BackupRepository(database, settings, entries, results = programmes, clock = clock)
 

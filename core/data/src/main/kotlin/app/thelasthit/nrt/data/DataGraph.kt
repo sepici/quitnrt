@@ -37,7 +37,9 @@ class DataGraph(
 
     /** Every write settles the programme's due results first. */
     val entries = EntryRepository(database.entries(), products, settings, clock, results = programmes, zone = { ZoneId.systemDefault() })
-    val game = GameRepository(database, settings, clock)
+
+    /** Reading the demon and spending hits settle the due results first. */
+    val game = GameRepository(database, settings, results = programmes, clock = clock)
     val breathing = BreathingRepository(database.breathing())
     val backups = BackupRepository(database, settings, entries, results = programmes, clock = clock)
 

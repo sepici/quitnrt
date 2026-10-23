@@ -154,6 +154,11 @@ data class Backup(
         val resultAt: String? = null,
         val choice: MissedWeekChoice? = null,
         val choiceAt: String? = null,
+        /** The extra goals, each absent while it's off. */
+        val maxUnitsPerDay: Int? = null,
+        val minGapMinutes: Int? = null,
+        /** A time on the wall clock, such as "07:30". */
+        val firstDoseNotBefore: String? = null,
     )
 
     @Serializable

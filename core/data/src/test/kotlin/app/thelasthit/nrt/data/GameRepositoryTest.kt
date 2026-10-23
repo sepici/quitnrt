@@ -57,6 +57,19 @@ class GameRepositoryTest {
     }
 
     @Test
+    fun hitsThatAreDueCountWithoutThePlanBeingLookedAtFirst() = runTest {
+        data.startGumPlan()
+        // Week 1's result came in at 04:00, and nothing has read the programme since.
+        data.setTime("2026-11-01T09:00")
+        assertEquals(1, data.game.demon.first()?.balance?.banked)
+        data.setTime("2026-11-08T09:00")
+        assertEquals(2, data.game.demon()?.balance?.banked)
+        data.setTime("2026-11-15T09:00")
+        assertEquals(SpendResult.Spent(HitBalance(120, 3, 1)), data.game.spendHit())
+        assertEquals(3, data.database.game().allLedger().count { it.hits > 0 })
+    }
+
+    @Test
     fun theFiveTimesAttackSpendsFiveBankedHitsAtOnce() = runTest {
         data.startGumPlan()
         // Weeks 1 to 4 are met: four hits, one short.
@@ -97,8 +110,12 @@ class GameRepositoryTest {
 
     @Test
     fun restylingChangesSettingsBeforeThePlanAndTheDemonAfter() = runTest {
-        data.game.restyleDemon("Gary", Creature.DRAGON, "ember")
+        data.game.restyleDemon(" Gary ", Creature.DRAGON, "ember")
         assertEquals("Gary", data.settings.current().demonName)
+        // A blank name is the app's default, before the plan as after it.
+        data.game.restyleDemon("  ", Creature.DRAGON, "ember")
+        assertNull(data.settings.current().demonName)
+        data.game.restyleDemon("Gary", Creature.DRAGON, "ember")
 
         data.startGumPlan()
         data.game.restyleDemon(" Mildred ", Creature.DRAGON, "frost")

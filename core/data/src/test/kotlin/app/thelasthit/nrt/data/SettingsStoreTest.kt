@@ -55,6 +55,15 @@ class SettingsStoreTest {
     }
 
     @Test
+    fun aBlankDemonNameIsTheDefault() = runTest {
+        data.settings.setDemon("Gary", Creature.DRAGON, "ember")
+        data.settings.setDemon("   ", Creature.DRAGON, null)
+        val settings = data.settings.current()
+        assertNull(settings.demonName)
+        assertNull(settings.demonVariant)
+    }
+
+    @Test
     fun soundIsOnUntilSwitchedOffAndGearCanBeEquipped() = runTest {
         assertTrue(data.settings.current().soundOn)
         assertNull(data.settings.current().equippedGear)

@@ -5,6 +5,7 @@ import app.thelasthit.nrt.domain.dose.sum
 import app.thelasthit.nrt.domain.log.Entry
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 
 /**
  * Where a programme is. A [Programme] with weeks is [ACTIVE], [OVERTIME] or [COMPLETE]. Before
@@ -34,8 +35,37 @@ enum class WeekResult {
 }
 
 /**
+ * A week's extra goals (PLAN §6.3), each off while it's null. They show in stats and advice, and
+ * never change whether a week is met.
+ */
+data class WeekGoals(
+    /** The most units a day. */
+    val maxUnitsPerDay: Int? = null,
+    /** The shortest gap between doses, in minutes. */
+    val minGapMinutes: Int? = null,
+    /** The time on the wall clock the day's first dose waits for. */
+    val firstDoseNotBefore: LocalTime? = null,
+) {
+    init {
+        require(maxUnitsPerDay == null || maxUnitsPerDay >= 1) { "At least 1 unit a day: $maxUnitsPerDay" }
+        require(minGapMinutes == null || minGapMinutes in 1..MINUTES_A_DAY) { "A gap is 1 to $MINUTES_A_DAY minutes: $minGapMinutes" }
+        require(firstDoseNotBefore == null || firstDoseNotBefore.second == 0 && firstDoseNotBefore.nano == 0) {
+            "The first dose waits for a whole minute: $firstDoseNotBefore"
+        }
+    }
+
+    companion object {
+        /** Every goal off, as they start. */
+        val NONE = WeekGoals()
+
+        private const val MINUTES_A_DAY = 24 * 60
+    }
+}
+
+/**
  * One week of a programme: seven logical days from [startDate]. [number] is its place in the
- * run, counting repeats and overtime. A result, once in, has the time it came in.
+ * run, counting repeats and overtime. A result, once in, has the time it came in. [goals] are its
+ * extra goals, which a repeat takes from the week it repeats.
  */
 data class ProgrammeWeek(
     val number: Int,
@@ -44,6 +74,7 @@ data class ProgrammeWeek(
     val kind: WeekKind = WeekKind.PLANNED,
     val result: WeekResult = WeekResult.PENDING,
     val resultAt: Instant? = null,
+    val goals: WeekGoals = WeekGoals.NONE,
 ) {
     init {
         require(number >= 1) { "Weeks count from 1: $number" }
@@ -221,9 +252,9 @@ data class Programme(
     fun openChoice(clock: ProgrammeClock): ProgrammeWeek? = weeks.lastOrNull { canRepeat(it.number, clock) }
 
     /**
-     * Repeats missed week [number]: the week after it, already running, takes its target and
-     * mix, and every later week moves on a week. That adds a week and 10 HP, and meeting the
-     * repeat pays back the missed week too.
+     * Repeats missed week [number]: the week after it, already running, takes its target, mix
+     * and goals, and every later week moves on a week with its own. That adds a week and 10 HP,
+     * and meeting the repeat pays back the missed week too.
      */
     fun repeat(number: Int, clock: ProgrammeClock): Programme {
         require(canRepeat(number, clock)) { "Week $number can't be repeated now" }
@@ -233,6 +264,7 @@ data class Programme(
             startDate = missed.endDate.plusDays(1),
             target = missed.target,
             kind = WeekKind.REPEAT,
+            goals = missed.goals,
         )
         val later = weeks.drop(number).map { it.copy(number = it.number + 1, startDate = it.startDate.plusWeeks(1)) }
         return copy(weeks = weeks.take(number) + again + later)

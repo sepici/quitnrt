@@ -4,11 +4,15 @@ import app.thelasthit.nrt.data.repo.BackupRepository
 import app.thelasthit.nrt.data.repo.ImportMode
 import app.thelasthit.nrt.data.repo.LogRequest
 import app.thelasthit.nrt.data.repo.SpendResult
+import app.thelasthit.nrt.data.repo.StoredCounts
 import app.thelasthit.nrt.domain.advice.BreathingPattern
 import app.thelasthit.nrt.domain.backup.Backup
 import app.thelasthit.nrt.domain.creature.Creature
+import app.thelasthit.nrt.domain.programme.HitBalance
 import app.thelasthit.nrt.domain.programme.MissedWeekChoice
 import app.thelasthit.nrt.domain.programme.ProgrammeStatus
+import app.thelasthit.nrt.domain.programme.UsualDay
+import app.thelasthit.nrt.domain.programme.WeekGoals
 import app.thelasthit.nrt.domain.programme.WeekResult
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -179,11 +183,100 @@ class BackupRepositoryTest {
 
         val summary = target.backups.import(source.backups.export(), ImportMode.MERGE)
         assertEquals(1, summary.programmes)
+        // The backup's baseline is left out, and the summary says so.
+        assertEquals(1, summary.programmesSkipped)
         assertEquals(own.id, target.programmes.current()?.id)
         val stored = target.database.programmes().all().map { it.programme.status }
         assertEquals(listOf(ProgrammeStatus.ACTIVE, ProgrammeStatus.ABANDONED), stored.sorted())
         // The abandoned plan comes with its demon.
         assertEquals(2, target.database.game().allDemons().size)
+    }
+
+    @Test
+    fun aPlanFromTheBackupTakesOverFromABaselineOnThePhone() = runTest {
+        source.playTwoWeeks()
+        // A new phone: a baseline started, then the backup added.
+        target.setTime("2026-11-08T09:00")
+        val baseline = target.programmes.startBaseline()
+
+        val summary = target.backups.import(source.backups.export(), ImportMode.MERGE)
+        assertEquals(1, summary.programmes)
+        assertEquals(0, summary.programmesSkipped)
+        assertSameGame(source, target)
+        assertEquals(1, target.game.demon()?.balance?.banked)
+        // The phone's baseline closes as abandoned.
+        val closed = target.database.programmes().all().single { it.programme.id == baseline.id }.programme
+        assertEquals(ProgrammeStatus.ABANDONED, closed.status)
+        assertEquals(target.clock.now.toEpochMilli(), closed.endedAt)
+    }
+
+    @Test
+    fun aPlanOnThePhoneStaysAndTheBackupsIsCountedAsLeftOut() = runTest {
+        source.playTwoWeeks()
+        val own = target.startGumPlan()
+
+        val summary = target.backups.import(source.backups.export(), ImportMode.MERGE)
+        assertEquals(0, summary.programmes)
+        assertEquals(1, summary.programmesSkipped)
+        assertEquals(own.id, target.programmes.current()?.id)
+        assertEquals(1, target.database.programmes().all().size)
+        // The backup's demon and hits stay out with its plan.
+        assertEquals(own.demon?.id, target.database.game().allDemons().single().id)
+        assertTrue(target.database.game().allLedger().isEmpty())
+    }
+
+    @Test
+    fun aBaselineOnThePhoneStaysWhenTheBackupsIsABaselineToo() = runTest {
+        source.programmes.startBaseline()
+        val own = target.programmes.startBaseline()
+        val summary = target.backups.import(source.backups.export(), ImportMode.MERGE)
+        assertEquals(0, summary.programmes)
+        assertEquals(1, summary.programmesSkipped)
+        assertEquals(own.id, target.programmes.current()?.id)
+    }
+
+    @Test
+    fun theCountsBeforeAReplaceNameThePlanAndTheGame() = runTest {
+        val empty = target.backups.counts()
+        assertEquals(StoredCounts(0, 0, null, null, programmes = 0, achievements = 0, gear = 0, breathingSessions = 0), empty)
+
+        target.playTwoWeeks()
+        val counts = target.backups.counts()
+        assertEquals(7, counts.entries)
+        assertEquals(2, counts.products)
+        assertEquals(ProgrammeStatus.ACTIVE, counts.currentProgramme)
+        assertEquals("Gary", counts.demon?.demon?.name)
+        assertEquals(HitBalance(maxHp = 120, earned = 2, spent = 1), counts.demon?.balance)
+        assertEquals(1, counts.programmes)
+        assertEquals(1, counts.achievements)
+        assertEquals(1, counts.gear)
+        assertEquals(1, counts.breathingSessions)
+    }
+
+    @Test
+    fun anExportBringsInTheResultsThatAreDue() = runTest {
+        source.startGumPlan()
+        // Weeks 1 and 2 are over and their results are due, though nothing has read the plan.
+        source.setTime("2026-11-08T09:00")
+        val backup = source.backups.export()
+        assertEquals(listOf(WeekResult.MET, WeekResult.MET), backup.programmes.single().weeks.take(2).map { it.result })
+        assertEquals(listOf(1, 2), backup.hitLedger.map { it.week })
+    }
+
+    @Test
+    fun weekGoalsComeThroughABackup() = runTest {
+        val gum = source.products.addFromCatalogue(GUM_4)
+        source.programmes.keepUsualDay(UsualDay.typed(gum to 8))
+        val built = checkNotNull(source.programmes.buildPlan())
+        val goals = WeekGoals(maxUnitsPerDay = 6, minGapMinutes = 90, firstDoseNotBefore = LocalTime.of(7, 30))
+        source.programmes.startPlan(built.copy(weeks = built.weeks.map { if (it.number == 1) it.copy(goals = goals) else it }))
+
+        val file = source.backups.export().encode()
+        assertTrue("\"firstDoseNotBefore\": \"07:30\"" in file)
+        target.backups.import(Backup.decode(file), ImportMode.REPLACE)
+        val weeks = checkNotNull(target.programmes.current()?.plan).weeks
+        assertEquals(goals, weeks.first().goals)
+        assertTrue(weeks.drop(1).all { it.goals == WeekGoals.NONE })
     }
 
     @Test

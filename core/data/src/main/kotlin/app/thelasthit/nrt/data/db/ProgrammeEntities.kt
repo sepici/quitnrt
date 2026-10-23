@@ -87,7 +87,8 @@ data class LadderUnitEntity(
 
 /**
  * One week of a programme, by its number in the run. [ladderStep] is null for an NRT-free week.
- * [choice] is what was picked after the week was missed, if anything.
+ * The extra goals (PLAN §6.3) are null while they're off. [choice] is what was picked after the
+ * week was missed, if anything.
  */
 @Entity(
     tableName = "programme_weeks",
@@ -106,6 +107,10 @@ data class ProgrammeWeekEntity(
     val dailyGuideMicrograms: Long,
     val weeklyAllowanceMicrograms: Long,
     val isNrtFree: Boolean,
+    val maxUnitsPerDay: Int?,
+    val minGapMinutes: Int?,
+    /** The wall-clock time the day's first dose waits for, as minutes after midnight. */
+    val firstDoseNotBeforeMinuteOfDay: Int?,
     val result: WeekResult,
     val resultAt: Long?,
     val choice: MissedWeekChoice?,

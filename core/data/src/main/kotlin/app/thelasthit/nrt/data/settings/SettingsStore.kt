@@ -28,9 +28,9 @@ data class Settings(
     val stoppedSmokingOn: LocalDate? = null,
     val onboardingComplete: Boolean = false,
     /**
-     * The demon picked in onboarding. It lives here until a plan starts, when it gets its HP and
-     * a row in the database (ProgrammeRepository.startPlan). It stays here after that, as the
-     * choice a first plan starts from.
+     * The demon the next plan starts with: the one picked in onboarding, or the last programme's
+     * once it closes, with any restyle since. When a plan starts, the demon gets its HP and a row
+     * in the database (ProgrammeRepository.startPlan), and this stays as it was while it runs.
      */
     val demonName: String? = null,
     val demonCreature: Creature = Creature.DRAGON,
@@ -79,10 +79,12 @@ class SettingsStore(private val store: DataStore<Preferences>) {
 
     suspend fun completeOnboarding() = store.edit { it[ONBOARDING_COMPLETE] = true }
 
-    suspend fun setDemon(name: String, creature: Creature, variant: String) = store.edit { prefs ->
-        prefs[DEMON_NAME] = name.trim()
+    /** The demon the next plan starts with. A blank or null [name], or a null [variant], shows the app's default. */
+    suspend fun setDemon(name: String?, creature: Creature, variant: String?) = store.edit { prefs ->
+        val trimmed = name?.trim()?.ifBlank { null }
+        if (trimmed == null) prefs.remove(DEMON_NAME) else prefs[DEMON_NAME] = trimmed
         prefs[DEMON_CREATURE] = creature.key
-        prefs[DEMON_VARIANT] = variant
+        if (variant == null) prefs.remove(DEMON_VARIANT) else prefs[DEMON_VARIANT] = variant
     }
 
     suspend fun setSoundOn(on: Boolean) = store.edit { it[SOUND_ON] = on }
