@@ -92,10 +92,9 @@ The owner asked for agents on UI/UX, colour, tone and copy, so nothing ends up l
 ## Setting up locally
 
 1. Install a current Android Studio that supports AGP 9.4 (it bundles a suitable JDK).
-2. Get the branch:
+2. Clone `main` into a folder outside iCloud or OneDrive, since synced folders fight Gradle's build files:
    ```
    git clone https://github.com/sepici/quitnrt
-   git checkout claude/elegant-bell-67rsvf
    ```
 3. Run the full check:
    ```

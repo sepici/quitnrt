@@ -53,5 +53,5 @@ The build uses AGP 9.4 with built-in Kotlin: there's no `org.jetbrains.kotlin.an
 
 ## Branch
 
-Work continues on `claude/elegant-bell-67rsvf`. CI (`.github/workflows/ci.yml`) runs on every push
-and keeps the debug APK as a download.
+Work happens on `main`. CI (`.github/workflows/ci.yml`) runs on every push and keeps the debug APK
+as a download.
