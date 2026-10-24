@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -67,6 +68,7 @@ import app.thelasthit.nrt.ui.components.pressable
 import app.thelasthit.nrt.ui.graphViewModel
 import app.thelasthit.nrt.ui.theme.LastHit
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
@@ -86,6 +88,21 @@ class UnlockViewModel(private val graph: DataGraph) : ViewModel() {
 }
 
 /**
+ * Holds new unlocks back while a strike plays in the lair, so a badge's toast or a gear card never
+ * lands on top of a hit or the defeat. They come in once it's over.
+ */
+private val strikePlaying = MutableStateFlow(false)
+
+/** Holds unlocks back while [playing], and lets them go when it isn't or this leaves the screen. */
+@Composable
+fun HoldUnlocksWhile(playing: Boolean) {
+    DisposableEffect(playing) {
+        strikePlaying.value = playing
+        onDispose { strikePlaying.value = false }
+    }
+}
+
+/**
  * How long a badge's toast stays before the next one, in milliseconds, unless the phone's
  * accessibility settings ask for longer.
  */
@@ -100,6 +117,7 @@ const val BADGE_TOAST_MILLIS = 4_000L
 @Composable
 fun UnlockHost(onOpenShelf: () -> Unit, viewModel: UnlockViewModel = graphViewModel { UnlockViewModel(it) }) {
     val news by viewModel.news.collectAsStateWithLifecycle()
+    val held by strikePlaying.collectAsStateWithLifecycle()
     // As Material's snackbar does: the toast can be tapped, so it stays as long as the phone's
     // accessibility settings ask, for anyone who needs longer to reach it.
     val accessibility = LocalAccessibilityManager.current
@@ -117,7 +135,7 @@ fun UnlockHost(onOpenShelf: () -> Unit, viewModel: UnlockViewModel = graphViewMo
         contentAlignment = Alignment.TopCenter,
     ) {
         AnimatedContent(
-            targetState = news.firstOrNull(),
+            targetState = if (held) null else news.firstOrNull(),
             transitionSpec = {
                 (slideInVertically { -it } + fadeIn()) togetherWith (slideOutVertically { -it } + fadeOut()) using
                     SizeTransform(clip = false)

@@ -33,6 +33,8 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -49,6 +51,9 @@ import app.thelasthit.nrt.ui.game.UnlockHost
 import app.thelasthit.nrt.ui.history.HistoryScreen
 import app.thelasthit.nrt.ui.insights.InsightsScreen
 import app.thelasthit.nrt.ui.lair.LairScreen
+import app.thelasthit.nrt.ui.lair.LairTabIcon
+import app.thelasthit.nrt.ui.lair.lairTabSpoken
+import app.thelasthit.nrt.ui.lair.rememberLairHitsReady
 import app.thelasthit.nrt.ui.link.LinkHost
 import app.thelasthit.nrt.ui.settings.AboutScreen
 import app.thelasthit.nrt.ui.settings.CatalogueScreen
@@ -206,6 +211,8 @@ private fun NavGraphBuilder.settings(navController: NavController, snackbars: Sn
 @Composable
 private fun BottomBar(currentRoute: String?, navController: NavController) {
     val colors = LastHit.colors
+    val lairReady = rememberLairHitsReady()
+    val lairSpoken = lairTabSpoken(lairReady)
     NavigationBar(
         containerColor = colors.bg,
         tonalElevation = 0.dp,
@@ -218,10 +225,19 @@ private fun BottomBar(currentRoute: String?, navController: NavController) {
             NavigationBarItem(
                 selected = selected,
                 onClick = { navController.navigateTo(destination) },
-                icon = { Icon(painterResource(destination.icon), contentDescription = null) },
+                icon = {
+                    // The Lair tab carries a badge for the hits ready to spend.
+                    if (destination == TopLevelDestination.Lair) {
+                        LairTabIcon(painterResource(destination.icon), lairReady)
+                    } else {
+                        Icon(painterResource(destination.icon), contentDescription = null)
+                    }
+                },
                 label = {
+                    val spoken = if (destination == TopLevelDestination.Lair) lairSpoken else null
                     Text(
                         stringResource(destination.label),
+                        modifier = if (spoken != null) Modifier.semantics { contentDescription = spoken } else Modifier,
                         style = LastHit.type.caption.copy(
                             fontSize = 12.sp,
                             fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.SemiBold,

@@ -13,6 +13,8 @@ class SpriteSheet private constructor(
     private val slotKeys: List<Char>,
     /** The slot labelled "eye" in the sprite file, or -1. */
     private val eyeSlot: Int,
+    /** The slot labelled "outline" in the sprite file, or -1. */
+    private val outlineSlot: Int,
     private val variants: Map<String, IntArray>,
     val defaultVariant: String,
     private val frames: Map<SpriteFrame, ByteArray>,
@@ -53,6 +55,28 @@ class SpriteSheet private constructor(
             }
         }
     }
+
+    /**
+     * The hit flash, made from the frame itself: every pixel in [argb] but the outline, which
+     * keeps its colour, so the creature still has its shape on a light sky as it flashes.
+     */
+    fun flashPixels(frame: SpriteFrame, argb: Int, variant: String = defaultVariant): IntArray {
+        val outline = palette(variant).getOrNull(outlineSlot)
+        val slots = frames.getValue(frame)
+        return IntArray(slots.size) { i ->
+            when {
+                slots[i] < 0 -> 0
+                outline != null && slots[i].toInt() == outlineSlot -> outline
+                else -> argb
+            }
+        }
+    }
+
+    /**
+     * The frame's rim in [argb], one sprite pixel wide, for the dark-mode sky: (size + 2) pixels a
+     * side, to draw one sprite pixel up and to the left of the frame (see [PixelRim]).
+     */
+    fun rimPixels(frame: SpriteFrame, argb: Int): IntArray = PixelRim.around(argbPixels(frame), size, size, argb)
 
     companion object {
         private val json = Json { ignoreUnknownKeys = true }
@@ -103,7 +127,8 @@ class SpriteSheet private constructor(
                 }
             }
             val eyeSlot = slotKeys.indexOfFirst { file.slots[it.toString()] == "eye" }
-            return SpriteSheet(file.creature, size, slotKeys, eyeSlot, variants, file.defaultVariant, frames)
+            val outlineSlot = slotKeys.indexOfFirst { file.slots[it.toString()] == "outline" }
+            return SpriteSheet(file.creature, size, slotKeys, eyeSlot, outlineSlot, variants, file.defaultVariant, frames)
         }
 
         private fun parseColour(hex: String): Int {

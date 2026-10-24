@@ -26,6 +26,15 @@ class CreatureTest {
     }
 
     @Test
+    fun `the dragon can always be picked, and the seven wait for their sign-off together`() {
+        assertEquals(Creature.DRAGON, Creature.drawn.first())
+        val seven = Creature.entries - Creature.DRAGON
+        assertTrue(seven.all { it.isDrawn } || seven.none { it.isDrawn }, "the seven are signed off together")
+        assertEquals(seven.any { !it.isDrawn }, Creature.someUndrawn)
+        assertEquals(Creature.entries.filter { it.isDrawn }, Creature.drawn)
+    }
+
+    @Test
     fun `unknown keys fall back to the dragon`() {
         assertEquals(Creature.BEAR, Creature.fromKey("bear"))
         assertEquals(Creature.DRAGON, Creature.fromKey("unicorn"))

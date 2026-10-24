@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The lair's battle (PLAN 7.3): the stage, the HP and hits, the attacks, the defeat and the
+     victory, renaming the demon, and the sound switch. The demon's lines are short, dry and about
+     the demon, never about the person fighting it. -->
+<resources>
+    <!-- The bar across the top of the stage. -->
+    <string name="lair_week">Week %1$d of %2$d</string>
+    <string name="lair_week_overtime">Week %1$d, overtime</string>
+    <string name="lair_week_starts">Week 1 starts on %1$s</string>
+    <string name="lair_programme_done">Programme done</string>
+    <string name="lair_restyle_spoken">Rename or restyle %1$s</string>
+
+    <!-- The stage, for screen readers. %2$s is the creature, such as "dragon". -->
+    <string name="lair_stage_fresh">%1$s the %2$s, standing on a rock</string>
+    <string name="lair_stage_rough">%1$s the %2$s, roughed up, on a rock</string>
+    <string name="lair_stage_barely">%1$s the %2$s, barely standing on a rock</string>
+    <string name="lair_stage_gone">An empty rock, with the last of %1$s drifting off as pixels</string>
+
+    <!-- HP, as the pixel numbers show it and as a screen reader says it. -->
+    <string name="lair_hp">%1$d/%2$d</string>
+    <string name="lair_hp_spoken">%1$d of %2$d HP</string>
+
+    <!-- The demon's lines. -->
+    <string name="lair_line_fresh">%1$s eyes you from the rocks.</string>
+    <string name="lair_line_rough">%1$s has seen better weeks.</string>
+    <string name="lair_line_barely">%1$s is barely standing.</string>
+    <string name="lair_line_last_hit">%1$s has one hit left in it.</string>
+    <string name="lair_line_smug">%1$s looks smug. Meet next week and take that hit back.</string>
+    <string name="lair_line_staggers">%1$s staggers.</string>
+    <string name="lair_line_reels">%1$s reels. It didn\'t see five coming.</string>
+    <string name="lair_line_gone">Nothing left of %1$s but a few stray pixels.</string>
+
+    <!-- The hits banked. -->
+    <string name="lair_bank_none">No hits banked</string>
+    <string name="lair_bank_one">Hit banked</string>
+    <string name="lair_bank_many">Hits banked</string>
+    <plurals name="lair_bank_spoken">
+        <item quantity="one">%d hit banked</item>
+        <item quantity="other">%d hits banked</item>
+    </plurals>
+
+    <!-- The attacks. -->
+    <string name="lair_hit">Hit</string>
+    <string name="lair_hit_uses">Uses 1 hit</string>
+    <string name="lair_hit_needs">Needs 1 hit</string>
+    <string name="lair_combo">5× attack</string>
+    <string name="lair_combo_uses">Uses 5 hits</string>
+    <string name="lair_combo_needs">Needs 5 hits</string>
+    <!-- In the pixel font, which draws a hyphen as its minus sign. -->
+    <string name="lair_damage">-%1$d</string>
+
+    <!-- The victory, once the final hit lands. -->
+    <string name="lair_victory_title">Victory</string>
+    <string name="lair_victory_weeks">Weeks</string>
+    <string name="lair_victory_weeks_overtime">%1$d, plus %2$d of overtime</string>
+    <string name="lair_victory_daily">Daily amount</string>
+    <string name="lair_victory_daily_value">%1$s\u00A0mg, down to none</string>
+    <string name="lair_victory_hits">Hits on %1$s</string>
+    <string name="lair_victory_hits_today">%1$d, the last one today</string>
+    <string name="lair_victory_hits_on">%1$d, the last one on %2$s</string>
+    <string name="lair_victory_triggers">Triggers you got on top of</string>
+    <string name="lair_victory_foot">Badges and gear carry over. A rematch starts from the Plan tab, if you ever need one.</string>
+
+    <!-- Renaming and restyling the demon. -->
+    <string name="lair_restyle_title">Rename or restyle</string>
+    <string name="lair_restyle_note">HP and hits stay as they are.</string>
+    <string name="lair_restyle_save">Save</string>
+
+    <!-- The badge on the Lair tab, for screen readers. -->
+    <plurals name="nav_lair_hits_ready">
+        <item quantity="one">Lair, %d hit ready</item>
+        <item quantity="other">Lair, %d hits ready</item>
+    </plurals>
+
+    <!-- The sound switch in Settings (ROADMAP P4-3). -->
+    <string name="settings_lair">The lair</string>
+    <string name="settings_sound">Sound</string>
+    <string name="settings_sound_detail">8-bit sounds for hits and the defeat. Quiet while the phone is on silent.</string>
+</resources>

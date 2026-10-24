@@ -68,6 +68,7 @@ import app.thelasthit.nrt.ui.components.DayStartStepper
 import app.thelasthit.nrt.ui.format.DayTitleFormatter
 import app.thelasthit.nrt.ui.format.countryBrands
 import app.thelasthit.nrt.ui.format.countryName
+import app.thelasthit.nrt.ui.format.creatureName
 import app.thelasthit.nrt.ui.format.variantName
 import app.thelasthit.nrt.ui.format.pillLabelText
 import app.thelasthit.nrt.ui.format.rememberTimeFormatter
@@ -378,7 +379,7 @@ private fun DoneStep(state: OnboardingState, onStart: () -> Unit) {
         val flavour = stringResource(R.string.onboarding_done_flavour, name)
         val description = stringResource(R.string.onboarding_done_description, flavour)
         BandScene(
-            Creature.DRAGON,
+            draft.creature,
             variant = null,
             height = 188.dp,
             textStart = 172.dp,
@@ -409,7 +410,7 @@ private fun DoneStep(state: OnboardingState, onStart: () -> Unit) {
         // Each label stays on one line, so the list only breaks after a comma.
         val quickLog = state.pickedProducts.mapNotNull { state.pickLabels[it.id] }.map { pillLabelText(it).replace(' ', '\u00A0') }
         val variantName = stringResource(variantName(draft.variant))
-        val kind = stringResource(R.string.onboarding_demon_kind, variantName, stringResource(R.string.creature_dragon).lowercase(Locale.UK))
+        val kind = stringResource(R.string.onboarding_demon_kind, variantName, stringResource(creatureName(draft.creature)).lowercase(Locale.UK))
         val rows = listOf(
             stringResource(R.string.onboarding_summary_stopped) to (
                 draft.stoppedOn?.let { (if (it.year == state.today.year) DayTitleFormatter else DateWithYear).format(it) }
