@@ -4,16 +4,20 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.data.DataGraph
 import app.thelasthit.nrt.data.settings.QuickLogOptions
+import app.thelasthit.nrt.data.settings.ReminderMarks
 import app.thelasthit.nrt.domain.product.UserProduct
 import app.thelasthit.nrt.domain.reminders.Reminder
 import app.thelasthit.nrt.domain.reminders.ReminderSettings
@@ -93,24 +97,39 @@ fun WidgetTileScreen(onBack: () -> Unit, viewModel: WidgetTileViewModel = graphV
 }
 
 /** What the two Settings rows for phase 6 say: reminders on, and what the tile does. */
-data class PhoneRowsState(val reminders: ReminderSettings, val tile: WidgetTileState)
+data class PhoneRowsState(val reminders: ReminderSettings, val marks: ReminderMarks, val tile: WidgetTileState)
 
 class PhoneRowsViewModel(graph: DataGraph) : ViewModel() {
-    val state: StateFlow<PhoneRowsState?> = combine(graph.reminders.reminders, graph.reminders.quickLog, graph.products.quickLog) { reminders, options, quickLog ->
-        PhoneRowsState(reminders, WidgetTileState.of(options, quickLog))
+    val state: StateFlow<PhoneRowsState?> = combine(
+        graph.reminders.reminders,
+        graph.reminders.marks,
+        graph.reminders.quickLog,
+        graph.products.quickLog,
+    ) { reminders, marks, options, quickLog ->
+        PhoneRowsState(reminders, marks, WidgetTileState.of(options, quickLog))
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 }
 
-/** The Reminders row's detail: how many are on, and quiet hours, or that notifications are off. */
+/**
+ * The Reminders row's detail: how many are on, and quiet hours, or that notifications are off.
+ * On Android 13 and newer, until the app has asked for notifications, it says to allow them
+ * rather than that they're off, since nobody turned them off.
+ */
 @Composable
-fun remindersSummary(settings: ReminderSettings): String {
+fun remindersSummary(settings: ReminderSettings, marks: ReminderMarks): String {
     val context = LocalContext.current
-    val canPost = remember { NoticePoster(context).canPost() }
+    var canPost by remember { mutableStateOf(NoticePoster(context).canPost()) }
+    // Back from the phone's settings, the row follows what was chosen there.
+    LifecycleResumeEffect(Unit) {
+        canPost = NoticePoster(context).canPost()
+        onPauseOrDispose {}
+    }
     val timeFormat = rememberTimeFormatter()
     val on = settings.on.size
     val all = Reminder.entries.size
     val quiet = settings.quietHours
     return when {
+        on > 0 && !canPost && !marks.permissionAsked && !NoticePoster.hasPermission(context) -> stringResource(R.string.settings_reminders_ask)
         on > 0 && !canPost -> stringResource(R.string.settings_reminders_blocked)
         on == 0 -> stringResource(R.string.settings_reminders_off)
         quiet.enabled -> stringResource(R.string.settings_reminders_quiet, on, all, timeFormat.format(quiet.start), timeFormat.format(quiet.end))

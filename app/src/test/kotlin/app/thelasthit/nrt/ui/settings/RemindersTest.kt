@@ -14,6 +14,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.thelasthit.nrt.TestApp
 import app.thelasthit.nrt.domain.reminders.Reminder
 import app.thelasthit.nrt.reminders.allowNotifications
+import app.thelasthit.nrt.seedWeek
 import app.thelasthit.nrt.setUp
 import app.thelasthit.nrt.ui.PHONE
 import app.thelasthit.nrt.ui.theme.LastHitTheme
@@ -103,7 +104,18 @@ class RemindersTest {
         app.allowNotifications()
         runBlocking { app.graph.reminders.setCheckInTime(java.time.LocalTime.of(22, 30)) }
         showReminders()
-        compose.onNodeWithText("22:30 is in your quiet hours, so the check-in won't show.").performScrollTo().assertExists()
+        // On the time's own row, with the time still beside it, so it can't be read as about another.
+        compose.onNodeWithText("In your quiet hours, so it won't show").performScrollTo().assertExists()
+        compose.onNode(hasText("Check-in time") and hasText("In your quiet hours, so it won't show") and hasText("22:30")).assertExists()
+    }
+
+    @Test
+    fun forgotToLogSaysAboutWhenToTheQuarterHour() {
+        app.allowNotifications()
+        // The mockups' week puts the usual first dose at 07:46.
+        app.seedWeek()
+        showReminders()
+        compose.onNodeWithText("When nothing's logged by about 09:45, 2 hours after your usual first dose").performScrollTo().assertExists()
     }
 
     @Test
@@ -133,6 +145,18 @@ class RemindersTest {
         assertEquals("reminders", opened)
         compose.onNodeWithText("The tile logs Nicorette gum 2${Char(0xA0)}mg").performScrollTo().performClick()
         assertEquals("widget", opened)
+    }
+
+    @Test
+    fun beforeTheAppHasAskedTheSettingsRowInvitesRatherThanSaysOff() {
+        app.allowNotifications(false)
+        compose.setContent {
+            LastHitTheme { SettingsScreen(remember { SnackbarHostState() }, onBack = {}, links = SettingsLinks({}, {}, {}, {}, {}, {}, {})) }
+        }
+        compose.waitUntilAtLeastOneExists(hasText("Allow notifications to get reminders"), timeoutMillis = 5_000)
+        // Once asked and refused, they're off.
+        runBlocking { app.graph.reminders.markPermissionAsked() }
+        compose.waitUntilAtLeastOneExists(hasText("Notifications are off for this app"), timeoutMillis = 5_000)
     }
 
     @Test

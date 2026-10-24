@@ -1,5 +1,6 @@
 package app.thelasthit.nrt.reminders
 
+import android.app.Notification
 import androidx.test.core.app.ApplicationProvider
 import androidx.work.CoroutineWorker
 import androidx.work.ListenableWorker
@@ -21,6 +22,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.time.Duration
 import java.time.LocalTime
 
 /** The reminders' workers, each run as WorkManager would run it, against the app's data. */
@@ -109,6 +111,14 @@ class ReminderWorkersTest {
         run<CheckInWorker>()
         assertNull(app.notification(Notice.ID_CHECK_IN))
         assertTrue(app.work(ReminderScheduler.CHECK_IN)?.state.let { it == null || it == WorkInfo.State.CANCELLED })
+    }
+
+    @Test
+    fun eachCheckInAlertsThoughYesterdaysIsStillShowing() {
+        app.setTime("2026-10-23T21:30")
+        run<CheckInWorker>()
+        val notice = present(app.notification(Notice.ID_CHECK_IN))
+        assertEquals(0, notice.flags and Notification.FLAG_ONLY_ALERT_ONCE)
     }
 
     @Test
@@ -232,6 +242,28 @@ class ReminderWorkersTest {
         assertEquals("Week 1 met", app.awaitNotification(Notice.ID_RESULTS + 1)?.title)
     }
 
+    @Test
+    fun aResultBroughtInBeforeItsBookingRunsIsToldStraightAway() {
+        app.startGumPlan()
+        runBlocking { app.reminders.reschedule() }
+        // Week 1's result is due at 04:00 on 1 November. The app looks first, at 07:30, before
+        // the booking has run, as when the phone holds it back to save battery.
+        app.setTime("2026-11-01T07:30")
+        runBlocking { app.graph.programmes.current() }
+        runBlocking { app.reminders.reschedule() }
+        assertEquals("Week 1 met", app.awaitNotification(Notice.ID_RESULTS + 1)?.title)
+    }
+
+    @Test
+    fun theLastWeeksResultIsToldThoughNoWeekFollows() {
+        val last = checkNotNull(app.startGumPlan().plan).weeks.last()
+        val due = runBlocking { app.graph.programmes.clock() }.resultDue(last)
+        app.clock.now = due.plus(Duration.ofHours(4))
+        runBlocking { app.graph.programmes.current() }
+        runBlocking { app.reminders.reschedule() }
+        assertEquals("Week ${last.number} met", app.awaitNotification(Notice.ID_RESULTS + last.number)?.title)
+    }
+
     // Booking.
 
     @Test
@@ -250,7 +282,7 @@ class ReminderWorkersTest {
     fun aBadgeIsToldByName() {
         app.setTime("2026-10-23T15:05")
         runBlocking { app.reminders.achievementsUnlocked(listOf("First week met"), emptyList()) }
-        val notice = present(app.notification(Notice.ID_ACHIEVEMENTS))
+        val notice = app.achievementNotices().single()
         assertEquals("First week met", notice.title)
         assertEquals("New badge. It's on the trophy shelf in the lair.", notice.text)
     }
@@ -259,7 +291,7 @@ class ReminderWorkersTest {
     fun badgesAndGearTogether() {
         app.setTime("2026-10-23T15:05")
         runBlocking { app.reminders.achievementsUnlocked(listOf("First week met", "Logged on 7 days"), listOf("iron sword")) }
-        val notice = present(app.notification(Notice.ID_ACHIEVEMENTS))
+        val notice = app.achievementNotices().single()
         assertEquals("2 new badges", notice.title)
         assertEquals("First week met and Logged on 7 days. They're on the trophy shelf in the lair. New gear too: iron sword.", notice.text)
     }
@@ -268,7 +300,7 @@ class ReminderWorkersTest {
     fun manyBadgesAtOnceAreOneSummary() {
         app.setTime("2026-10-23T15:05")
         runBlocking { app.reminders.achievementsUnlocked(listOf("A", "B", "C", "D", "E"), emptyList()) }
-        val notice = present(app.notification(Notice.ID_ACHIEVEMENTS))
+        val notice = app.achievementNotices().single()
         assertEquals("5 new badges", notice.title)
         assertEquals("They're on the trophy shelf in the lair.", notice.text)
     }
@@ -277,7 +309,37 @@ class ReminderWorkersTest {
     fun gearAlone() {
         app.setTime("2026-10-23T15:05")
         runBlocking { app.reminders.achievementsUnlocked(emptyList(), listOf("iron sword")) }
-        assertEquals("New gear: iron sword", app.notification(Notice.ID_ACHIEVEMENTS)?.title)
+        assertEquals("New gear: iron sword", app.achievementNotices().single().title)
+    }
+
+    @Test
+    fun aSecondUnlockDoesNotTakeTheFirstOnesPlace() {
+        app.setTime("2026-10-23T15:05")
+        runBlocking {
+            app.reminders.achievementsUnlocked(listOf("First week met"), emptyList())
+            app.reminders.achievementsUnlocked(listOf("Logged on 7 days"), emptyList())
+        }
+        assertEquals(listOf("First week met", "Logged on 7 days"), app.achievementNotices().mapNotNull { it.title }.sorted())
+    }
+
+    @Test
+    fun unlocksInQuietHoursAreEachHeldForTheMorning() {
+        app.setTime("2026-10-23T23:30")
+        runBlocking {
+            app.reminders.achievementsUnlocked(listOf("First week met"), emptyList())
+            app.reminders.achievementsUnlocked(listOf("Logged on 7 days"), emptyList())
+        }
+        assertEquals(emptyList<Notification>(), app.achievementNotices())
+        val held = listOf("First week met", "Logged on 7 days").map { badge ->
+            present(app.work(ReminderScheduler.held(Notice.achievementsId(listOf(badge), emptyList()))))
+        }
+        assertEquals(listOf(WorkInfo.State.ENQUEUED, WorkInfo.State.ENQUEUED), held.map { it.state })
+
+        app.setTime("2026-10-24T07:00")
+        held.forEach { WorkManagerTestInitHelper.getTestDriver(app)!!.setInitialDelayMet(it.id) }
+        val end = System.currentTimeMillis() + 5_000
+        while (app.achievementNotices().size < 2 && System.currentTimeMillis() < end) Thread.sleep(20)
+        assertEquals(listOf("First week met", "Logged on 7 days"), app.achievementNotices().mapNotNull { it.title }.sorted())
     }
 
     private fun <T> present(value: T?): T {

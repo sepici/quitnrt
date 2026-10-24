@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import java.io.File
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -43,7 +44,8 @@ data class ReminderMarks(
 /**
  * Phase 6's settings: the reminder switches, the check-in time and quiet hours, the widget and
  * tile options, and the reminders' own notes. They belong to this phone, so they sit in a file of
- * their own and stay out of backups.
+ * their own, [FILE], which the backup rules leave out (res/xml/backup_rules.xml and
+ * data_extraction_rules.xml): a new phone asks for notifications again.
  */
 class ReminderStore(private val store: DataStore<Preferences>) {
 
@@ -124,8 +126,16 @@ class ReminderStore(private val store: DataStore<Preferences>) {
 
         private fun timeOf(minutes: Int): LocalTime = LocalTime.ofSecondOfDay(minutes.mod(24 * 60) * 60L)
 
+        /** The file's path under the app's files, as the backup rules name it. */
+        const val FILE = "datastore/reminders.preferences_pb"
+
+        private const val NAME = "reminders"
+
+        /** Where the store keeps its file: [FILE] under the app's files. */
+        fun fileIn(context: Context): File = context.preferencesDataStoreFile(NAME)
+
         /** Only one DataStore may exist per file, so the app creates this once. */
         fun createDataStore(context: Context): DataStore<Preferences> =
-            PreferenceDataStoreFactory.create(produceFile = { context.preferencesDataStoreFile("reminders") })
+            PreferenceDataStoreFactory.create(produceFile = { fileIn(context) })
     }
 }

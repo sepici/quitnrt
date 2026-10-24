@@ -20,7 +20,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
@@ -54,6 +57,18 @@ sealed interface LogResult {
 }
 
 /**
+ * A dose just logged, with the live doses that stood once it was saved ([standing], itself
+ * among them), from [DAYS_AROUND] days before its day to as many after: enough for any week it
+ * falls in. What follows a log reads these rather than the database, so a dose logged a moment
+ * later can't change what this one crossed.
+ */
+data class NewDose(val entry: Entry, val standing: List<Entry>) {
+    companion object {
+        const val DAYS_AROUND = 6L
+    }
+}
+
+/**
  * Logging, editing and deleting doses. Every write settles the programme results that are due
  * first, through [results], so a result counts the logs as they stood when it came due.
  */
@@ -67,13 +82,16 @@ class EntryRepository(
     private val zone: () -> ZoneId = { clock.zone },
     private val newId: () -> String = { UUID.randomUUID().toString() },
 ) {
-    private val _logged = MutableSharedFlow<Entry>(extraBufferCapacity = 64)
+    private val _logged = MutableSharedFlow<NewDose>(extraBufferCapacity = 64)
+
+    /** One log at a time, so each new dose's check and [NewDose.standing] see the ones before it. */
+    private val logging = Mutex()
 
     /**
      * Each new dose as it's saved, from whichever way it was logged, for what follows a log, such
      * as the allowance nudge. Edits and restores aren't new doses, so they aren't here.
      */
-    val logged: SharedFlow<Entry> = _logged.asSharedFlow()
+    val logged: SharedFlow<NewDose> = _logged.asSharedFlow()
 
     suspend fun log(request: LogRequest): LogResult {
         results.settleDue()
@@ -82,21 +100,25 @@ class EntryRepository(
         if (!LogTime.isAcceptable(at, now)) return LogResult.TimeInFuture
         val product = products.get(request.productId) ?: return LogResult.UnknownProduct
 
-        if (!request.allowDuplicate) {
-            val nearby = dao.between(
-                at.minus(LogChecks.DUPLICATE_WINDOW).toEpochMilli(),
-                at.plus(LogChecks.DUPLICATE_WINDOW).toEpochMilli(),
-            ).map { it.toDomain() }
-            LogChecks.possibleDuplicateOf(product.id, at, request.source, nearby)?.let {
-                return LogResult.PossibleDuplicate(it)
+        return logging.withLock {
+            if (!request.allowDuplicate) {
+                val nearby = dao.between(
+                    at.minus(LogChecks.DUPLICATE_WINDOW).toEpochMilli(),
+                    at.plus(LogChecks.DUPLICATE_WINDOW).toEpochMilli(),
+                ).map { it.toDomain() }
+                LogChecks.possibleDuplicateOf(product.id, at, request.source, nearby)?.let {
+                    return@withLock LogResult.PossibleDuplicate(it)
+                }
             }
-        }
 
-        val entry = buildEntry(newId(), product, request, at, settings.current().dayBoundary)
-        val warning = labelWarningFor(product, entry)
-        dao.insertWithTags(entry.toEntity(createdAt = now.toEpochMilli(), updatedAt = now.toEpochMilli()), entry.tagKeys)
-        _logged.tryEmit(entry)
-        return LogResult.Saved(entry, warning)
+            val entry = buildEntry(newId(), product, request, at, settings.current().dayBoundary)
+            val warning = labelWarningFor(product, entry)
+            dao.insertWithTags(entry.toEntity(createdAt = now.toEpochMilli(), updatedAt = now.toEpochMilli()), entry.tagKeys)
+            val day = entry.logicalDate.toEpochDay()
+            val standing = dao.observeDays(day - NewDose.DAYS_AROUND, day + NewDose.DAYS_AROUND).first().map { it.toDomain() }
+            _logged.tryEmit(NewDose(entry, standing))
+            LogResult.Saved(entry, warning)
+        }
     }
 
     /**

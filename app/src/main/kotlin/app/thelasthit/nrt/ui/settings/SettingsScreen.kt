@@ -172,7 +172,7 @@ fun SettingsScreen(
                 chevron = true,
             )
             phone?.let { rows ->
-                SettingsRow(stringResource(R.string.settings_reminders), remindersSummary(rows.reminders), first = false, onClick = links.reminders, chevron = true)
+                SettingsRow(stringResource(R.string.settings_reminders), remindersSummary(rows.reminders, rows.marks), first = false, onClick = links.reminders, chevron = true)
             }
         }
 

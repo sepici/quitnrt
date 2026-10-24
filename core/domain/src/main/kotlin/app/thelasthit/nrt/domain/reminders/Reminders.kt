@@ -108,6 +108,18 @@ data class QuietHours(
 object ReminderTimes {
 
     /**
+     * [time] to the nearest quarter hour, for saying about when a reminder comes rather than a
+     * worked-out minute: 09:46 is about 09:45, and 09:53 about 10:00. Seconds don't count.
+     */
+    fun nearestQuarterHour(time: LocalTime): LocalTime {
+        val minutes = time.hour * 60 + time.minute
+        val rounded = (minutes + QUARTER / 2) / QUARTER * QUARTER
+        return LocalTime.of(0, 0).plusMinutes(rounded.toLong())
+    }
+
+    private const val QUARTER = 15
+
+    /**
      * The next moment after [after] when the clock in [zone] reads [time]. On the day the clocks
      * go forward past it, that's when they jump; on the day they go back, the first time round.
      */

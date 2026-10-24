@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Android 12 and newer: back up and transfer everything the app stores. -->
+<!--
+    Android 12 and newer: back up and transfer everything the app stores, except the reminder
+    settings and their notes, which belong to this phone (ReminderStore).
+-->
 <data-extraction-rules>
-    <cloud-backup />
-    <device-transfer />
+    <cloud-backup>
+        <exclude domain="file" path="datastore/reminders.preferences_pb" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="file" path="datastore/reminders.preferences_pb" />
+    </device-transfer>
 </data-extraction-rules>

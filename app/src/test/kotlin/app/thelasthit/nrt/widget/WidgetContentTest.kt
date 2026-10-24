@@ -19,6 +19,7 @@ import app.thelasthit.nrt.TestApp
 import app.thelasthit.nrt.data.repo.LogRequest
 import app.thelasthit.nrt.domain.dose.Dose
 import app.thelasthit.nrt.domain.log.Entry
+import app.thelasthit.nrt.domain.log.LabelWarning
 import app.thelasthit.nrt.domain.product.DoseUnit
 import app.thelasthit.nrt.domain.product.ProductForm
 import app.thelasthit.nrt.quicklog.WidgetMoment
@@ -32,9 +33,11 @@ import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -147,6 +150,60 @@ class WidgetContentTest {
     fun aShortWidgetLeavesTheMeterOutButKeepsTheGuide() = show(model(), size = DpSize(320.dp, 110.dp)) {
         onNode(hasTextEqualTo("6${nbsp}mg left today")).assertExists()
         onNode(hasTextEqualTo("Gum 2${nbsp}mg")).assertExists()
+    }
+
+    @Test
+    fun aShortWidgetLetsTheMomentTakeTheHerosPlace() =
+        show(model(moment = WidgetMoment.Duplicate(LogRequest(GUM_2), gumEntry())), size = DpSize(250.dp, 110.dp)) {
+            onNode(hasTextEqualTo("Logged twice in a minute. Keep both?")).assertExists()
+            onNode(hasTextEqualTo("Discard")).assertExists()
+            onNode(hasTextEqualTo("Keep both")).assertExists()
+            onAllNodes(hasTextEqualTo("8")).assertCountEquals(0)
+        }
+
+    @Test
+    fun aRoomyWidgetKeepsTheHeroAboveTheMoment() =
+        show(model(moment = WidgetMoment.Logged(gumEntry(), "Nicorette gum", warning = null)), size = DpSize(330.dp, 230.dp)) {
+            onNode(hasTextEqualTo("8")).assertExists()
+            onNode(hasTextEqualTo("Logged 2${nbsp}mg of Nicorette gum")).assertExists()
+        }
+
+    // How it lays out.
+
+    private fun layout(model: WidgetModel, size: DpSize) = WidgetLayout.of(model, size, app)
+
+    @Test
+    fun everyTapTargetIsAtLeast48Dp() {
+        assertTrue(WidgetSizes.PILL_HEIGHT >= 48.dp)
+    }
+
+    @Test
+    fun aLabelsNoteIsShownInFullWhereItFits() {
+        val note = WidgetMoment.Logged(gumEntry(), "Nicorette gum", warning = LabelWarning.OverDaily(units = 16, limit = 15))
+        val shown = layout(model(moment = note), DpSize(330.dp, 150.dp))
+        val text = "That's more than the pack's daily limit of 15. Worth a word with a pharmacist."
+        assertEquals(text, shown.moment)
+        assertEquals(TextRoom(app).lines(text, WidgetSizes.SMALL, bold = true, 302.dp), shown.momentLines)
+    }
+
+    @Test
+    fun theGuidesLabelSitsUnderItsMarkerBesideWhatsLeft() {
+        val shown = layout(model(), DpSize(330.dp, 230.dp))
+        assertEquals(Hero.ROOMY, shown.hero)
+        assertEquals(false, shown.guideOwnLine)
+        // Centred under the marker, 70% along the 302 dp meter.
+        val guideWidth = TextRoom(app).width("14${nbsp}mg guide", WidgetSizes.SMALL, bold = false)
+        assertEquals((302 * 0.7f - guideWidth.value / 2), shown.guideStart.value, 0.5f)
+    }
+
+    @Test @Config(fontScale = 1.3f)
+    fun withLargeTextOnANarrowWidgetTheGuidesLabelTakesALineOfItsOwn() {
+        // Tall enough for the roomy layout even with the guide's label on a line of its own.
+        val shown = layout(model(), DpSize(250.dp, 300.dp))
+        assertEquals(Hero.ROOMY, shown.hero)
+        assertEquals(true, shown.guideOwnLine)
+        // Where there isn't the height for that, the guide's label goes under what's left, beside the amount.
+        assertEquals(Hero.METER, layout(model(), DpSize(250.dp, 230.dp)).hero)
     }
 
     // The data behind it.

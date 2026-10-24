@@ -57,6 +57,7 @@ import app.thelasthit.nrt.domain.reminders.ForgotToLog
 import app.thelasthit.nrt.domain.reminders.QuietHours
 import app.thelasthit.nrt.domain.reminders.Reminder
 import app.thelasthit.nrt.domain.reminders.ReminderSettings
+import app.thelasthit.nrt.domain.reminders.ReminderTimes
 import app.thelasthit.nrt.reminders.NoticePoster
 import app.thelasthit.nrt.ui.components.NoteCard
 import app.thelasthit.nrt.ui.format.rememberTimeFormatter
@@ -77,7 +78,10 @@ import java.time.ZoneId
 data class RemindersState(
     val settings: ReminderSettings,
     val marks: ReminderMarks,
-    /** About when "Forgot to log" would come, from the last 14 days, or null before there's a usual time. */
+    /**
+     * About when "Forgot to log" would come, from the last 14 days, to the nearest quarter hour,
+     * or null before there's a usual time.
+     */
     val forgotAt: LocalTime?,
 )
 
@@ -93,7 +97,7 @@ class RemindersViewModel(
         val boundary = settings.dayBoundary
         val today = boundary.logicalDate(graph.clock.instant(), zone())
         graph.entries.observeRange(today.minusDays(ForgotToLog.LOOK_BACK_DAYS.toLong()), today).map { entries ->
-            ForgotToLog.usualFirstLog(entries, today, boundary.dayStart)?.plus(ForgotToLog.AFTER_USUAL)
+            ForgotToLog.usualFirstLog(entries, today, boundary.dayStart)?.plus(ForgotToLog.AFTER_USUAL)?.let(ReminderTimes::nearestQuarterHour)
         }
     }
 
@@ -196,7 +200,7 @@ fun RemindersScreen(onBack: () -> Unit, viewModel: RemindersViewModel = graphVie
             }
             SettingsRow(
                 stringResource(R.string.reminders_check_in_time),
-                detail = null,
+                detail = if (checkInOn && settings.checkInIsQuiet) stringResource(R.string.reminders_check_in_time_quiet) else null,
                 first = false,
                 onClick = { picking = TimeField.CHECK_IN },
                 muted = !checkInOn,
@@ -210,9 +214,6 @@ fun RemindersScreen(onBack: () -> Unit, viewModel: RemindersViewModel = graphVie
                 settings.isOn(Reminder.FORGOT_TO_LOG),
                 first = false,
             ) { switch(Reminder.FORGOT_TO_LOG, it) }
-        }
-        if (settings.isOn(Reminder.CHECK_IN) && settings.checkInIsQuiet) {
-            FootNote(stringResource(R.string.reminders_check_in_quiet, timeFormat.format(settings.checkInTime)))
         }
 
         SectionHeading(stringResource(R.string.reminders_plan_and_game))

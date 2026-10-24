@@ -8,6 +8,7 @@
     <string name="settings_reminders_quiet">%1$d of %2$d on, quiet from %3$s to %4$s</string>
     <string name="settings_reminders_off">All off</string>
     <string name="settings_reminders_blocked">Notifications are off for this app</string>
+    <string name="settings_reminders_ask">Allow notifications to get reminders</string>
     <string name="settings_widget_tile">Widget and tile</string>
     <string name="settings_widget_tile_logs">The tile logs %1$s</string>
     <string name="settings_widget_tile_logs_first">The tile logs the first product on your quick log</string>
@@ -26,10 +27,10 @@
     <string name="reminders_check_in">Evening check-in</string>
     <string name="reminders_check_in_detail">Today\'s total against the guide, with buttons for Log and All good</string>
     <string name="reminders_check_in_time">Check-in time</string>
-    <string name="reminders_check_in_quiet">%1$s is in your quiet hours, so the check-in won\'t show.</string>
+    <string name="reminders_check_in_time_quiet">In your quiet hours, so it won\'t show</string>
     <string name="reminders_forgot">Forgot to log</string>
     <string name="reminders_forgot_detail">When nothing\'s logged by about 2 hours after your usual first dose</string>
-    <string name="reminders_forgot_detail_due">When nothing\'s logged by %1$s, about 2 hours after your usual first dose</string>
+    <string name="reminders_forgot_detail_due">When nothing\'s logged by about %1$s, 2 hours after your usual first dose</string>
     <string name="reminders_plan_and_game">Your plan and the lair</string>
     <string name="reminders_results">Weekly results</string>
     <string name="reminders_results_detail">When a week\'s result comes in, with the hits it earned</string>

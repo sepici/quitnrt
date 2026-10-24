@@ -134,4 +134,15 @@ class DailyRemindersTest {
         assertEquals(at("2026-10-24T10:00"), ForgotToLog.nextCheck(at("2026-10-23T06:00"), history, boundary, ZONE, remindedOn = friday))
         assertNull(ForgotToLog.nextCheck(at("2026-10-23T06:00"), emptyList(), boundary, ZONE, remindedOn = null))
     }
+
+    @Test
+    fun `the time shown is to the nearest quarter hour`() {
+        fun shown(time: String) = ReminderTimes.nearestQuarterHour(LocalTime.parse(time)).toString()
+        assertEquals("09:45", shown("09:46"))
+        assertEquals("09:45", shown("09:52"))
+        assertEquals("10:00", shown("09:53"))
+        assertEquals("10:00", shown("10:00"))
+        assertEquals("10:00", shown("10:07:59"))
+        assertEquals("00:00", shown("23:55"))
+    }
 }

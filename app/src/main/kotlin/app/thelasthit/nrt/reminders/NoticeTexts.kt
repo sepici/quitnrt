@@ -102,7 +102,7 @@ class NoticeTexts(private val resources: Resources) {
                 gearText?.let { resources.getString(R.string.achievement_gear_too, it) },
             ).joinToString(" ")
         }
-        return Notice(Reminder.ACHIEVEMENTS, NoticeChannel.ACHIEVEMENTS, Notice.ID_ACHIEVEMENTS, title, text)
+        return Notice(Reminder.ACHIEVEMENTS, NoticeChannel.ACHIEVEMENTS, Notice.achievementsId(badges, gear), title, text)
     }
 
     /** The tile's note: what it logged, with Undo, gone after [timeout]. */

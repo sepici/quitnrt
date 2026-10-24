@@ -80,15 +80,15 @@ class AllowanceNudgesTest {
 
     @Test
     fun withinTheGuideNothingComes() {
-        val entry = app.chew("2026-10-26T09:00", pieces = 6)
-        assertNull(runBlocking { app.reminders.afterLog(entry) })
+        val dose = app.told(1) { app.chew("2026-10-26T09:00", pieces = 6) }.single()
+        assertNull(runBlocking { app.reminders.afterLog(dose) })
     }
 
     @Test
     fun inQuietHoursTheNudgeIsDropped() {
         app.setTime("2026-10-26T23:00")
         app.chew("2026-10-26T09:00", pieces = 6)
-        val over = app.chew("2026-10-26T22:50")
+        val over = app.told(1) { app.chew("2026-10-26T22:50") }.single()
         assertEquals(Delivery.Dropped, runBlocking { app.reminders.afterLog(over) })
     }
 
@@ -96,8 +96,33 @@ class AllowanceNudgesTest {
     fun switchedOffNothingComes() {
         runBlocking { app.graph.reminders.setOn(Reminder.ALLOWANCE, false) }
         app.chew("2026-10-26T09:00", pieces = 6)
-        val over = app.chew("2026-10-26T11:00")
+        val over = app.told(1) { app.chew("2026-10-26T11:00") }.single()
         assertEquals(Delivery.Off, runBlocking { app.reminders.afterLog(over) })
+    }
+
+    @Test
+    fun twoDosesLoggedTogetherEachGoByWhatStoodWhenTheyWereLogged() {
+        // 132 mg on Saturday, then two doses in before either is followed up, as a watch's queue
+        // would send them. The first takes the week past 80%, whatever came after it.
+        app.chew("2026-10-24T09:00", pieces = 33)
+        val (first, second) = app.told(2) {
+            app.chew("2026-10-26T09:00")
+            app.chew("2026-10-26T09:05")
+        }
+        assertEquals(Delivery.Now, runBlocking { app.reminders.afterLog(first) })
+        assertNull(runBlocking { app.reminders.afterLog(second) })
+    }
+
+    @Test
+    fun takingBackTheDoseThatNudgedTakesTheNudgeToo() {
+        app.chew("2026-10-26T09:00", pieces = 6)
+        val over = app.chew("2026-10-26T11:00")
+        present(Notice.ID_ALLOWANCE, title = "Past today's guide")
+        // As Undo does, from the app, the widget or the tile's note.
+        runBlocking { app.graph.entries.delete(over.id) }
+        val end = System.currentTimeMillis() + 5_000
+        while (app.notification(Notice.ID_ALLOWANCE) != null && System.currentTimeMillis() < end) Thread.sleep(20)
+        assertNull(app.notification(Notice.ID_ALLOWANCE))
     }
 
     @After

@@ -3,6 +3,7 @@ package app.thelasthit.nrt.reminders
 import android.content.Context
 import androidx.work.Data
 import app.thelasthit.nrt.data.DataGraph
+import app.thelasthit.nrt.data.repo.NewDose
 import app.thelasthit.nrt.domain.game.Achievement
 import app.thelasthit.nrt.domain.game.Gear
 import app.thelasthit.nrt.domain.game.NewUnlocks
@@ -18,11 +19,15 @@ import app.thelasthit.nrt.domain.reminders.TodayGuide
 import app.thelasthit.nrt.domain.time.DayBoundary
 import app.thelasthit.nrt.widget.LastHitWidget
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
@@ -47,6 +52,12 @@ class Reminders(
     private val store get() = graph.reminders
     private val texts get() = NoticeTexts(context.resources)
 
+    /** The dose behind the allowance nudge in the shade, so taking it back takes the nudge too. */
+    private val nudgedBy = MutableStateFlow<Entry?>(null)
+
+    /** One telling of results at a time, so a result settled twice over is told once. */
+    private val telling = Mutex()
+
     /**
      * Runs as long as the app does: makes the channels, nudges after each log, books the checks
      * again whenever what they depend on changes, and keeps the widget up to date.
@@ -54,6 +65,7 @@ class Reminders(
     suspend fun follow() = coroutineScope {
         poster.createChannels()
         launch { graph.entries.logged.collect { afterLog(it) } }
+        launch { nudgedBy.collectLatest { entry -> if (entry != null) clearNudgeOnceGone(entry) } }
         launch {
             combine(
                 store.reminders,
@@ -69,10 +81,11 @@ class Reminders(
     // After a log.
 
     /**
-     * The allowance nudge [entry] brings, if any, and what became of it: null when there's none.
-     * A dose logged also answers "Forgot to log".
+     * The allowance nudge [dose] brings, if any, and what became of it: null when there's none.
+     * It goes by the doses that stood when this one was saved, so one logged straight after
+     * can't hide the line this one crossed. A dose logged also answers "Forgot to log".
      */
-    suspend fun afterLog(entry: Entry): Delivery? {
+    suspend fun afterLog(dose: NewDose): Delivery? {
         poster.cancel(Notice.ID_FORGOT)
         if (!isSetUp()) return null
         val now = graph.clock.instant()
@@ -80,9 +93,19 @@ class Reminders(
         val record = graph.programmes.current() ?: return null
         val plan = record.plan ?: return null
         val week = plan.weekOn(today) ?: return null
-        val logged = graph.entries.observeRange(week.startDate, week.endDate).first()
-        val nudge = AllowanceNudge.forLog(entry, plan, record.status, logged, today) ?: return null
-        return send(texts.nudge(nudge))
+        val logged = dose.standing.filter { it.logicalDate in week }
+        val nudge = AllowanceNudge.forLog(dose.entry, plan, record.status, logged, today) ?: return null
+        return send(texts.nudge(nudge)).also { if (it == Delivery.Now) nudgedBy.value = dose.entry }
+    }
+
+    /**
+     * Waits for [entry], whose log brought the nudge in the shade, to be taken back, by Undo or
+     * deleting it, then clears the nudge, since its numbers no longer hold.
+     */
+    private suspend fun clearNudgeOnceGone(entry: Entry) {
+        graph.entries.observeRange(entry.logicalDate, entry.logicalDate).first { day -> day.none { it.id == entry.id } }
+        poster.cancel(Notice.ID_ALLOWANCE)
+        nudgedBy.compareAndSet(entry, null)
     }
 
     // The checks on WorkManager.
@@ -125,14 +148,16 @@ class Reminders(
      * later doesn't bring old news.
      */
     suspend fun results() {
-        val record = graph.programmes.current()
-        val plan = record?.plan
-        if (record != null && plan != null && isSetUp()) {
-            val marks = store.currentMarks()
-            val notices = ResultNotices.since(plan, marks.resultsNotifiedUpTo, graph.clock.instant())
-            val name = record.demon?.name ?: graph.settings.current().demonName
-            notices.forEach { send(texts.result(it, name)) }
-            ResultNotices.notifiedUpTo(notices, marks.resultsNotifiedUpTo)?.let { store.markResultsNotified(it) }
+        telling.withLock {
+            val record = graph.programmes.current()
+            val plan = record?.plan
+            if (record != null && plan != null && isSetUp()) {
+                val marks = store.currentMarks()
+                val notices = ResultNotices.since(plan, marks.resultsNotifiedUpTo, graph.clock.instant())
+                val name = record.demon?.name ?: graph.settings.current().demonName
+                notices.forEach { send(texts.result(it, name)) }
+                ResultNotices.notifiedUpTo(notices, marks.resultsNotifiedUpTo)?.let { store.markResultsNotified(it) }
+            }
         }
         scheduleResults()
     }
@@ -204,11 +229,20 @@ class Reminders(
         scheduler.at(ReminderScheduler.FORGOT, ForgotToLogWorker::class.java, at)
     }
 
-    /** At the next result due, while a plan runs. Results are noted even with the reminder off. */
+    /**
+     * At the next result due, while a plan runs, or now when a result is in that hasn't been told
+     * of yet. A result can come in before its booking runs, whenever the app looks or a dose is
+     * logged, and the last week's has no next one to wait for. Results are noted even with the
+     * reminder off.
+     */
     private suspend fun scheduleResults() {
+        val now = graph.clock.instant()
+        val plan = graph.programmes.current()?.plan
+        val untold = plan != null && isSetUp() && ResultNotices.since(plan, store.currentMarks().resultsNotifiedUpTo, now).isNotEmpty()
+        val next = plan?.weeks?.firstOrNull { it.result == WeekResult.PENDING }
         val clock = graph.programmes.clock()
-        val next = graph.programmes.current()?.plan?.weeks?.firstOrNull { it.result == WeekResult.PENDING }
-        scheduler.at(ReminderScheduler.RESULTS, ResultWorker::class.java, next?.let { clock.resultDue(it) })
+        val at = if (untold) now else next?.let { clock.resultDue(it) }
+        scheduler.at(ReminderScheduler.RESULTS, ResultWorker::class.java, at)
     }
 
     /** The widget again, and at a new day the next day's booking. */

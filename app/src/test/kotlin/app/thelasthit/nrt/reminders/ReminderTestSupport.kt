@@ -14,10 +14,16 @@ import app.thelasthit.nrt.GUM_4
 import app.thelasthit.nrt.TestApp
 import app.thelasthit.nrt.data.repo.LogRequest
 import app.thelasthit.nrt.data.repo.LogResult
+import app.thelasthit.nrt.data.repo.NewDose
 import app.thelasthit.nrt.data.repo.ProgrammeRecord
 import app.thelasthit.nrt.domain.log.Entry
 import app.thelasthit.nrt.domain.programme.UsualDay
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.shadows.ShadowNotificationManager
 
@@ -80,6 +86,21 @@ fun TestApp.chew(at: String, pieces: Int = 1): Entry = runBlocking {
     val result = graph.entries.log(LogRequest(GUM_4, quantity = pieces, at = TestApp.london(at), allowDuplicate = true))
     (result as LogResult.Saved).entry
 }
+
+/**
+ * Runs [block], which logs [count] doses, and gives back each one as the log told of it, with
+ * the doses that stood when it was saved.
+ */
+fun TestApp.told(count: Int, block: () -> Unit): List<NewDose> = runBlocking {
+    // Undispatched, so it's listening before anything is logged.
+    val told = async(start = CoroutineStart.UNDISPATCHED) { graph.entries.logged.take(count).toList() }
+    block()
+    withTimeout(5_000) { told.await() }
+}
+
+/** The achievements notices in the shade. */
+fun TestApp.achievementNotices(): List<Notification> =
+    notifications.allNotifications.filter { it.channelId == NoticeChannel.ACHIEVEMENTS.id }
 
 /** The state of the job booked under [name], if there is one. */
 fun TestApp.work(name: String): WorkInfo? = WorkManager.getInstance(this).getWorkInfosForUniqueWork(name).get().lastOrNull()

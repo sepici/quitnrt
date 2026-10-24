@@ -23,7 +23,9 @@ import androidx.glance.color.ColorProvider
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
+import androidx.glance.layout.ColumnScope
 import androidx.glance.layout.Row
+import androidx.glance.layout.RowScope
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
@@ -42,11 +44,19 @@ import app.thelasthit.nrt.MainActivity
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.domain.dose.Dose
 import app.thelasthit.nrt.quicklog.WidgetMoment
-import app.thelasthit.nrt.ui.format.labelNoteText
 import app.thelasthit.nrt.ui.format.mgText
 import app.thelasthit.nrt.ui.theme.DarkColors
 import app.thelasthit.nrt.ui.theme.LastHitColors
 import app.thelasthit.nrt.ui.theme.LightColors
+import app.thelasthit.nrt.widget.WidgetSizes.AMOUNT_LARGE
+import app.thelasthit.nrt.widget.WidgetSizes.GAP
+import app.thelasthit.nrt.widget.WidgetSizes.METER
+import app.thelasthit.nrt.widget.WidgetSizes.METER_GAP
+import app.thelasthit.nrt.widget.WidgetSizes.PILL_HEIGHT
+import app.thelasthit.nrt.widget.WidgetSizes.SIDE
+import app.thelasthit.nrt.widget.WidgetSizes.SMALL
+import app.thelasthit.nrt.widget.WidgetSizes.TICK
+import app.thelasthit.nrt.widget.WidgetSizes.TICK_GAP
 
 /**
  * The B tokens for the widget, each a light and dark pair, so the phone's own mode picks. The
@@ -65,131 +75,129 @@ private object Tones {
     val successOnHero = pair { it.successOnHero }
 }
 
-/** Heights at which the widget has room for more: the meter, then the hero's own layout. */
-private val METER_HEIGHT = 140.dp
-private val ROOMY_HEIGHT = 220.dp
-
-/** Wide enough for a third favourite. */
-private val THREE_WIDE = 300.dp
-
-/** A favourite this wide has room for its form's icon as well as its label. */
-private val ICON_PILL = 130.dp
-
-private val SIDE = 14.dp
-private val GAP = 6.dp
-private val PILL_HEIGHT = 44.dp
-
+/**
+ * The widget at its size: Today's hero above, as much of it as fits, and the favourites below,
+ * or for a moment after a tap, what came of it. [WidgetLayout] works out what fits.
+ */
 @Composable
 internal fun WidgetContent(model: WidgetModel?) {
     val size = LocalSize.current
+    val layout = model?.let { WidgetLayout.of(it, size, LocalContext.current) }
     Column(
         GlanceModifier
             .fillMaxSize()
             .appWidgetBackground()
             .tinted(R.drawable.widget_shape_hero, Tones.hero)
-            .padding(horizontal = SIDE, vertical = 12.dp),
+            .padding(horizontal = SIDE, vertical = (layout?.spacing ?: Spacing.of(size.height)).padding),
     ) {
-        if (model == null) return@Column
+        if (model == null || layout == null) return@Column
         val width = size.width - SIDE * 2
-        Column(GlanceModifier.fillMaxWidth().defaultWeight().clickable(actionStartActivity<MainActivity>())) {
-            val guide = model.guide
-            if (size.height >= ROOMY_HEIGHT && guide != null) {
-                // As Today's hero has it: the label, the amount, the meter, then what's left.
-                Label()
-                Amount(model.today, large = true)
-                Spacer(GlanceModifier.height(4.dp))
-                Meter(model.today, guide, width)
-                Spacer(GlanceModifier.height(2.dp))
-                Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Left(model.today, guide)
-                    Spacer(GlanceModifier.defaultWeight())
-                    GuideText(guide)
-                }
-            } else {
-                if (size.height >= ROOMY_HEIGHT) Label()
-                Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Amount(model.today, large = false)
-                    Spacer(GlanceModifier.defaultWeight())
-                    Column(horizontalAlignment = Alignment.End) {
-                        if (guide == null) {
-                            Doses(model.doses)
-                        } else {
-                            Left(model.today, guide)
-                            GuideText(guide)
-                        }
-                    }
-                }
-                if (guide != null && size.height >= METER_HEIGHT) {
-                    Spacer(GlanceModifier.height(6.dp))
-                    Meter(model.today, guide, width)
-                }
+        if (layout.hero != Hero.NONE) {
+            Column(GlanceModifier.fillMaxWidth().defaultWeight().clickable(actionStartActivity<MainActivity>())) {
+                Top(model, layout, width)
             }
         }
-        // Larger text needs a wider widget for a third.
-        val fontScale = LocalContext.current.resources.configuration.fontScale.coerceAtLeast(1f)
-        val favourites = if (size.width >= THREE_WIDE * fontScale) 3 else 2
-        Bottom(model, favourites, withIcons = (width - GAP * (favourites - 1)) / favourites >= ICON_PILL)
+        Bottom(model, layout)
+    }
+}
+
+/** Today's hero, as much of it as the widget has room for. */
+@Composable
+private fun Top(model: WidgetModel, layout: WidgetLayout, width: Dp) {
+    val guide = model.guide
+    if (layout.hero == Hero.ROOMY && guide != null) {
+        // As Today's hero has it: the label, the amount, the meter, and the guide's label under
+        // its marker, beside what's left, or under it when they'd meet.
+        Label()
+        Amount(model.today, AMOUNT_LARGE)
+        Spacer(GlanceModifier.height(4.dp))
+        Meter(model.today, guide, width)
+        Spacer(GlanceModifier.height(2.dp))
+        val guideLabel = @Composable {
+            Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Spacer(GlanceModifier.width(layout.guideStart))
+                GuideText(layout.guide.orEmpty(), lines = 1, end = false)
+            }
+        }
+        if (layout.guideOwnLine) {
+            guideLabel()
+            Left(model.today <= guide, layout.left.orEmpty(), lines = 1, end = false)
+        } else {
+            Box(GlanceModifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
+                Left(model.today <= guide, layout.left.orEmpty(), lines = 1, end = false)
+                guideLabel()
+            }
+        }
+        return
+    }
+    if (layout.labelled) Label()
+    Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Amount(model.today, layout.amountSize)
+        Spacer(GlanceModifier.defaultWeight())
+        Spacer(GlanceModifier.width(WidgetSizes.LABEL_GAP))
+        Column(horizontalAlignment = Alignment.End) {
+            if (guide == null) {
+                Text(
+                    layout.doses.orEmpty(),
+                    style = small(Tones.onHero2, bold = false).copy(textAlign = TextAlign.End),
+                    maxLines = layout.dosesLines,
+                )
+            } else {
+                Left(model.today <= guide, layout.left.orEmpty(), layout.leftLines, end = true)
+                if (layout.showGuide) GuideText(layout.guide.orEmpty(), layout.guideLines, end = true)
+            }
+        }
+    }
+    if (guide != null && layout.hero == Hero.METER) {
+        Spacer(GlanceModifier.height(METER_GAP))
+        Meter(model.today, guide, width)
     }
 }
 
 @Composable
 private fun Label() {
-    Text(LocalContext.current.getString(R.string.today_youve_had), style = small(Tones.onHero2, bold = false))
+    Text(LocalContext.current.getString(R.string.today_youve_had), style = small(Tones.onHero2, bold = false), maxLines = 1)
 }
 
-/** "8 mg", larger when the widget has the room. */
+/**
+ * "8 mg" at [size]. The "mg" sits on the amount's baseline, lined up from the top, so a short
+ * widget that runs into the amount's bottom padding never moves it.
+ */
 @Composable
-private fun Amount(today: Dose, large: Boolean) {
-    Row(verticalAlignment = Alignment.Bottom) {
+private fun Amount(today: Dose, size: Float) {
+    val room = TextRoom(LocalContext.current)
+    val unit = WidgetSizes.unitSize(size)
+    Row(verticalAlignment = Alignment.Top) {
         Text(
             today.mgText(),
-            style = TextStyle(color = Tones.onHero, fontSize = if (large) 42.sp else 34.sp, fontWeight = FontWeight.Bold),
+            style = TextStyle(color = Tones.onHero, fontSize = size.sp, fontWeight = FontWeight.Bold),
             maxLines = 1,
         )
         Text(
             LocalContext.current.getString(R.string.unit_mg),
-            style = TextStyle(color = Tones.onHero, fontSize = if (large) 20.sp else 18.sp, fontWeight = FontWeight.Bold),
+            style = TextStyle(color = Tones.onHero, fontSize = unit.sp, fontWeight = FontWeight.Bold),
             maxLines = 1,
-            modifier = GlanceModifier.padding(start = 4.dp, bottom = if (large) 7.dp else 5.dp),
+            modifier = GlanceModifier.padding(start = 4.dp, top = (room.baseline(size, bold = true) - room.baseline(unit, bold = true)).coerceAtLeast(0.dp)),
         )
     }
 }
 
-/** Without a plan there's nothing to measure against, so it counts the doses, as Today does. */
 @Composable
-private fun Doses(doses: Int) {
-    val context = LocalContext.current
-    val text = if (doses == 0) {
-        context.getString(R.string.today_nothing_yet)
-    } else {
-        context.resources.getQuantityString(R.plurals.today_doses_so_far, doses, doses)
-    }
-    Text(text, style = small(Tones.onHero2, bold = false), maxLines = 2)
-}
-
-@Composable
-private fun GuideText(guide: Dose) {
-    Text(LocalContext.current.getString(R.string.widget_guide, guide.mgText()), style = small(Tones.onHero2, bold = false), maxLines = 1)
+private fun GuideText(text: String, lines: Int, end: Boolean) {
+    Text(text, style = small(Tones.onHero2, bold = false).copy(textAlign = if (end) TextAlign.End else TextAlign.Start), maxLines = lines)
 }
 
 /** "6 mg left today" with the tick, which is the only green: at or under the guide. Over it is plain. */
 @Composable
-private fun Left(today: Dose, guide: Dose) {
-    val context = LocalContext.current
+private fun Left(within: Boolean, text: String, lines: Int, end: Boolean) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        val within = today <= guide
         if (within) {
-            Box(GlanceModifier.size(16.dp).tinted(R.drawable.widget_shape_dot, Tones.successOnHero), contentAlignment = Alignment.Center) {
+            Box(GlanceModifier.size(TICK).tinted(R.drawable.widget_shape_dot, Tones.successOnHero), contentAlignment = Alignment.Center) {
                 Image(ImageProvider(R.drawable.ic_check), contentDescription = null, modifier = GlanceModifier.size(12.dp), colorFilter = ColorFilter.tint(Tones.hero))
             }
-            Spacer(GlanceModifier.width(5.dp))
+            Spacer(GlanceModifier.width(TICK_GAP))
         }
-        val text = when {
-            guide == Dose.ZERO && within -> context.getString(R.string.widget_nrt_free)
-            within -> context.getString(R.string.widget_left, Dose(guide.micrograms - today.micrograms).mgText())
-            else -> context.getString(R.string.widget_over, Dose(today.micrograms - guide.micrograms).mgText())
-        }
-        Text(text, style = small(Tones.onHero, bold = true), maxLines = 1)
+        Text(text, style = small(Tones.onHero, bold = true).copy(textAlign = if (end) TextAlign.End else TextAlign.Start), maxLines = lines)
     }
 }
 
@@ -199,18 +207,17 @@ private fun Left(today: Dose, guide: Dose) {
  */
 @Composable
 private fun Meter(today: Dose, guide: Dose, width: Dp) {
-    val scale = maxOf(guide.micrograms * 10 / 7, today.micrograms, 1)
-    val used = width * (today.micrograms.toFloat() / scale)
-    val mark = width * (guide.micrograms.toFloat() / scale)
-    Box(GlanceModifier.fillMaxWidth().height(22.dp), contentAlignment = Alignment.CenterStart) {
+    val used = width * MeterMarks.usedAt(today, guide)
+    val mark = width * MeterMarks.markAt(today, guide)
+    Box(GlanceModifier.fillMaxWidth().height(METER), contentAlignment = Alignment.CenterStart) {
         Box(GlanceModifier.fillMaxWidth().height(12.dp).tinted(R.drawable.widget_shape_bar, Tones.heroTrack)) {}
         if (today > Dose.ZERO) {
             Box(GlanceModifier.width(maxOf(used, 12.dp)).height(12.dp).tinted(R.drawable.widget_shape_bar, Tones.heroUsed)) {}
         }
-        Row(GlanceModifier.fillMaxWidth().height(22.dp)) {
+        Row(GlanceModifier.fillMaxWidth().height(METER)) {
             // A ring of the hero green sets the marker apart from the bar under it.
             Spacer(GlanceModifier.width(maxOf(mark - 4.dp, 0.dp)))
-            Box(GlanceModifier.width(8.dp).height(22.dp).tinted(R.drawable.widget_shape_mark, Tones.hero), contentAlignment = Alignment.Center) {
+            Box(GlanceModifier.width(8.dp).height(METER).tinted(R.drawable.widget_shape_mark, Tones.hero), contentAlignment = Alignment.Center) {
                 Box(GlanceModifier.width(4.dp).height(18.dp).tinted(R.drawable.widget_shape_mark, Tones.onHero)) {}
             }
         }
@@ -219,50 +226,68 @@ private fun Meter(today: Dose, guide: Dose, width: Dp) {
 
 /** The favourites, or for a moment after a tap, what came of it. */
 @Composable
-private fun Bottom(model: WidgetModel, favourites: Int, withIcons: Boolean) {
+private fun ColumnScope.Bottom(model: WidgetModel, layout: WidgetLayout) {
     val context = LocalContext.current
-    val modifier = GlanceModifier.fillMaxWidth().padding(top = 8.dp)
+    val modifier = GlanceModifier.fillMaxWidth().padding(top = layout.spacing.bottomGap)
     val moment = model.moment
     when {
         !model.setUp -> Note(context.getString(R.string.widget_set_up), modifier)
-        moment is WidgetMoment.Logged -> {
-            val text = moment.warning?.let { context.resources.labelNoteText(it) }
-                ?: context.getString(R.string.today_logged, moment.entry.total.mgText(), moment.name)
-            Row(modifier, verticalAlignment = Alignment.CenterVertically) {
-                Text(text, style = small(Tones.onHero, bold = true), maxLines = 3, modifier = GlanceModifier.defaultWeight())
-                Spacer(GlanceModifier.width(GAP))
-                Pill(
-                    context.getString(R.string.widget_tags),
-                    actionStartActivity<QuickTagsActivity>(actionParametersOf(WidgetKeys.ENTRY to moment.entry.id)),
-                    description = context.getString(R.string.widget_tags_description),
-                )
-                Spacer(GlanceModifier.width(GAP))
-                Pill(context.getString(R.string.action_undo), actionRunCallback<UndoWidgetLog>(actionParametersOf(WidgetKeys.ENTRY to moment.entry.id)), filled = true)
-            }
+        moment is WidgetMoment.Logged -> Moment(layout) {
+            Pill(
+                context.getString(R.string.widget_tags),
+                actionStartActivity<QuickTagsActivity>(actionParametersOf(WidgetKeys.ENTRY to moment.entry.id)),
+                description = context.getString(R.string.widget_tags_description),
+                modifier = GlanceModifier.defaultWeight(),
+            )
+            Spacer(GlanceModifier.width(GAP))
+            Pill(
+                context.getString(R.string.action_undo),
+                actionRunCallback<UndoWidgetLog>(actionParametersOf(WidgetKeys.ENTRY to moment.entry.id)),
+                filled = true,
+                modifier = GlanceModifier.defaultWeight(),
+            )
         }
-        moment is WidgetMoment.Duplicate -> Row(modifier, verticalAlignment = Alignment.CenterVertically) {
-            Text(context.getString(R.string.log_duplicate_title), style = small(Tones.onHero, bold = true), maxLines = 3, modifier = GlanceModifier.defaultWeight())
+        moment is WidgetMoment.Duplicate -> Moment(layout) {
+            Pill(context.getString(R.string.widget_discard), actionRunCallback<DiscardWidgetLog>(), modifier = GlanceModifier.defaultWeight())
             Spacer(GlanceModifier.width(GAP))
-            Pill(context.getString(R.string.widget_discard), actionRunCallback<DiscardWidgetLog>())
-            Spacer(GlanceModifier.width(GAP))
-            Pill(context.getString(R.string.log_duplicate_keep), actionRunCallback<KeepBothWidgetLogs>(), filled = true)
+            Pill(context.getString(R.string.log_duplicate_keep), actionRunCallback<KeepBothWidgetLogs>(), filled = true, modifier = GlanceModifier.defaultWeight())
         }
         model.favourites.isEmpty() -> Note(context.getString(R.string.widget_no_favourites), modifier)
         else -> Row(modifier) {
-            model.favourites.take(favourites).forEachIndexed { index, favourite ->
+            model.favourites.take(layout.favourites).forEachIndexed { index, favourite ->
                 if (index > 0) Spacer(GlanceModifier.width(GAP))
                 val parameters = actionParametersOf(WidgetKeys.PRODUCT to favourite.productId)
                 val action = if (model.asksForTags) actionStartActivity<QuickTagsActivity>(parameters) else actionRunCallback<LogFavourite>(parameters)
                 Pill(
                     favourite.label,
                     action,
-                    icon = favourite.icon.takeIf { withIcons },
+                    icon = favourite.icon.takeIf { layout.withIcons },
                     description = favourite.description,
                     modifier = GlanceModifier.defaultWeight(),
                 )
             }
         }
     }
+}
+
+/**
+ * A moment: its text across the full width, and its two pills under it, where the favourites
+ * were. When the widget has no room for the hero as well, the moment takes its place.
+ */
+@Composable
+private fun ColumnScope.Moment(layout: WidgetLayout, pills: @Composable RowScope.() -> Unit) {
+    val text = @Composable { modifier: GlanceModifier ->
+        Text(layout.moment.orEmpty(), style = small(Tones.onHero, bold = true), maxLines = layout.momentLines, modifier = modifier)
+    }
+    if (layout.hero == Hero.NONE) {
+        Box(GlanceModifier.fillMaxWidth().defaultWeight(), contentAlignment = Alignment.CenterStart) {
+            text(GlanceModifier.fillMaxWidth())
+        }
+    } else {
+        text(GlanceModifier.fillMaxWidth().padding(top = layout.spacing.bottomGap))
+    }
+    Spacer(GlanceModifier.height(layout.spacing.momentGap))
+    Row(GlanceModifier.fillMaxWidth()) { pills() }
 }
 
 @Composable
@@ -301,14 +326,14 @@ private fun Pill(
         }
         Text(
             label,
-            style = TextStyle(color = ink, fontSize = 13.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center),
+            style = TextStyle(color = ink, fontSize = SMALL.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center),
             maxLines = 2,
         )
     }
 }
 
 private fun small(color: ColorProvider, bold: Boolean) =
-    TextStyle(color = color, fontSize = 13.sp, fontWeight = if (bold) FontWeight.Bold else FontWeight.Medium)
+    TextStyle(color = color, fontSize = SMALL.sp, fontWeight = if (bold) FontWeight.Bold else FontWeight.Medium)
 
 /** A rounded shape in [tone]: corners that also show on phones before Android 12. */
 private fun GlanceModifier.tinted(@DrawableRes shape: Int, tone: ColorProvider): GlanceModifier =

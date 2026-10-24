@@ -4,8 +4,8 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.test.core.app.ApplicationProvider
 import app.thelasthit.nrt.data.repo.LogRequest
 import app.thelasthit.nrt.data.repo.LogResult
+import app.thelasthit.nrt.data.repo.NewDose
 import app.thelasthit.nrt.data.settings.ReminderStore
-import app.thelasthit.nrt.domain.log.Entry
 import app.thelasthit.nrt.domain.log.EntrySource
 import app.thelasthit.nrt.domain.reminders.QuietHours
 import app.thelasthit.nrt.domain.reminders.Reminder
@@ -107,8 +107,11 @@ class ReminderStoreTest {
         // An edit isn't a new dose.
         data.entries.edit(first.id, LogRequest(GUM_4, note = "after lunch"))
         val second = (data.entries.log(LogRequest(GUM_4, source = EntrySource.TILE, allowDuplicate = true)) as LogResult.Saved).entry
-        val told: List<Entry> = logged.await()
-        assertEquals(listOf(first.id, second.id), told.map { it.id })
-        assertEquals(listOf(EntrySource.WIDGET, EntrySource.TILE), told.map { it.source })
+        val told: List<NewDose> = logged.await()
+        assertEquals(listOf(first.id, second.id), told.map { it.entry.id })
+        assertEquals(listOf(EntrySource.WIDGET, EntrySource.TILE), told.map { it.entry.source })
+        // Each comes with the doses that stood once it was saved, not those logged after it.
+        assertEquals(setOf(first.id), told[0].standing.map { it.id }.toSet())
+        assertEquals(setOf(first.id, second.id), told[1].standing.map { it.id }.toSet())
     }
 }

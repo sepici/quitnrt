@@ -92,11 +92,21 @@ data class Notice(
         const val ID_ALLOWANCE = 1
         const val ID_CHECK_IN = 2
         const val ID_FORGOT = 3
-        const val ID_ACHIEVEMENTS = 4
         const val ID_LOGGED = 5
 
         /** Weekly results: one per week, from here up. */
         const val ID_RESULTS = 100
+
+        /**
+         * Achievements: one per unlock, from here up, so a badge that unlocks while another's
+         * notice is showing, or held through quiet hours, doesn't take its place.
+         */
+        const val ID_ACHIEVEMENTS = 1000
+        private const val ACHIEVEMENT_IDS = 9000
+
+        /** The ID for the notice of these unlocks, which only unlock once each. */
+        fun achievementsId(badges: List<String>, gear: List<String>): Int =
+            ID_ACHIEVEMENTS + Math.floorMod((badges + "" + gear).hashCode(), ACHIEVEMENT_IDS)
 
         private const val KEY_REMINDER = "reminder"
         private const val KEY_CHANNEL = "channel"
@@ -164,7 +174,9 @@ class NoticePoster(private val context: Context) {
         .apply { if (notice.text != null) setContentText(notice.text).setStyle(NotificationCompat.BigTextStyle().bigText(notice.text)) }
         .setContentIntent(openApp(notice.id))
         .setAutoCancel(true)
-        .setOnlyAlertOnce(true)
+        // A reminder alerts each time, even over yesterday's still in the shade. The tile's note
+        // is quiet on a low channel already.
+        .setOnlyAlertOnce(notice.reminder == null)
         .setCategory(if (notice.reminder == Reminder.CHECK_IN || notice.reminder == Reminder.FORGOT_TO_LOG) NotificationCompat.CATEGORY_REMINDER else NotificationCompat.CATEGORY_STATUS)
         // Doses are health details, so the lock screen shows only what kind of notice it is.
         .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
