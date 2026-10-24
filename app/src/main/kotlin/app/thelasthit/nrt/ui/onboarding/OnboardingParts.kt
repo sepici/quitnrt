@@ -44,6 +44,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -140,7 +141,8 @@ private fun StepsBar(step: OnboardingStep, onBack: (() -> Unit)?, onSkip: (() ->
         if (onSkip != null) {
             Text(
                 stringResource(R.string.onboarding_skip),
-                style = LastHit.type.title.copy(fontWeight = FontWeight.Bold, fontSize = 15.sp),
+                // Underlined, as the app's other links are.
+                style = LastHit.type.title.copy(fontWeight = FontWeight.Bold, fontSize = 15.sp, textDecoration = TextDecoration.Underline),
                 color = colors.link,
                 modifier = Modifier
                     .heightIn(min = 48.dp)

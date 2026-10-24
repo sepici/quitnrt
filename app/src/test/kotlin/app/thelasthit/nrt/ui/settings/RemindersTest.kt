@@ -1,11 +1,14 @@
 package app.thelasthit.nrt.ui.settings
 
 import android.Manifest
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isOn
+import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -97,6 +100,44 @@ class RemindersTest {
         }
         assertEquals(null, shadowOf(compose.activity).lastRequestedPermission)
         assertFalse(runBlocking { app.graph.reminders.currentMarks().permissionAsked })
+    }
+
+    /** Asked already, here or in set-up, and refused once, so Android would still let the app ask. */
+    private fun askedAndRefusedOnce() {
+        app.allowNotifications(false)
+        runBlocking { app.graph.reminders.markPermissionAsked() }
+        shadowOf(app.packageManager).setShouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS, true)
+    }
+
+    /** Whether anything opened the phone's notification settings for the app. */
+    private fun openedNotificationSettings(): Boolean =
+        generateSequence { shadowOf(app).nextStartedActivity }.any { it.action == Settings.ACTION_APP_NOTIFICATION_SETTINGS }
+
+    @Test
+    fun onceAskedSwitchingOneOnAsksNothingMore() {
+        askedAndRefusedOnce()
+        showReminders()
+        compose.onNodeWithText("Forgot to log").performScrollTo().performClick()
+        compose.waitUntilExactlyOneExists(hasText("Forgot to log") and isToggleable() and isOn(), timeoutMillis = 5_000)
+        assertTrue(reminders().isOn(Reminder.FORGOT_TO_LOG))
+        assertEquals(null, shadowOf(compose.activity).lastRequestedPermission)
+        assertFalse(openedNotificationSettings())
+        // The note and its link stay, for asking again.
+        compose.onNodeWithText("Notifications are off").assertExists()
+        compose.onNodeWithText("Allow notifications").assertExists()
+    }
+
+    @Test
+    fun onceAskedTheLinkStillAsksWhileAndroidLetsIt() {
+        askedAndRefusedOnce()
+        showReminders()
+        compose.onNodeWithText("Allow notifications").performClick()
+        compose.waitUntil(5_000) {
+            compose.waitForIdle()
+            shadowOf(compose.activity).lastRequestedPermission != null
+        }
+        val asked = shadowOf(compose.activity).lastRequestedPermission
+        assertTrue(Manifest.permission.POST_NOTIFICATIONS in asked.requestedPermissions)
     }
 
     @Test

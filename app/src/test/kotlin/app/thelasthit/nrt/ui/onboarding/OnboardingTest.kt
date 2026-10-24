@@ -3,6 +3,7 @@ package app.thelasthit.nrt.ui.onboarding
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.ComponentActivity
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -18,6 +19,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.test.core.app.ApplicationProvider
 import app.thelasthit.nrt.GUM_2
 import app.thelasthit.nrt.GUM_4
@@ -263,6 +266,17 @@ class OnboardingTest {
 
         compose.waitUntilExactlyOneExists(hasText("Monday 2 March"))
         compose.onNodeWithText("Most NRT courses run 8 to 12\u00A0weeks").assertDoesNotExist()
+    }
+
+    @Test
+    fun `skip is underlined, as the app's other links are`() {
+        showAt(OnboardingDraft(step = OnboardingStep.STOPPED, country = "GB"))
+
+        compose.waitUntilExactlyOneExists(hasText("Skip"))
+        val node = compose.onNodeWithText("Skip", useUnmergedTree = true).fetchSemanticsNode()
+        val layouts = mutableListOf<TextLayoutResult>()
+        node.config[SemanticsActions.GetTextLayoutResult].action?.invoke(layouts)
+        assertEquals(TextDecoration.Underline, layouts.single().layoutInput.style.textDecoration)
     }
 
     @Test
