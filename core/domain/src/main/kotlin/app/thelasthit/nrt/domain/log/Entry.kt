@@ -47,5 +47,8 @@ data class Entry(
 /** Whether a dose was taken on schedule or because of a craving. */
 enum class EntryKind { PLANNED, CRAVING, UNSPECIFIED }
 
-/** Where an entry was logged from. Used for duplicate checks and debugging. */
-enum class EntrySource { APP, WIDGET, TILE, SHORTCUT, DEEP_LINK, APP_FUNCTION, WATCH, IMPORT }
+/**
+ * Where an entry was logged from. Used for duplicate checks and debugging. [NOTIFICATION] is a
+ * reminder's Log button, which opens the log sheet. Stored by name, so new ones go at the end.
+ */
+enum class EntrySource { APP, WIDGET, TILE, SHORTCUT, DEEP_LINK, APP_FUNCTION, WATCH, IMPORT, NOTIFICATION }

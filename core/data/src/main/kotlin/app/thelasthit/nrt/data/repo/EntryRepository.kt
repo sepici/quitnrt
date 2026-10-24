@@ -17,6 +17,9 @@ import app.thelasthit.nrt.domain.log.LogTime
 import app.thelasthit.nrt.domain.product.UserProduct
 import app.thelasthit.nrt.domain.time.DayBoundary
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
 import java.time.Clock
 import java.time.Duration
@@ -64,6 +67,14 @@ class EntryRepository(
     private val zone: () -> ZoneId = { clock.zone },
     private val newId: () -> String = { UUID.randomUUID().toString() },
 ) {
+    private val _logged = MutableSharedFlow<Entry>(extraBufferCapacity = 64)
+
+    /**
+     * Each new dose as it's saved, from whichever way it was logged, for what follows a log, such
+     * as the allowance nudge. Edits and restores aren't new doses, so they aren't here.
+     */
+    val logged: SharedFlow<Entry> = _logged.asSharedFlow()
+
     suspend fun log(request: LogRequest): LogResult {
         results.settleDue()
         val now = clock.instant()
@@ -84,6 +95,7 @@ class EntryRepository(
         val entry = buildEntry(newId(), product, request, at, settings.current().dayBoundary)
         val warning = labelWarningFor(product, entry)
         dao.insertWithTags(entry.toEntity(createdAt = now.toEpochMilli(), updatedAt = now.toEpochMilli()), entry.tagKeys)
+        _logged.tryEmit(entry)
         return LogResult.Saved(entry, warning)
     }
 
