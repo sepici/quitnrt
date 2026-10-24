@@ -31,15 +31,17 @@ import app.thelasthit.nrt.ui.theme.LastHit
 
 /**
  * Your goals (PLAN §6.3): a tile for each extra goal on this programme week or last, in Habits'
- * tiles, with this week so far as its figure and last week under it. A day counts once it's over.
- * Colours stay neutral, and only a goal kept every time this week gets the guide's green tick, as
- * at or under. Goals never change whether a week is met.
+ * tiles, with this week so far as its figure and last week under it. A day counts once it's over,
+ * so on the week's first day a tile has no figure, and the section says why once. Colours stay
+ * neutral, and only a goal kept every time this week gets the guide's green tick, as at or under.
+ * Goals never change whether a week is met.
  */
 @Composable
 internal fun GoalsSection(state: InsightsState) {
     val goals = state.goals ?: return
+    val firstDay = goals.thisWeek?.days == 0
     Section(title = stringResource(R.string.goals_title), action = {}) {
-        Meta(stringResource(R.string.goals_meta))
+        Meta(stringResource(if (firstDay) R.string.goals_meta_first_day else R.string.goals_meta))
         Column(Modifier.padding(top = 14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             goals.caps.forEach { GoalTile(it, goals) }
             goals.gap?.let { GoalTile(it, goals) }
@@ -58,23 +60,18 @@ private fun GoalTile(line: GoalWeeks.Line<out GoalProgress.Count>, weeks: GoalWe
     val named = now ?: before ?: return
     Tile(resources.goalLabel(named, time), Modifier.fillMaxWidth()) {
         val value = now?.let { resources.keptValue(it) }
-        if (now != null && value != null) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        when {
+            now != null && value != null -> Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
                 TileValue(numbersLarge(value))
                 if (now.isAllKept) TickDot(20.dp, fill = LastHit.colors.success, ink = LastHit.colors.bg, modifier = Modifier.padding(top = 2.dp))
             }
-        } else {
-            val quiet = when {
-                now == null -> R.string.goals_off_this_week
-                now is GoalProgress.Gap && (weeks.thisWeek?.days ?: 0) > 0 -> R.string.goals_no_gaps_yet
-                else -> R.string.goals_no_days_yet
-            }
-            Text(
-                stringResource(quiet),
-                style = LastHit.type.headline.copy(fontSize = 20.sp, lineHeight = 36.sp, letterSpacing = 0.sp),
-                color = LastHit.colors.text2,
-                modifier = Modifier.padding(top = 2.dp),
-            )
+            now == null -> QuietValue(stringResource(R.string.goals_off_this_week))
+            // Days over, but none with two doses in it.
+            (weeks.thisWeek?.days ?: 0) > 0 -> QuietValue(stringResource(R.string.goals_no_gaps_yet))
+            // On the week's first day the goal is named alone, and the section says once when it counts.
         }
         val week = weeks.lastWeek?.week?.number
         if (before != null && week != null) {
@@ -87,6 +84,17 @@ private fun GoalTile(line: GoalWeeks.Line<out GoalProgress.Count>, weeks: GoalWe
             Text(text, style = LastHit.type.label, color = LastHit.colors.text2, modifier = Modifier.padding(top = 6.dp))
         }
     }
+}
+
+/** In place of a tile's figure, when this week has none: "Off this week". */
+@Composable
+private fun QuietValue(text: String) {
+    Text(
+        text,
+        style = LastHit.type.headline.copy(fontSize = 20.sp, lineHeight = 36.sp, letterSpacing = 0.sp),
+        color = LastHit.colors.text2,
+        modifier = Modifier.padding(top = 2.dp),
+    )
 }
 
 /** A tile value's words, a size down from its numbers, as Habits' durations have their units. */

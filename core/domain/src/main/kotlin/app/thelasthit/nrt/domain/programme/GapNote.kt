@@ -11,7 +11,7 @@ import java.time.LocalDate
  * stops the dose being logged.
  *
  * It counts gaps as the goal's stats do ([GoalProgress]): only between doses on the same logical
- * day, so a night's sleep is never one, and never for a patch.
+ * day, so a night's sleep is never one, never for a patch, and to the minute, as the times show.
  */
 data class GapNote(
     val goalMinutes: Int,
@@ -41,13 +41,14 @@ data class GapNote(
             editing: String? = null,
         ): GapNote? {
             if (goalMinutes == null || isPatch) return null
+            val time = at.toMinute()
             val nearest = entries
                 .filter { it.logicalDate == date && !it.isBackground && it.id != editing }
-                .minWithOrNull(compareBy<Entry> { Duration.between(it.occurredAt, at).abs() }.thenBy { it.occurredAt > at })
+                .minWithOrNull(compareBy<Entry> { Duration.between(it.occurredAt.toMinute(), time).abs() }.thenBy { it.occurredAt.toMinute() > time })
                 ?: return null
-            val apart = Duration.between(nearest.occurredAt, at).abs()
+            val apart = Duration.between(nearest.occurredAt.toMinute(), time).abs()
             if (apart >= Duration.ofMinutes(goalMinutes.toLong())) return null
-            return GapNote(goalMinutes, nearest, apart, otherCameFirst = nearest.occurredAt <= at)
+            return GapNote(goalMinutes, nearest, apart, otherCameFirst = nearest.occurredAt.toMinute() <= time)
         }
     }
 }

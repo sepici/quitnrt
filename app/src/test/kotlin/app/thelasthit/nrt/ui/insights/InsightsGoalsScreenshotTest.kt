@@ -8,6 +8,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.thelasthit.nrt.TestApp
 import app.thelasthit.nrt.ui.LARGE_FONT
 import app.thelasthit.nrt.ui.captureLooks
+import app.thelasthit.nrt.ui.plan.seedGoalFirstDay
 import app.thelasthit.nrt.ui.plan.seedGoalWeeks
 import app.thelasthit.nrt.ui.plan.setUpForPlan
 import org.junit.Rule
@@ -34,15 +35,22 @@ class InsightsGoalsScreenshotTest {
     private val app: TestApp = ApplicationProvider.getApplicationContext()
 
     @Test @Config(qualifiers = GOALS_PAGE)
-    fun goals() = capture()
+    fun goals() = capture("insights-goals") { app.seedGoalWeeks() }
 
     @Test @Config(qualifiers = GOALS_PAGE_LARGE, fontScale = LARGE_FONT)
-    fun goalsLarge() = capture()
+    fun goalsLarge() = capture("insights-goals") { app.seedGoalWeeks() }
 
-    private fun capture() {
+    /** Week 4's first day: no figure for this week, last week under each goal, and why said once. */
+    @Test @Config(qualifiers = GOALS_PAGE)
+    fun firstDay() = capture("insights-goals-first-day") { app.seedGoalFirstDay() }
+
+    @Test @Config(qualifiers = GOALS_PAGE_LARGE, fontScale = LARGE_FONT)
+    fun firstDayLarge() = capture("insights-goals-first-day") { app.seedGoalFirstDay() }
+
+    private fun capture(name: String, seed: () -> Unit) {
         app.setUpForPlan()
-        app.seedGoalWeeks()
-        compose.captureLooks("insights-goals", ready = hasText("Your goals")) {
+        seed()
+        compose.captureLooks(name, ready = hasText("Your goals")) {
             InsightsScreen(remember { SnackbarHostState() })
         }
     }

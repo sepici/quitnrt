@@ -69,6 +69,20 @@ class GoalProgressTest {
     }
 
     @Test
+    fun `a gap is read to the minute, as the times show`() {
+        val entries = listOf(
+            // A dose logged as now keeps its seconds, but 10:30 to 12:00 on the clock is 90 minutes.
+            use("2026-10-24T10:30:45", GUM_2),
+            use("2026-10-24T12:00:10", GUM_2),
+            // 10:30 to 11:59 is 89, though it's nearer 90 to the second.
+            use("2026-10-25T10:30:10", GUM_2),
+            use("2026-10-25T11:59:50", GUM_2),
+        )
+        val gap = checkNotNull(GoalProgress.of(week1, entries, today = date("2026-10-26"), dayStart).gap)
+        assertEquals(GoalProgress.Gap(90, kept = 1, of = 2), gap)
+    }
+
+    @Test
     fun `patches are left out of the gaps and the first dose`() {
         val entries = listOf(
             use("2026-10-24T07:00", PATCH_21),

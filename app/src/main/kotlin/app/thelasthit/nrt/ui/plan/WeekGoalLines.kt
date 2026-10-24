@@ -28,9 +28,10 @@ import app.thelasthit.nrt.ui.theme.LastHit
 
 /**
  * The week's extra goals (PLAN §6.3) under its columns, a short line each: "At most 5 pieces of
- * 2 mg gum a day: kept on 4 of 4 days so far". A day counts once it's over. A goal kept every
- * time so far gets the guide's green tick, as at or under; the rest stays neutral, since goals
- * never change whether the week is met.
+ * 2 mg gum a day: kept on 4 of 4 days so far". A day counts once it's over, so on the week's
+ * first day each goal is named alone, with that said once above them. A goal kept every time so
+ * far gets the guide's green tick, as at or under; the rest stays neutral, since goals never
+ * change whether the week is met.
  */
 @Composable
 internal fun WeekGoalLines(state: PlanState.Running, week: ProgrammeWeek, modifier: Modifier = Modifier) {
@@ -42,14 +43,16 @@ internal fun WeekGoalLines(state: PlanState.Running, week: ProgrammeWeek, modifi
     val time = rememberTimeFormatter()
     Column(modifier.fillMaxWidth()) {
         Kicker(stringResource(R.string.goals_plan_title))
+        if (progress.days == 0) Meta(stringResource(R.string.goals_plan_first_day), Modifier.padding(top = 2.dp))
         Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             progress.counts.forEach { count ->
                 val label = resources.goalLabel(count, time)
                 val kept = resources.keptInLine(count)
                 val text = when {
                     kept != null -> stringResource(R.string.goals_plan_line, label, kept)
-                    count is GoalProgress.Gap && progress.days > 0 -> stringResource(R.string.goals_plan_no_gaps, label)
-                    else -> stringResource(R.string.goals_plan_waiting, label)
+                    // Days over, but none with two doses in it.
+                    progress.days > 0 -> stringResource(R.string.goals_plan_no_gaps, label)
+                    else -> label
                 }
                 GoalLine(count.icon, text, count.isAllKept)
             }

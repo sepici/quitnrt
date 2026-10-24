@@ -3,8 +3,10 @@ package app.thelasthit.nrt.domain.programme
 import app.thelasthit.nrt.domain.log.Entry
 import app.thelasthit.nrt.domain.product.UserProduct
 import java.time.Duration
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.temporal.ChronoUnit
 
 /**
  * How a week's extra goals went (PLAN §6.3), for Insights and the Plan tab. Goals show in stats
@@ -17,7 +19,8 @@ import java.time.LocalTime
  *   have a cap like any product in the mix.
  * - **The gap between doses:** each gap between two doses next to each other on the same logical
  *   day, as Habits counts them, so a night's sleep is never one. A gap at least as long as the goal
- *   keeps it.
+ *   keeps it. Gaps are read to the minute, as every dose time shows, so 10:30 to 12:00 is 90
+ *   minutes whatever the seconds of each.
  * - **First dose not before:** a day keeps it when its first dose comes at or after the time, on
  *   the dose's own clock, or it has no dose. Times are read from the day start, as Habits reads
  *   the first dose, so one taken after midnight counts as late in its day rather than early.
@@ -81,7 +84,9 @@ data class GoalProgress(
             val paced = dates.associateWith { date -> byDay[date].orEmpty().filterNot { it.isBackground }.sortedBy { it.occurredAt } }
             val gap = goals.minGapMinutes?.let { minutes ->
                 val goal = Duration.ofMinutes(minutes.toLong())
-                val gaps = paced.values.flatMap { day -> day.zipWithNext { a, b -> Duration.between(a.occurredAt, b.occurredAt) } }
+                val gaps = paced.values.flatMap { day ->
+                    day.zipWithNext { a, b -> Duration.between(a.occurredAt.toMinute(), b.occurredAt.toMinute()) }
+                }
                 Gap(minutes, kept = gaps.count { it >= goal }, of = gaps.size)
             }
             val firstDose = goals.firstDoseNotBefore?.let { time ->
@@ -102,6 +107,12 @@ data class GoalProgress(
         private const val MINUTES_A_DAY = 24 * 60
     }
 }
+
+/**
+ * [this] as a dose time reads, to the minute. A dose logged as now keeps the seconds it was logged
+ * at, which no screen shows, so gaps are measured between the times on the clock.
+ */
+internal fun Instant.toMinute(): Instant = truncatedTo(ChronoUnit.MINUTES)
 
 /**
  * Insights' "Your goals": the extra goals of the programme week running on a day and of the week

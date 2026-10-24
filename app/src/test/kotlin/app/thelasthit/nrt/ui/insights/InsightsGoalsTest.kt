@@ -20,6 +20,7 @@ import app.thelasthit.nrt.domain.backup.Backup
 import app.thelasthit.nrt.seedMockupPlan
 import app.thelasthit.nrt.setUp
 import app.thelasthit.nrt.ui.PHONE
+import app.thelasthit.nrt.ui.plan.seedGoalFirstDay
 import app.thelasthit.nrt.ui.plan.seedGoalWeeks
 import app.thelasthit.nrt.ui.plan.seedWeekFour
 import app.thelasthit.nrt.ui.plan.setUpForPlan
@@ -69,6 +70,23 @@ class InsightsGoalsTest {
             .assertExists()
         compose.onNode(hasText("First dose from 09:00") and hasText("Kept on 3${NB}of${NB}4", substring = true) and hasText("Week 3, from 08:45: kept on 5${NB}of${NB}7", substring = true))
             .assertExists()
+    }
+
+    @Test
+    fun `on the week's first day each goal shows last week, and when this week counts is said once`() {
+        app.setUpForPlan()
+        app.seedGoalFirstDay()
+        show()
+
+        compose.waitUntilAtLeastOneExists(hasText("Your goals"), timeoutMillis = 10_000)
+        compose.onNodeWithText("Your goals").performScrollTo()
+        compose.onNodeWithText("This week's goals count once today is over, and they never change whether a week is met.").assertExists()
+        compose.onNode(hasText("First dose from 09:00") and hasText("Week 3, from 08:45: kept on 5${NB}of${NB}7", substring = true)).assertExists()
+        compose.onNode(hasText("between doses", substring = true) and hasText("Week 3: kept for 47${NB}of${NB}54", substring = true)).assertExists()
+        // No tile has a figure for this week, or a line in its place.
+        compose.onNode(hasText("Kept ", substring = true)).assertDoesNotExist()
+        compose.onNode(hasText("No full days yet", substring = true)).assertDoesNotExist()
+        compose.onNode(hasText("No gaps yet", substring = true)).assertDoesNotExist()
     }
 
     @Test

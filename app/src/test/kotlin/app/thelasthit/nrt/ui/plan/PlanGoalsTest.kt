@@ -12,6 +12,7 @@ import app.thelasthit.nrt.ui.AppShell
 import app.thelasthit.nrt.ui.PHONE
 import app.thelasthit.nrt.ui.theme.LastHitTheme
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -59,14 +60,39 @@ class PlanGoalsTest {
     }
 
     @Test
-    fun `on the week's first day the goals count once it's over`() {
+    fun `on the week's first day each goal is named alone, and when they count is said once`() {
         app.startMockupPlan()
         app.setTime("2026-10-24T10:00")
         runBlocking { app.graph.programmes.setGoals(WeekGoals(minGapMinutes = 90, firstDoseNotBefore = LocalTime.of(8, 0))) }
         showPlanTab()
 
-        compose.onNode(hasText("between doses: counts once today is over", substring = true)).assertExists()
-        compose.onNodeWithText("First dose from 08:00: counts once today is over").assertExists()
+        compose.onNodeWithText("They count once today is over.").assertExists()
+        compose.onNodeWithText("At least 1${NB}h 30${NB}min between doses").assertExists()
+        compose.onNodeWithText("First dose from 08:00").assertExists()
+        compose.onNode(hasText("counts once today is over", substring = true)).assertDoesNotExist()
+    }
+
+    @Test
+    fun `once the week's days count, the note about today goes`() {
+        app.seedGoalWeeks()
+        showPlanTab()
+
+        compose.onNodeWithText("Extra goals this week").assertExists()
+        compose.onNodeWithText("They count once today is over.").assertDoesNotExist()
+    }
+
+    @Test
+    fun `a missed week that can still be repeated today stays above the goals`() {
+        app.seedGoalsCarriedOn()
+        showPlanTab()
+        compose.waitUntilAtLeastOneExists(hasText("You carried on after week 6.", substring = true), timeoutMillis = 10_000)
+
+        val link = compose.onNodeWithText("Repeat week 6 instead").fetchSemanticsNode().boundsInRoot
+        val goals = compose.onNodeWithText("Extra goals this week").fetchSemanticsNode().boundsInRoot
+        // The columns' key, the last of the week's figures.
+        val days = compose.onNodeWithText("At or under the guide", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+        assertTrue("The choice comes after the week's columns", days.bottom <= link.top)
+        assertTrue("The goals come after the choice", link.bottom <= goals.top)
     }
 
     @Test

@@ -31,6 +31,18 @@ class GapNoteTest {
     }
 
     @Test
+    fun `the gap is read to the minute, as the times show`() {
+        // A dose logged as now keeps its seconds, but 10:30 to 12:00 on the clock is 90 minutes.
+        val last = use("2026-10-26T10:30:45", GUM_2)
+        assertNull(GapNote.of(90, at("2026-10-26T12:00:10"), date("2026-10-26"), isPatch = false, entries = listOf(last)))
+        // 10:30 to 11:59 is 89, though it's nearer 90 to the second.
+        val early = use("2026-10-26T10:30:10", GUM_2)
+        val note = checkNotNull(GapNote.of(90, at("2026-10-26T11:59:50"), date("2026-10-26"), isPatch = false, entries = listOf(early)))
+        assertEquals(Duration.ofMinutes(89), note.apart)
+        assertTrue(note.otherCameFirst)
+    }
+
+    @Test
     fun `nothing when the goal is off, for a patch, or with nothing else that day`() {
         assertNull(GapNote.of(null, at("2026-10-26T12:10"), date("2026-10-26"), isPatch = false, entries = listOf(earlier)))
         assertNull(GapNote.of(90, at("2026-10-26T12:10"), date("2026-10-26"), isPatch = true, entries = listOf(earlier)))
