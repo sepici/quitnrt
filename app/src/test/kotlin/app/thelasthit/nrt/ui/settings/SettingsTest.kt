@@ -224,7 +224,7 @@ class SettingsTest {
         compose.onNode(hasText("Replace everything") and isButton).performClick()
         waitFor("Replace everything on this phone?")
         compose.onNodeWithText(
-            "The 10\u00A0doses, 4\u00A0products and tag changes on this phone will be deleted. " +
+            "This deletes 10\u00A0doses, 4\u00A0products and your tag changes on this phone. " +
                 "The backup from 23 October 2026 takes their place, along with its day start.",
         ).assertExists()
         // The sheet counts as a dialog too, so find the warning's button by the warning's title.

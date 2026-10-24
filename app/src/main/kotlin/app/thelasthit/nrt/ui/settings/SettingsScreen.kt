@@ -205,15 +205,13 @@ fun SettingsScreen(
     restore?.let { candidate ->
         RestoreSheet(candidate, viewModel)
         candidate.replacing?.let { counts ->
-            val doses = pluralStringResource(R.plurals.restore_doses, counts.entries, counts.entries)
-            val products = pluralStringResource(R.plurals.restore_products, counts.products, counts.products)
             val madeOn = candidate.madeOn?.let { DayMonthYearFormatter.format(it) } ?: candidate.fileName
             AlertDialog(
                 onDismissRequest = viewModel::cancelReplace,
                 title = { Text(stringResource(R.string.replace_title)) },
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Text(stringResource(R.string.replace_body, doses, products, madeOn))
+                        Text(LocalResources.current.replaceBody(counts, madeOn))
                         Text(stringResource(R.string.replace_small), style = LastHit.type.label, color = LastHit.colors.text2)
                     }
                 },

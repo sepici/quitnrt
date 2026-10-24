@@ -2,16 +2,13 @@ package app.thelasthit.nrt.ui
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -27,6 +24,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
@@ -42,11 +40,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import app.thelasthit.nrt.LastHitApp
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.ui.history.HistoryScreen
 import app.thelasthit.nrt.ui.insights.InsightsScreen
 import app.thelasthit.nrt.ui.lair.LairScreen
 import app.thelasthit.nrt.ui.link.LinkHost
+import app.thelasthit.nrt.ui.plan.PlanRoutes
+import app.thelasthit.nrt.ui.plan.PlanScreen
+import app.thelasthit.nrt.ui.plan.SettleOnStart
+import app.thelasthit.nrt.ui.plan.planPages
 import app.thelasthit.nrt.ui.settings.AboutScreen
 import app.thelasthit.nrt.ui.settings.CatalogueScreen
 import app.thelasthit.nrt.ui.settings.DayStartScreen
@@ -99,7 +102,10 @@ fun AppShell() {
     val showMessage: (Int) -> Unit = { res -> shellScope.launch { snackbars.showSnackbar(resources.getString(res)) } }
     val colors = LastHit.colors
 
-    val inSettings = currentRoute?.startsWith(SettingsRoutes.MAIN) == true
+    val inSettings = currentRoute?.startsWith(SettingsRoutes.MAIN) == true || PlanRoutes.isPage(currentRoute)
+    val graph = (LocalContext.current.applicationContext as LastHitApp).graph
+    // Results that fell due while the app was away arrive when it comes back (ROADMAP P3-3).
+    SettleOnStart { graph.programmes.settle() }
 
     Scaffold(
         containerColor = colors.bg,
@@ -138,8 +144,15 @@ fun AppShell() {
                 InsightsScreen(snackbars = snackbars)
             }
             page(TopLevelDestination.Plan.route) {
-                PlaceholderScreen(title = stringResource(TopLevelDestination.Plan.label))
+                PlanScreen(
+                    onUsualDay = { navController.navigate(PlanRoutes.usualDay(it)) },
+                    onBuild = { navController.navigate(PlanRoutes.BUILD) },
+                    onGoals = { navController.navigate(PlanRoutes.GOALS) },
+                    onOpenLair = { navController.navigateTo(TopLevelDestination.Lair) },
+                    onNewDemon = { navController.navigate(PlanRoutes.NEW_DEMON) },
+                )
             }
+            planPages(navController, onOpenCatalogue = { navController.navigate(SettingsRoutes.CATALOGUE) })
             composable(TopLevelDestination.Lair.route) { LairScreen() }
             settings(navController, snackbars, showMessage)
         }
@@ -233,22 +246,5 @@ private fun NavController.navigateTo(destination: TopLevelDestination) {
         popUpTo(graph.findStartDestination().id) { saveState = true }
         launchSingleTop = true
         restoreState = true
-    }
-}
-
-@Composable
-private fun PlaceholderScreen(title: String) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Text(title, style = MaterialTheme.typography.headlineMedium)
-        Text(
-            stringResource(R.string.placeholder_body),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
     }
 }

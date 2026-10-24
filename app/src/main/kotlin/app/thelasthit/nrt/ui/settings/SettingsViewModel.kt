@@ -135,7 +135,12 @@ class SettingsViewModel(
             val summary = graph.backups.import(candidate.backup, mode)
             _messages.send(
                 when (mode) {
-                    ImportMode.MERGE -> SettingsMessage.Count(R.plurals.restored_merge, summary.entries)
+                    // A running programme in the backup stays out of a merge, and only replacing brings it in.
+                    ImportMode.MERGE -> if (summary.programmesSkipped > 0) {
+                        SettingsMessage.Count(R.plurals.plan_restored_merge_skipped, summary.entries)
+                    } else {
+                        SettingsMessage.Count(R.plurals.restored_merge, summary.entries)
+                    }
                     ImportMode.REPLACE -> SettingsMessage.Text(R.string.restored_replace)
                 },
             )
