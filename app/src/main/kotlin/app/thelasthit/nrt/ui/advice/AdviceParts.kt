@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,6 +36,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.AlignmentLine
+import androidx.compose.ui.layout.FirstBaseline
+import androidx.compose.ui.layout.LastBaseline
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -49,6 +54,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -103,9 +109,10 @@ fun AdvicePage(title: String?, onBack: () -> Unit, trailing: @Composable RowScop
 }
 
 /**
- * A timer's page: its top bar, a body that scrolls when it has to, and the buttons pinned to
- * the bottom, as the mockups' tm-foot. A [centred] body sits in the middle of the space, as the
- * running breathing timer and the end frames do.
+ * A timer's page: its top bar, a body that scrolls when it has to, and the buttons at the bottom,
+ * as the mockups' tm-foot. A [centred] body sits in the middle of the space, as the running
+ * breathing timer and the end frames do. The buttons stay in reach when the body is taller than
+ * the screen, as it can be at a large font, and a rule along their top edge shows there's more.
  */
 @Composable
 fun TimerPage(
@@ -114,11 +121,13 @@ fun TimerPage(
     centred: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    Column(Modifier.fillMaxSize().background(LastHit.colors.bg)) {
+    val colors = LastHit.colors
+    val scroll = rememberScrollState()
+    Column(Modifier.fillMaxSize().background(colors.bg)) {
         top()
         BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
             val height = maxHeight
-            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+            Column(Modifier.fillMaxSize().verticalScroll(scroll)) {
                 Column(
                     Modifier.fillMaxWidth().then(if (centred) Modifier.heightIn(min = height) else Modifier),
                     verticalArrangement = if (centred) Arrangement.Center else Arrangement.Top,
@@ -127,7 +136,15 @@ fun TimerPage(
             }
         }
         Column(
-            Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 24.dp, bottom = 28.dp),
+            Modifier
+                .fillMaxWidth()
+                .drawBehind {
+                    if (scroll.canScrollForward) {
+                        val line = 1.dp.toPx()
+                        drawLine(colors.line, Offset(0f, line / 2), Offset(size.width, line / 2), strokeWidth = line)
+                    }
+                }
+                .padding(start = 20.dp, end = 20.dp, top = 24.dp, bottom = 28.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) { foot() }
     }
@@ -382,12 +399,34 @@ fun AdviceCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.(
 }
 
 
-/** An underlined link, at least 48 dp to tap, as the mockups' link. */
+/**
+ * Fits a text whose [lineHeight] is less than its font's own into line boxes that tall, as CSS
+ * does, with the difference taken evenly from above and below. Android keeps a line at least as
+ * tall as its font, whatever the line height or LineHeightStyle, so a big number would otherwise
+ * stand taller than in the mockups and push everything under it down. Only the first line's top
+ * and the last line's bottom are trimmed, so lines that wrap never overlap, and baselines move
+ * with the text.
+ */
+fun Modifier.cssLineHeight(lineHeight: TextUnit): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints)
+    val first = placeable[FirstBaseline]
+    val last = placeable[LastBaseline]
+    // The font's own height for one line: from the top to the first baseline, and from the last baseline to the bottom.
+    val ownLine = if (first == AlignmentLine.Unspecified || last == AlignmentLine.Unspecified) {
+        placeable.height
+    } else {
+        first + placeable.height - last
+    }
+    val trim = ((ownLine - lineHeight.roundToPx()) / 2).coerceAtLeast(0)
+    layout(placeable.width, placeable.height - 2 * trim) { placeable.place(0, -trim) }
+}
+
+/** An underlined link, at least 48 dp each way to tap, as the mockups' link. */
 @Composable
 fun AdviceLink(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, description: String? = null) {
     Box(
         modifier
-            .heightIn(min = 48.dp)
+            .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
             .clickable(role = Role.Button, onClick = onClick)
             .then(if (description != null) Modifier.semantics { contentDescription = description } else Modifier)
             .padding(horizontal = 4.dp),

@@ -56,7 +56,9 @@ import java.time.format.DateTimeFormatter
 fun DelayScreen(
     onBack: () -> Unit,
     onBreathe: () -> Unit,
-    viewModel: DelayViewModel = timerViewModel { graph, saved, context -> DelayViewModel(graph.clock, saved, VibratorBuzzer(context)) },
+    viewModel: DelayViewModel = timerViewModel { graph, saved, context ->
+        DelayViewModel(graph.clock, saved, VibratorBuzzer(context), PartialWakeLock(context))
+    },
 ) {
     val stage by viewModel.stage.collectAsStateWithLifecycle()
     val now by viewModel.now.collectAsStateWithLifecycle()
@@ -150,11 +152,12 @@ private fun DelayRunning(
                     color = colors.text2,
                 )
                 Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    val lineHeight = fixedSp(100.dp)
                     Text(
                         clockText(left),
-                        style = LastHit.type.hero.copy(fontSize = fixedSp(112.dp), lineHeight = fixedSp(100.dp), letterSpacing = (-0.036).em),
+                        style = LastHit.type.hero.copy(fontSize = fixedSp(112.dp), lineHeight = lineHeight, letterSpacing = (-0.036).em),
                         color = colors.text,
-                        modifier = Modifier.alignByBaseline(),
+                        modifier = Modifier.cssLineHeight(lineHeight).alignByBaseline(),
                     )
                     Text(
                         stringResource(R.string.delay_of, run.minutes),
@@ -252,7 +255,7 @@ private fun DelayDone(run: DelayRun, time: DateTimeFormatter, onClose: () -> Uni
                 style = LastHit.type.headline.copy(fontSize = 34.sp, lineHeight = 38.sp, letterSpacing = (-0.035).em),
                 color = colors.text,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 28.dp),
+                modifier = Modifier.padding(top = 28.dp).cssLineHeight(38.sp),
             )
             Text(
                 stringResource(R.string.delay_done_when, time.formatAt(run.startedAt), time.formatAt(run.endsAt)),

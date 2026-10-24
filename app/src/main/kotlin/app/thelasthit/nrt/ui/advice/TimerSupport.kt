@@ -3,6 +3,7 @@ package app.thelasthit.nrt.ui.advice
 import android.content.Context
 import android.media.AudioAttributes
 import android.os.Build
+import android.os.PowerManager
 import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -31,6 +32,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.time.Duration
 
 /** The timers' buzzes. */
 interface Buzzer {
@@ -40,7 +42,7 @@ interface Buzzer {
     /** Two taps, as a breathing session ends. */
     fun finish()
 
-    /** The delay timer's end: three long buzzes, as an alarm, so they come through while the app is in the background. */
+    /** The delay timer's end: three long buzzes, as an alarm, which Android lets through from an app in the background. */
     fun alarm()
 }
 
@@ -77,6 +79,37 @@ class VibratorBuzzer(context: Context) : Buzzer {
         const val TICK_MS = 40L
         val FINISH = longArrayOf(0, 60, 120, 60)
         val ALARM = longArrayOf(0, 400, 250, 400, 250, 400)
+    }
+}
+
+/**
+ * Keeps the phone's processor running while the delay timer counts, so its end buzzes on time
+ * with the screen off. Without it, a locked phone sleeps and the countdown stops with it.
+ */
+interface WakeHold {
+    /** Keeps the processor awake for at most [timeout]. Holding again starts the timeout over. */
+    fun hold(timeout: Duration)
+
+    fun release()
+}
+
+/** A partial wake lock: the screen can go off, and the processor stays on until it's released or times out. */
+class PartialWakeLock(context: Context) : WakeHold {
+
+    private val lock: PowerManager.WakeLock? = context.getSystemService(PowerManager::class.java)
+        ?.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG)
+        ?.apply { setReferenceCounted(false) }
+
+    override fun hold(timeout: Duration) {
+        lock?.acquire(timeout.toMillis().coerceAtLeast(1))
+    }
+
+    override fun release() {
+        lock?.takeIf { it.isHeld }?.release()
+    }
+
+    companion object {
+        const val TAG = "LastHit:delay"
     }
 }
 

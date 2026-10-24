@@ -38,6 +38,25 @@ fun TestApp.seedAdviceWeeks() = runBlocking {
     }
 }
 
+/**
+ * Two weeks with an after-meal dose at 10:30 and another at 12:05 each day, so the timing tip
+ * moves them to 10:00, before breakfast, and 11:30, before lunch: two times 90 minutes apart.
+ * A first dose at 08:00 lets both move earlier.
+ */
+fun TestApp.seedCloseMeals() = runBlocking {
+    val first = LocalDate.parse("2026-10-09")
+    for (day in 0L..13L) {
+        val date = first.plusDays(day)
+        fun log(time: String, vararg tags: String) = runBlocking {
+            graph.entries.log(LogRequest(GUM_2, at = london("${date}T$time"), tagKeys = tags.toSet()))
+        }
+        log("08:00", "woke_up")
+        log("10:30", "after_meal")
+        log("12:05", "after_meal")
+        log("16:00")
+    }
+}
+
 /** [count] breathing sessions that ran to the end, before today. */
 fun TestApp.seedBreathing(count: Int) = runBlocking {
     repeat(count) { index ->
@@ -61,5 +80,19 @@ class FakeBuzzer : Buzzer {
 
     override fun alarm() {
         alarms++
+    }
+}
+
+/** A wake hold that remembers its timeout while it's held. */
+class FakeWakeHold : WakeHold {
+    /** How long the hold in place lasts at most, or null when nothing holds the processor on. */
+    var heldFor: Duration? = null
+
+    override fun hold(timeout: Duration) {
+        heldFor = timeout
+    }
+
+    override fun release() {
+        heldFor = null
     }
 }

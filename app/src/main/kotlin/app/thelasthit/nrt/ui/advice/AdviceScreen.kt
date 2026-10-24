@@ -55,7 +55,8 @@ import kotlin.math.roundToInt
 /**
  * The full advice list (PLAN §9 and §15): someone's own top triggers first, from the last 14
  * days, then the 4 Ds, then every strategy by the kind of trigger it suits, and free help.
- * A strategy with a timer opens the timer; the rest open their page.
+ * Under the top triggers and in the 4 Ds card, a strategy with a timer opens the timer. Every
+ * other row opens the strategy's page, with its sources and a button for the timer.
  */
 @Composable
 fun AdviceScreen(
@@ -65,7 +66,8 @@ fun AdviceScreen(
     viewModel: AdviceViewModel = graphViewModel { AdviceViewModel(it) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val open: (Strategy) -> Unit = { strategy -> strategy.interactive?.let(onTimer) ?: onStrategy(strategy.key) }
+    // A top trigger's row goes straight to its timer, as the 4 Ds card does.
+    val timerOrPage: (Strategy) -> Unit = { strategy -> strategy.interactive?.let(onTimer) ?: onStrategy(strategy.key) }
     AdvicePage(stringResource(R.string.advice_title), onBack) {
         AdviceIntro(stringResource(R.string.advice_intro))
         val loaded = state ?: return@AdvicePage
@@ -80,7 +82,7 @@ fun AdviceScreen(
                 modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp),
             )
         }
-        loaded.personal.forTriggers.forEach { advice -> TriggerBlock(advice, loaded, time, open) }
+        loaded.personal.forTriggers.forEach { advice -> TriggerBlock(advice, loaded, time, timerOrPage) }
 
         FourDs(onStrategy, onTimer)
 
@@ -95,7 +97,7 @@ fun AdviceScreen(
                         sub = AnnotatedString(tags.joinToString(", ")),
                         first = index == 0,
                         timer = strategy.interactive != null,
-                        onClick = { open(strategy) },
+                        onClick = { onStrategy(strategy.key) },
                     )
                 }
             }
@@ -111,7 +113,10 @@ fun AdviceScreen(
     }
 }
 
-/** One top trigger: its name and share, then its strategies, with a timing tip where there is one. */
+/**
+ * One top trigger: its name and share, then its strategies, with a timing tip where there is one.
+ * The 4 Ds card comes next, so the 4 Ds and the strategies for any moment aren't rows here too.
+ */
 @Composable
 private fun TriggerBlock(advice: TriggerAdvice, state: AdviceState, time: DateTimeFormatter, open: (Strategy) -> Unit) {
     val colors = LastHit.colors
@@ -133,12 +138,12 @@ private fun TriggerBlock(advice: TriggerAdvice, state: AdviceState, time: DateTi
         )
     }
     Ruled {
-        advice.strategies.forEachIndexed { index, match ->
+        AdviceIndex.triggerRows(advice).forEachIndexed { index, match ->
             val strategy = match.strategy
             val tip = state.tipFor(advice.trigger, strategy)
             StrategyRow(
                 title = strategy.title,
-                sub = if (tip != null) fromLogs(tipShort(tip, time)) else AnnotatedString(strategy.steps.first()),
+                sub = if (tip != null) fromLogs(tipShort(tip, time)) else AnnotatedString(strategy.summary),
                 subColour = if (tip != null) colors.text else colors.text2,
                 first = index == 0,
                 timer = strategy.interactive != null,
@@ -164,8 +169,8 @@ private fun FourDs(onStrategy: (String) -> Unit, onTimer: (Interactive) -> Unit)
         val rows = listOf(
             FourD(R.string.advice_ds_delay, R.string.advice_ds_delay_sub, R.drawable.ic_timer, timer = true) { onTimer(Interactive.DELAY_TIMER) },
             FourD(R.string.advice_ds_breaths, R.string.advice_ds_breaths_sub, R.drawable.ic_wind, timer = true) { onTimer(Interactive.BREATHING_TIMER) },
-            FourD(R.string.advice_ds_water, R.string.advice_ds_water_sub, R.drawable.ic_drop, timer = false) { onStrategy(FOUR_DS) },
-            FourD(R.string.advice_ds_else, R.string.advice_ds_else_sub, R.drawable.ic_swap, timer = false) { onStrategy(FOUR_DS) },
+            FourD(R.string.advice_ds_water, R.string.advice_ds_water_sub, R.drawable.ic_drop, timer = false) { onStrategy(AdviceIndex.FOUR_DS) },
+            FourD(R.string.advice_ds_else, R.string.advice_ds_else_sub, R.drawable.ic_swap, timer = false) { onStrategy(AdviceIndex.FOUR_DS) },
         )
         rows.forEachIndexed { index, row ->
             StrategyRow(
@@ -182,8 +187,6 @@ private fun FourDs(onStrategy: (String) -> Unit, onTimer: (Interactive) -> Unit)
 }
 
 private class FourD(@StringRes val title: Int, @StringRes val sub: Int, val icon: Int, val timer: Boolean, val onClick: () -> Unit)
-
-private const val FOUR_DS = "four_ds"
 
 /** The free lines for the phone's country, each with a way to call or open it. */
 @Composable

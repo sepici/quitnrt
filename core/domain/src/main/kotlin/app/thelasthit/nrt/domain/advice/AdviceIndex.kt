@@ -9,8 +9,8 @@ import java.time.LocalTime
 data class StrategySection(val group: TagGroup?, val strategies: List<Strategy>)
 
 /**
- * The full advice list (PLAN §9 and §15): every strategy once, under the kind of trigger it
- * suits best, after someone's own top triggers and the 4 Ds.
+ * The full advice list (PLAN §9 and §15): someone's own top triggers, the 4 Ds in a card, then
+ * every other strategy once, under the kind of trigger it suits best.
  */
 object AdviceIndex {
     /** How many of its tags a strategy's row names. */
@@ -18,6 +18,9 @@ object AdviceIndex {
 
     /** A group a strategy names counts as this many of its tags when placing it. */
     const val NAMED_GROUP_WEIGHT = 2
+
+    /** The 4 Ds, which the list shows as a card of its own, straight after the top triggers. */
+    const val FOUR_DS = "four_ds"
 
     /**
      * The section [strategy] sits in: null, for any moment, when it names every group. Otherwise
@@ -36,14 +39,28 @@ object AdviceIndex {
     /**
      * Every strategy for someone using [forms], by section: any time first, then the groups in
      * their order, each in the library's order. A strategy about some forms, such as gum, only
-     * shows to people who use one of them. With no products yet, every strategy shows.
+     * shows to people who use one of them. With no products yet, every strategy shows. The 4 Ds
+     * has its own card, so it isn't listed again here.
      */
     fun sections(library: AdviceLibrary, forms: Set<ProductForm>): List<StrategySection> {
-        val shown = library.strategies.filter { strategy -> forms.isEmpty() || strategy.forms.isEmpty() || forms.any(strategy::appliesTo) }
+        val shown = library.strategies.filter { strategy ->
+            strategy.key != FOUR_DS && (forms.isEmpty() || strategy.forms.isEmpty() || forms.any(strategy::appliesTo))
+        }
         val bySection = shown.groupBy(::sectionOf)
         return (listOf<TagGroup?>(null) + TagGroup.entries).mapNotNull { group ->
             bySection[group]?.let { StrategySection(group, it) }
         }
+    }
+
+    /**
+     * The rows under a top trigger in the list: the strategies for its tag or its group. The 4 Ds
+     * card comes straight after the top triggers, for any craving, so they leave out the 4 Ds and
+     * the strategies for any moment, such as the delay timer, which would only repeat it. A
+     * trigger with nothing else keeps its best one of those, the 4 Ds last.
+     */
+    fun triggerRows(advice: TriggerAdvice): List<StrategyMatch> {
+        val specific = advice.strategies.filter { it.level != MatchLevel.ANY_TIME && it.strategy.key != FOUR_DS }
+        return specific.ifEmpty { advice.strategies.sortedBy { it.strategy.key == FOUR_DS }.take(1) }
     }
 
     /**

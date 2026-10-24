@@ -19,12 +19,34 @@ class AdviceIndexTest {
     private fun section(key: String): TagGroup? = AdviceIndex.sectionOf(library.find(key)!!)
 
     @Test
-    fun `every strategy sits in one section, with the ones for any moment first`() {
+    fun `every strategy but the 4 Ds sits in one section, with the ones for any moment first`() {
         val sections = AdviceIndex.sections(library, forms = emptySet())
 
         assertEquals(listOf(null) + TagGroup.entries, sections.map { it.group })
-        assertEquals(library.strategies.map { it.key }.sorted(), sections.flatMap { s -> s.strategies.map { it.key } }.sorted())
-        assertEquals(listOf("four_ds", "delay_timer", "reasons_list", "quit_coach"), sections.first().strategies.map { it.key })
+        // The 4 Ds has its own card, just above.
+        val others = library.strategies.map { it.key }.filter { it != AdviceIndex.FOUR_DS }
+        assertEquals(others.sorted(), sections.flatMap { s -> s.strategies.map { it.key } }.sorted())
+        assertEquals(listOf("delay_timer", "reasons_list", "quit_coach"), sections.first().strategies.map { it.key })
+    }
+
+    @Test
+    fun `a top trigger's rows leave out the 4 Ds and the any-time strategies, as the 4 Ds card follows them`() {
+        val coffee = personal(meals).forTriggers.single { it.trigger.key == "coffee_tea" }
+        assertEquals(listOf("gum_and_drinks", "swap_drink", "four_ds"), coffee.strategies.map { it.strategy.key })
+        assertEquals(listOf("gum_and_drinks", "swap_drink"), AdviceIndex.triggerRows(coffee).map { it.strategy.key })
+
+        fun rows(vararg matches: Pair<String, MatchLevel>) = AdviceIndex.triggerRows(
+            coffee.copy(strategies = matches.map { (key, level) -> StrategyMatch(library.find(key)!!, level) }),
+        ).map { it.strategy.key }
+        // The 4 Ds names Strong craving itself, and still isn't a row.
+        assertEquals(
+            listOf("ask_about_pace", "delay_timer"),
+            rows("four_ds" to MatchLevel.TAG, "ask_about_pace" to MatchLevel.TAG, "delay_timer" to MatchLevel.TAG),
+        )
+        assertEquals(listOf("change_rooms"), rows("change_rooms" to MatchLevel.GROUP, "delay_timer" to MatchLevel.ANY_TIME))
+        // With nothing else, the best of the rest, the 4 Ds last.
+        assertEquals(listOf("delay_timer"), rows("four_ds" to MatchLevel.ANY_TIME, "delay_timer" to MatchLevel.ANY_TIME))
+        assertEquals(listOf("four_ds"), rows("four_ds" to MatchLevel.ANY_TIME))
     }
 
     @Test

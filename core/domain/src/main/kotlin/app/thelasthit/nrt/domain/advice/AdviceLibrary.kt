@@ -74,6 +74,7 @@ class AdviceLibrary internal constructor(
             return Strategy(
                 key = key,
                 title = entry.title,
+                summary = entry.summary,
                 body = entry.body,
                 steps = entry.steps,
                 tags = entry.tags.toSet(),
@@ -122,6 +123,11 @@ data class Strategy(
     val key: String,
     /** Sentence case, with no full stop. */
     val title: String,
+    /**
+     * A short phrase under the title in a list, like "Leave as soon as you finish eating", with no
+     * full stop.
+     */
+    val summary: String = "",
     /** One to three sentences on why it helps. */
     val body: String,
     /** What to do, in order. */

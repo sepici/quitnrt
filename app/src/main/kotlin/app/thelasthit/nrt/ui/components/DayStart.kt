@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -63,6 +64,7 @@ fun DayStartStepper(time: String, isDefault: Boolean, canEarlier: Boolean, canLa
     }
 }
 
+/** A round stepper button. At the end of its range it's disabled, and the whole button fades, as the mockups' does. */
 @Composable
 fun RoundButton(icon: Int, description: String, enabled: Boolean, onClick: () -> Unit) {
     val colors = LastHit.colors
@@ -71,13 +73,19 @@ fun RoundButton(icon: Int, description: String, enabled: Boolean, onClick: () ->
         enabled = enabled,
         shape = CircleShape,
         color = colors.surface,
-        contentColor = if (enabled) colors.text else colors.disabledText,
-        shadowElevation = 1.dp,
-        modifier = Modifier.size(52.dp).semantics { contentDescription = description },
+        contentColor = colors.text,
+        shadowElevation = if (enabled) 1.dp else 0.dp,
+        modifier = Modifier
+            .size(52.dp)
+            .alpha(if (enabled) 1f else DISABLED_ALPHA)
+            .semantics { contentDescription = description },
     ) {
         Box(contentAlignment = Alignment.Center) { Icon(painterResource(icon), contentDescription = null) }
     }
 }
+
+/** How much of a disabled round button shows, from the mockups' opacity. */
+private const val DISABLED_ALPHA = 0.38f
 
 /**
  * Thursday as the app counts it: from the day start to the next one, with midnight marked and a

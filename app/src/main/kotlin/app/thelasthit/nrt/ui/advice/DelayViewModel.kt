@@ -24,14 +24,18 @@ sealed interface DelayStage {
 
 /**
  * The delay timer (PLAN §9). It counts from its start by the clock, and its start is in [saved],
- * so it keeps counting while the app is closed. While the app is still running, in the
- * background or under the breathing timer, it buzzes at the end. A notification comes with
- * reminders in phase 6.
+ * so it's right whenever it's looked at again, even after the app was closed.
+ *
+ * While it runs it keeps the screen on, and [awake] keeps the processor running until just after
+ * the end, so it buzzes on time under the breathing timer, behind another app or with the phone
+ * locked. If Android closes or freezes the app in the meantime, there's no buzz, and the timer
+ * shows as done when it's opened again. A notification comes with reminders in phase 6.
  */
 class DelayViewModel(
     private val clock: Clock,
     private val saved: SavedStateHandle,
     private val buzzer: Buzzer,
+    private val awake: WakeHold,
 ) : ViewModel() {
 
     private val _stage = MutableStateFlow(restore())
@@ -43,6 +47,7 @@ class DelayViewModel(
     private var ending: Job? = null
 
     init {
+        keepAwake(_stage.value)
         (_stage.value as? DelayStage.Running)?.let { watch(it.run) }
         tick()
     }
@@ -84,6 +89,7 @@ class DelayViewModel(
 
     override fun onCleared() {
         ScreenOnHolds.release(this)
+        awake.release()
     }
 
     /** Ends the timer on time while the app runs, whatever page is showing. */
@@ -106,7 +112,7 @@ class DelayViewModel(
 
     private fun set(stage: DelayStage) {
         _stage.value = stage
-        if (stage is DelayStage.Running) ScreenOnHolds.hold(this) else ScreenOnHolds.release(this)
+        keepAwake(stage)
         when (stage) {
             is DelayStage.SetUp -> {
                 saved[STAGE] = SET_UP
@@ -125,16 +131,25 @@ class DelayViewModel(
         }
     }
 
+    /** Keeps the screen and the processor on while [stage] runs, the processor until a little after the end. */
+    private fun keepAwake(stage: DelayStage) {
+        if (stage is DelayStage.Running) {
+            ScreenOnHolds.hold(this)
+            awake.hold(stage.run.remaining(clock.instant()) + DelayRun.BUZZ_WINDOW)
+        } else {
+            ScreenOnHolds.release(this)
+            awake.release()
+        }
+    }
+
     private fun restore(): DelayStage {
         val minutes = (saved.get<Int>(MINUTES) ?: DelayRun.DEFAULT_MINUTES).coerceIn(DelayRun.MINUTES)
         val run = saved.get<Long>(STARTED_AT)?.let { DelayRun(Instant.ofEpochMilli(it), minutes) }
-        val stage = when (saved.get<String>(STAGE)) {
+        return when (saved.get<String>(STAGE)) {
             RUNNING -> run?.let { DelayStage.Running(it) }
             DONE -> run?.let { DelayStage.Done(it) }
             else -> null
         } ?: DelayStage.SetUp(minutes)
-        if (stage is DelayStage.Running) ScreenOnHolds.hold(this)
-        return stage
     }
 
     companion object {

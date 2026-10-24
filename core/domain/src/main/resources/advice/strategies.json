@@ -4,6 +4,7 @@
   {
    "key": "four_ds",
    "title": "The 4 Ds",
+   "summary": "Delay, deep breaths, drink water, do something else",
    "body": "Most urges pass within 3 to 5\u00a0minutes. These 4 steps help you get through one.",
    "steps": [
     "Delay. Give it 5\u00a0minutes before you decide anything.",
@@ -40,7 +41,8 @@
   },
   {
    "key": "delay_timer",
-   "title": "Wait it out",
+   "title": "Delay",
+   "summary": "Wait 5 to 10\u00a0minutes while the urge peaks and passes",
    "body": "An urge rises, peaks and fades, usually within a few minutes. Start the timer and leave the decision until it ends.",
    "steps": [
     "Choose 5 to 10\u00a0minutes and start the timer.",
@@ -79,6 +81,7 @@
   {
    "key": "ride_the_wave",
    "title": "Ride out the urge",
+   "summary": "Let it rise and fade without acting on it",
    "body": "Treat an urge like a wave: don't fight it and don't act on it. Most fade within a few minutes, and they get weaker over time.",
    "steps": [
     "Notice the urge and say what you feel, like “I want a dose and my chest feels tight.”",
@@ -108,6 +111,7 @@
   {
    "key": "talk_back",
    "title": "Answer the urge back",
+   "summary": "Spot the thought behind it and answer it",
    "body": "Urges come with thoughts like “I deserve one” or “one more won't matter”. Once you've spotted them, they're easier to answer.",
    "steps": [
     "Notice the thought that comes just before or during an urge.",
@@ -136,6 +140,7 @@
   {
    "key": "reasons_list",
    "title": "Write down your reasons",
+   "summary": "Why you're coming off NRT, in your own words",
    "body": "When an urge comes, it helps to see, in your own words, why you're coming off NRT.",
    "steps": [
     "Write 3 reasons you want to stop using NRT.",
@@ -172,6 +177,7 @@
   {
    "key": "after_a_slip",
    "title": "After a slip",
+   "summary": "A one-off doesn't undo what you've done",
    "body": "Going over the guide, or smoking or vaping again, doesn't undo what you've done. It shows you where the hard moments are.",
    "steps": [
     "Treat a one-off as a one-off and carry on with the plan.",
@@ -195,6 +201,7 @@
   {
    "key": "quit_coach",
    "title": "Talk to a quit coach",
+   "summary": "Free advice from people who know NRT well",
    "body": "Stop smoking services and quitlines are free. Their advisers know NRT well and can help with urges, triggers and how you use your products.",
    "steps": [
     "Call your local quitline or stop smoking service.",
@@ -230,7 +237,8 @@
   },
   {
    "key": "breathing_timer",
-   "title": "Slow your breathing",
+   "title": "Deep breaths",
+   "summary": "Box breathing or 4-7-8, for 1 to 3\u00a0minutes",
    "body": "Slow, counted breathing can calm you when stress pushes you towards a dose. Follow the timer for 1 to 3\u00a0minutes.",
    "steps": [
     "Sit or stand with your feet flat on the floor and your shoulders loose.",
@@ -266,6 +274,7 @@
   {
    "key": "short_walk",
    "title": "Move for 5\u00a0minutes",
+   "summary": "A brisk walk or the stairs while it passes",
    "body": "A quick burst of activity uses up restless energy and gives an urge time to pass.",
    "steps": [
     "Walk briskly, outside if you can.",
@@ -303,6 +312,7 @@
   {
    "key": "muscle_relaxation",
    "title": "Relax your muscles one by one",
+   "summary": "Tense and let go, one part at a time",
    "body": "Tensing and then letting go of each part of your body in turn eases tension. It also helps you notice when you're tensing up.",
    "steps": [
     "Lie down or sit somewhere comfortable.",
@@ -330,6 +340,7 @@
   {
    "key": "low_mood",
    "title": "Look after yourself when you're low",
+   "summary": "Move, plan your day and talk to someone",
    "body": "Mood can dip for a while as your body adjusts. A dose may seem to help, but it only eases withdrawal for a while.",
    "steps": [
     "Get outside and move, even for a few minutes.",
@@ -362,6 +373,7 @@
   {
    "key": "another_treat",
    "title": "Pick another treat",
+   "summary": "Mark a good moment with something else",
    "body": "If a dose is how you mark a good moment, find something else that feels like a reward.",
    "steps": [
     "Make a short list of small treats: a favourite snack, a song, a film or time outside.",
@@ -392,6 +404,7 @@
   {
    "key": "milestone_treats",
    "title": "Tie treats to milestones",
+   "summary": "Spend what you save on something you enjoy",
    "body": "Cutting down is worth marking. Spending what you save on NRT gives each week something to show for it.",
    "steps": [
     "Work out what a week of NRT costs you.",
@@ -423,6 +436,7 @@
   {
    "key": "dose_decision",
    "title": "Make each dose a decision",
+   "summary": "Rate the urge before each dose",
    "body": "On autopilot, a dose can happen before you've noticed. A short pause turns it back into a choice.",
    "steps": [
     "Keep your NRT in one place, not in every pocket and bag.",
@@ -451,6 +465,7 @@
   {
    "key": "busy_hands",
    "title": "Give your hands something to do",
+   "summary": "Something to hold where you'd reach for NRT",
    "body": "Holding something breaks the habit of reaching for NRT, especially on calls, in front of a screen or when you're bored.",
    "steps": [
     "Keep a squeeze ball, a pen to doodle with or a fidget toy where you'd usually reach for NRT.",
@@ -481,6 +496,7 @@
   {
    "key": "distraction_list",
    "title": "Keep a list of distractions",
+   "summary": "Quick things to do, written down in advance",
    "body": "Urges fade faster when your mind is busy. A list made in advance means you don't have to think of something in the moment.",
    "steps": [
     "Write down 5 quick things you enjoy, like a song, a puzzle, a call or a funny video.",
@@ -513,6 +529,7 @@
   {
    "key": "change_rooms",
    "title": "Change rooms",
+   "summary": "Go somewhere else until it passes",
    "body": "Urges are tied to places and routines. Moving, even to another room, breaks the pattern long enough for an urge to pass.",
    "steps": [
     "Get up and go somewhere else, or step outside for fresh air.",
@@ -544,6 +561,7 @@
   {
    "key": "dose_before_meal",
    "title": "Move the dose to before the meal",
+   "summary": "Have it before you eat, not after",
    "body": "If a dose follows every meal, the meal becomes the cue. Having that dose before you eat breaks the link without adding one.",
    "steps": [
     "Have your usual after-meal dose before the meal instead.",
@@ -572,6 +590,7 @@
   {
    "key": "leave_the_table",
    "title": "Get up from the table",
+   "summary": "Leave as soon as you finish eating",
    "body": "The end of a meal, or of a coffee or tea, is a common cue. Doing something different straight away breaks it.",
    "steps": [
     "Get up as soon as you've finished.",
@@ -595,6 +614,7 @@
   {
    "key": "gum_and_drinks",
    "title": "Time drinks around gum and lozenges",
+   "summary": "Coffee and fizzy drinks stop gum and lozenges working as well",
    "body": "Coffee, fizzy drinks and other acidic food and drink can stop gum and lozenges working as well, so each one does less for the urge.",
    "steps": [
     "Don't eat or drink for 15\u00a0minutes before a piece of gum or a lozenge.",
@@ -629,6 +649,7 @@
   {
    "key": "swap_drink",
    "title": "Swap the drink for a while",
+   "summary": "Juice or hot water with lemon, somewhere new",
    "body": "If coffee or tea and a dose go together, the drink becomes the cue. Swapping it for a few weeks loosens the link.",
    "steps": [
     "Try juice, or hot water with lemon.",
@@ -657,6 +678,7 @@
   {
    "key": "busy_mouth",
    "title": "Keep your mouth busy",
+   "summary": "Mints, sugar-free gum or something to chew",
    "body": "When you can't get up and leave, like when you're driving or at a table, something to chew or sip helps.",
    "steps": [
     "Carry sugar-free mints or ordinary sugar-free gum.",
@@ -688,6 +710,7 @@
   {
    "key": "morning_routine",
    "title": "Start the day with something else",
+   "summary": "Start the day with something that isn't nicotine",
    "body": "The first dose of the day is often the hardest to move. Putting something else first makes the morning less about NRT.",
    "steps": [
     "Have a glass of water, a shower or breakfast before anything else.",
@@ -710,6 +733,7 @@
   {
    "key": "wind_down",
    "title": "Wind down without a dose",
+   "summary": "A calmer last hour before bed",
    "body": "A dose late in the evening can become part of going to bed, and nicotine can affect sleep. A calmer last hour makes it easier to go without.",
    "steps": [
     "Skip caffeine from late afternoon.",
@@ -740,6 +764,7 @@
   {
    "key": "change_commute",
    "title": "Change the commute",
+   "summary": "A new route, new music or something to chew",
    "body": "Driving, walking the same way and waiting for transport are common cues. A small change to the routine weakens them.",
    "steps": [
     "Take a different route for a while.",
@@ -768,6 +793,7 @@
   {
    "key": "change_breaks",
    "title": "Change your breaks",
+   "summary": "A different time, place or company",
    "body": "If a break usually means a dose, the break itself becomes the cue.",
    "steps": [
     "Take your break at a different time.",
@@ -790,6 +816,7 @@
   {
    "key": "after_exercise",
    "title": "Cool down with water first",
+   "summary": "Water and a stretch after a workout",
    "body": "If a dose usually follows a workout, fill those minutes with water and a stretch instead.",
    "steps": [
     "Drink a full glass of water straight after.",
@@ -824,6 +851,7 @@
   {
    "key": "drinks_limit",
    "title": "Decide your limit before you go out",
+   "summary": "Decide how many doses fit tonight before you go",
    "body": "Drinking and nights out are common cues. Deciding before you go takes the choice out of the moment.",
    "steps": [
     "Before you go, decide how many doses fit tonight.",
@@ -856,6 +884,7 @@
   {
    "key": "ready_line",
    "title": "Have a line ready",
+   "summary": "Know what you'll say if someone offers",
    "body": "Being around people who smoke or vape, or being offered one, is easier when you've already decided what to say.",
    "steps": [
     "Pick a short line, like “No thanks, I've stopped.”",
@@ -886,6 +915,7 @@
   {
    "key": "tell_someone",
    "title": "Tell someone you're cutting down",
+   "summary": "Someone to message when an urge is strong",
    "body": "People who know what you're doing can help in the moment. A call or a message is often enough to get past an urge.",
    "steps": [
     "Tell a friend or someone at home about your plan.",
@@ -919,6 +949,7 @@
   {
    "key": "withdrawal_passes",
    "title": "Remember withdrawal passes",
+   "summary": "It's strongest in the first week, then fades",
    "body": "Withdrawal is uncomfortable, but it can't hurt you. It's usually strongest in the first week and fades over 3 to 4\u00a0weeks. Cutting down can bring some of it back for a while.",
    "steps": [
     "Remind yourself the feeling is temporary.",
@@ -951,6 +982,7 @@
   {
    "key": "ask_about_pace",
    "title": "Ask about slowing the plan",
+   "summary": "A pharmacist or GP can help you go slower",
    "body": "Using NRT for longer is far safer than going back to smoking. If withdrawal is strong or keeps coming back, a pharmacist or GP can help you set a slower pace.",
    "steps": [
     "Note when the urges are worst and how strong they get.",
@@ -980,6 +1012,7 @@
   {
    "key": "use_it_right",
    "title": "Use each dose the way the pack says",
+   "summary": "How gum and lozenges work best",
    "body": "Nicotine gum and lozenges work differently from ordinary gum and sweets. Used properly, each one does more for the urge.",
    "steps": [
     "Gum: bite slowly until it tingles, then park it between your cheek and gum for about a minute. Repeat until the tingling stops, usually about 30\u00a0minutes.",
@@ -1020,6 +1053,7 @@
   {
    "key": "hunger_check",
    "title": "Check if it's hunger",
+   "summary": "Eat first, then see if the urge is still there",
    "body": "Hunger and an urge for nicotine can feel alike, so it's easy to mistake one for the other.",
    "steps": [
     "Eat 3 meals a day, with a snack every 3 to 4\u00a0hours if you need one.",
@@ -1048,6 +1082,7 @@
   {
    "key": "foggy_day",
    "title": "Go easy on a foggy day",
+   "summary": "Water, food and a short walk",
    "body": "Feeling tired or foggy is common while your body adjusts to less nicotine, and it usually passes.",
    "steps": [
     "Drink a glass of water, and eat if it's been 3 to 4\u00a0hours.",

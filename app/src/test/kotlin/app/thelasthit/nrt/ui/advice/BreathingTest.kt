@@ -18,6 +18,7 @@ import app.thelasthit.nrt.ui.PHONE
 import app.thelasthit.nrt.ui.theme.LastHitTheme
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -37,6 +38,7 @@ class BreathingTest {
     private val app: TestApp = ApplicationProvider.getApplicationContext()
     private val buzzer = FakeBuzzer()
     private lateinit var view: View
+    private lateinit var viewModel: BreathingViewModel
     private var backs = 0
 
     @Before
@@ -50,7 +52,7 @@ class BreathingTest {
                     onBack = { backs++ },
                     viewModel = timerViewModel { graph, saved, _ ->
                         args.forEach { (key, value) -> saved[key] = value }
-                        BreathingViewModel(graph.clock, saved, graph.breathing, buzzer, prefs = null)
+                        BreathingViewModel(graph.clock, saved, graph.breathing, buzzer, prefs = null).also { viewModel = it }
                     },
                 )
             }
@@ -246,5 +248,18 @@ class BreathingTest {
         waitFor("Paused. Round 1 of 4.")
         compose.onNodeWithText("1:04 left").assertExists()
         compose.onNodeWithText("Resume").assertExists()
+    }
+
+    @Test
+    fun `turning the phone doesn't pause the session`() {
+        show()
+        compose.onNodeWithText("Start box breathing").performClick()
+        waitFor("Breathe in. Round 1 of 4.")
+
+        // Turning the phone, or the system switching to dark mode, rebuilds the activity.
+        compose.activityRule.scenario.recreate()
+
+        val stage = viewModel.stage.value as BreathingStage.Running
+        assertFalse(stage.run.isPaused)
     }
 }

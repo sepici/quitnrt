@@ -6,6 +6,9 @@
     <!-- The breathing and delay timers buzz. -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
+    <!-- The delay timer keeps the processor on until it ends, so it buzzes with the phone locked. -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <application
         android:name=".LastHitApp"
         android:allowBackup="true"

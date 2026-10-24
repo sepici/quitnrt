@@ -4,9 +4,12 @@ import android.os.Looper
 import android.os.VibrationAttributes
 import android.os.VibratorManager
 import android.view.View
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -24,6 +27,10 @@ import app.thelasthit.nrt.setUp
 import app.thelasthit.nrt.ui.PHONE
 import app.thelasthit.nrt.ui.theme.LastHitTheme
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -31,6 +38,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
+import org.robolectric.shadows.ShadowPowerManager
 import java.time.Duration
 
 /** The delay timer, on the test clock: the length, counting from its start, the end, and breathing on top. */
@@ -44,6 +53,7 @@ class DelayTest {
 
     private val app: TestApp = ApplicationProvider.getApplicationContext()
     private val buzzer = FakeBuzzer()
+    private val awake = FakeWakeHold()
     private lateinit var view: View
     private var backs = 0
     private var breathes = 0
@@ -60,7 +70,7 @@ class DelayTest {
                     onBreathe = { breathes++ },
                     viewModel = timerViewModel { graph, state, _ ->
                         saved.forEach { (key, value) -> state[key] = value }
-                        DelayViewModel(graph.clock, state, buzzer)
+                        DelayViewModel(graph.clock, state, buzzer, awake)
                     },
                 )
             }
@@ -84,6 +94,23 @@ class DelayTest {
         compose.waitUntilExactlyOneExists(hasText("10\u00A0min"))
         compose.onNodeWithContentDescription("One minute more").assertIsNotEnabled()
         compose.onNodeWithText("Start 10\u00A0minutes").assertExists()
+    }
+
+    @Test
+    @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    fun `at 5 minutes the minus fades, as a disabled button does in the mockup`() {
+        show()
+        compose.waitUntilExactlyOneExists(hasText("5\u00A0min"), timeoutMillis = 5_000)
+
+        // The fill, left of the icon: the surface on the plus, and faded towards the grey behind on the minus.
+        fun fillOf(description: String): Color {
+            val pixels = compose.onNodeWithContentDescription(description).captureToImage().toPixelMap()
+            return pixels[pixels.width / 5, pixels.height / 2]
+        }
+        val plus = fillOf("One minute more")
+        val minus = fillOf("One minute less")
+        assertEquals(Color.White, plus)
+        assertNotEquals(plus, minus)
     }
 
     @Test
@@ -118,6 +145,31 @@ class DelayTest {
     }
 
     @Test
+    fun `while it runs the phone stays awake until just after the end, so it buzzes with the screen off`() {
+        at("15:00:00")
+        show()
+        compose.onNodeWithText("Start 5\u00A0minutes").performClick()
+        waitForLeft("5 minutes left of 5 minutes")
+        assertEquals(Duration.ofMinutes(6), awake.heldFor)
+
+        at("15:05:00")
+        compose.waitUntilExactlyOneExists(hasText("5\u00A0minutes done"), timeoutMillis = 5_000)
+        assertNull(awake.heldFor)
+    }
+
+    @Test
+    fun `stopping lets the phone sleep again`() {
+        show()
+        compose.onNodeWithText("Start 5\u00A0minutes").performClick()
+        compose.waitUntilExactlyOneExists(hasText("Stop the timer"), timeoutMillis = 5_000)
+        assertEquals(Duration.ofMinutes(6), awake.heldFor)
+
+        compose.onNodeWithText("Stop the timer").performClick()
+        compose.waitUntilExactlyOneExists(hasText("Start 5\u00A0minutes"))
+        assertNull(awake.heldFor)
+    }
+
+    @Test
     fun `opened again after the app was closed, it counts from its start`() {
         at("15:05:00")
         show(
@@ -128,6 +180,8 @@ class DelayTest {
 
         waitForLeft("1 minute left of 5 minutes")
         compose.onNodeWithText("Started 15:01").assertExists()
+        // Awake for the minute left, and the minute after the end that it can still buzz in.
+        assertEquals(Duration.ofMinutes(2), awake.heldFor)
     }
 
     @Test
@@ -200,6 +254,9 @@ class DelayTest {
         compose.onNodeWithText("Start 5\u00A0minutes").performClick()
         at("15:06:00")
         waitForLeft("4 minutes left of 5 minutes")
+        // The real wake lock: the processor stays on, with the screen off, until the end.
+        val lock = checkNotNull(ShadowPowerManager.getLatestWakeLock())
+        assertTrue(lock.isHeld)
 
         compose.onNodeWithText("Breathe with the timer").performScrollTo().performClick()
         compose.waitUntilExactlyOneExists(hasText("Start box breathing"), timeoutMillis = 5_000)
@@ -216,6 +273,7 @@ class DelayTest {
         shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMinutes(5))
         val attributes = shadowOf(vibrator).vibrationAttributesFromLastVibration as VibrationAttributes
         assertEquals(VibrationAttributes.USAGE_ALARM, attributes.usage)
+        assertFalse(lock.isHeld)
 
         compose.runOnIdle { nav.popBackStack() }
         compose.waitUntilExactlyOneExists(hasText("5\u00A0minutes done"), timeoutMillis = 5_000)

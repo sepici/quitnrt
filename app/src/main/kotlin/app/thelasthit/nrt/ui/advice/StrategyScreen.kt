@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -61,6 +62,7 @@ import app.thelasthit.nrt.ui.theme.heatFill
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlin.math.roundToInt
 
 /**
  * One strategy (PLAN §9): what it is, what it's good for, what someone's own logs say about
@@ -82,7 +84,6 @@ fun StrategyScreen(
         return
     }
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val open: (Strategy) -> Unit = { other -> other.interactive?.let(onTimer) ?: onStrategy(other.key) }
     AdvicePage(
         title = null,
         onBack = onBack,
@@ -106,12 +107,13 @@ fun StrategyScreen(
             ListHeading(stringResource(R.string.advice_also, alsoFor(loaded, alsoTag)), top = 32.dp)
             Ruled {
                 context.also.forEachIndexed { index, other ->
+                    // Another strategy's page, timers' too, so its sources are always a tap away.
                     StrategyRow(
                         title = other.title,
-                        sub = AnnotatedString(other.steps.first()),
+                        sub = AnnotatedString(other.summary),
                         first = index == 0,
                         timer = other.interactive != null,
-                        onClick = { open(other) },
+                        onClick = { onStrategy(other.key) },
                     )
                 }
             }
@@ -234,18 +236,13 @@ private fun HourStrip(tip: TimingTip, dayStart: LocalTime, time: DateTimeFormatt
         joinTimes(tip.slots.map { time.format(it.suggested) }),
     )
     Column(Modifier.fillMaxWidth().padding(top = 12.dp).clearAndSetSemantics { contentDescription = description }) {
-        BoxWithConstraints(Modifier.fillMaxWidth()) {
-            val width = maxWidth
+        SuggestedTimes(tip.slots.map { minutesIntoDay(it.suggested, dayStart) / MINUTES_IN_DAY }) {
             tip.slots.forEach { slot ->
-                val x = width * (minutesIntoDay(slot.suggested, dayStart) / MINUTES_IN_DAY)
-                Column(Modifier.centredAt(x, width), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        time.format(slot.suggested),
-                        style = LastHit.type.caption.copy(fontSize = 12.sp, lineHeight = 16.sp, fontWeight = FontWeight.Bold),
-                        color = colors.text,
-                    )
-                    Caret(Modifier.padding(top = 1.dp), width = 12.dp, height = 7.dp)
-                }
+                Text(
+                    time.format(slot.suggested),
+                    style = LastHit.type.caption.copy(fontSize = 12.sp, lineHeight = 16.sp, fontWeight = FontWeight.Bold),
+                    color = colors.text,
+                )
             }
         }
         Row(Modifier.fillMaxWidth().padding(top = 3.dp), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -275,6 +272,90 @@ private fun HourStrip(tip: TimingTip, dayStart: LocalTime, time: DateTimeFormatt
 }
 
 private const val MINUTES_IN_DAY = 24f * 60f
+
+/**
+ * A caret over each suggested time, at [fractions] of the way along the strip, with its time over
+ * it. The [labels] are the times, in the same order. Times close together, such as 10:00 and 11:30,
+ * would overlap, so their labels move apart while the carets stay where they are.
+ */
+@Composable
+private fun SuggestedTimes(fractions: List<Float>, labels: @Composable () -> Unit) {
+    Layout(
+        content = {
+            labels()
+            fractions.forEach { _ -> Caret(width = 12.dp, height = 7.dp) }
+        },
+        modifier = Modifier.fillMaxWidth(),
+    ) { measurables, constraints ->
+        val loose = constraints.copy(minWidth = 0, minHeight = 0)
+        val count = fractions.size
+        val texts = measurables.take(count).map { it.measure(loose) }
+        val carets = measurables.drop(count).map { it.measure(loose) }
+        val width = constraints.maxWidth
+        val centres = fractions.map { (it * width).roundToInt() }
+        val lefts = spreadLabels(centres, texts.map { it.width }, width, gap = LABEL_GAP.roundToPx())
+        val textHeight = texts.maxOfOrNull { it.height } ?: 0
+        val caretTop = textHeight + 1.dp.roundToPx()
+        val height = caretTop + (carets.maxOfOrNull { it.height } ?: 0)
+        layout(width, height) {
+            texts.forEachIndexed { index, text -> text.place(lefts[index], textHeight - text.height) }
+            carets.forEachIndexed { index, caret ->
+                caret.place((centres[index] - caret.width / 2).coerceIn(0, (width - caret.width).coerceAtLeast(0)), caretTop)
+            }
+        }
+    }
+}
+
+private val LABEL_GAP = 8.dp
+
+/**
+ * Where labels of [widths] go along a strip [width] wide, as their left edges: each centred on
+ * its place in [centres], which run left to right, unless that overlaps a neighbour. Labels that
+ * would overlap are set side by side, [gap] apart, centred where they want to be on average. All
+ * of them stay inside the strip.
+ */
+internal fun spreadLabels(centres: List<Int>, widths: List<Int>, width: Int, gap: Int): List<Int> {
+    // Runs of neighbouring labels set side by side, from first to last.
+    val runs = mutableListOf<IntRange>()
+    fun spanOf(run: IntRange) = run.sumOf { widths[it] } + gap * (run.last - run.first)
+    fun leftOf(run: IntRange): Int {
+        var offset = 0
+        var total = 0
+        for (index in run) {
+            total += centres[index] - offset - widths[index] / 2
+            offset += widths[index] + gap
+        }
+        return Math.floorDiv(total, run.count())
+    }
+    for (index in centres.indices) {
+        runs += index..index
+        while (runs.size > 1) {
+            val before = runs[runs.size - 2]
+            val last = runs.last()
+            if (leftOf(before) + spanOf(before) + gap <= leftOf(last)) break
+            runs.removeAt(runs.lastIndex)
+            runs[runs.lastIndex] = before.first..last.last
+        }
+    }
+    val lefts = IntArray(centres.size)
+    runs.forEach { run ->
+        var x = leftOf(run)
+        for (index in run) {
+            lefts[index] = x
+            x += widths[index] + gap
+        }
+    }
+    // Inside the strip: in from the left edge, then from the right.
+    for (index in lefts.indices) {
+        val least = if (index == 0) 0 else lefts[index - 1] + widths[index - 1] + gap
+        lefts[index] = maxOf(lefts[index], least)
+    }
+    for (index in lefts.indices.reversed()) {
+        val most = if (index == lefts.lastIndex) width - widths[index] else lefts[index + 1] - widths[index] - gap
+        lefts[index] = minOf(lefts[index], most)
+    }
+    return lefts.toList()
+}
 
 /** Places the content centred on [x], kept inside [width]. */
 private fun Modifier.centredAt(x: Dp, width: Dp): Modifier = layout { measurable, constraints ->

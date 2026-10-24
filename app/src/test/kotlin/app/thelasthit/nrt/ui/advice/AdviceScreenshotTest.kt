@@ -69,6 +69,21 @@ class AdviceScreenshotTest {
         }
     }
 
+    @Test @Config(qualifiers = FULL_PAGE)
+    fun detailCloseTimes() = captureDetailCloseTimes()
+
+    @Test @Config(qualifiers = FULL_PAGE, fontScale = LARGE_FONT)
+    fun detailCloseTimesLarge() = captureDetailCloseTimes()
+
+    /** Suggested times 90 minutes apart, 10:00 and 11:30, whose labels move apart over the strip. */
+    private fun captureDetailCloseTimes() {
+        app.setUp()
+        app.seedCloseMeals()
+        compose.captureLooks("advice-detail-close", ready = hasText("10:00 and 11:30", substring = true)) {
+            StrategyScreen("dose_before_meal", onBack = {}, onAllAdvice = {}, onStrategy = {}, onTimer = {})
+        }
+    }
+
     @Test @Config(qualifiers = PHONE)
     fun breathing() = captureBreathing()
 

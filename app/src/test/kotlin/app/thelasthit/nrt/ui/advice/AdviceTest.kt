@@ -2,6 +2,9 @@ package app.thelasthit.nrt.ui.advice
 
 import android.content.Intent
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertHeightIsAtLeast
+import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
@@ -11,6 +14,7 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
 import app.thelasthit.nrt.TestApp
 import app.thelasthit.nrt.domain.advice.Interactive
@@ -68,8 +72,12 @@ class AdviceTest {
         }
         compose.onNodeWithText("From your logs: try 12:30, before lunch").assertExists()
         compose.onNodeWithText("From your logs: try 09:15 this week, 15\u00A0minutes later").assertExists()
-        // A strategy that isn't from the logs shows its first step.
-        compose.onNodeWithText("Get up as soon as you've finished.").assertExists()
+        // A strategy that isn't from the logs shows its summary.
+        compose.onNodeWithText("Leave as soon as you finish eating").assertExists()
+        // The 4 Ds card comes next, so the 4 Ds and the strategies for any moment aren't rows under a trigger too.
+        compose.onAllNodesWithText("The 4 Ds").assertCountEquals(1)
+        // Delay shows in the card and under Every strategy only.
+        compose.onAllNodesWithText("Delay").assertCountEquals(2)
     }
 
     @Test
@@ -82,7 +90,7 @@ class AdviceTest {
     }
 
     @Test
-    fun `a strategy opens its page and a timer opens the timer`() {
+    fun `a strategy opens its page and the 4 Ds card opens the timers`() {
         app.setUp()
         app.seedAdviceWeeks()
         showList()
@@ -92,14 +100,21 @@ class AdviceTest {
         compose.onAllNodesWithText("Move the dose to before the meal").onFirst().performClick()
         assertEquals(listOf("dose_before_meal"), opened)
 
-        scrollTo("Delay")
-        compose.onNodeWithText("Delay").performClick()
-        scrollTo("Deep breaths")
-        compose.onNodeWithText("Deep breaths").performClick()
+        // In the 4 Ds card, then again under Every strategy, by the same names.
+        compose.onAllNodesWithText("Delay").assertCountEquals(2)
+        compose.onAllNodesWithText("Deep breaths").assertCountEquals(2)
+        compose.onAllNodesWithText("Delay")[0].performScrollTo().performClick()
+        compose.onAllNodesWithText("Deep breaths")[0].performScrollTo().performClick()
         scrollTo("Drink water")
         compose.onNodeWithText("Drink water").performClick()
         assertEquals(listOf(Interactive.DELAY_TIMER, Interactive.BREATHING_TIMER), timers)
         assertEquals(listOf("dose_before_meal", "four_ds"), opened)
+
+        // Under Every strategy a timer's row opens its page, with its sources and the timer's button.
+        compose.onAllNodesWithText("Deep breaths")[1].performScrollTo().performClick()
+        compose.onAllNodesWithText("Delay")[1].performScrollTo().performClick()
+        assertEquals(listOf("dose_before_meal", "four_ds", "breathing_timer", "delay_timer"), opened)
+        assertEquals(2, timers.size)
     }
 
     @Test
@@ -111,6 +126,8 @@ class AdviceTest {
         for (heading in listOf("Any time", "Feelings", "Routine", "People", "Body", "Habit")) {
             scrollTo(heading)
         }
+        // The 4 Ds is its card, and not listed again.
+        compose.onAllNodesWithText("The 4 Ds").assertCountEquals(1)
         scrollTo("Make each dose a decision")
         compose.onNodeWithText("On autopilot, Bored, Screen time").assertExists()
         scrollTo("Ride out the urge")
@@ -125,7 +142,11 @@ class AdviceTest {
         compose.waitUntilExactlyOneExists(hasText("Free help"), timeoutMillis = 5_000)
         scrollTo("Smokefree National Helpline")
         compose.onNodeWithText("England, 0300 123 1044").assertExists()
-        compose.onNode(hasContentDescription("Call Smokefree National Helpline")).performScrollTo().performClick()
+        compose.onNode(hasContentDescription("Call Smokefree National Helpline"))
+            .performScrollTo()
+            .assertWidthIsAtLeast(48.dp)
+            .assertHeightIsAtLeast(48.dp)
+            .performClick()
 
         val intent = shadowOf(app).nextStartedActivity
         assertEquals(Intent.ACTION_DIAL, intent.action)
@@ -170,6 +191,7 @@ class AdviceTest {
         scrollTo("How to do it")
         compose.onNode(hasContentDescription("Step 1. Have your usual after-meal dose before the meal instead.")).assertExists()
         scrollTo("Also for after a meal")
+        compose.onNodeWithText("Leave as soon as you finish eating").assertExists()
         compose.onNodeWithText("Get up from the table").performScrollTo().performClick()
         assertEquals(listOf("leave_the_table"), opened)
         scrollTo("Based on")
@@ -189,9 +211,24 @@ class AdviceTest {
             }
         }
 
-        compose.waitUntilExactlyOneExists(hasText("Slow your breathing"), timeoutMillis = 5_000)
+        compose.waitUntilExactlyOneExists(hasText("Deep breaths"), timeoutMillis = 5_000)
         compose.onNodeWithText("Open the timer").performClick()
         assertEquals(listOf(Interactive.BREATHING_TIMER), timers)
+    }
+
+    @Test
+    fun `another strategy with a timer opens its page, where its sources are`() {
+        app.setUp()
+        compose.setContent {
+            LastHitTheme {
+                StrategyScreen("ride_the_wave", onBack = {}, onAllAdvice = {}, onStrategy = { opened += it }, onTimer = { timers += it })
+            }
+        }
+
+        compose.waitUntilExactlyOneExists(hasText("Also for stressed"), timeoutMillis = 5_000)
+        compose.onNodeWithText("Deep breaths").performScrollTo().performClick()
+        assertEquals(listOf("breathing_timer"), opened)
+        assertEquals(emptyList<Interactive>(), timers)
     }
 
     @Test

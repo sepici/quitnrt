@@ -1,6 +1,7 @@
 package app.thelasthit.nrt.ui.advice
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -86,8 +87,12 @@ fun BreathingScreen(
     KeepScreenOnWhileTimersRun()
     val breathing = (stage as? BreathingStage.Running)?.run?.isPaused == false
     TimerTicks(running = breathing, everyFrame = true, onTick = viewModel::tick)
-    // Turning the screen off or leaving the app pauses the session. Pausing is fine.
-    LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.pause() }
+    // Turning the screen off or leaving the app pauses the session. Pausing is fine. Turning the
+    // phone or a change of theme also stops the page while it's rebuilt, and the session carries on.
+    val activity = LocalActivity.current
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
+        if (activity?.isChangingConfigurations != true) viewModel.pause()
+    }
     when (val current = stage) {
         is BreathingStage.SetUp -> BreathingSetUp(current, sessions, viewModel, onBack)
         is BreathingStage.Running -> {
@@ -320,11 +325,12 @@ private fun BreathingRunning(run: BreathingRun, now: Instant, onStop: () -> Unit
                         color = colors.onHero2,
                         textAlign = TextAlign.Center,
                     )
+                    val lineHeight = fixedSp(96.dp)
                     Text(
                         "${moment.count}",
-                        style = LastHit.type.hero.copy(fontSize = fixedSp(96.dp), lineHeight = fixedSp(96.dp), letterSpacing = (-0.04).em),
+                        style = LastHit.type.hero.copy(fontSize = fixedSp(96.dp), lineHeight = lineHeight, letterSpacing = (-0.04).em),
                         color = colors.onHero,
-                        modifier = Modifier.padding(top = 2.dp),
+                        modifier = Modifier.padding(top = 2.dp).cssLineHeight(lineHeight),
                     )
                 }
             }
@@ -375,7 +381,7 @@ private fun BreathingDone(done: BreathingStage.Done, onClose: () -> Unit, onAnot
                     style = LastHit.type.headline.copy(fontSize = 34.sp, lineHeight = 38.sp, letterSpacing = (-0.035).em),
                     color = colors.text,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 28.dp),
+                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 28.dp).cssLineHeight(38.sp),
                 )
                 Text(
                     stringResource(
