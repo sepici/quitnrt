@@ -9,6 +9,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import kotlin.math.abs
 
 class BattleMotionTest {
 
@@ -111,5 +112,20 @@ class BattleMotionTest {
             now += 37
         }
         assertEquals(motion.cues.map { it.second }, heard)
+    }
+
+    @Test
+    fun `zoomed for the shake, the stage covers its bounds wherever the shake moves it`() {
+        val (width, height) = 160 to 120
+        val zoom = shakeZoom(width, height, BattleMotion.SHAKE_REACH)
+        val shakes = BattleMotion(combo, reduced = false).poses().map { it.shake }.filter { it != Px(0, 0) }
+        assertTrue(shakes.isNotEmpty())
+        for (shake in shakes) {
+            // Drawn zoom times larger about the middle, then moved zoom times the shake: its edges stay outside the stage's.
+            assertTrue(zoom * (width / 2f - abs(shake.x)) >= width / 2f)
+            assertTrue(zoom * (height / 2f - abs(shake.y)) >= height / 2f)
+        }
+        // And no larger than it needs to be: a few per cent.
+        assertTrue(zoom < 1.05f)
     }
 }

@@ -8,7 +8,7 @@ import java.time.ZoneId
 
 /**
  * What the victory screen sums up once the demon falls (PLAN 7.3): the weeks it took, the usual
- * day's mg that came down to none, the hits it took, and the triggers that came with the doses at
+ * day that came down to none, the hits it took, and the triggers that came with the doses at
  * the start. A programme only ends at 0 HP once its last weeks are met with no NRT, so every one
  * of those triggers was got on top of.
  */
@@ -17,8 +17,11 @@ data class Victory(
     val weeks: Int,
     /** NRT-free weeks run on after a missed final week. */
     val overtime: Int,
-    /** The usual day the plan stepped down from. */
-    val usualDaily: Dose,
+    /**
+     * The usual day the plan stepped down from, product by product, as the Plan tab's summary
+     * puts it: "8 pieces of 4 mg gum and 3 sprays" (PLAN 6.1).
+     */
+    val usualDay: List<MixUnit>,
     /** Every hit spent on the demon. */
     val hits: Int,
     /** The logical day the final hit landed. */
@@ -26,6 +29,9 @@ data class Victory(
     /** The start's most common tags, most doses first: up to [TRIGGERS] keys. */
     val triggers: List<String>,
 ) {
+    /** The usual day's mg. */
+    val usualDaily: Dose get() = usualDay.daily()
+
     companion object {
         /** How many triggers the summary names. */
         const val TRIGGERS = 2
@@ -52,7 +58,7 @@ data class Victory(
             return Victory(
                 weeks = programme.weeks.count { it.kind != GameWeek.Kind.OVERTIME },
                 overtime = programme.weeks.count { it.kind == GameWeek.Kind.OVERTIME },
-                usualDaily = programme.baseline.daily,
+                usualDay = programme.baseline.usualDay,
                 hits = ledger.spent,
                 lastHitOn = boundary.logicalDate(defeatedAt, zone),
                 triggers = triggers,

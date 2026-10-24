@@ -10,6 +10,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isOff
 import androidx.compose.ui.test.isOn
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.core.app.ApplicationProvider
@@ -94,6 +95,10 @@ class LairSettingsTest {
         compose.setContent { LastHitTheme { AppShell() } }
 
         compose.waitUntilAtLeastOneExists(hasText("Lair"), timeoutMillis = 5_000)
+        // The lurking demon on screen means the game's data is in, so the tab has had its chance to show a badge.
+        compose.onNodeWithText("Lair").performClick()
+        compose.waitUntilExactlyOneExists(hasText("Gary watches from the rocks until your plan starts."), timeoutMillis = 5_000)
+        compose.waitForIdle()
         compose.onNode(hasContentDescription("ready", substring = true)).assertDoesNotExist()
     }
 

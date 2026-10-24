@@ -3,10 +3,14 @@ package app.thelasthit.nrt.ui.lair
 import app.thelasthit.nrt.domain.creature.SpriteFrame
 import app.thelasthit.nrt.domain.game.Attack
 import app.thelasthit.nrt.ui.game.GameSound
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
-/** One attack in the lair, from the tap to the end of its animation. */
-data class Strike(val id: Long, val attack: Attack, val hpBefore: Int, val maxHp: Int) {
+/**
+ * One attack in the lair, from the tap to the end of its animation. [cutShort] when the lair left
+ * the screen before the animation ended: it shows as it ends and doesn't play again.
+ */
+data class Strike(val id: Long, val attack: Attack, val hpBefore: Int, val maxHp: Int, val cutShort: Boolean = false) {
     val hpAfter: Int get() = (hpBefore - attack.damage).coerceAtLeast(0)
 
     /** The final hit: the demon falls, and the defeat plays after the impact. */
@@ -68,7 +72,7 @@ class BattleMotion(val strike: Strike, val reduced: Boolean, private val impact:
     /** When the defeat starts, for a final strike. */
     private val knockoutAt: Long = impactAt + KNOCKOUT_AFTER
 
-    /** How long the whole strike takes. Taps wait until it's over. */
+    /** How long the whole strike takes. The attack buttons are busy until it's over. */
     val length: Long = when {
         reduced && strike.isFinal -> REDUCED_FINAL_LENGTH
         reduced -> REDUCED_LENGTH
@@ -257,5 +261,8 @@ class BattleMotion(val strike: Strike, val reduced: Boolean, private val impact:
         /** The 5× finisher's shake: an offset every 40 ms, dying away. */
         private const val SHAKE_EVERY = 40L
         private val SHAKE = listOf(Px(2, 0), Px(-2, 1), Px(2, -1), Px(-1, 1), Px(1, 0), Px(-1, 0), Px(1, 0))
+
+        /** The furthest the shake moves the stage each way, across and down. */
+        val SHAKE_REACH = Px(SHAKE.maxOf { abs(it.x) }, SHAKE.maxOf { abs(it.y) })
     }
 }

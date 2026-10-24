@@ -5,9 +5,11 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.scale as zoomed
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -24,12 +26,14 @@ import app.thelasthit.nrt.ui.game.drawBackdrop
 import app.thelasthit.nrt.ui.game.drawPixels
 import app.thelasthit.nrt.ui.game.drawRim
 import app.thelasthit.nrt.ui.theme.LastHit
+import kotlin.math.abs
 
 /**
  * The lair's stage with the demon on its rock, in its colours: the frame for its HP, or the
  * one [pose] asks for while a strike plays, with the gear swinging, the flash, the pixels thrown
  * off, the damage number and the shake. In dark mode the demon has the backdrop's light rim, in
- * whole sprite pixels.
+ * whole sprite pixels. The stage keeps to its bounds: while it shakes, it's drawn just large enough
+ * that no edge of the backdrop comes into view.
  */
 @Composable
 fun BattleScene(
@@ -58,44 +62,59 @@ fun BattleScene(
     val damageStyle = LastHit.type.pixel
     val damageFill = colors.marigold
     val damageEdge = colors.onMarigold
-    Canvas(modifier) {
+    Canvas(modifier.clipToBounds()) {
         val scale = maxOf(size.width / backdrop.width, size.height / backdrop.height)
         val shake = pose?.shake ?: Px(0, 0)
-        translate(shake.x * scale, shake.y * scale) {
-            val (_, origin) = drawBackdrop(backdrop, image)
-            val base = origin + Offset(backdrop.spriteX * scale, backdrop.spriteY * scale)
-            val at = base + Offset((pose?.knockBack ?: 0) * scale, 0f)
-            rim?.let { drawRim(it, at, scale) }
-            drawPixels(sprite, at, scale)
-            flash?.let { drawPixels(it, at, scale) }
-            pose?.weapon?.let { drawPixels(weapon, base + Offset(it.x * scale, it.y * scale), scale) }
-            pose?.sparks?.forEach { spark ->
-                drawRect(
-                    sparkColours[spark.colour % sparkColours.size],
-                    topLeft = base + Offset(spark.at.x * scale, spark.at.y * scale),
-                    size = Size(scale, scale),
-                    alpha = spark.alpha,
-                )
-            }
-            if (damage != null && damageText != null) {
-                // The pixel font is drawn on a grid of 8 to the em, so 8 sprite pixels to the em
-                // puts each of its pixels on one of the art's.
-                val em = (if (damage.big) BIG_DAMAGE_EM else DAMAGE_EM) * scale
-                val layout = measurer.measure(damageText, damageStyle.copy(fontSize = em.toSp(), lineHeight = em.toSp()))
-                val topLeft = base + Offset(
-                    SPRITE_MIDDLE * scale - layout.size.width / 2f,
-                    (DAMAGE_BASE - damage.rise) * scale - layout.size.height,
-                )
-                val edge = em / 8
-                for (dx in -1..1) {
-                    for (dy in -1..1) {
-                        if (dx != 0 || dy != 0) drawText(layout, damageEdge, topLeft + Offset(dx * edge, dy * edge), alpha = damage.alpha)
-                    }
+        val zoom = if (shake == Px(0, 0)) 1f else shakeZoom(backdrop.width, backdrop.height, BattleMotion.SHAKE_REACH)
+        zoomed(zoom, pivot = center) {
+            translate(shake.x * scale, shake.y * scale) {
+                val (_, origin) = drawBackdrop(backdrop, image)
+                val base = origin + Offset(backdrop.spriteX * scale, backdrop.spriteY * scale)
+                val at = base + Offset((pose?.knockBack ?: 0) * scale, 0f)
+                rim?.let { drawRim(it, at, scale) }
+                drawPixels(sprite, at, scale)
+                flash?.let { drawPixels(it, at, scale) }
+                pose?.weapon?.let { drawPixels(weapon, base + Offset(it.x * scale, it.y * scale), scale) }
+                pose?.sparks?.forEach { spark ->
+                    drawRect(
+                        sparkColours[spark.colour % sparkColours.size],
+                        topLeft = base + Offset(spark.at.x * scale, spark.at.y * scale),
+                        size = Size(scale, scale),
+                        alpha = spark.alpha,
+                    )
                 }
-                drawText(layout, damageFill, topLeft, alpha = damage.alpha)
+                if (damage != null && damageText != null) {
+                    // The pixel font is drawn on a grid of 8 to the em, so 8 sprite pixels to the em
+                    // puts each of its pixels on one of the art's.
+                    val em = (if (damage.big) BIG_DAMAGE_EM else DAMAGE_EM) * scale
+                    val layout = measurer.measure(damageText, damageStyle.copy(fontSize = em.toSp(), lineHeight = em.toSp()))
+                    val topLeft = base + Offset(
+                        SPRITE_MIDDLE * scale - layout.size.width / 2f,
+                        (DAMAGE_BASE - damage.rise) * scale - layout.size.height,
+                    )
+                    val edge = em / 8
+                    for (dx in -1..1) {
+                        for (dy in -1..1) {
+                            if (dx != 0 || dy != 0) drawText(layout, damageEdge, topLeft + Offset(dx * edge, dy * edge), alpha = damage.alpha)
+                        }
+                    }
+                    drawText(layout, damageFill, topLeft, alpha = damage.alpha)
+                }
             }
         }
     }
+}
+
+/**
+ * How much larger to draw a [width] by [height] stage, in sprite pixels, while it shakes up to
+ * [reach] pixels each way, so that however the shake moves it, it still covers its bounds.
+ */
+fun shakeZoom(width: Int, height: Int, reach: Px): Float {
+    // Drawn z times larger about its middle, the stage moves z times the shake too, so it covers
+    // its width while z (width / 2 - reach) is at least width / 2.
+    val across = width / (width - 2f * abs(reach.x))
+    val down = height / (height - 2f * abs(reach.y))
+    return maxOf(across, down)
 }
 
 /**

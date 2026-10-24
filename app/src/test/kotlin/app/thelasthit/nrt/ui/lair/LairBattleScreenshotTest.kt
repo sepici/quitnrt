@@ -4,9 +4,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -26,6 +29,8 @@ import app.thelasthit.nrt.ui.captureLooks
 import app.thelasthit.nrt.ui.game.GameArt
 import app.thelasthit.nrt.ui.game.LocalGameSounds
 import app.thelasthit.nrt.ui.theme.LastHit
+import app.thelasthit.nrt.ui.theme.LastHitTheme
+import com.github.takahirom.roborazzi.captureScreenRoboImage
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -110,6 +115,34 @@ class LairBattleScreenshotTest {
             compose.onNodeWithContentDescription("Rename or restyle Gary").performClick()
             compose.waitUntil(5_000) { compose.onAllNodes(hasText("Rename or restyle")).fetchSemanticsNodes().isNotEmpty() }
         }
+    }
+
+    /**
+     * The 5× finisher landing, with 9 hits banked: both attack buttons are held down until it's
+     * over. Each look starts in its own theme, since the clock stands still at the impact.
+     */
+    @Test @Config(qualifiers = PHONE)
+    fun lairStriking() = captureStriking(dark = false)
+
+    @Test @Config(qualifiers = PHONE)
+    fun lairStrikingDark() = captureStriking(dark = true)
+
+    private fun captureStriking(dark: Boolean) {
+        app.battleAt(week = 10, spent = 0)
+        compose.setContent {
+            LastHitTheme(darkTheme = dark) {
+                Surface(Modifier.fillMaxSize(), color = LastHit.colors.bg, contentColor = LastHit.colors.text) {
+                    CompositionLocalProvider(LocalGameSounds provides RecordedSounds()) { AppShell() }
+                }
+            }
+        }
+        compose.onNodeWithText("Lair").performClick()
+        compose.waitUntil(5_000) { compose.onAllNodes(hasText("Gary eyes you from the rocks.")).fetchSemanticsNodes().isNotEmpty() }
+        compose.mainClock.autoAdvance = false
+        compose.onNode(hasText("5× attack") and hasClickAction()).performClick()
+        compose.mainClock.advanceTimeBy(BattleMotion.FINISHER_IMPACT + 40)
+        captureScreenRoboImage("build/outputs/roborazzi/lair-striking-${if (dark) "dark" else "light"}.png")
+        compose.mainClock.autoAdvance = true
     }
 
     /**

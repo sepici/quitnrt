@@ -12,6 +12,8 @@ import app.thelasthit.nrt.domain.creature.Creature
 import app.thelasthit.nrt.domain.game.Attack
 import app.thelasthit.nrt.domain.game.Gear
 import app.thelasthit.nrt.domain.game.Victory
+import app.thelasthit.nrt.domain.programme.Mix
+import app.thelasthit.nrt.domain.programme.MixItem
 import app.thelasthit.nrt.domain.programme.ProgrammeStatus
 import app.thelasthit.nrt.domain.programme.WeekResult
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -70,9 +72,22 @@ sealed interface LairState {
         val victory: Victory? = null,
         /** Tags by key, for naming the triggers in the victory. */
         val tags: Map<String, TagEntity> = emptyMap(),
+        /** The usual day the plan stepped down from, as the victory puts it, or null if a product in it has gone. */
+        val usualDay: Mix? = null,
     ) : LairState {
         val isDefeated: Boolean get() = maxHp > 0 && hp <= 0
     }
+}
+
+/**
+ * An attack that landed, with the battle as it left it: the HP, the hits banked and whether the
+ * latest week was missed. The demon answers to it only while the battle is still like that, so a
+ * week's result or a hit spent elsewhere gives it its usual line back.
+ */
+data class Landed(val attack: Attack, val hp: Int, val banked: Int, val lastWeekMissed: Boolean) {
+    /** The attack the demon answers to in [battle], or null once the battle has moved on. */
+    fun answeredIn(battle: LairState.Battle): Attack? =
+        attack.takeIf { battle.hp == hp && battle.banked == banked && battle.lastWeekMissed == lastWeekMissed }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -82,7 +97,7 @@ class LairViewModel(
 ) : ViewModel() {
 
     private val strikes = MutableStateFlow<Strike?>(null)
-    private val landed = MutableStateFlow<Attack?>(null)
+    private val landed = MutableStateFlow<Landed?>(null)
     private var nextStrike = 1L
 
     val state: StateFlow<LairState?> =
@@ -91,11 +106,14 @@ class LairViewModel(
         }.mapLatest { (settings, demon, programme) -> build(settings, demon, programme) }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    /** The strike playing now, from the tap to the end of its animation. Taps wait for it. */
+    /**
+     * The strike playing now, from the tap until its animation is over and the ledger shows it.
+     * The attack buttons are busy until then, and [attack] turns down any tap that gets through.
+     */
     val strike: StateFlow<Strike?> = strikes.asStateFlow()
 
-    /** The attack that landed last on this visit, which the demon answers to. */
-    val lastAttack: StateFlow<Attack?> = landed.asStateFlow()
+    /** The attack that landed last on this visit, which the demon answers to while the battle stays as it left it. */
+    val lastAttack: StateFlow<Landed?> = landed.asStateFlow()
 
     val soundOn: StateFlow<Boolean> = graph.settings.settings.map { it.soundOn }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
@@ -134,6 +152,20 @@ class LairViewModel(
     /** The strike's animation is over. It ends once the ledger shows it too. */
     fun strikeDone(strike: Strike) = finish(strike, animated = true)
 
+    /**
+     * The lair has left the screen: a tab switch, a toast's link or a rotation. A strike still
+     * playing ends now rather than playing again from the tap when the lair comes back, and the
+     * demon's answer to the last attack goes with the visit.
+     */
+    fun leave() {
+        strikes.value?.let { strike ->
+            // Until the ledger shows it, the screen holds the strike where it ended, without playing it again.
+            if (strike.id !in written) strikes.value = strike.copy(cutShort = true)
+            finish(strike, animated = true)
+        }
+        landed.value = null
+    }
+
     private val written = mutableSetOf<Long>()
     private val animated = mutableSetOf<Long>()
 
@@ -141,8 +173,11 @@ class LairViewModel(
     private fun finish(strike: Strike, written: Boolean = false, animated: Boolean = false) {
         if (written) this.written += strike.id
         if (animated) this.animated += strike.id
-        if (strike.id !in this.written || strike.id !in this.animated || strikes.value?.id != strike.id) return
-        landed.value = strike.attack
+        val playing = strikes.value
+        if (strike.id !in this.written || strike.id !in this.animated || playing?.id != strike.id) return
+        // The demon answers only a strike that played out on screen.
+        val battle = state.value as? LairState.Battle
+        landed.value = if (playing.cutShort || battle == null) null else Landed(strike.attack, battle.hp, battle.banked, battle.lastWeekMissed)
         strikes.value = null
     }
 
@@ -177,6 +212,12 @@ class LairViewModel(
         if (!battle.isDefeated) return battle
         val record = graph.unlocks.record()
         val victory = record.programmes.lastOrNull()?.let { Victory.of(it, record.entries, settings.dayBoundary, zone()) }
-        return battle.copy(victory = victory, tags = graph.tags.all.first().associateBy { it.key })
+        return battle.copy(victory = victory, tags = graph.tags.all.first().associateBy { it.key }, usualDay = victory?.let { usualDayMix(it) })
+    }
+
+    /** The victory's usual day with its products, to put into words as the Plan tab does. Null if one has gone. */
+    private suspend fun usualDayMix(victory: Victory): Mix? {
+        val items = victory.usualDay.map { unit -> graph.products.get(unit.productId)?.let { MixItem(it, unit.unitsPerDay) } ?: return null }
+        return Mix.of(items)
     }
 }

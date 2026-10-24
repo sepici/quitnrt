@@ -34,13 +34,14 @@ class VictoryTest {
     }
 
     @Test
-    fun `the summary has the weeks, the usual day's mg, the hits and the day of the last one`() {
+    fun `the summary has the weeks, the usual day, the hits and the day of the last one`() {
         val run = WeekRun(EXAMPLE_2_PLAN)
         // 02:30 on a Sunday counts toward the Saturday before, as every day in the app does.
         val lastHit = java.time.LocalDateTime.parse("2027-02-07T02:30").atZone(ZONE).toInstant()
         val victory = requireNotNull(Victory.of(defeated(run, lastHit = lastHit), emptyList(), BOUNDARY, ZONE))
         assertEquals(12, victory.weeks)
         assertEquals(0, victory.overtime)
+        assertEquals(EXAMPLE_2_USUAL_DAY, victory.usualDay)
         assertEquals(Dose.mg(32), victory.usualDaily)
         assertEquals(12, victory.hits)
         assertEquals(LocalDate.of(2027, 2, 6), victory.lastHitOn)

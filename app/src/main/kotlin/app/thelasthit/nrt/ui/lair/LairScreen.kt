@@ -1,5 +1,6 @@
 package app.thelasthit.nrt.ui.lair
 
+import android.content.res.Resources
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -25,10 +26,12 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -47,7 +50,9 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -59,6 +64,8 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
@@ -70,11 +77,15 @@ import app.thelasthit.nrt.domain.game.Attack
 import app.thelasthit.nrt.domain.game.Gear
 import app.thelasthit.nrt.domain.game.LairLine
 import app.thelasthit.nrt.domain.game.Victory
+import app.thelasthit.nrt.domain.product.ProductForm
+import app.thelasthit.nrt.domain.programme.Mix
+import app.thelasthit.nrt.domain.programme.MixItem
 import app.thelasthit.nrt.ui.components.pressable
 import app.thelasthit.nrt.ui.format.DayMonthFormatter
 import app.thelasthit.nrt.ui.format.DayMonthYearFormatter
 import app.thelasthit.nrt.ui.format.creatureName
 import app.thelasthit.nrt.ui.format.mgText
+import app.thelasthit.nrt.ui.format.plural
 import app.thelasthit.nrt.ui.format.tagText
 import app.thelasthit.nrt.ui.game.CreatureScene
 import app.thelasthit.nrt.ui.game.GameArt
@@ -85,7 +96,6 @@ import app.thelasthit.nrt.ui.game.HoldUnlocksWhile
 import app.thelasthit.nrt.ui.game.PixelImage
 import app.thelasthit.nrt.ui.game.rememberGameSounds
 import app.thelasthit.nrt.ui.graphViewModel
-import app.thelasthit.nrt.ui.onboarding.SummaryRow
 import app.thelasthit.nrt.ui.onboarding.OnboardingDraft
 import app.thelasthit.nrt.ui.theme.LastHit
 import kotlinx.coroutines.delay
@@ -109,6 +119,8 @@ fun LairScreen(
     val lastAttack by viewModel.lastAttack.collectAsStateWithLifecycle()
     val soundOn by viewModel.soundOn.collectAsStateWithLifecycle()
     val equipped by viewModel.equipped.collectAsStateWithLifecycle()
+    // Leaving mid-strike ends it, so it isn't played again from the tap when the lair comes back.
+    DisposableEffect(viewModel) { onDispose(viewModel::leave) }
     val current = state ?: return
     val colors = LastHit.colors
     val name = current.name ?: stringResource(R.string.demon_default_name)
@@ -181,7 +193,7 @@ fun LairScreen(
         if (battle == null) {
             Lurking(name)
         } else {
-            val line = LairLine.of(shownHp, battle.maxHp, battle.banked, battle.lastWeekMissed, lastAttack)
+            val line = LairLine.of(shownHp, battle.maxHp, battle.banked, battle.lastWeekMissed, lastAttack?.answeredIn(battle))
             // The demon answers once the strike is over: until then its line stays as it was at the tap.
             val heldLine = remember(strike?.id) { line }
             BattleHud(name, shownHp, battle.maxHp, lineText(if (strike != null) heldLine else line, name))
@@ -204,6 +216,7 @@ fun LairScreen(
                 Attacks(
                     banked = battle.banked,
                     hp = battle.hp,
+                    busy = strike != null,
                     equipped = equipped,
                     onAttack = viewModel::attack,
                     modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 18.dp, bottom = 20.dp),
@@ -231,7 +244,8 @@ fun LairScreen(
 /**
  * The strike playing now as a [Pose], moved on every frame from the time since the tap, at the
  * phone's animation speed. Each sound's moment calls [onCue] once, and the end calls [onDone].
- * Null when no strike is playing.
+ * A strike cut short by the lair leaving the screen shows as it ends, with no sound. Null when no
+ * strike is playing.
  */
 @Composable
 private fun rememberStrikePose(
@@ -246,8 +260,9 @@ private fun rememberStrikePose(
     var elapsed by remember(motion) { mutableLongStateOf(0L) }
     val cue by rememberUpdatedState(onCue)
     val done by rememberUpdatedState(onDone)
-    LaunchedEffect(motion) {
-        val playing = motion ?: return@LaunchedEffect
+    val cutShort = strike?.cutShort == true
+    LaunchedEffect(motion, cutShort) {
+        val playing = motion?.takeUnless { cutShort } ?: return@LaunchedEffect
         var start = -1L
         var last = -1L
         while (true) {
@@ -263,7 +278,7 @@ private fun rememberStrikePose(
         }
         done(playing.strike)
     }
-    return motion?.at(elapsed)
+    return motion?.at(if (cutShort) motion.length else elapsed)
 }
 
 /** The haptic for each sound: a tick for each hit, a heavier one for the finisher and the knockout. */
@@ -566,9 +581,12 @@ private fun Bank(count: Int, title: String, rule: String, spoken: String?, modif
     }
 }
 
-/** Hit, with the gear in hand, and the 5× attack with a pip for each hit towards it. */
+/**
+ * Hit, with the gear in hand, and the 5× attack with a pip for each hit towards it. While a strike
+ * plays they're [busy]: held down and taking no taps until it's over.
+ */
 @Composable
-private fun Attacks(banked: Int, hp: Int, equipped: Gear, onAttack: (Attack) -> Unit, modifier: Modifier = Modifier) {
+private fun Attacks(banked: Int, hp: Int, busy: Boolean, equipped: Gear, onAttack: (Attack) -> Unit, modifier: Modifier = Modifier) {
     val canHit = Attack.HIT.canUse(banked, hp)
     val canCombo = Attack.COMBO.canUse(banked, hp)
     Row(modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -576,6 +594,7 @@ private fun Attacks(banked: Int, hp: Int, equipped: Gear, onAttack: (Attack) -> 
             title = stringResource(R.string.lair_hit),
             sub = stringResource(if (canHit) R.string.lair_hit_uses else R.string.lair_hit_needs),
             enabled = canHit,
+            busy = busy,
             onClick = { onAttack(Attack.HIT) },
             modifier = Modifier.weight(1.25f).fillMaxHeight(),
             icon = { PixelImage(GameIcons.gear(equipped), 32.dp) },
@@ -584,6 +603,7 @@ private fun Attacks(banked: Int, hp: Int, equipped: Gear, onAttack: (Attack) -> 
             title = stringResource(R.string.lair_combo),
             sub = stringResource(if (canCombo) R.string.lair_combo_uses else R.string.lair_combo_needs),
             enabled = canCombo,
+            busy = busy,
             onClick = { onAttack(Attack.COMBO) },
             modifier = Modifier.weight(1f).fillMaxHeight(),
             pips = minOf(banked, Attack.COMBO.hits),
@@ -591,12 +611,17 @@ private fun Attacks(banked: Int, hp: Int, equipped: Gear, onAttack: (Attack) -> 
     }
 }
 
-/** One of the two attack buttons: marigold with its pressed edge when it can be used, the quiet disabled tone when not. */
+/**
+ * One of the two attack buttons: marigold with its pressed edge when it can be used, the quiet
+ * disabled tone when not. While a strike plays, one that can be used is [busy]: held down onto its
+ * edge, with no ripple, until the strike is over.
+ */
 @Composable
 private fun AttackButton(
     title: String,
     sub: String,
     enabled: Boolean,
+    busy: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     icon: (@Composable () -> Unit)? = null,
@@ -605,18 +630,20 @@ private fun AttackButton(
     val colors = LastHit.colors
     val shape = RoundedCornerShape(24.dp)
     val content = if (enabled) colors.onMarigold else colors.disabledText
+    val ready = enabled && !busy
     Column(
         modifier
             .heightIn(min = 104.dp)
             .then(
-                if (enabled) {
-                    Modifier.pressable(colors.marigold, shape, edge = colors.marigoldEdge, depth = 5.dp)
-                } else {
-                    Modifier.clip(shape).background(colors.disabledBg)
+                when {
+                    ready -> Modifier.pressable(colors.marigold, shape, edge = colors.marigoldEdge, depth = PRESS_DEPTH)
+                    // Held down: the face sits on its edge, lower by the edge's depth.
+                    enabled -> Modifier.padding(top = PRESS_DEPTH).clip(shape).background(colors.marigold)
+                    else -> Modifier.clip(shape).background(colors.disabledBg)
                 },
             )
-            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
-            .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = if (enabled) 19.dp else 14.dp),
+            .clickable(enabled = ready, role = Role.Button, onClick = onClick)
+            .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = if (ready) 14.dp + PRESS_DEPTH else 14.dp),
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -667,7 +694,10 @@ private fun Pips(filled: Int, onMarigold: Boolean, outline: Color) {
 
 // The victory.
 
-/** What the run took, once the demon falls: weeks, the usual day's mg down to none, the hits and the triggers. */
+/**
+ * What the run took, once the demon falls, in plan-done.html's rows: weeks, the usual day down to
+ * none, the hits and the triggers.
+ */
 @Composable
 private fun VictorySection(victory: Victory, name: String, battle: LairState.Battle) {
     val colors = LastHit.colors
@@ -683,6 +713,9 @@ private fun VictorySection(victory: Victory, name: String, battle: LairState.Bat
         stringResource(R.string.lair_victory_hits_on, victory.hits, day)
     }
     val triggers = victory.triggers.map { key -> battle.tags[key]?.let { tagText(it) } ?: tagText(key) }
+    // As the Plan tab sums up the same run: the usual day product by product, or its mg if a product in it has gone.
+    val daily = battle.usualDay?.let { stringResource(R.string.lair_victory_daily_value, usualDayText(it)) }
+        ?: stringResource(R.string.lair_victory_daily_mg, victory.usualDaily.mgText())
     Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 28.dp, bottom = 24.dp)) {
         Text(
             stringResource(R.string.lair_victory_title),
@@ -691,11 +724,11 @@ private fun VictorySection(victory: Victory, name: String, battle: LairState.Bat
             modifier = Modifier.semantics { heading() },
         )
         Column(Modifier.padding(top = 4.dp)) {
-            SummaryRow(stringResource(R.string.lair_victory_weeks), weeks, first = true)
-            SummaryRow(stringResource(R.string.lair_victory_daily), stringResource(R.string.lair_victory_daily_value, victory.usualDaily.mgText()), first = false)
-            SummaryRow(stringResource(R.string.lair_victory_hits, name), hits, first = false)
+            VictoryRow(stringResource(R.string.lair_victory_weeks), weeks, first = true)
+            VictoryRow(stringResource(R.string.lair_victory_daily), daily, first = false)
+            VictoryRow(stringResource(R.string.lair_victory_hits, name), hits, first = false)
             if (triggers.isNotEmpty()) {
-                SummaryRow(stringResource(R.string.lair_victory_triggers), triggers.joinToString(", "), first = false)
+                VictoryRow(stringResource(R.string.lair_victory_triggers), triggers.joinToString(", "), first = false)
             }
         }
         Text(
@@ -706,6 +739,75 @@ private fun VictorySection(victory: Victory, name: String, battle: LairState.Bat
         )
     }
 }
+
+/**
+ * One row of the victory: the label on the left and the value on the right, as plan-done.html has
+ * them, with the label on one line. A value that would take more than two lines beside it, as a
+ * long label leaves it at a large font, goes under the label instead, across the full width.
+ */
+@Composable
+private fun VictoryRow(label: String, value: String, first: Boolean) {
+    val colors = LastHit.colors
+    val labelStyle = LastHit.type.body
+    val valueStyle = LastHit.type.body.copy(fontWeight = FontWeight.Bold)
+    val measurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    Column {
+        if (!first) HorizontalDivider(color = colors.line)
+        BoxWithConstraints(
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 14.dp)
+                .semantics(mergeDescendants = true) {},
+        ) {
+            val gap = 16.dp
+            val beside = constraints.maxWidth - measurer.measure(label, labelStyle).size.width - with(density) { gap.roundToPx() }
+            val stacked = beside <= 0 || measurer.measure(value, valueStyle, constraints = Constraints(maxWidth = beside)).lineCount > 2
+            if (stacked) {
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(label, style = labelStyle, color = colors.text2)
+                    Text(value, style = valueStyle, color = colors.text)
+                }
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(gap)) {
+                    Text(label, style = labelStyle, color = colors.text2, maxLines = 1)
+                    Text(value, style = valueStyle, color = colors.text, textAlign = TextAlign.End, modifier = Modifier.weight(1f))
+                }
+            }
+        }
+    }
+}
+
+/** The usual day in words, as the Plan tab puts it: "8 pieces of 4 mg gum and 3 sprays". */
+@Composable
+private fun usualDayText(mix: Mix): String {
+    val resources = LocalResources.current
+    val items = mix.items.map { resources.mixItemText(it) }
+    return if (items.size == 1) items.single() else stringResource(R.string.lair_list_and, items.dropLast(1).joinToString(", "), items.last())
+}
+
+/** One product's units a day: "8 pieces of 4 mg gum", "3 sprays", or the units and the product's name. */
+private fun Resources.mixItemText(item: MixItem): String {
+    val product = item.product
+    val units = item.units
+    val mg = product.perUnit.mgText()
+    val words = when (product.form) {
+        ProductForm.GUM -> R.plurals.lair_mix_gum
+        ProductForm.LOZENGE -> R.plurals.lair_mix_lozenge
+        ProductForm.MINI_LOZENGE -> R.plurals.lair_mix_mini_lozenge
+        ProductForm.PATCH_16H, ProductForm.PATCH_24H -> R.plurals.lair_mix_patch
+        ProductForm.MOUTH_SPRAY -> R.plurals.lair_mix_spray
+        ProductForm.NASAL_SPRAY -> R.plurals.lair_mix_nasal_spray
+        else -> null
+    }
+    if (words != null) return getQuantityString(words, units, units, mg)
+    // Catalogue names carry their strength, and one added by hand gets it added.
+    val title = if (product.catalogueId == null) getString(R.string.dose_named, product.name, mg) else product.name
+    return getString(R.string.lair_mix_other, getQuantityString(product.unit.plural, units, units), title)
+}
+
+/** How deep an attack button's edge is, and how far it goes down while it's held. */
+private val PRESS_DEPTH = 5.dp
 
 /** HP comes in blocks of 10. */
 private const val HP_BLOCK = 10

@@ -54,12 +54,45 @@
     <string name="lair_victory_weeks">Weeks</string>
     <string name="lair_victory_weeks_overtime">%1$d, plus %2$d of overtime</string>
     <string name="lair_victory_daily">Daily amount</string>
-    <string name="lair_victory_daily_value">%1$s\u00A0mg, down to none</string>
+    <!-- %1$s is the usual day, as the Plan tab puts it: "8 pieces of 4 mg gum and 3 sprays". -->
+    <string name="lair_victory_daily_value">%1$s, down to none</string>
+    <!-- If a product in the usual day has gone, its mg. -->
+    <string name="lair_victory_daily_mg">%1$s\u00A0mg, down to none</string>
     <string name="lair_victory_hits">Hits on %1$s</string>
     <string name="lair_victory_hits_today">%1$d, the last one today</string>
     <string name="lair_victory_hits_on">%1$d, the last one on %2$s</string>
     <string name="lair_victory_triggers">Triggers you got on top of</string>
     <string name="lair_victory_foot">Badges and gear carry over. A rematch starts from the Plan tab, if you ever need one.</string>
+
+    <!-- The usual day in words, as the Plan tab puts it: "8 pieces of 4 mg gum and 3 sprays". -->
+    <string name="lair_list_and">%1$s and %2$s</string>
+    <plurals name="lair_mix_gum">
+        <item quantity="one">%1$d\u00A0piece of %2$s\u00A0mg gum</item>
+        <item quantity="other">%1$d\u00A0pieces of %2$s\u00A0mg gum</item>
+    </plurals>
+    <plurals name="lair_mix_lozenge">
+        <item quantity="one">%1$d\u00A0lozenge of %2$s\u00A0mg</item>
+        <item quantity="other">%1$d\u00A0lozenges of %2$s\u00A0mg</item>
+    </plurals>
+    <plurals name="lair_mix_mini_lozenge">
+        <item quantity="one">%1$d\u00A0mini lozenge of %2$s\u00A0mg</item>
+        <item quantity="other">%1$d\u00A0mini lozenges of %2$s\u00A0mg</item>
+    </plurals>
+    <plurals name="lair_mix_patch">
+        <item quantity="one">%1$d\u00A0patch of %2$s\u00A0mg</item>
+        <item quantity="other">%1$d\u00A0patches of %2$s\u00A0mg</item>
+    </plurals>
+    <!-- The mouth spray comes in one strength, so its sprays are counted on their own. -->
+    <plurals name="lair_mix_spray">
+        <item quantity="one">%1$d\u00A0spray</item>
+        <item quantity="other">%1$d\u00A0sprays</item>
+    </plurals>
+    <plurals name="lair_mix_nasal_spray">
+        <item quantity="one">%1$d\u00A0nasal spray</item>
+        <item quantity="other">%1$d\u00A0nasal sprays</item>
+    </plurals>
+    <!-- Units of any other product: "2 tablets of Microtab 2 mg". -->
+    <string name="lair_mix_other">%1$s of %2$s</string>
 
     <!-- Renaming and restyling the demon. -->
     <string name="lair_restyle_title">Rename or restyle</string>

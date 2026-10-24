@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import app.thelasthit.nrt.domain.game.Gear
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import kotlin.math.PI
 import kotlin.math.pow
@@ -165,15 +166,18 @@ fun interface GameSounds {
  */
 class ChipPlayer(context: Context) : GameSounds {
     private val audio = context.getSystemService(AudioManager::class.java)
-    private val worker = Executors.newSingleThreadScheduledExecutor { task -> Thread(task, "game-sounds").apply { isDaemon = true } }
-    private val made = ConcurrentHashMap<Pair<GameSound, HitVoice>, ShortArray>()
+
+    @Volatile
+    private var closed = false
 
     /** Whether the phone's ringer lets the game make a sound: not on silent or vibrate. */
     val phoneAllowsSound: Boolean get() = audio?.ringerMode == AudioManager.RINGER_MODE_NORMAL
 
     override fun play(sound: GameSound, voice: HitVoice) {
-        if (!phoneAllowsSound || worker.isShutdown) return
+        if (closed || !phoneAllowsSound) return
         worker.execute {
+            // Asked for just as the lair closed: it's gone, so the sound goes too.
+            if (closed) return@execute
             try {
                 val samples = made.getOrPut(sound to voice) { ChipSynth.render(sound, voice) }
                 val track = AudioTrack.Builder()
@@ -206,12 +210,25 @@ class ChipPlayer(context: Context) : GameSounds {
         }
     }
 
-    /** Stops taking sounds. Those already playing finish and are released. */
-    fun close() = worker.shutdown()
+    /**
+     * Stops taking sounds. Those already playing finish and are released, since the worker that
+     * releases them carries on: it's shared by every player and never shut down.
+     */
+    fun close() {
+        closed = true
+    }
 
     private companion object {
         /** Room after a sound ends before its track is let go. */
         const val RELEASE_AFTER_MS = 200L
+
+        /** One thread for the app's sounds, idle between them, so a track's release can't be turned away. */
+        val worker: ScheduledExecutorService by lazy {
+            Executors.newSingleThreadScheduledExecutor { task -> Thread(task, "game-sounds").apply { isDaemon = true } }
+        }
+
+        /** Each sound is made once, in each gear's voice. */
+        val made = ConcurrentHashMap<Pair<GameSound, HitVoice>, ShortArray>()
     }
 }
 

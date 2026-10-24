@@ -15,7 +15,10 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.core.app.ApplicationProvider
+import app.thelasthit.nrt.GUM_4
 import app.thelasthit.nrt.TestApp
+import app.thelasthit.nrt.TestApp.Companion.london
+import app.thelasthit.nrt.data.repo.LogRequest
 import app.thelasthit.nrt.domain.creature.Creature
 import app.thelasthit.nrt.setUp
 import app.thelasthit.nrt.ui.PHONE
@@ -92,6 +95,50 @@ class LairBattleTest {
     }
 
     @Test
+    fun `while a strike plays the attack buttons are held, and a second tap spends nothing`() {
+        // 110 of 120 HP, with 2 hits banked.
+        app.battleAt(week = 4, spent = 1)
+        showLair()
+
+        compose.waitUntilExactlyOneExists(hp(110), timeoutMillis = 5_000)
+        val hit = hasText("Hit") and hasClickAction()
+        compose.mainClock.autoAdvance = false
+        compose.onNode(hit).performClick()
+        compose.mainClock.advanceTimeBy(BattleMotion.HIT_IMPACT / 2)
+        compose.onNode(hit).assertIsNotEnabled().performClick()
+        compose.mainClock.autoAdvance = true
+
+        compose.waitUntilExactlyOneExists(hasText("Gary staggers."), timeoutMillis = 5_000)
+        compose.onNode(hp(100)).assertExists()
+        compose.onNodeWithContentDescription("1 hit banked", substring = true).assertExists()
+        compose.onNode(hit).assertIsEnabled()
+        assertEquals(1, demon().balance.banked)
+        assertEquals(listOf(GameSound.SWING, GameSound.IMPACT), sounds.snapshot())
+    }
+
+    @Test
+    fun `a week missed after a hit makes the demon smug, though it just staggered`() {
+        // Week 4 of 12 at 110 of 120 HP, with 2 hits banked.
+        app.battleAt(week = 4, spent = 1)
+        showLair()
+
+        compose.waitUntilExactlyOneExists(hp(110), timeoutMillis = 5_000)
+        compose.onNode(hasText("Hit") and hasClickAction()).performClick()
+        compose.waitUntilExactlyOneExists(hasText("Gary staggers."), timeoutMillis = 5_000)
+
+        // Week 4 goes well over, and its result comes in on week 5's third day.
+        runBlocking {
+            app.graph.entries.log(LogRequest(GUM_4, quantity = 40, at = london("${PLAN_START.plusWeeks(3)}T09:00")))
+            app.clock.now = london("${PLAN_START.plusWeeks(4).plusDays(2)}T15:05")
+            app.graph.programmes.settle()
+        }
+
+        compose.waitUntilExactlyOneExists(hasText("Gary looks smug. Meet next week and take that hit back."), timeoutMillis = 5_000)
+        compose.onNodeWithText("Gary staggers.").assertDoesNotExist()
+        compose.onNode(hp(100)).assertExists()
+    }
+
+    @Test
     fun `the 5x attack spends five hits for 50 HP in one combo`() {
         app.battleWithCombo()
         showLair()
@@ -128,7 +175,7 @@ class LairBattleTest {
         compose.onNodeWithContentDescription("An empty rock, with the last of Gary drifting off as pixels").assertExists()
         compose.onNodeWithText("Weeks").assertExists()
         compose.onNodeWithText("12").assertExists()
-        compose.onNodeWithText("32 mg, down to none").assertExists()
+        compose.onNodeWithText("8\u00A0pieces of 4\u00A0mg gum, down to none").assertExists()
         compose.onNodeWithText("Hits on Gary").assertExists()
         compose.onNodeWithText("12, the last one today").performScrollTo()
         // The battle's buttons and the rename are gone with the demon.
@@ -146,6 +193,7 @@ class LairBattleTest {
 
         compose.waitUntilExactlyOneExists(hasText("Victory"), timeoutMillis = 5_000)
         compose.onNodeWithContentDescription("An empty rock, with the last of Gary drifting off as pixels").assertExists()
+        compose.onNodeWithText("8\u00A0pieces of 4\u00A0mg gum and 3\u00A0sprays, down to none").assertExists()
         compose.onNodeWithText("Triggers you got on top of").assertExists()
         compose.onNodeWithText("After a meal, With coffee or tea").assertExists()
         assertTrue(sounds.snapshot().isEmpty())

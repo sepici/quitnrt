@@ -2,6 +2,7 @@ package app.thelasthit.nrt.ui.lair
 
 import android.provider.Settings
 import app.thelasthit.nrt.GUM_4
+import app.thelasthit.nrt.QUICKMIST
 import app.thelasthit.nrt.TestApp
 import app.thelasthit.nrt.TestApp.Companion.london
 import app.thelasthit.nrt.data.repo.LogRequest
@@ -17,15 +18,16 @@ import java.time.LocalDate
 val PLAN_START: LocalDate = LocalDate.of(2026, 10, 24)
 
 /**
- * Gary in [week] of a 12-week plan down from 8 pieces of 4 mg gum, with every week before it met
- * (nothing logged meets a week), and [spent] of those hits spent. The clock is at 15:05 on the
- * week's third day, once the week before's result is in. Week 13 means the plan is over, with
- * all 12 met.
+ * Gary in [week] of a 12-week plan down from 8 pieces of 4 mg gum (and [sprays] sprays a day),
+ * with every week before it met (nothing logged meets a week), and [spent] of those hits spent.
+ * The clock is at 15:05 on the week's third day, once the week before's result is in. Week 13
+ * means the plan is over, with all 12 met.
  */
-fun TestApp.battleAt(week: Int, spent: Int) = runBlocking {
+fun TestApp.battleAt(week: Int, spent: Int, sprays: Int = 0) = runBlocking {
     setUp()
     val gum = checkNotNull(graph.products.get(GUM_4))
-    graph.programmes.keepUsualDay(UsualDay.typed(gum to 8))
+    val spray = checkNotNull(graph.products.get(QUICKMIST))
+    graph.programmes.keepUsualDay(UsualDay.typed(gum to 8, spray to sprays))
     graph.programmes.startPlan(checkNotNull(graph.programmes.buildPlan()))
     clock.now = london("${PLAN_START.plusWeeks(week - 1L).plusDays(2)}T15:05")
     graph.programmes.settle()
@@ -45,13 +47,14 @@ fun TestApp.battleBarely() = battleAt(week = 12, spent = 8)
 fun TestApp.battleLastHit() = battleAt(week = 13, spent = 11)
 
 /**
- * Gary defeated: all 12 weeks met and every hit spent, the last one today. In the plan's first
- * week, gum was taken with coffee or tea in the mornings and after lunch, the triggers the
- * victory names (the usual day was typed, so they come from that week). Logged once the results
- * are in, so they change none.
+ * Gary defeated, as plan-done.html sums up the run: a plan down from 8 pieces of 4 mg gum and 3
+ * sprays, all 12 weeks met and every hit spent, the last one today. In the plan's first week, gum
+ * was taken with coffee or tea in the mornings and after lunch, the triggers the victory names
+ * (the usual day was typed, so they come from that week). Logged once the results are in, so they
+ * change none.
  */
 fun TestApp.defeatedWithTriggers() = runBlocking {
-    battleLastHit()
+    battleAt(week = 13, spent = 11, sprays = 3)
     for (day in 25..28) {
         graph.entries.log(LogRequest(GUM_4, at = london("2026-10-${day}T08:00"), tagKeys = setOf("coffee_tea")))
         graph.entries.log(LogRequest(GUM_4, at = london("2026-10-${day}T13:00"), tagKeys = setOf("after_meal")))
