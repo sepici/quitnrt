@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -63,7 +62,7 @@ import app.thelasthit.nrt.R
 import app.thelasthit.nrt.domain.dose.Dose
 import app.thelasthit.nrt.domain.log.HistoryFilter
 import app.thelasthit.nrt.domain.log.LoggedDay
-import app.thelasthit.nrt.ui.absorbed.ABSORBED_WIDTH
+import app.thelasthit.nrt.ui.absorbed.BesideTheAmount
 import app.thelasthit.nrt.ui.absorbed.absorbedText
 import app.thelasthit.nrt.ui.components.Chip
 import app.thelasthit.nrt.ui.components.ChipKind
@@ -334,7 +333,8 @@ private fun ClearChip(name: String, onClear: () -> Unit, modifier: Modifier = Mo
 /**
  * Under a filter, the day's line counts its matches against every dose it had: "1 of 5 doses". A
  * [ticked] day stayed at or under the plan's guide, and has a green tick by its total. With
- * [absorbed], the estimated absorbed amount sits under the total while that setting is on.
+ * [absorbed], the estimated absorbed amount sits under the total while that setting is on, or on a
+ * line of its own under the header where beside the total it would wrap the day's date.
  */
 @Composable
 private fun DayHeader(day: LoggedDay, today: LocalDate, filtered: Boolean, ticked: Boolean = false, absorbed: Dose? = null) {
@@ -372,23 +372,25 @@ private fun DayHeader(day: LoggedDay, today: LocalDate, filtered: Boolean, ticke
                 },
             verticalAlignment = Alignment.Bottom,
         ) {
-            Column(Modifier.weight(1f)) {
-                Text(
-                    title,
-                    style = LastHit.type.headline.copy(fontSize = 24.sp, lineHeight = 30.sp, letterSpacing = (-0.025).em),
-                    color = colors.text,
-                )
-                Text(
-                    if (filtered) {
-                        pluralStringResource(R.plurals.history_day_meta_filtered, day.doses, date, count, day.doses)
-                    } else {
-                        pluralStringResource(R.plurals.history_day_meta, count, date, count)
-                    },
-                    style = LastHit.type.label,
-                    color = colors.text2,
-                )
+            val titles = @Composable { columnModifier: Modifier ->
+                Column(columnModifier) {
+                    Text(
+                        title,
+                        style = LastHit.type.headline.copy(fontSize = 24.sp, lineHeight = 30.sp, letterSpacing = (-0.025).em),
+                        color = colors.text,
+                    )
+                    Text(
+                        if (filtered) {
+                            pluralStringResource(R.plurals.history_day_meta_filtered, day.doses, date, count, day.doses)
+                        } else {
+                            pluralStringResource(R.plurals.history_day_meta, count, date, count)
+                        },
+                        style = LastHit.type.label,
+                        color = colors.text2,
+                    )
+                }
             }
-            Column(Modifier.padding(start = 12.dp), horizontalAlignment = Alignment.End) {
+            val amount = @Composable {
                 Row(verticalAlignment = Alignment.Bottom) {
                     if (isToday) {
                         Text(
@@ -415,15 +417,21 @@ private fun DayHeader(day: LoggedDay, today: LocalDate, filtered: Boolean, ticke
                         color = colors.text,
                     )
                 }
-                if (absorbed != null) {
-                    Text(
-                        absorbedText(absorbed),
-                        style = LastHit.type.caption,
-                        color = colors.text2,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier.widthIn(max = ABSORBED_WIDTH),
-                    )
-                }
+            }
+            if (absorbed == null) {
+                titles(Modifier.weight(1f))
+                amount()
+            } else {
+                BesideTheAmount(
+                    gap = 12.dp,
+                    start = { titles(Modifier) },
+                    amount = amount,
+                    estimate = {
+                        Text(absorbedText(absorbed), style = LastHit.type.caption, color = colors.text2, textAlign = TextAlign.End)
+                    },
+                    modifier = Modifier.weight(1f),
+                    bottom = true,
+                )
             }
         }
         HorizontalDivider(color = colors.line)

@@ -18,10 +18,20 @@ value class AbsorptionFactor(val perMille: Int) {
     val percent: Int get() = (perMille + 5) / 10
 }
 
+/** What kind of source a factor comes from, which is how the Settings page groups them. */
+enum class SourceKind { LEAFLET, LABEL, STUDY }
+
 /** A published page or paper a factor comes from, with the day it was read. */
 data class AbsorptionSource(
+    val kind: SourceKind,
+    /**
+     * The name the Settings page gives it in its line of sources: the product for a leaflet or
+     * label, such as "QuickMist", and the first author for a study, such as "Benowitz", with its
+     * [year] beside it.
+     */
+    val short: String,
     val publisher: String,
-    /** What the app shows: who wrote it and its title, or the product and the label's section. */
+    /** The full citation: who wrote it and its title, or the product and the label's sections. */
     val title: String,
     val year: Int?,
     val url: String,
@@ -29,9 +39,9 @@ data class AbsorptionSource(
 )
 
 /**
- * One form's factor, with the [low] to [high] range the sources give where they give one, and a
- * note on how the figure was reached from them. [basis] is for whoever checks the figure, not
- * for the screen.
+ * One form's factor, or one catalogue line's, with the [low] to [high] range the sources give
+ * where they give one, and a note on how the figure was reached from them. [basis] is for
+ * whoever checks the figure, not for the screen.
  */
 data class FormFactor(
     val factor: AbsorptionFactor,
@@ -48,15 +58,18 @@ data class FormFactor(
 }
 
 /**
- * The factors for each form, from product leaflets (the emc and HPRA), US labels and
- * pharmacokinetic studies, all read on 24 October 2026. [ProductForm.OTHER] has none, since it
- * could be anything, so it never gets an estimate.
+ * The factors for each form, and for the few catalogue lines that differ from their form, from
+ * product leaflets (the emc, HPRA and Medsafe), US labels and pharmacokinetic studies, all read
+ * on 24 October 2026. [ProductForm.OTHER] has none, since it could be anything, so it never gets
+ * an estimate.
  */
 object Absorption {
 
     private val READ: LocalDate = LocalDate.of(2026, 10, 24)
 
     val BENOWITZ_2009 = AbsorptionSource(
+        kind = SourceKind.STUDY,
+        short = "Benowitz",
         publisher = "Handbook of Experimental Pharmacology",
         title = "Benowitz, Hukkanen and Jacob, Nicotine chemistry, metabolism, kinetics and biomarkers",
         year = 2009,
@@ -65,6 +78,8 @@ object Absorption {
     )
 
     val BENOWITZ_1987 = AbsorptionSource(
+        kind = SourceKind.STUDY,
+        short = "Benowitz",
         publisher = "Clinical Pharmacology and Therapeutics",
         title = "Benowitz, Jacob and Savanapridi, Determinants of nicotine intake while chewing nicotine polacrilex gum",
         year = 1987,
@@ -73,6 +88,8 @@ object Absorption {
     )
 
     val OLSSON_GISLESKOG_2021 = AbsorptionSource(
+        kind = SourceKind.STUDY,
+        short = "Olsson Gisleskog",
         publisher = "Clinical Pharmacokinetics",
         title = "Olsson Gisleskog and others, Nicotine population pharmacokinetics in healthy smokers after " +
             "intravenous, oral, buccal and transdermal administration",
@@ -82,6 +99,8 @@ object Absorption {
     )
 
     val CHOI_2003 = AbsorptionSource(
+        kind = SourceKind.STUDY,
+        short = "Choi",
         publisher = "Nicotine and Tobacco Research",
         title = "Choi and others, Pharmacokinetics of a nicotine polacrilex lozenge",
         year = 2003,
@@ -90,6 +109,8 @@ object Absorption {
     )
 
     val KRAICZI_2011 = AbsorptionSource(
+        kind = SourceKind.STUDY,
+        short = "Kraiczi",
         publisher = "Nicotine and Tobacco Research",
         title = "Kraiczi, Hansson and Perfekt, Single-dose pharmacokinetics of nicotine when given with a novel mouth spray",
         year = 2011,
@@ -98,6 +119,8 @@ object Absorption {
     )
 
     val AZZOPARDI_2022 = AbsorptionSource(
+        kind = SourceKind.STUDY,
+        short = "Azzopardi",
         publisher = "Scientific Reports",
         title = "Azzopardi and others, A randomised study to assess the nicotine pharmacokinetics of an oral " +
             "nicotine pouch and two nicotine replacement therapy products",
@@ -106,7 +129,20 @@ object Absorption {
         read = READ,
     )
 
+    val DAUTZENBERG_2007 = AbsorptionSource(
+        kind = SourceKind.STUDY,
+        short = "Dautzenberg",
+        publisher = "BMC Clinical Pharmacology 7:11",
+        title = "Dautzenberg, Nides, Kienzler and Callens, Pharmacokinetics, safety and efficacy from randomized " +
+            "controlled trials of 1 and 2 mg nicotine bitartrate lozenges (Nicotinell)",
+        year = 2007,
+        url = "https://pmc.ncbi.nlm.nih.gov/articles/PMC2194660/",
+        read = READ,
+    )
+
     val NIQUITIN_MINIS_LEAFLET = AbsorptionSource(
+        kind = SourceKind.LEAFLET,
+        short = "NiQuitin Minis",
         publisher = "NCSCT",
         title = "NiQuitin Minis 4 mg Lozenges, summary of product characteristics, section 5.2",
         year = 2023,
@@ -115,6 +151,8 @@ object Absorption {
     )
 
     val QUICKMIST_LEAFLET = AbsorptionSource(
+        kind = SourceKind.LEAFLET,
+        short = "QuickMist",
         publisher = "emc",
         title = "Nicorette QuickMist 1 mg mouth spray, summary of product characteristics, section 5.2",
         year = 2026,
@@ -123,6 +161,8 @@ object Absorption {
     )
 
     val NICOTROL_NS_LABEL = AbsorptionSource(
+        kind = SourceKind.LABEL,
+        short = "Nicotrol NS",
         publisher = "Pfizer, US prescribing information",
         title = "Nicotrol NS nasal spray, clinical pharmacology",
         year = 2024,
@@ -131,6 +171,8 @@ object Absorption {
     )
 
     val NICOTROL_INHALER_LABEL = AbsorptionSource(
+        kind = SourceKind.LABEL,
+        short = "Nicotrol Inhaler",
         publisher = "Pfizer, US prescribing information",
         title = "Nicotrol Inhaler, clinical pharmacology",
         year = 2024,
@@ -139,6 +181,8 @@ object Absorption {
     )
 
     val INHALATOR_LEAFLET = AbsorptionSource(
+        kind = SourceKind.LEAFLET,
+        short = "Inhalator",
         publisher = "emc",
         title = "Nicorette 15 mg Inhalator, summary of product characteristics, section 5.2",
         year = 2026,
@@ -147,6 +191,8 @@ object Absorption {
     )
 
     val MICROTAB_LEAFLET = AbsorptionSource(
+        kind = SourceKind.LEAFLET,
+        short = "Microtab",
         publisher = "emc",
         title = "Nicorette Microtab 2 mg, summary of product characteristics, section 5.2",
         year = 2026,
@@ -155,14 +201,18 @@ object Absorption {
     )
 
     val STRIPS_LEAFLET = AbsorptionSource(
+        kind = SourceKind.LEAFLET,
+        short = "NiQuitin Strips",
         publisher = "HPRA",
-        title = "NiQuitin Strips Mint 2.5 mg, summary of product characteristics, section 5.2",
+        title = "NiQuitin Strips Mint 2.5 mg, summary of product characteristics, sections 5.1 and 5.2",
         year = 2015,
         url = "https://assets.hpra.ie/products/Human/25393/LicenseSPC_PA0678-071-018_27112015134038.pdf",
         read = READ,
     )
 
     val INVISI_LEAFLET = AbsorptionSource(
+        kind = SourceKind.LEAFLET,
+        short = "Invisi",
         publisher = "emc",
         title = "Nicorette Invisi 25 mg Patch, summary of product characteristics, sections 2 and 5.2",
         year = 2026,
@@ -171,10 +221,52 @@ object Absorption {
     )
 
     val NICOTINELL_PATCH_LEAFLET = AbsorptionSource(
+        kind = SourceKind.LEAFLET,
+        short = "Nicotinell",
         publisher = "emc",
         title = "Nicotinell TTS 30 patch, summary of product characteristics, sections 2 and 5.2",
         year = 2026,
         url = "https://www.medicines.org.uk/emc/product/388/smpc",
+        read = READ,
+    )
+
+    val NICOTINELL_LOZENGE_1MG_LEAFLET = AbsorptionSource(
+        kind = SourceKind.LEAFLET,
+        short = "Nicotinell",
+        publisher = "emc",
+        title = "Nicotinell Mint 1 mg Lozenge, summary of product characteristics, sections 2 and 5.2",
+        year = 2025,
+        url = "https://www.medicines.org.uk/emc/product/2254/smpc",
+        read = READ,
+    )
+
+    val NICOTINELL_LOZENGE_2MG_LEAFLET = AbsorptionSource(
+        kind = SourceKind.LEAFLET,
+        short = "Nicotinell",
+        publisher = "emc",
+        title = "Nicotinell Mint 2 mg Lozenge, summary of product characteristics, sections 2 and 5.2",
+        year = 2025,
+        url = "https://www.medicines.org.uk/emc/product/1190/smpc",
+        read = READ,
+    )
+
+    val BOOTS_NICASSIST_LOZENGE_LEAFLET = AbsorptionSource(
+        kind = SourceKind.LEAFLET,
+        short = "Boots NicAssist",
+        publisher = "emc",
+        title = "Boots NicAssist 1 mg compressed lozenge, summary of product characteristics, section 2",
+        year = 2026,
+        url = "https://www.medicines.org.uk/emc/product/8534/smpc",
+        read = READ,
+    )
+
+    val HABITROL_LOZENGE_DATA_SHEET = AbsorptionSource(
+        kind = SourceKind.LEAFLET,
+        short = "Habitrol",
+        publisher = "Medsafe",
+        title = "Habitrol Lozenge 1 mg and 2 mg, New Zealand data sheet, section 2",
+        year = 2019,
+        url = "https://www.medsafe.govt.nz/profs/Datasheet/h/Habitrollozenge.pdf",
         read = READ,
     )
 
@@ -229,10 +321,11 @@ object Absorption {
     )
 
     private val STRIP = factor(
-        500, null, null, STRIPS_LEAFLET, BENOWITZ_2009,
-        basis = "The NiQuitin Strips leaflet says a strip dissolves completely in about 3 minutes, all of it there " +
-            "to absorb or swallow, and a 2.5 mg strip peaks at about 4.1 ng/ml. That's close to a 2 mg lozenge's " +
-            "4.4 ng/ml, which Benowitz 2009 puts at 50%, so it takes the lower lozenge figure.",
+        480, 400, 480, STRIPS_LEAFLET, BENOWITZ_2009,
+        basis = "The NiQuitin Strips leaflet calls the 2.5 mg strip bioequivalent to the 2 mg lozenge (section " +
+            "5.1), and its single-dose peak of about 4.13 ng/ml (section 5.2) matches a 2 mg lozenge's. So a strip " +
+            "takes the 2 mg lozenge's absorbed amount spread over its 2.5 mg: 1.2 mg at the lozenge's 60% is 48%. " +
+            "Benowitz 2009 puts the 2 mg lozenge at 50%, which would make it 40%.",
     )
 
     private val POUCH = factor(
@@ -244,10 +337,30 @@ object Absorption {
 
     private val PATCH = factor(
         800, 680, 1000, INVISI_LEAFLET, NICOTINELL_PATCH_LEAFLET, OLSSON_GISLESKOG_2021, BENOWITZ_2009,
-        basis = "Patches are labelled by the nicotine they release over 16 or 24 hours (the Invisi leaflet; " +
-            "Nicotinell's speaks of an average absorption rate of 21 mg in 24 hours). Of what's released, about " +
-            "77% reaches the blood (the Nicotinell leaflet), 76% in the 2021 model, and 68 to 100% across brands " +
-            "in Benowitz 2009.",
+        basis = "Patches are labelled by the nicotine they deliver over 16 or 24 hours (the Invisi leaflet). The " +
+            "Nicotinell leaflet reads two ways. Section 2 says the 21 mg patch \"provides an average absorption " +
+            "rate of 21 mg nicotine in 24 hours\", which calls the labelled 21 mg the absorbed amount (100%). " +
+            "Section 5.2 says \"the absolute bioavailability of the patch, compared to intravenous nicotine " +
+            "perfusion, is about 77%\". 80% follows the second reading, with the 2021 model, where 76% of what's " +
+            "released reaches the blood, and Benowitz 2009, which gives 68 to 100% across brands. Reading the " +
+            "labelled mg as the absorbed amount instead would make it 100%.",
+    )
+
+    /**
+     * The 1 mg and 2 mg nicotine bitartrate lozenge sold as Nicotinell Mint, Boots NicAssist,
+     * Thrive (Canada) and Habitrol (New Zealand). Its salt dissolves into the mouth more fully
+     * than the polacrilex lozenges the form's figure is drawn from.
+     */
+    private val BITARTRATE_LOZENGE = factor(
+        800, 730, 900, DAUTZENBERG_2007, NICOTINELL_LOZENGE_1MG_LEAFLET, NICOTINELL_LOZENGE_2MG_LEAFLET,
+        BOOTS_NICASSIST_LOZENGE_LEAFLET, HABITROL_LOZENGE_DATA_SHEET,
+        basis = "Dautzenberg 2007 found the 1 mg lozenge bioequivalent to 2 mg gum: at steady state its AUC is " +
+            "90% of the gum's, which the app shows as 1 mg absorbed, so 0.9 mg (90%). The 2 mg lozenge reached 73% " +
+            "of 4 mg gum's AUC at steady state, so 1.46 mg of the gum's 2 mg (73%), and 145% of 2 mg gum's after " +
+            "a single dose (72%). The Nicotinell leaflets give the same steady-state peaks (10.6 and 22.5 ng/ml) " +
+            "and call the two strengths dose-proportional, so one figure covers both: 80%, between the 2 mg's 73% " +
+            "and the 1 mg's 90%. The Boots NicAssist and Habitrol leaflets list the same salt and strengths " +
+            "(nicotine bitartrate dihydrate, 3.072 mg for 1 mg), as Thrive's Canadian label does.",
     )
 
     /** Each form's factor, in the order the Settings page lists them. [ProductForm.OTHER] isn't here. */
@@ -265,9 +378,23 @@ object Absorption {
         ProductForm.PATCH_24H to PATCH,
     )
 
-    /** Every source, once each, in the order the forms first cite them. */
-    val sources: List<AbsorptionSource> = byForm.values.flatMap { it.sources }.distinct()
+    /**
+     * The catalogue lines whose own figure differs from their form's, by line ID. Each one's
+     * `absorptionPerMille` in `products.json` is this factor, and a test keeps the two the same.
+     */
+    val byLine: Map<String, FormFactor> = mapOf(
+        "nicotinell-lozenge-uk" to BITARTRATE_LOZENGE,
+        "boots-nicassist-lozenge" to BITARTRATE_LOZENGE,
+        "thrive-lozenge-ca" to BITARTRATE_LOZENGE,
+        "habitrol-lozenge-nz" to BITARTRATE_LOZENGE,
+    )
 
-    /** The latest day any source was read, for "Checked October 2026". */
+    /** The bitartrate lozenge's figure, for the Settings page's line of its own. */
+    val bitartrateLozenge: FormFactor get() = BITARTRATE_LOZENGE
+
+    /** Every source, once each, in the order the forms and then the lines first cite them. */
+    val sources: List<AbsorptionSource> = (byForm.values + byLine.values).flatMap { it.sources }.distinct()
+
+    /** The latest day any source was read, for "Last checked October 2026". */
     val checked: LocalDate = sources.maxOf { it.read }
 }

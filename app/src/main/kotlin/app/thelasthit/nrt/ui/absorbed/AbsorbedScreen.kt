@@ -1,7 +1,6 @@
 package app.thelasthit.nrt.ui.absorbed
 
 import androidx.annotation.StringRes
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,15 +8,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -29,6 +25,7 @@ import androidx.lifecycle.viewModelScope
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.data.DataGraph
 import app.thelasthit.nrt.domain.absorbed.Absorption
+import app.thelasthit.nrt.domain.absorbed.FormFactor
 import app.thelasthit.nrt.domain.product.ProductForm
 import app.thelasthit.nrt.ui.components.SwitchRow
 import app.thelasthit.nrt.ui.graphViewModel
@@ -74,10 +71,14 @@ fun AbsorbedSection(onOpen: () -> Unit, viewModel: AbsorbedViewModel = graphView
     }
 }
 
-/** One line of the shares: the forms it covers share a figure, and the first one's is shown. */
-private enum class ShareRow(@StringRes val label: Int, val form: ProductForm) {
+/**
+ * One line of the shares: the forms it covers share a figure, and the first one's is shown. The
+ * bitartrate lozenges are the catalogue lines with a figure of their own.
+ */
+private enum class ShareRow(@StringRes val label: Int, private val form: ProductForm?) {
     GUM(R.string.absorbed_form_gum, ProductForm.GUM),
     LOZENGE(R.string.absorbed_form_lozenge, ProductForm.LOZENGE),
+    BITARTRATE_LOZENGE(R.string.absorbed_form_bitartrate_lozenge, null),
     MOUTH_SPRAY(R.string.absorbed_form_mouth_spray, ProductForm.MOUTH_SPRAY),
     NASAL_SPRAY(R.string.absorbed_form_nasal_spray, ProductForm.NASAL_SPRAY),
     INHALATOR(R.string.absorbed_form_inhalator, ProductForm.INHALATOR),
@@ -85,6 +86,9 @@ private enum class ShareRow(@StringRes val label: Int, val form: ProductForm) {
     STRIP(R.string.absorbed_form_strip, ProductForm.ORAL_FILM),
     POUCH(R.string.absorbed_form_pouch, ProductForm.POUCH),
     PATCH(R.string.absorbed_form_patch, ProductForm.PATCH_24H),
+    ;
+
+    val figure: FormFactor get() = form?.let(Absorption.byForm::getValue) ?: Absorption.bitartrateLozenge
 }
 
 /**
@@ -118,7 +122,7 @@ fun AbsorbedScreen(onBack: () -> Unit, viewModel: AbsorbedViewModel = graphViewM
         SectionHeading(stringResource(R.string.absorbed_shares_heading))
         RowList {
             ShareRow.entries.forEachIndexed { index, row ->
-                val factor = Absorption.byForm.getValue(row.form).factor
+                val factor = row.figure.factor
                 if (index > 0) HorizontalDivider(color = colors.line)
                 Row(
                     Modifier
@@ -146,23 +150,13 @@ fun AbsorbedScreen(onBack: () -> Unit, viewModel: AbsorbedViewModel = graphViewM
         )
 
         SectionHeading(stringResource(R.string.absorbed_sources_heading))
-        Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            val style = LastHit.type.label.copy(fontWeight = FontWeight.Normal)
-            Absorption.sources.forEach { source ->
-                val line = source.year?.let { stringResource(R.string.absorbed_source, source.publisher, source.title, it) }
-                    ?: stringResource(R.string.absorbed_source_no_year, source.publisher, source.title)
-                Row {
-                    Box(Modifier.padding(start = 2.dp, top = 8.dp, end = 8.dp).size(4.dp).clip(CircleShape).background(colors.text3))
-                    Text(line, style = style, color = colors.text2)
-                }
-            }
-            Text(
-                stringResource(R.string.absorbed_checked, Absorption.checked.format(CHECKED)),
-                style = style,
-                color = colors.text2,
-                modifier = Modifier.padding(top = 6.dp),
-            )
-        }
+        // The full citations, with their links, are in Absorption, for checking.
+        Text(
+            stringResource(R.string.absorbed_sources, Absorption.checked.format(CHECKED)),
+            style = LastHit.type.body,
+            color = colors.text,
+            modifier = Modifier.padding(horizontal = 20.dp),
+        )
     }
 }
 

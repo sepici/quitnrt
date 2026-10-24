@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isOff
 import androidx.compose.ui.test.isOn
@@ -19,11 +20,15 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
+import app.thelasthit.nrt.R
 import app.thelasthit.nrt.TestApp
+import app.thelasthit.nrt.domain.absorbed.Absorption
+import app.thelasthit.nrt.domain.absorbed.SourceKind
 import app.thelasthit.nrt.seedHistory
 import app.thelasthit.nrt.seedPlan
 import app.thelasthit.nrt.seedWeek
 import app.thelasthit.nrt.setUp
+import app.thelasthit.nrt.ui.FULL_PAGE
 import app.thelasthit.nrt.ui.PHONE
 import app.thelasthit.nrt.ui.history.HistoryScreen
 import app.thelasthit.nrt.ui.insights.InsightsScreen
@@ -44,7 +49,7 @@ import org.robolectric.annotation.Config
 
 /**
  * Estimated absorbed amounts (ROADMAP P9-1): off by default, then beside the labelled mg on
- * Today's hero, History's rows and day totals and the log sheet, and nowhere else. The week in
+ * Today's hero and rows, History's rows and day totals and the log sheet, and nowhere else. The week in
  * [seedWeek] has 8 mg of gum today (one 4 mg piece and two 2 mg ones), so about 4 mg absorbed,
  * and a 14 mg patch on Thursday, so about 11.2 mg.
  */
@@ -88,6 +93,8 @@ class AbsorbedTest {
 
     private fun setting() = runBlocking { app.graph.settings.settings.first().showAbsorbed }
 
+    private fun heroEstimate() = compose.onAllNodes(hasTestTag(HERO_ESTIMATE_TAG), useUnmergedTree = true).fetchSemanticsNodes()
+
     @Test
     fun `it's off by default, so Today shows the labelled mg alone`() {
         app.setUp()
@@ -97,6 +104,7 @@ class AbsorbedTest {
 
         waitForDescription("8${NB}mg today")
         assertNoAbsorbedFigures()
+        assertTrue("the hero shows an estimate", heroEstimate().isEmpty())
     }
 
     @Test
@@ -106,10 +114,32 @@ class AbsorbedTest {
         app.showAbsorbed()
         showToday()
 
-        waitForDescription("8${NB}mg today, about 4${NB}mg absorbed")
-        // Today's own rows stay as they were: History is where each dose's estimate shows.
-        compose.onAllNodes(hasText("absorbed", substring = true), useUnmergedTree = true).fetchSemanticsNodes().let {
-            assertEquals(0, it.size)
+        val total = hasContentDescription("8${NB}mg today, about 4${NB}mg absorbed")
+        compose.waitUntilAtLeastOneExists(total, timeoutMillis = 5_000)
+        // The line screen readers skip, since the total's description has it, is drawn under the number.
+        val number = compose.onNode(total, useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+        val line = heroEstimate().single().boundsInRoot
+        assertTrue("the estimate isn't under the number: $line against $number", line.top >= number.bottom)
+        assertTrue("the estimate has no size", line.height > 0f && line.width > 0f)
+    }
+
+    @Test @Config(qualifiers = FULL_PAGE)
+    fun `Today's rows give each dose's estimate too`() {
+        app.setUp()
+        app.seedWeek()
+        app.showAbsorbed()
+        showToday()
+
+        // Screen readers hear each in full. On screen it's "about 1 mg" under the mg, and the hero says "absorbed".
+        waitForText("about 2${NB}mg absorbed")
+        compose.onAllNodes(hasText("about 1${NB}mg absorbed")).fetchSemanticsNodes().let { assertEquals(2, it.size) }
+        val rows = compose.onAllNodes(hasTestTag(ROW_ESTIMATE_TAG), useUnmergedTree = true).fetchSemanticsNodes()
+        assertEquals(3, rows.size)
+        // Each under its own mg, at the row's end.
+        val amounts = compose.onAllNodes(hasText("2${NB}mg") or hasText("4${NB}mg"), useUnmergedTree = true).fetchSemanticsNodes()
+        rows.forEach { estimate ->
+            val above = amounts.filter { it.boundsInRoot.bottom <= estimate.boundsInRoot.top && it.boundsInRoot.right == estimate.boundsInRoot.right }
+            assertTrue("no mg above the estimate at ${estimate.boundsInRoot}", above.isNotEmpty())
         }
     }
 
@@ -150,7 +180,8 @@ class AbsorbedTest {
         show { HistoryScreen(snackbars = it) }
 
         waitForDescription("Today, 8${NB}mg so far, about 4${NB}mg absorbed")
-        // The 4 mg piece and the two 2 mg ones.
+        assertEquals("about 1${NB}mg", app.getString(R.string.absorbed_about_short, "1"))
+        // The 4 mg piece and the two 2 mg ones, which screen readers hear in full.
         compose.onAllNodes(hasText("about 2${NB}mg absorbed")).fetchSemanticsNodes().let { assertTrue(it.isNotEmpty()) }
         compose.onAllNodes(hasText("about 1${NB}mg absorbed")).fetchSemanticsNodes().let { assertEquals(2, it.size) }
         // Beside the labelled mg, never in place of it.
@@ -228,9 +259,26 @@ class AbsorbedTest {
 
         waitForText("This isn't medical advice. A pharmacist can tell you more about the products you use.")
         compose.onNode(hasText("Gum") and hasText("50%")).assertExists()
+        compose.onNode(hasText("Strip") and hasText("48%")).assertExists()
+        compose.onNode(hasText("1 and 2${NB}mg lozenges from Nicotinell, Boots NicAssist, Thrive and Habitrol") and hasText("80%")).assertExists()
         compose.onNode(hasText("Patch") and hasText("80%")).assertExists()
-        compose.onNodeWithText("Checked October 2026.").assertExists()
-        compose.onNode(hasText("Nicotrol NS nasal spray", substring = true)).assertExists()
+        compose.onNode(hasText("Last checked October 2026.", substring = true)).assertExists()
+    }
+
+    @Test
+    fun `its line of sources names every source the figures come from`() {
+        val line = app.getString(R.string.absorbed_sources, "October 2026")
+        assertTrue(line.endsWith("Last checked October 2026."))
+        Absorption.sources.forEach { source ->
+            assertTrue("${source.short} isn't named: ${source.title}", source.short in line)
+            if (source.kind == SourceKind.STUDY) {
+                // "Benowitz (1987 and 2009)"
+                val years = line.substringAfter("${source.short} (", missingDelimiterValue = "").substringBefore(")")
+                assertTrue("${source.short}'s year ${source.year} isn't given: $years", "${source.year}" in years)
+            }
+        }
+        // A short paragraph, as About's, rather than a list of citations.
+        assertTrue("${line.length} characters", line.length < 600)
     }
 
     @Test
@@ -239,7 +287,7 @@ class AbsorbedTest {
         var opened = false
         show { SettingsScreen(it, onBack = {}, links = SettingsLinks({}, {}, {}, {}, {}, absorbed = { opened = true })) }
 
-        val row = hasText("Estimated absorbed")
+        val row = hasText("Absorbed amounts")
         compose.waitUntilAtLeastOneExists(row and hasText("Off"), timeoutMillis = 5_000)
         app.showAbsorbed()
         compose.waitUntilAtLeastOneExists(row and hasText("On"), timeoutMillis = 5_000)
