@@ -271,6 +271,9 @@ class ReminderWorkersTest {
         runBlocking { app.graph.programmes.current() }
         runBlocking { app.reminders.reschedule() }
         assertEquals("Week ${last.number} met", app.awaitNotification(Notice.ID_RESULTS + last.number)?.title)
+        // The badges the results bring are told on another thread, so this waits for them, or
+        // they could land in the next test's shade.
+        assertEquals(1, app.awaitAchievementNotices().size)
     }
 
     @Test
