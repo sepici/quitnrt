@@ -52,6 +52,12 @@ data class WeekTarget(val step: Int?, val mix: Mix) {
  * - With k < T, week w is at step ⌈k × w ÷ T⌉, so a step lasts more than a week.
  * - With no steps, every taper week holds at the usual day.
  *
+ * A switch to a lower strength ([Ladder.isSwitch]) gets a week of its own, so there's a week to
+ * settle into the new strength before the count comes down. A week that would take a switch and
+ * then another step stops at the switch, and the same formula spreads the steps left over the
+ * weeks left. The last taper week has no weeks after it, so it never stops: it always takes the
+ * rest of the ladder.
+ *
  * So the last taper week is always at the bottom of the ladder, the first is below the usual day
  * whenever the ladder has steps, and allowances never go up. The NRT-free weeks follow.
  */
@@ -69,11 +75,34 @@ object PlanBuilder {
         }
     }
 
+    /**
+     * The step each of [taperWeeks] weeks is at down [ladder]: [stepFor], with each switch to a
+     * lower strength a week's last step unless it falls in the last week.
+     */
+    fun taperSteps(ladder: Ladder, taperWeeks: Int): List<Int> {
+        require(taperWeeks >= 1) { "A taper needs weeks: $taperWeeks" }
+        val steps = ArrayList<Int>(taperWeeks)
+        // The spread runs from the usual day, and again from each switch a week stops at.
+        var from = 0
+        var weeksBefore = 0
+        for (week in 1..taperWeeks) {
+            val before = steps.lastOrNull() ?: 0
+            val planned = from + stepFor(week - weeksBefore, ladder.size - from, taperWeeks - weeksBefore)
+            val switch = if (week < taperWeeks) (before + 1 until planned).firstOrNull(ladder::isSwitch) else null
+            if (switch == null) {
+                steps += planned
+            } else {
+                steps += switch
+                from = switch
+                weeksBefore = week
+            }
+        }
+        return steps
+    }
+
     /** Every week's target: the taper weeks down [ladder], then the NRT-free weeks. */
     fun targets(ladder: Ladder, length: ProgrammeLength): List<WeekTarget> {
-        val taper = (1..length.taperWeeks).map { week ->
-            WeekTarget.at(ladder, stepFor(week, ladder.size, length.taperWeeks))
-        }
+        val taper = taperSteps(ladder, length.taperWeeks).map { step -> WeekTarget.at(ladder, step) }
         return taper + List(ProgrammeLength.NRT_FREE_WEEKS) { WeekTarget.NRT_FREE }
     }
 

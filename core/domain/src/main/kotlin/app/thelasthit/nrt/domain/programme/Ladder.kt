@@ -1,6 +1,8 @@
 package app.thelasthit.nrt.domain.programme
 
 import app.thelasthit.nrt.domain.catalogue.Catalogue
+import app.thelasthit.nrt.domain.catalogue.CatalogueProduct
+import app.thelasthit.nrt.domain.catalogue.LineKind
 import app.thelasthit.nrt.domain.catalogue.ProductStatus
 import app.thelasthit.nrt.domain.dose.Dose
 import app.thelasthit.nrt.domain.product.DoseUnit
@@ -63,12 +65,31 @@ data class Ladder(
 
     fun isNew(product: UserProduct): Boolean = newProducts.any { it.id == product.id }
 
+    /**
+     * Whether [step] is a switch to a lower strength: a kind of pieces, lozenges, sprays or
+     * sessions moving to a weaker unit, as 4 pieces of 4 mg gum become 8 of 2 mg. It shows in the
+     * mixes alone, so a ladder read back from storage has it too: a switch is the only step where
+     * a product other than a patch has more units a day than at the step before, since one fewer
+     * only takes units away. Patches stepping down a strength aren't switches: each strength is
+     * the step down itself. A switch gets a week of its own (PLAN §6.2, [PlanBuilder]).
+     */
+    fun isSwitch(step: Int): Boolean {
+        require(step in 0..size) { "The ladder has steps 0 to $size: $step" }
+        if (step == 0) return false
+        val before = mixAt(step - 1)
+        return mixAt(step).items.any { item ->
+            item.product.form.defaultUnit != DoseUnit.PATCH && item.units > before.unitsOf(item.product.id)
+        }
+    }
+
     companion object {
         /**
          * The ladder down from [usual]. Lower strengths come from [own], the user's products
          * with hidden ones too, and from [catalogue]: the lines of the products in use, then
          * other lines of the same brand and form sold in [market] or where those lines are
-         * sold. A user's product is used before a catalogue one of the same strength.
+         * sold. A user's product is used before a catalogue one of the same strength. When none
+         * of those has a lower strength, the catalogue's generic line of the form has the next
+         * one on sale in [market], so no pack drops from its strong unit straight to nothing.
          */
         fun build(usual: UsualDay, own: List<UserProduct>, catalogue: Catalogue, market: String): Ladder {
             val steps = Walk(usual, Strengths(own, catalogue, market)).steps()
@@ -179,8 +200,15 @@ private class Walk(private val usual: UsualDay, private val strengths: Strengths
  * 2. The catalogue lines of the products in use, wherever they're sold, since the user buys them.
  * 3. Other catalogue lines of the same brand and form, sold in the user's market or where the
  *    lines in use are sold.
+ * 4. When none of those has a lower strength (a shop's own 21 mg patch, a 4 mg mini lozenge
+ *    with no 2 mg in its brand, a product added by hand), the catalogue's generic line of the
+ *    same form, at the strengths a pack of that form is sold at in those markets. Where no pack
+ *    of the form is sold there (somewhere else), every strength of the generic line counts.
  *
- * Discontinued packs are never offered.
+ * A generic product stands for any pack at its strength, so the generic line is only ever the
+ * fallback, even when a generic product is in use: that keeps a 2 mg generic mini lozenge from
+ * stepping on to a 1.5 mg one that no shop in the market sells. Discontinued packs are never
+ * offered, and they don't count as on sale.
  */
 internal class Strengths(own: List<UserProduct>, private val catalogue: Catalogue, market: String) {
 
@@ -190,24 +218,42 @@ internal class Strengths(own: List<UserProduct>, private val catalogue: Catalogu
 
     private val onSale = catalogue.products.filter { it.status != ProductStatus.DISCONTINUED }
 
+    private val branded = onSale.filter { it.kind != LineKind.GENERIC }
+
+    private val generic = onSale.filter { it.kind == LineKind.GENERIC }
+
     /**
      * The product with the next strength below [product]'s, or null when there's none. The
-     * catalogue lines searched are those of [lineage], in order, then the rest of their brands'.
+     * catalogue lines searched are those of [lineage], in order, then the rest of their brands',
+     * then the generic line.
      */
     fun below(product: UserProduct, lineage: List<UserProduct>): UserProduct? {
-        val lines = lineage.mapNotNull { it.catalogueId?.let(catalogue::find) }.distinctBy { it.lineId }
+        val lines = lineage.mapNotNull { it.catalogueId?.let(catalogue::find) }
+            .filter { it.kind != LineKind.GENERIC }
+            .distinctBy { it.lineId }
         val lineIds = lines.map { it.lineId }
         val brands = lines.map { it.brand }.toSet()
         val markets = lines.flatMap { it.markets }.toSet() + market
-        val sameForm = onSale.filter { it.form == product.form }
+        val sameForm = branded.filter { it.form == product.form }
         val sameLine = lineIds.flatMap { line -> sameForm.filter { it.lineId == line } }
-        val sameBrand = sameForm.filter { candidate ->
-            candidate.lineId !in lineIds && candidate.brand in brands &&
-                (candidate.markets.isEmpty() || candidate.markets.any { it in markets })
-        }
-        val candidates = (own + (sameLine + sameBrand).map { it.toUserProduct() })
-            .filter { it.form == product.form && it.unit == product.unit && it.perUnit < product.perUnit }
-        val best: Dose = candidates.maxOfOrNull { it.perUnit } ?: return null
-        return candidates.first { it.perUnit == best }
+        val sameBrand = sameForm.filter { it.lineId !in lineIds && it.brand in brands && it.isSoldIn(markets) }
+        return nextBelow(product, own + (sameLine + sameBrand).map { it.toUserProduct() })
+            ?: nextBelow(product, genericLine(product.form, markets))
+    }
+
+    /** The generic line of [form] at the strengths a pack of that form is sold at in [markets], or all of it where none is. */
+    private fun genericLine(form: ProductForm, markets: Set<String>): List<UserProduct> {
+        val sold = branded.filter { it.form == form && it.isSoldIn(markets) }.map { it.strength }.toSet()
+        return generic.filter { it.form == form && (sold.isEmpty() || it.strength in sold) }.map { it.toUserProduct() }
+    }
+
+    private fun CatalogueProduct.isSoldIn(markets: Set<String>): Boolean =
+        this.markets.isEmpty() || this.markets.any { it in markets }
+
+    /** The strongest of [candidates] below [product], of its form and unit, the first listed on a tie. */
+    private fun nextBelow(product: UserProduct, candidates: List<UserProduct>): UserProduct? {
+        val lower = candidates.filter { it.form == product.form && it.unit == product.unit && it.perUnit < product.perUnit }
+        val best: Dose = lower.maxOfOrNull { it.perUnit } ?: return null
+        return lower.first { it.perUnit == best }
     }
 }
