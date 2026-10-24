@@ -59,11 +59,12 @@ Privacy policy.
 
 | What happens | Collected or shared? | Why |
 |---|---|---|
-| **Backup and CSV files** the user exports from Settings | No | The user starts it and picks where the file goes in Android's file picker. Play exempts transfers a user starts and expects. Its help page also says an upload to the user's own storage, such as Google Drive, that the app never sees or receives, doesn't count as collection. |
-| **Android Auto Backup** and device-to-device transfer | No | Android's own backup service copies the app's private files into the user's Google account backup, under Google's terms. The developer never receives or can read it. On Android 9 and newer with a screen lock, it's encrypted with the lock screen. This is the same reasoning as the user's own cloud storage above. It's a judgement, and the usual one for apps that use Auto Backup. If Play's review ever says otherwise, the answer would be Health info, collected, optional, for App functionality. |
-| **AppFunctions** (Android 16 and newer): an assistant such as Gemini logs a dose or reads today's totals | Not declared | Play counts a transfer to another app on the phone as sharing, but not when the user starts it and expects the data to go there. The app answers only when the user asks the assistant to log, list or summarise, and Android only lets assistants holding its `EXECUTE_APP_FUNCTIONS` permission call. Each answer carries only what the request needs. This is also a judgement, and the one to look at again if Play asks: see "For the owner" below. |
+| **Backup and CSV files** the user exports from Settings | No | The app never transmits the file: the user starts the export, and Android's file picker hands the file to whatever app or storage the user picks there. The developer never receives it. Play counts data as collected when it's sent off the phone, and as shared when it goes to a third party, unless the user starts the transfer and expects it; here the user starts and directs it. This is reasoning from Play's definitions, not a quote from its help page. |
+| **Android Auto Backup** and device-to-device transfer | No | Android's own backup service copies the app's private files into the user's Google account backup, under Google's terms. The developer never receives or can read it. On Android 9 and newer with a screen lock, it's encrypted with the lock screen; without one, or on Android 8, it isn't end-to-end encrypted (see "For the owner"). This is the same reasoning as a file the user exports to their own storage, above. It's a judgement, and the usual one for apps that use Auto Backup. If Play's review ever says otherwise, the answer would be Health info, collected, optional, for App functionality. |
+| **AppFunctions** (Android 16 and newer): an assistant such as Gemini logs a dose or reads today's totals | Not declared | Play counts a transfer to another app on the phone as sharing, but not when the user starts it and expects the data to go there. Assistants call these functions when the user asks them to log, list or summarise, and Android only lets apps holding its `EXECUTE_APP_FUNCTIONS` permission call at all. Android doesn't check that the user asked: that's the assistant's job. Each answer carries only what the request needs. This is also a judgement, and the one to look at again if Play asks: see "For the owner" below. |
 | **The widget, notifications, shortcuts and the Quick Settings tile** | No | They show the user's own data on their own phone, drawn by the launcher and system UI. Nothing goes to a third party. |
 | **Log links and NFC stickers** (`lasthit://log`) | No | Data comes into the app, not out. |
+| **Quitline buttons** on the advice pages | No | They hand a quitline's phone number to the phone app, or its web address to the browser, with Android's `ACTION_DIAL` and `ACTION_VIEW`. Nothing about the user goes with them. |
 | **Crash reports in Play Console** | No | Android and Google Play gather these under the user's own Google settings. The app has no crash reporting of its own and sends nothing. |
 
 ## Other App content answers
@@ -86,16 +87,32 @@ The rest of the App content page, for completeness:
 
 ## For the owner
 
-- **AppFunctions.** Play counts on-device transfers to another app as sharing unless the user
-  starts them. The functions only run when the user asks an assistant to act, which is the
-  user-initiated case. But an assistant like Gemini may send the request, and so the app's answer,
+- **AppFunctions.** Play counts on-device transfers to another app as sharing unless the user starts
+  them. The functions are meant to run when the user asks an assistant to act, which is the
+  user-initiated case, though Android only checks that the caller holds `EXECUTE_APP_FUNCTIONS`, not
+  that the user asked. And an assistant like Gemini may send the request, and so the app's answer,
   to its own servers. Recommended: keep "No", since the user chose the assistant and asked it to
   act, and Gemini's own policy covers what it does. If Play's review disagrees, declare Health info
   as shared, optional, for App functionality.
-- **Contact address.** The privacy policy ends with `{contact email}`. Fill it in before hosting.
-- **Auto Backup without a screen lock.** On Android 12 and newer, `data_extraction_rules.xml`
-  backs up to Google even on a phone with no screen lock, where the backup isn't end-to-end
-  encrypted. Recommended: add `disableIfNoEncryptionCapabilities="true"` to its `<cloud-backup>`,
-  so dose logs only go to Google's backup when they're encrypted with the screen lock. Phone to
-  phone transfer is unaffected. It's an app change, so it's left for its own slice; the answers
-  here hold either way.
+- **Developer name and contact address.** The privacy policy ends with
+  `{developer name, as shown on Google Play}` and `{contact email}`. Play's User Data policy asks
+  the policy to name the developer as the Play listing does and to give a privacy contact. Fill
+  both in before hosting.
+- **Auto Backup without a screen lock.** Android backs up to Google even on a phone with no screen
+  lock, where the backup isn't end-to-end encrypted. The privacy policy says so. To keep dose logs
+  out of an unencrypted backup, each Android version needs its own change, all in one app slice:
+  - **Android 12 and newer** read `data_extraction_rules.xml`: add
+    `disableIfNoEncryptionCapabilities="true"` to its `<cloud-backup>`. Phone to phone transfer is
+    unaffected.
+  - **Android 9 to 11** read `backup_rules.xml`, which has no encryption requirement: switch it to
+    `<include>` rules with `requireFlags="clientSideEncryption"`. Once it has an include, only what
+    it includes is backed up, so it needs one for each of the app's domains (`database`,
+    `sharedpref`, `file`), still leaving out the reminders' DataStore.
+  - **Android 8** (the app's `minSdk` is 26) can't encrypt backups with the screen lock at all.
+    Either accept an unencrypted backup there, which the policy already says, or leave the logs
+    out of backup on Android 8. Check on an Android 8 emulator how it treats the Android 9 rules
+    before relying on them.
+
+  Recommended: make the change, so a backup that isn't encrypted never holds health data. The
+  answers here hold either way, and if the app changes, update the policy's backup paragraph in
+  the same slice.

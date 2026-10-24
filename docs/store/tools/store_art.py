@@ -1,16 +1,21 @@
 """Frames the app's Roborazzi screenshots for the Play listing, and draws the feature graphic.
 
 usage, from the repository's folder:
-    ./gradlew :app:recordRoborazziDebug
+    ./gradlew :app:recordRoborazziDebug --tests "app.thelasthit.nrt.ui.StoreScreenshotTest"
     python -I docs/store/tools/store_art.py [name ...]
 
-It reads the light renders in app/build/outputs/roborazzi/ and writes docs/store/screenshots/:
+It reads the light store-* renders in app/build/outputs/roborazzi/, which StoreScreenshotTest
+makes from one set of data with generic products, and writes docs/store/screenshots/:
   01-today.png to 08-log.png   1080 x 1920 (9:16), a caption above a plain phone frame
   feature-graphic.png          1024 x 500, the demon band from Today with the app's name
 
 Names on the command line (such as "today" or "feature") make only those. Every PNG is 24-bit
 RGB with no alpha, as Play asks. Standard library only: PNGs are read and written with zlib, and
 text is drawn by ttf.py in the app's own Schibsted Grotesk. Captions follow docs/STYLE.md.
+
+A shot that starts partway down a page has to start in the plain space between two sections. If
+a layout change moves its section, the script stops and names the nearest plain rows, so the
+start in SHOTS can be moved. Look at every output all the same.
 """
 import json
 import os
@@ -32,17 +37,23 @@ OUT = os.path.normpath(os.path.join(HERE, '..', 'screenshots'))
 DENSITY = 2.625
 
 # Each shot: output name, render, the first row of the page to show (render pixels) and the
-# caption. A tall render is cut to a phone's height from that row, as if scrolled there.
+# caption. A tall render is cut to a phone's height from that row, as if scrolled there, so a
+# row other than 0 must be plain: one colour across, between two sections.
 SHOTS = [
-    ('01-today', 'today-plan', 0, "Today against your plan's daily guide"),
-    ('02-plan', 'plan-build', 1230, 'A taper built from your own usual day'),
-    ('03-lair', 'lair-battle', 0, 'Every week you meet is a hit on the demon you named'),
-    ('04-schedule', 'plan-week', 1880, 'A missed week comes back when you meet the next'),
-    ('05-insights', 'insights-plan', 560, 'Each day and each week against the plan'),
-    ('06-hours', 'insights-plan', 2620, 'The hours of the day you use it most'),
-    ('07-advice', 'advice-detail', 0, 'Advice for your own triggers, timed from your logs'),
-    ('08-log', 'log-sheet', 0, 'Log a dose now, or one you forgot earlier'),
+    ('01-today', 'store-today', 0, "Today against your plan's daily guide"),
+    ('02-plan', 'store-plan', 1190, 'A taper built from your own usual day'),
+    ('03-lair', 'store-lair', 0, 'Every week you meet is a hit on the demon you named'),
+    ('04-schedule', 'store-schedule', 1830, 'A missed week comes back when you meet the next'),
+    ('05-insights', 'store-insights', 560, 'Each day and each week against the plan'),
+    ('06-hours', 'store-insights', 2620, 'The hours you use NRT most'),
+    ('07-advice', 'store-advice', 0, 'Ways through a craving, matched to your triggers'),
+    ('08-log', 'store-log', 0, 'Log a dose now, or one you forgot earlier'),
 ]
+
+# How far a plain row's colour may wander, per channel, for antialiasing and dithering.
+PLAIN_TOLERANCE = 2
+# How far above and below a start the script looks for plain rows to suggest.
+PLAIN_SEARCH = 400
 
 # Colours from the app's light theme (ui/theme/Color.kt), except the phone's own.
 BG = '#ECE9DE'        # sunk
@@ -267,6 +278,29 @@ def luminance(c):
     return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
 
 
+def is_plain(row):
+    """Whether a row of RGB bytes is one colour across, as the space between a page's sections is."""
+    first = row[0:3]
+    return all(abs(row[i] - first[i % 3]) <= PLAIN_TOLERANCE for i in range(len(row)))
+
+
+def check_start(name, path, first):
+    """Stops when a shot would start partway through a section, naming the nearest plain rows."""
+    if first == 0:
+        return
+    top = max(0, first - PLAIN_SEARCH)
+    rows, _, _ = read_png(path, top, 2 * PLAIN_SEARCH + 1)
+    if is_plain(rows[first - top]):
+        return
+    plain = [top + j for j, row in enumerate(rows) if is_plain(row)]
+    above = max((y for y in plain if y < first), default=None)
+    below = min((y for y in plain if y > first), default=None)
+    near = ', '.join(f'{y} {side}' for y, side in ((above, 'above'), (below, 'below')) if y is not None)
+    raise SystemExit(f'{name}: row {first} of {os.path.basename(path)} cuts through something. The nearest plain '
+                     f'rows are {near or f"more than {PLAIN_SEARCH} rows away"}. A plain row can also be a gap inside '
+                     'a section, so move the start in SHOTS to one between two sections and look at the output.')
+
+
 # Screenshots -------------------------------------------------------------------------------------
 
 def shot(name, render, first, caption, fonts):
@@ -293,7 +327,11 @@ def shot(name, render, first, caption, fonts):
     status = round(STATUS_DP * scale)
     page_h = H - sy - status
     src_h = round(page_h * 1078 / sw)
-    rows, rw, rh = read_png(os.path.join(RENDERS, f'{render}-light.png'), first, src_h)
+    path = os.path.join(RENDERS, f'{render}-light.png')
+    if not os.path.exists(path):
+        raise SystemExit(f'{name}: {path} is missing. Record the renders first: see the usage at the top')
+    check_start(name, path, first)
+    rows, rw, rh = read_png(path, first, src_h)
     if len(rows) < src_h:
         raise SystemExit(f'{name}: {render} is {rh} px tall, too short to start at {first}')
     page = resize(rows, rw, sw, page_h)

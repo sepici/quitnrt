@@ -9,9 +9,15 @@ What Google Play needs for The Last Hit: Quit NRT, kept with the code so it chan
 | `data-safety.md` | The Data safety form's answers, page by page, with the reasons, plus the rest of App content. |
 | `health-apps.md` | The Health apps declaration's answers. |
 | `listing.md` | The store listing: name, short and full description, category, content rating, and the screenshots. |
-| `screenshots/` | Eight framed phone screenshots and the feature graphic. |
+| `screenshots/` | Eight framed phone screenshots and the feature graphic, from `StoreScreenshotTest`'s renders. |
 | `tools/` | `store_art.py`, which makes the screenshots from the Roborazzi renders, and `ttf.py`, which draws their captions. |
 
-Before the first upload, fill in `{contact email}` in the privacy policy and the listing, and host
-the policy. If the app ever gains a permission, a library or a feature that touches data, update
+Before the first upload:
+
+- fill in `{developer name, as shown on Google Play}` in the privacy policy's Contact section, with
+  the name exactly as the Play listing shows it
+- fill in `{contact email}` in the privacy policy and the listing
+- host the policy
+
+If the app ever gains a permission, a library or a feature that touches data, update
 `privacy-policy.md` and `data-safety.md` in the same change.
