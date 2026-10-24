@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.thelasthit.nrt.data.repo.BreathingRepository
+import app.thelasthit.nrt.data.settings.ReminderStore
 import app.thelasthit.nrt.domain.advice.BreathingOutcome
 import app.thelasthit.nrt.domain.advice.BreathingPattern
 import app.thelasthit.nrt.domain.advice.BreathingPlan
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Clock
@@ -35,13 +37,16 @@ sealed interface BreathingStage {
  * The breathing timer (PLAN §9). Everything it needs to carry on is in [saved], so it survives
  * the app being closed and opened again. A session is saved for the breathing badges when it
  * runs to the end, and when it's stopped part way, which doesn't count.
+ *
+ * Whether it buzzes at each change is kept with this phone's other settings in [prefs], out of
+ * backups, and is on until it's switched off.
  */
 class BreathingViewModel(
     private val clock: Clock,
     private val saved: SavedStateHandle,
     private val breathing: BreathingRepository,
     private val buzzer: Buzzer,
-    private val prefs: TimerPrefs?,
+    private val prefs: ReminderStore?,
 ) : ViewModel() {
 
     private val _stage = MutableStateFlow(restore())
@@ -56,7 +61,18 @@ class BreathingViewModel(
     /** The step the last tick saw, so each change buzzes once. */
     private var lastPhase = -1
 
+    /** The buzz setting kept on this phone, once it's been read. */
+    private var keptBuzz: Boolean? = null
+
     init {
+        prefs?.let { store ->
+            viewModelScope.launch {
+                val on = store.timers.first().breathingBuzz
+                keptBuzz = on
+                // The set-up shows the kept setting, unless the switch was changed here before it was read.
+                if (saved.get<Boolean>(BUZZ_CHANGED) != true) setUp { it.copy(buzz = on) }
+            }
+        }
         if (_stage.value is BreathingStage.Running) ScreenOnHolds.hold(this)
         // "Breathe for 1 minute" on the tip after logging starts at once, the first time only.
         if (saved.get<Boolean>(START) == true && saved.get<Boolean>(STARTED) != true) {
@@ -70,7 +86,9 @@ class BreathingViewModel(
     fun pickMinutes(minutes: Int) = setUp { it.copy(minutes = minutes.coerceIn(BreathingPlan.MINUTES)) }
 
     fun setBuzz(on: Boolean) {
-        prefs?.breathingBuzz = on
+        saved[BUZZ_CHANGED] = true
+        keptBuzz = on
+        prefs?.let { store -> viewModelScope.launch(NonCancellable) { store.setBreathingBuzz(on) } }
         setUp { it.copy(buzz = on) }
     }
 
@@ -114,7 +132,7 @@ class BreathingViewModel(
         ScreenOnHolds.release(this)
     }
 
-    private val buzz: Boolean get() = saved.get<Boolean>(BUZZ) ?: prefs?.breathingBuzz ?: true
+    private val buzz: Boolean get() = saved.get<Boolean>(BUZZ) ?: keptBuzz ?: true
 
     private fun begin(plan: BreathingPlan) {
         val now = clock.instant()
@@ -205,6 +223,7 @@ class BreathingViewModel(
         private const val STARTED = "started"
         private const val STAGE = "stage"
         private const val BUZZ = "buzz"
+        private const val BUZZ_CHANGED = "buzzChanged"
         private const val RUN_STARTED = "runStarted"
         private const val RUN_BEFORE = "runBefore"
         private const val RUN_RESUMED = "runResumed"

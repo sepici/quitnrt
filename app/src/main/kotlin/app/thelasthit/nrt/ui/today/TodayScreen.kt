@@ -58,6 +58,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.domain.log.Elapsed
 import app.thelasthit.nrt.domain.log.LabelWarning
+import app.thelasthit.nrt.ui.advice.AdviceLinks
 import app.thelasthit.nrt.ui.components.EntryRow
 import app.thelasthit.nrt.ui.components.IconTile
 import app.thelasthit.nrt.ui.components.pressable
@@ -85,29 +86,39 @@ fun TodayScreen(
     onOpenSettings: () -> Unit,
     onOpenLair: () -> Unit,
     onEditQuickLog: () -> Unit = onOpenSettings,
+    adviceLinks: AdviceLinks = AdviceLinks.None,
     viewModel: TodayViewModel = graphViewModel { TodayViewModel(it) },
     sheetViewModel: LogSheetViewModel = graphViewModel(key = "log-sheet") { LogSheetViewModel(it) },
+    adviceViewModel: TodayAdviceViewModel = graphViewModel(key = "today-advice") { TodayAdviceViewModel(it) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val advice by adviceViewModel.state.collectAsStateWithLifecycle()
     val duplicate by viewModel.duplicate.collectAsStateWithLifecycle()
     var sheetOpen by rememberSaveable { mutableStateOf(false) }
     val resources = LocalResources.current
 
     LaunchedEffect(viewModel) {
         viewModel.logged.collect { logged ->
+            // The tip after logging takes the advice line's place; the snackbar keeps the amount and Undo.
+            adviceViewModel.afterLogging(logged.entry)
             launch {
                 val result = snackbars.showSnackbar(
                     message = resources.getString(R.string.today_logged, logged.entry.total.mgText(), logged.name),
                     actionLabel = resources.getString(R.string.action_undo),
                     duration = SnackbarDuration.Long,
                 )
-                if (result == SnackbarResult.ActionPerformed) viewModel.undo(logged.entry)
+                if (result == SnackbarResult.ActionPerformed) {
+                    viewModel.undo(logged.entry)
+                    adviceViewModel.undone(logged.entry)
+                }
             }
         }
     }
 
     val current = state
-    if (current == null) {
+    val adviceNow = advice
+    // The advice line is part of the first layout, so it never pushes the page down as it arrives.
+    if (current == null || adviceNow == null) {
         Box(Modifier.fillMaxSize())
         return
     }
@@ -129,9 +140,12 @@ fun TodayScreen(
             )
         }
         current.labelNote?.let { note -> item { LabelNote(note, onDismiss = viewModel::dismissLabelNote) } }
+        val tip = adviceNow.tip
         current.day.lastDose?.let { last ->
             item {
                 SinceRow(
+                    // The tip's card has an edge of its own, so the rule under the row goes.
+                    ruled = tip == null,
                     elapsed = Elapsed.of(Duration.between(last.occurredAt, current.now)),
                     // "4 mg of Nicorette gum", so two 2 mg pieces don't read like the 4 mg product.
                     detail = stringResource(
@@ -142,6 +156,11 @@ fun TodayScreen(
                     ),
                 )
             }
+        }
+        val line = adviceNow.line
+        when {
+            tip != null -> item(key = "advice") { TipAfterLogging(tip, adviceNow.tags, adviceLinks, onClose = adviceViewModel::closeTip) }
+            line != null -> item(key = "advice") { AdviceLine(line, adviceNow.tags, adviceLinks) }
         }
         item {
             val plan = current.plan
@@ -385,7 +404,7 @@ private fun LabelNote(note: LabelWarning, onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun SinceRow(elapsed: Elapsed, detail: String) {
+private fun SinceRow(elapsed: Elapsed, detail: String, ruled: Boolean = true) {
     Column {
         Row(
             Modifier
@@ -407,7 +426,7 @@ private fun SinceRow(elapsed: Elapsed, detail: String) {
                 Text(detail, style = LastHit.type.label.copy(fontWeight = FontWeight.Normal), color = LastHit.colors.text2)
             }
         }
-        HorizontalDivider(Modifier.padding(start = 78.dp, end = 20.dp), color = LastHit.colors.line)
+        if (ruled) HorizontalDivider(Modifier.padding(start = 78.dp, end = 20.dp), color = LastHit.colors.line)
     }
 }
 

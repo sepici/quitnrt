@@ -36,9 +36,11 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.domain.advice.DelayRun
+import app.thelasthit.nrt.reminders.DelayNotices
 import app.thelasthit.nrt.ui.components.PrimaryButton
 import app.thelasthit.nrt.ui.components.RoundButton
 import app.thelasthit.nrt.ui.format.formatAt
@@ -57,7 +59,7 @@ fun DelayScreen(
     onBack: () -> Unit,
     onBreathe: () -> Unit,
     viewModel: DelayViewModel = timerViewModel { graph, saved, context ->
-        DelayViewModel(graph.clock, saved, VibratorBuzzer(context), PartialWakeLock(context))
+        DelayViewModel(graph.clock, saved, VibratorBuzzer(context), PartialWakeLock(context), DelayNotices(context))
     },
 ) {
     val stage by viewModel.stage.collectAsStateWithLifecycle()
@@ -75,7 +77,14 @@ fun DelayScreen(
             BackHandler(onBack = stop)
             DelayRunning(current.run, now, time, onClose = stop, onStop = viewModel::stop, onBreathe = onBreathe)
         }
-        is DelayStage.Done -> DelayDone(current.run, time, onClose = onBack, onAgain = viewModel::start)
+        is DelayStage.Done -> {
+            // Back in the app at the end frame, the notice in the shade has nothing more to say.
+            LifecycleResumeEffect(current) {
+                viewModel.seen()
+                onPauseOrDispose { }
+            }
+            DelayDone(current.run, time, onClose = onBack, onAgain = viewModel::start)
+        }
     }
 }
 

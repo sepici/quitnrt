@@ -53,6 +53,7 @@ import app.thelasthit.nrt.reminders.NoticeTarget
 import app.thelasthit.nrt.ui.advice.AdviceRoutes
 import app.thelasthit.nrt.ui.advice.KeepScreenOnWhileTimersRun
 import app.thelasthit.nrt.ui.advice.advice
+import app.thelasthit.nrt.ui.advice.adviceLinks
 import app.thelasthit.nrt.ui.game.UnlockHost
 import app.thelasthit.nrt.ui.history.HistoryScreen
 import app.thelasthit.nrt.ui.insights.InsightsScreen
@@ -130,6 +131,7 @@ fun AppShell(notices: NoticeTargetViewModel = viewModel()) {
     SettleOnStart { graph.programmes.settle() }
     // True while the lair is to open at its trophy shelf, as an unlock's toast or card asks.
     var toShelf by remember { mutableStateOf(false) }
+    val adviceLinks = remember(navController) { navController.adviceLinks() }
 
     Scaffold(
         containerColor = colors.bg,
@@ -159,13 +161,14 @@ fun AppShell(notices: NoticeTargetViewModel = viewModel()) {
                     onOpenSettings = { navController.navigate(SettingsRoutes.MAIN) },
                     onOpenLair = { navController.navigateTo(TopLevelDestination.Lair) },
                     onEditQuickLog = { navController.navigate(SettingsRoutes.QUICK_LOG) },
+                    adviceLinks = adviceLinks,
                 )
             }
             page(TopLevelDestination.History.route) {
                 HistoryScreen(snackbars = snackbars)
             }
             page(TopLevelDestination.Insights.route) {
-                InsightsScreen(snackbars = snackbars)
+                InsightsScreen(snackbars = snackbars, adviceLinks = adviceLinks)
             }
             page(TopLevelDestination.Plan.route) {
                 PlanScreen(

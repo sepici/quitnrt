@@ -73,6 +73,7 @@ import app.thelasthit.nrt.domain.insights.DaysWithin
 import app.thelasthit.nrt.domain.insights.InsightRange
 import app.thelasthit.nrt.domain.insights.ProductType
 import app.thelasthit.nrt.domain.product.FormWord
+import app.thelasthit.nrt.ui.advice.AdviceLinks
 import app.thelasthit.nrt.ui.components.Chip
 import app.thelasthit.nrt.ui.components.ChipKind
 import app.thelasthit.nrt.ui.components.GuideLineKey
@@ -104,10 +105,13 @@ import kotlin.math.abs
 @Composable
 fun InsightsScreen(
     snackbars: SnackbarHostState,
+    adviceLinks: AdviceLinks = AdviceLinks.None,
     viewModel: InsightsViewModel = graphViewModel { InsightsViewModel(it) },
     sheetViewModel: LogSheetViewModel = graphViewModel(key = "insights-sheet") { LogSheetViewModel(it) },
+    adviceViewModel: TriggerAdviceViewModel = graphViewModel(key = "insights-advice") { TriggerAdviceViewModel(it) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val advice by adviceViewModel.advice.collectAsStateWithLifecycle()
     var sheetOpen by rememberSaveable { mutableStateOf(false) }
     val resources = LocalResources.current
     val scope = rememberCoroutineScope()
@@ -145,7 +149,7 @@ fun InsightsScreen(
                 PatchNote()
             } else {
                 WhenYouUse(current)
-                TriggersSection(current)
+                TriggersSection(current, advice, adviceLinks)
                 HabitsSection(current)
             }
             GoalsSection(current)

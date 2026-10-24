@@ -8,7 +8,12 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
+import app.thelasthit.nrt.domain.advice.ShowingTip
+import app.thelasthit.nrt.domain.advice.Slip
+import app.thelasthit.nrt.domain.advice.TipCard
 import app.thelasthit.nrt.domain.reminders.QuietHours
 import app.thelasthit.nrt.domain.reminders.Reminder
 import app.thelasthit.nrt.domain.reminders.ReminderSettings
@@ -41,11 +46,20 @@ data class ReminderMarks(
     val forgotRemindedOn: LocalDate? = null,
 )
 
+/** The timers' settings on this phone (PLAN §9). */
+data class TimerSettings(
+    /** The breathing timer buzzes at each change of breath. */
+    val breathingBuzz: Boolean = true,
+)
+
 /**
  * Phase 6's settings: the reminder switches, the check-in time and quiet hours, the widget and
  * tile options, and the reminders' own notes. They belong to this phone, so they sit in a file of
  * their own, [FILE], which the backup rules leave out (res/xml/backup_rules.xml and
  * data_extraction_rules.xml): a new phone asks for notifications again.
+ *
+ * The phone's other settings and notes that aren't backed up sit here too: the timers' buzz, and
+ * Today's tip after logging, which only lasts the day.
  */
 class ReminderStore(private val store: DataStore<Preferences>) {
 
@@ -77,6 +91,13 @@ class ReminderStore(private val store: DataStore<Preferences>) {
         )
     }.distinctUntilChanged()
 
+    val timers: Flow<TimerSettings> = store.data.map { prefs ->
+        TimerSettings(breathingBuzz = prefs[BREATHING_BUZZ] ?: true)
+    }.distinctUntilChanged()
+
+    /** Today's tip after logging, and the tags that have had one on its day. */
+    val adviceTip: Flow<TipCard?> = store.data.map(::tipOf).distinctUntilChanged()
+
     suspend fun currentReminders(): ReminderSettings = reminders.first()
 
     suspend fun currentQuickLog(): QuickLogOptions = quickLog.first()
@@ -91,6 +112,33 @@ class ReminderStore(private val store: DataStore<Preferences>) {
         prefs[QUIET_ON] = quiet.enabled
         prefs[QUIET_START_MINUTES] = minutesOf(quiet.start)
         prefs[QUIET_END_MINUTES] = minutesOf(quiet.end)
+    }
+
+    suspend fun setBreathingBuzz(on: Boolean) = store.edit { it[BREATHING_BUZZ] = on }
+
+    /**
+     * Changes Today's tip after logging with [change], from what's kept now, in one edit, so two
+     * changes close together can't undo each other.
+     */
+    suspend fun updateAdviceTip(change: (TipCard?) -> TipCard?) = store.edit { prefs ->
+        val card = change(tipOf(prefs))
+        if (card == null) {
+            listOf(TIP_DATE, TIP_SHOWN, TIP_STRATEGY, TIP_TAG, TIP_SLIP, TIP_ENTRY).forEach { prefs.remove(it) }
+            return@edit
+        }
+        prefs[TIP_DATE] = card.date.toEpochDay()
+        prefs[TIP_SHOWN] = card.shown
+        val showing = card.showing
+        if (showing == null) {
+            listOf(TIP_STRATEGY, TIP_TAG, TIP_SLIP, TIP_ENTRY).forEach { prefs.remove(it) }
+        } else {
+            prefs[TIP_STRATEGY] = showing.strategy
+            val tag = showing.tag
+            val slip = showing.slip
+            if (tag == null) prefs.remove(TIP_TAG) else prefs[TIP_TAG] = tag
+            if (slip == null) prefs.remove(TIP_SLIP) else prefs[TIP_SLIP] = slip.name
+            prefs[TIP_ENTRY] = showing.entryId
+        }
     }
 
     suspend fun setTileOpensSheet(on: Boolean) = store.edit { it[TILE_OPENS_SHEET] = on }
@@ -121,6 +169,28 @@ class ReminderStore(private val store: DataStore<Preferences>) {
         private val RESULTS_NOTIFIED_UP_TO = longPreferencesKey("results_notified_up_to")
         private val CHECK_IN_SENT_ON = longPreferencesKey("check_in_sent_on")
         private val FORGOT_REMINDED_ON = longPreferencesKey("forgot_reminded_on")
+        private val BREATHING_BUZZ = booleanPreferencesKey("breathing_buzz")
+        private val TIP_DATE = longPreferencesKey("advice_tip_date")
+        private val TIP_SHOWN = stringSetPreferencesKey("advice_tip_shown")
+        private val TIP_STRATEGY = stringPreferencesKey("advice_tip_strategy")
+        private val TIP_TAG = stringPreferencesKey("advice_tip_tag")
+        private val TIP_SLIP = stringPreferencesKey("advice_tip_slip")
+        private val TIP_ENTRY = stringPreferencesKey("advice_tip_entry")
+
+        private fun tipOf(prefs: Preferences): TipCard? = prefs[TIP_DATE]?.let { day ->
+            TipCard(
+                date = LocalDate.ofEpochDay(day),
+                shown = prefs[TIP_SHOWN].orEmpty(),
+                showing = prefs[TIP_STRATEGY]?.let { strategy ->
+                    ShowingTip(
+                        strategy = strategy,
+                        tag = prefs[TIP_TAG],
+                        slip = prefs[TIP_SLIP]?.let { name -> Slip.entries.firstOrNull { it.name == name } },
+                        entryId = prefs[TIP_ENTRY].orEmpty(),
+                    )
+                },
+            )
+        }
 
         private fun minutesOf(time: LocalTime): Int = time.hour * 60 + time.minute
 

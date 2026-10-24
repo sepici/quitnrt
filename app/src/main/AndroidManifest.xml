@@ -65,6 +65,11 @@
                 android:resource="@xml/shortcuts" />
         </activity>
 
+        <!-- The delay timer's end, booked as it starts, so it's told of after the app is closed. -->
+        <receiver
+            android:name=".reminders.DelayEndReceiver"
+            android:exported="false" />
+
         <!-- The home-screen widget: today against the guide, and favourites that log at a tap. -->
         <receiver
             android:name=".widget.LastHitWidgetReceiver"

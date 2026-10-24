@@ -16,6 +16,7 @@ import app.thelasthit.nrt.MainActivity
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.domain.reminders.Reminder
 import app.thelasthit.nrt.link.LogLinks
+import app.thelasthit.nrt.ui.advice.VibratorBuzzer
 import java.time.Duration
 
 /**
@@ -27,6 +28,10 @@ enum class NoticeChannel(
     @param:StringRes val title: Int,
     @param:StringRes val detail: Int,
     val importance: Int,
+    /** No sound, for a channel that only buzzes. */
+    val silent: Boolean = false,
+    /** The channel's own buzz, or null for the phone's usual one. */
+    val vibration: LongArray? = null,
 ) {
     ALLOWANCE("allowance", R.string.channel_allowance, R.string.channel_allowance_detail, NotificationManagerCompat.IMPORTANCE_DEFAULT),
     CHECK_IN("check_in", R.string.channel_check_in, R.string.channel_check_in_detail, NotificationManagerCompat.IMPORTANCE_DEFAULT),
@@ -36,6 +41,16 @@ enum class NoticeChannel(
 
     /** The tile's note with Undo. Low, so it sits in the shade without a sound. */
     LOGGED("logged", R.string.channel_logged, R.string.channel_logged_detail, NotificationManagerCompat.IMPORTANCE_LOW),
+
+    /** The delay timer's end: the timer's three long buzzes, and no sound. */
+    DELAY(
+        "delay_timer",
+        R.string.channel_delay,
+        R.string.channel_delay_detail,
+        NotificationManagerCompat.IMPORTANCE_DEFAULT,
+        silent = true,
+        vibration = VibratorBuzzer.ALARM,
+    ),
     ;
 
     companion object {
@@ -123,6 +138,7 @@ data class Notice(
         const val ID_CHECK_IN = 2
         const val ID_FORGOT = 3
         const val ID_LOGGED = 5
+        const val ID_DELAY = 6
 
         /** Weekly results: one per week, from here up. */
         const val ID_RESULTS = 100
@@ -175,6 +191,8 @@ class NoticePoster(private val context: Context) {
                 NotificationChannelCompat.Builder(channel.id, channel.importance)
                     .setName(context.getString(channel.title))
                     .setDescription(context.getString(channel.detail))
+                    .apply { if (channel.silent) setSound(null, null) }
+                    .apply { channel.vibration?.let { setVibrationEnabled(true).setVibrationPattern(it) } }
                     .build()
             },
         )
@@ -207,7 +225,13 @@ class NoticePoster(private val context: Context) {
         // A reminder alerts each time, even over yesterday's still in the shade. The tile's note
         // is quiet on a low channel already.
         .setOnlyAlertOnce(notice.reminder == null)
-        .setCategory(if (notice.reminder == Reminder.CHECK_IN || notice.reminder == Reminder.FORGOT_TO_LOG) NotificationCompat.CATEGORY_REMINDER else NotificationCompat.CATEGORY_STATUS)
+        .setCategory(
+            when {
+                notice.channel == NoticeChannel.DELAY -> NotificationCompat.CATEGORY_ALARM
+                notice.reminder == Reminder.CHECK_IN || notice.reminder == Reminder.FORGOT_TO_LOG -> NotificationCompat.CATEGORY_REMINDER
+                else -> NotificationCompat.CATEGORY_STATUS
+            },
+        )
         // Doses are health details, so the lock screen shows only what kind of notice it is.
         .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
         .setPublicVersion(
