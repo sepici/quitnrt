@@ -210,7 +210,7 @@ private fun BuildingPage(state: PlanState.Building, onTyped: () -> Unit, onOpenL
             PlanColumns(columns, guide = null, description = resources.columnsText(columns), modifier = Modifier.padding(top = 40.dp))
             val count = pluralStringResource(R.plurals.plan_full_days, days.daysWithDoses, days.daysWithDoses)
             Meta(
-                boldIn(stringResource(R.string.plan_full_days_line, count), count),
+                boldIn(stringResource(R.string.plan_full_days_line, count), count, LastHit.colors.text),
                 Modifier.padding(top = 18.dp),
             )
             PlanNote(stringResource(R.string.plan_log_normally), listOf(stringResource(R.string.plan_log_normally_body)), Modifier.padding(top = 20.dp))

@@ -153,12 +153,17 @@ class ProgrammeRepository(
 
     /**
      * Starts measuring a baseline from today, as a new programme. If the last 7 full days are
-     * logged well enough, they're the baseline at once (ROADMAP P3-1). Refused while another
-     * programme is current: [startNew] closes it first.
+     * logged well enough, they're the baseline at once (ROADMAP P3-1). With a baseline already
+     * current, as after a second tap, that one is kept and returned. Refused while a plan is
+     * current: [startNew] closes it first.
      */
     suspend fun startBaseline(): ProgrammeRecord = mutex.withLock {
-        check(dao.currentRow() == null) { "A programme is already current" }
-        dao.insert(newProgramme(baselineStartedOn = clock().today))
+        val current = dao.currentRow()
+        if (current != null) {
+            check(current.status == ProgrammeStatus.BASELINE) { "A programme is already current" }
+        } else {
+            dao.insert(newProgramme(baselineStartedOn = clock().today))
+        }
         checkNotNull(loadCurrent())
     }
 
@@ -245,9 +250,10 @@ class ProgrammeRepository(
      * Starts [plan], from [buildPlan] and perhaps edited week by week. The products its steps
      * switch to are added to the user's products, or shown again if hidden, without joining the
      * quick log. The demon gets a row of its own with 10 HP for each week: [look], or else
-     * [nextDemon].
+     * [nextDemon]. A plan that has just started, as after a second tap, is left as it is.
      */
     suspend fun startPlan(plan: Programme, look: DemonLook? = null): ProgrammeRecord = mutex.withLock {
+        loadCurrent()?.takeIf { it.status == ProgrammeStatus.ACTIVE }?.let { return@withLock it }
         val now = clock()
         val demon = look ?: nextDemon()
         database.withTransaction {
@@ -314,7 +320,13 @@ class ProgrammeRepository(
      * starts, and carries them into the weeks after it ([ExtraGoals.apply]). Past weeks keep
      * theirs. False when there's no week to set them for: no plan, or an NRT-free week.
      */
-    suspend fun setGoals(goals: WeekGoals): Boolean = mutex.withLock {
+    suspend fun setGoals(goals: WeekGoals): Boolean = updateGoals { goals }
+
+    /**
+     * [setGoals] with what [change] makes of the week's goals as stored, read under the same lock
+     * as the write, so quick changes in a row each build on the one before.
+     */
+    suspend fun updateGoals(change: (ProgrammeWeek) -> WeekGoals): Boolean = mutex.withLock {
         settleLocked()
         val today = clock().today
         database.withTransaction {
@@ -322,7 +334,7 @@ class ProgrammeRepository(
             val plan = record.plan ?: return@withTransaction false
             if (record.status != ProgrammeStatus.ACTIVE) return@withTransaction false
             val week = ExtraGoals.weekToSet(plan, today) ?: return@withTransaction false
-            saveWeeks(record.id, ExtraGoals.apply(plan, week.number, goals), record.choices)
+            saveWeeks(record.id, ExtraGoals.apply(plan, week.number, change(week)), record.choices)
             true
         }
     }

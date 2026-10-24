@@ -13,10 +13,8 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -35,6 +33,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.thelasthit.nrt.R
@@ -45,9 +44,8 @@ import app.thelasthit.nrt.domain.programme.Programme
 import app.thelasthit.nrt.domain.programme.ProgrammeClock
 import app.thelasthit.nrt.domain.programme.ProgrammeWeek
 import app.thelasthit.nrt.domain.programme.plannedWeeks
+import app.thelasthit.nrt.ui.components.AppSheet
 import app.thelasthit.nrt.ui.components.PrimaryButton
-import app.thelasthit.nrt.ui.components.sheetEdge
-import app.thelasthit.nrt.ui.components.sheetScrim
 import app.thelasthit.nrt.ui.format.mgText
 import app.thelasthit.nrt.ui.theme.LastHit
 import kotlinx.coroutines.launch
@@ -82,14 +80,9 @@ internal fun MissedWeekSheet(
         scope.launch { sheetState.hide() }.invokeOnCompletion { onChoose(choice) }
     }
 
-    ModalBottomSheet(
+    AppSheet(
         onDismissRequest = { onChoose(MissedWeekChoice.CARRY_ON) },
         sheetState = sheetState,
-        containerColor = colors.surface,
-        scrimColor = sheetScrim,
-        modifier = Modifier.sheetEdge(colors),
-        contentColor = colors.text,
-        dragHandle = { BottomSheetDefaults.DragHandle(color = colors.lineStrong, width = 36.dp, height = 4.dp) },
     ) {
         Column(Modifier.fillMaxWidth()) {
             Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState())) {
@@ -102,7 +95,7 @@ internal fun MissedWeekSheet(
                 )
                 Text(
                     stringResource(R.string.plan_missed_back, next.number),
-                    style = LastHit.type.label.copy(fontSize = 15.sp, lineHeight = 22.sp),
+                    style = LastHit.type.label.copy(lineBreak = LineBreak.Paragraph),
                     color = colors.text,
                     modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp),
                 )

@@ -31,6 +31,9 @@ class BuildViewModel(private val graph: DataGraph) : ViewModel() {
     private val _state = MutableStateFlow<BuildState?>(null)
     val state: StateFlow<BuildState?> = _state.asStateFlow()
 
+    /** Set from the tap that starts the plan, so a quick second tap does nothing while it saves. */
+    private var starting = false
+
     init {
         viewModelScope.launch { build(ProgrammeLength.DEFAULT, start = null) }
     }
@@ -64,12 +67,15 @@ class BuildViewModel(private val graph: DataGraph) : ViewModel() {
         current?.copy(plan = runCatching { current.plan.edit(number, step, current.today) }.getOrDefault(current.plan))
     }
 
-    /** Starts the plan as it stands, then [then] goes back to the Plan tab. */
+    /** Starts the plan as it stands, then [then] goes back to the Plan tab. Taps while it saves do nothing. */
     fun start(then: () -> Unit) {
         val current = _state.value ?: return
+        if (starting) return
+        starting = true
         viewModelScope.launch {
-            graph.programmes.startPlan(current.plan)
-            then()
+            runCatching { graph.programmes.startPlan(current.plan) }
+                .onSuccess { then() }
+                .onFailure { starting = false }
         }
     }
 }

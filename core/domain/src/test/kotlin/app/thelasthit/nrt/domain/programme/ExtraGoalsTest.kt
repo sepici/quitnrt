@@ -68,6 +68,37 @@ class ExtraGoalsTest {
     }
 
     @Test
+    fun `a week edited past the switch has caps for its new mix, and so do the weeks that come down with it`() {
+        val set = ExtraGoals.apply(plan, 1, goals)
+        val friday = date("2026-10-23")
+
+        // Week 2 edited to week 3's switch: 8 pieces of 2 mg gum and 3 sprays. The 2 mg gum starts at
+        // its mix, the spray keeps its cap, and the 4 mg gum it no longer has loses its own.
+        val switched = set.edit(2, checkNotNull(plan.week(3).target.step), friday)
+        assertEquals(plan.week(3).target.mix, switched.week(2).target.mix)
+        assertEquals(mapOf(GUM_2.id to 8, SPRAY.id to 4), switched.week(2).goals.maxUnitsPerDay)
+        assertEquals(90, switched.week(2).goals.minGapMinutes)
+        assertEquals(LocalTime.of(9, 15), switched.week(2).goals.firstDoseNotBefore)
+        assertEquals(set.week(1), switched.week(1))
+        assertEquals(set.week(3), switched.week(3))
+
+        // Down to the first week of sprays alone: every week brought down with it drops its gum cap.
+        val sprays = plan.weeks.first { week -> !week.isNrtFree && week.target.mix.products.none { it.form == GUM_2.form } }
+        val lowered = set.edit(2, checkNotNull(sprays.target.step), friday)
+        (2..sprays.number).forEach { number ->
+            assertEquals(mapOf(SPRAY.id to 4), lowered.week(number).goals.maxUnitsPerDay, "week $number")
+        }
+        assertEquals(LocalTime.of(9, 30), lowered.week(3).goals.firstDoseNotBefore)
+    }
+
+    @Test
+    fun `an edited week with its caps off keeps them off`() {
+        val gapOnly = ExtraGoals.apply(plan, 1, WeekGoals(minGapMinutes = 60))
+        val edited = gapOnly.edit(2, checkNotNull(plan.week(3).target.step), date("2026-10-23"))
+        assertEquals(WeekGoals(minGapMinutes = 60), edited.week(2).goals)
+    }
+
+    @Test
     fun `switching a goal off clears it from then on`() {
         val on = ExtraGoals.apply(plan, 1, goals)
         val off = ExtraGoals.apply(on, 4, goals.copy(maxUnitsPerDay = emptyMap(), firstDoseNotBefore = null))

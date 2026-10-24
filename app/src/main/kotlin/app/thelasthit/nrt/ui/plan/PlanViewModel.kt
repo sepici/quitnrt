@@ -26,10 +26,12 @@ import app.thelasthit.nrt.domain.programme.UsualDay
 import app.thelasthit.nrt.domain.programme.WeekChoice
 import app.thelasthit.nrt.ui.minuteTicks
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -244,20 +246,27 @@ class PlanViewModel(
 
     // Starting.
 
-    /** Starts a baseline, which the last 7 days fill at once, then goes on to check the usual day. */
-    fun useLastSevenDays(then: () -> Unit) {
-        viewModelScope.launch {
-            if (graph.programmes.current() == null) graph.programmes.startBaseline()
+    /** The start or rematch a tap set going, so a quick second tap does nothing while it saves. */
+    private var starting: Job? = null
+
+    /**
+     * Runs [work] for a tap on the page shown while [on] holds, unless a tap's work is running
+     * already. Once it has saved, [then] runs, and taps are still ignored until that page has gone.
+     */
+    private fun startOnce(on: (PlanState?) -> Boolean, work: suspend () -> Unit, then: () -> Unit) {
+        if (starting?.isActive == true) return
+        starting = viewModelScope.launch {
+            if (runCatching { work() }.isFailure) return@launch
             then()
+            state.first { !on(it) }
         }
     }
 
+    /** Starts a baseline, which the last 7 days fill at once, then goes on to check the usual day. */
+    fun useLastSevenDays(then: () -> Unit) = startOnce({ it is PlanState.Start }, { graph.programmes.startBaseline() }, then)
+
     /** Starts measuring a 7-day baseline from today. */
-    fun startBaseline() {
-        viewModelScope.launch {
-            if (graph.programmes.current() == null) graph.programmes.startBaseline()
-        }
-    }
+    fun startBaseline() = startOnce({ it is PlanState.Start }, { graph.programmes.startBaseline() }, then = {})
 
     // During the plan.
 
@@ -274,12 +283,7 @@ class PlanViewModel(
     // After it.
 
     /** A rematch from current use, with the same demon back: a new baseline starts today. */
-    fun rematch(then: () -> Unit = {}) {
-        viewModelScope.launch {
-            runCatching { graph.programmes.startNew() }
-            then()
-        }
-    }
+    fun rematch(then: () -> Unit = {}) = startOnce({ it is PlanState.Done }, { graph.programmes.startNew() }, then)
 
     private companion object {
         const val TRIGGERS = 2

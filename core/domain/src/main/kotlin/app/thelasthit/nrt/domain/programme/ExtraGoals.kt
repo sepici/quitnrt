@@ -8,7 +8,7 @@ import java.time.LocalTime
  * week 1 before the plan starts, and carry into every week after it:
  * - **Most units a day:** a cap for each product in the week's mix. A later week keeps the cap
  *   of each product it shares, and a product new to it, such as a lower strength, starts at its
- *   own mix's units.
+ *   own mix's units. A week edited to a new mix ([Programme.edit]) follows the same rule.
  * - **The gap between doses** stays the same.
  * - **First dose not before** moves [STEP_MINUTES] later each week, and stops at [LATEST_FIRST_DOSE]
  *   so it never wraps past midnight.
@@ -58,13 +58,20 @@ object ExtraGoals {
         )
     }
 
+    /**
+     * [goals] for a week whose mix is now [mix], as when the week is edited: each product still in
+     * it keeps its cap, a product new to it starts at its units in [mix], and a product that has
+     * left it loses its cap. The gap and the first dose stay as they are, and caps that are off stay off.
+     */
+    fun forMix(goals: WeekGoals, mix: Mix): WeekGoals =
+        if (goals.maxUnitsPerDay.isEmpty()) goals else goals.copy(maxUnitsPerDay = capsFor(goals.maxUnitsPerDay, mix))
+
     private fun carried(goals: WeekGoals, week: ProgrammeWeek, weeksOn: Int): WeekGoals = WeekGoals(
-        maxUnitsPerDay = if (goals.maxUnitsPerDay.isEmpty()) {
-            emptyMap()
-        } else {
-            week.target.mix.items.associate { item -> item.product.id to (goals.maxUnitsPerDay[item.product.id] ?: item.units) }
-        },
+        maxUnitsPerDay = if (goals.maxUnitsPerDay.isEmpty()) emptyMap() else capsFor(goals.maxUnitsPerDay, week.target.mix),
         minGapMinutes = goals.minGapMinutes,
         firstDoseNotBefore = goals.firstDoseNotBefore?.let { later(it, weeksOn) },
     )
+
+    private fun capsFor(caps: Map<String, Int>, mix: Mix): Map<String, Int> =
+        mix.items.associate { item -> item.product.id to (caps[item.product.id] ?: item.units) }
 }

@@ -6,25 +6,23 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -36,6 +34,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
@@ -49,13 +53,13 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.domain.programme.Programme
+import app.thelasthit.nrt.ui.components.AppSheet
 import app.thelasthit.nrt.ui.components.PrimaryButton
-import app.thelasthit.nrt.ui.components.sheetEdge
-import app.thelasthit.nrt.ui.components.sheetScrim
 import app.thelasthit.nrt.ui.format.mgText
 import app.thelasthit.nrt.ui.theme.LastHit
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import kotlin.math.roundToInt
 
 /**
  * Changing a week before it starts: every step it can take, from the week before's down to the
@@ -84,23 +88,19 @@ internal fun EditWeekSheet(plan: Programme, number: Int, today: LocalDate, onSav
         scope.launch { sheetState.hide() }.invokeOnCompletion { then() }
     }
 
-    ModalBottomSheet(
+    AppSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = colors.surface,
-        scrimColor = sheetScrim,
-        modifier = Modifier.sheetEdge(colors),
-        contentColor = colors.text,
-        dragHandle = { BottomSheetDefaults.DragHandle(color = colors.lineStrong, width = 36.dp, height = 4.dp) },
     ) {
-        Column(Modifier.fillMaxWidth().fillMaxHeight()) {
+        Column(Modifier.fillMaxWidth()) {
             SheetHeader(
                 title = stringResource(R.string.plan_week_n, number),
                 subtitle = resources.longRange(week.startDate, week.endDate),
                 closeDescription = stringResource(R.string.action_close),
                 onClose = { close(onDismiss) },
             )
-            Column(Modifier.weight(1f).padding(start = 20.dp, end = 20.dp, top = 20.dp)) {
+            // Only as tall as the steps need: a long ladder scrolls inside the sheet's height.
+            Column(Modifier.weight(1f, fill = false).padding(start = 20.dp, end = 20.dp, top = 20.dp)) {
                 Text(
                     stringResource(R.string.plan_daily_mix),
                     style = LastHit.type.label.copy(fontWeight = FontWeight.Bold),
@@ -114,14 +114,20 @@ internal fun EditWeekSheet(plan: Programme, number: Int, today: LocalDate, onSav
                     initialFirstVisibleItemScrollOffset = if (steps.indexOf(planned) > 0) with(density) { 34.dp.roundToPx() } else 0,
                 )
                 val shape = RoundedCornerShape(16.dp)
+                // A step's height with its title on one line, the most common case.
+                val row = with(density) {
+                    maxOf(StepMinHeight.toPx(), (StepPadding * 2 + 1.dp).toPx() + StepTitleLine.toPx() + LastHit.type.caption.lineHeight.toPx())
+                }
                 LazyColumn(
                     state = list,
                     modifier = Modifier
                         .weight(1f, fill = false)
+                        .endMidRow(steps.size, row, with(density) { 1.dp.toPx() })
                         .fillMaxWidth()
                         .clip(shape)
                         .background(colors.surface)
                         .border(1.dp, colors.line, shape)
+                        .scrollFade(list, colors.surface)
                         .selectableGroup()
                         .semantics { contentDescription = resources.getString(R.string.plan_daily_mix_for, number) },
                 ) {
@@ -142,7 +148,7 @@ internal fun EditWeekSheet(plan: Programme, number: Int, today: LocalDate, onSav
                     val cap = when {
                         before != null -> {
                             val mix = resources.mixText(before.target.mix)
-                            boldIn(stringResource(R.string.plan_cap_week, number, before.number, mix), mix)
+                            boldIn(stringResource(R.string.plan_cap_week, number, before.number, mix), mix, colors.text)
                         }
                         plan.ladder.top > 0 -> boldIn(stringResource(R.string.plan_cap_first_label), "")
                         else -> boldIn(stringResource(R.string.plan_cap_first), "")
@@ -165,7 +171,7 @@ internal fun EditWeekSheet(plan: Programme, number: Int, today: LocalDate, onSav
                 Column(Modifier.padding(top = if (ruled) 16.dp else 14.dp)) {
                     if (ruled) HorizontalDivider(color = colors.line, modifier = Modifier.padding(bottom = 14.dp))
                     val line = if (down.isEmpty() && restLine != null) "$change $restLine" else change
-                    Meta(boldIn(line, forWeek))
+                    Meta(boldIn(line, forWeek, colors.text))
                 }
                 if (down.isNotEmpty()) {
                     Knock(picked, plan, down.map { it.number }, restLine)
@@ -183,6 +189,50 @@ internal fun EditWeekSheet(plan: Programme, number: Int, today: LocalDate, onSav
                 }
             }
         }
+    }
+}
+
+/** How far the list's soft edges reach in. */
+private val FadeHeight = 22.dp
+
+private val StepMinHeight = 64.dp
+private val StepPadding = 10.dp
+private val StepTitleLine = 21.sp
+
+/**
+ * Sizes a list of [rows] steps that doesn't fit so that, at the top, it ends halfway down a row:
+ * part of the next step always shows under the fade, as in the mockup, rather than the list
+ * stopping on a row's edge and looking complete. [row] is a step's height and [rule] the line
+ * between steps. A title that wraps at a large font makes its step taller, so then the end can
+ * land elsewhere.
+ */
+private fun Modifier.endMidRow(rows: Int, row: Float, rule: Float): Modifier = layout { measurable, constraints ->
+    val max = constraints.maxHeight
+    val pitch = row + rule
+    val whole = row + pitch * (rows - 1)
+    val height = if (!constraints.hasBoundedHeight || whole <= max || max < pitch * 2) {
+        max
+    } else {
+        val cut = (max - row).mod(pitch)
+        (max - (cut - pitch / 2).mod(pitch)).roundToInt().coerceAtLeast(constraints.minHeight)
+    }
+    val placeable = measurable.measure(constraints.copy(maxHeight = height))
+    layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+}
+
+/**
+ * A soft edge in [colour] at the top and bottom of a scrolling list, each only while there's more
+ * to scroll to that way, so a list cut off at a row's edge still looks like it goes on.
+ */
+private fun Modifier.scrollFade(list: LazyListState, colour: Color): Modifier = drawWithContent {
+    drawContent()
+    val fade = FadeHeight.toPx()
+    if (list.canScrollBackward) {
+        drawRect(Brush.verticalGradient(listOf(colour, Color.Transparent), startY = 0f, endY = fade), size = Size(size.width, fade))
+    }
+    if (list.canScrollForward) {
+        val top = size.height - fade
+        drawRect(Brush.verticalGradient(listOf(Color.Transparent, colour), startY = top, endY = size.height), topLeft = Offset(0f, top), size = Size(size.width, fade))
     }
 }
 
@@ -224,7 +274,7 @@ private fun Knock(step: Int, plan: Programme, weeks: List<Int>, rest: String?) {
                 Row(Modifier.fillMaxWidth().padding(vertical = 8.dp).semantics(mergeDescendants = true) {}, horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(stringResource(R.string.plan_week_n, other), style = LastHit.type.label, color = colors.text2)
                     Text(
-                        boldIn(stringResource(R.string.plan_knock_row, plan.week(other).target.dailyGuide.mgText(), newMg), newMg),
+                        boldIn(stringResource(R.string.plan_knock_row, plan.week(other).target.dailyGuide.mgText(), newMg), newMg, colors.text),
                         style = LastHit.type.label,
                         color = colors.text2,
                     )
@@ -247,13 +297,13 @@ private fun StepOption(title: String, detail: String, selected: Boolean, onPick:
             .fillMaxWidth()
             .background(if (selected) colors.sunk else colors.surface)
             .selectable(selected, role = Role.RadioButton, onClick = onPick)
-            .heightIn(min = 64.dp)
-            .padding(horizontal = 16.dp, vertical = 10.dp),
+            .heightIn(min = StepMinHeight)
+            .padding(horizontal = 16.dp, vertical = StepPadding),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Column(Modifier.weight(1f)) {
-            Text(title, style = LastHit.type.title.copy(fontSize = 15.sp, lineHeight = 21.sp, fontWeight = FontWeight.Bold), color = colors.text)
+            Text(title, style = LastHit.type.title.copy(fontSize = 15.sp, lineHeight = StepTitleLine, fontWeight = FontWeight.Bold), color = colors.text)
             Text(detail, style = LastHit.type.caption.copy(fontWeight = FontWeight.Normal), color = colors.text2, modifier = Modifier.padding(top = 1.dp))
         }
         Radio(selected)

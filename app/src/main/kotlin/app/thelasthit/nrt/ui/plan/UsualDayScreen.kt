@@ -16,11 +16,9 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -50,8 +48,7 @@ import app.thelasthit.nrt.R
 import app.thelasthit.nrt.domain.product.UserProduct
 import app.thelasthit.nrt.domain.programme.BaselineDays
 import app.thelasthit.nrt.domain.programme.UsualDay
-import app.thelasthit.nrt.ui.components.sheetEdge
-import app.thelasthit.nrt.ui.components.sheetScrim
+import app.thelasthit.nrt.ui.components.AppSheet
 import app.thelasthit.nrt.ui.format.icon
 import app.thelasthit.nrt.ui.format.mgText
 import app.thelasthit.nrt.ui.format.plural
@@ -221,7 +218,7 @@ private fun LogsShow(days: BaselineDays, usual: UsualDay) {
         if (average != null) {
             val value = resources.averageMg(average)
             Meta(
-                boldIn(stringResource(R.string.plan_logs_average, days.daysWithDoses, value, resources.mixText(usual.mix)), value),
+                boldIn(stringResource(R.string.plan_logs_average, days.daysWithDoses, value, resources.mixText(usual.mix)), value, LastHit.colors.text),
                 Modifier.padding(top = 18.dp),
             )
         }
@@ -244,14 +241,9 @@ private fun AddProductSheet(products: List<UserProduct>, onPick: (String) -> Uni
     val resources = LocalResources.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
-    ModalBottomSheet(
+    AppSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = colors.surface,
-        scrimColor = sheetScrim,
-        modifier = Modifier.sheetEdge(colors),
-        contentColor = colors.text,
-        dragHandle = { BottomSheetDefaults.DragHandle(color = colors.lineStrong, width = 36.dp, height = 4.dp) },
     ) {
         Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
             SheetHeader(

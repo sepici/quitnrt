@@ -13,7 +13,6 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.core.app.ApplicationProvider
 import app.thelasthit.nrt.TestApp
-import app.thelasthit.nrt.setUp
 import app.thelasthit.nrt.ui.AppShell
 import app.thelasthit.nrt.ui.FULL_PAGE
 import app.thelasthit.nrt.ui.LARGE_FONT
@@ -45,9 +44,10 @@ class PlanScreenshotTest {
 
     private val app: TestApp = ApplicationProvider.getApplicationContext()
 
+    /** Without 2 mg gum, so the plan's switch to it is new, as in the mockups. */
     @Before
     fun setUpApp() {
-        app.setUp()
+        app.setUpForPlan()
     }
 
     // Before a programme.

@@ -63,37 +63,41 @@ class GoalsViewModel(
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    private fun set(change: (GoalsState) -> WeekGoals) {
-        val current = state.value ?: return
-        viewModelScope.launch { graph.programmes.setGoals(change(current)) }
+    /**
+     * Changes the week's goals as they're stored, rather than as the screen last showed them, so
+     * quick taps in a row each build on the one before.
+     */
+    private fun set(change: (goals: WeekGoals, week: ProgrammeWeek, habits: Habits) -> WeekGoals) {
+        val habits = state.value?.habits ?: return
+        viewModelScope.launch { graph.programmes.updateGoals { week -> change(week.goals, week, habits) } }
     }
 
     /** The cap on units a day: on, each product starts at its units in this week's mix. */
-    fun switchCaps(on: Boolean) = set { it.goals.copy(maxUnitsPerDay = if (on) ExtraGoals.startingCaps(it.week) else emptyMap()) }
+    fun switchCaps(on: Boolean) = set { goals, week, _ -> goals.copy(maxUnitsPerDay = if (on) ExtraGoals.startingCaps(week) else emptyMap()) }
 
-    fun stepCap(productId: String, by: Int) = set { current ->
-        val caps = current.goals.maxUnitsPerDay
-        val now = caps[productId] ?: return@set current.goals
-        current.goals.copy(maxUnitsPerDay = caps + (productId to (now + by).coerceIn(1, MAX_CAP)))
+    fun stepCap(productId: String, by: Int) = set { goals, _, _ ->
+        val caps = goals.maxUnitsPerDay
+        val now = caps[productId] ?: return@set goals
+        goals.copy(maxUnitsPerDay = caps + (productId to (now + by).coerceIn(1, MAX_CAP)))
     }
 
     /** The gap between doses: on, it starts at 90 minutes, and moves 15 minutes at a time. */
-    fun switchGap(on: Boolean) = set { it.goals.copy(minGapMinutes = if (on) DEFAULT_GAP else null) }
+    fun switchGap(on: Boolean) = set { goals, _, _ -> goals.copy(minGapMinutes = if (on) DEFAULT_GAP else null) }
 
-    fun stepGap(by: Int) = set { current ->
-        val gap = current.goals.minGapMinutes ?: return@set current.goals
-        current.goals.copy(minGapMinutes = (gap + by * GAP_STEP).coerceIn(GAP_STEP, MAX_GAP))
+    fun stepGap(by: Int) = set { goals, _, _ ->
+        val gap = goals.minGapMinutes ?: return@set goals
+        goals.copy(minGapMinutes = (gap + by * GAP_STEP).coerceIn(GAP_STEP, MAX_GAP))
     }
 
     /** The first dose: on, it starts at the last 30 days' average to the quarter hour, or 08:00. */
-    fun switchFirstDose(on: Boolean) = set { current ->
-        current.goals.copy(firstDoseNotBefore = if (on) startingFirstDose(current.habits.firstDose) else null)
+    fun switchFirstDose(on: Boolean) = set { goals, _, habits ->
+        goals.copy(firstDoseNotBefore = if (on) startingFirstDose(habits.firstDose) else null)
     }
 
-    fun stepFirstDose(by: Int) = set { current ->
-        val time = current.goals.firstDoseNotBefore ?: return@set current.goals
+    fun stepFirstDose(by: Int) = set { goals, _, _ ->
+        val time = goals.firstDoseNotBefore ?: return@set goals
         val minutes = (time.hour * 60 + time.minute + by * ExtraGoals.STEP_MINUTES.toInt()).coerceIn(0, LATEST)
-        current.goals.copy(firstDoseNotBefore = LocalTime.of(minutes / 60, minutes % 60))
+        goals.copy(firstDoseNotBefore = LocalTime.of(minutes / 60, minutes % 60))
     }
 
     companion object {

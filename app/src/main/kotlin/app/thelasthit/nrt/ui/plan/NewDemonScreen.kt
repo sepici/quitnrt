@@ -58,15 +58,21 @@ class NewDemonViewModel(private val graph: DataGraph) : ViewModel() {
 
     fun pickVariant(variant: String) = _draft.update { it.copy(variant = variant) }
 
+    /** Set from the tap that starts the new programme, so a quick second tap does nothing while it saves. */
+    private var starting = false
+
     /** Closes the programme done and starts a new one from current use, with this demon waiting in it. */
     fun start(then: () -> Unit) {
         val chosen = _draft.value
-        if (!chosen.canStart) return
+        if (!chosen.canStart || starting) return
+        starting = true
         viewModelScope.launch {
-            runCatching { graph.programmes.startNew() }.onSuccess {
-                graph.game.restyleDemon(chosen.name, Creature.DRAGON, chosen.variant)
-                then()
-            }
+            runCatching { graph.programmes.startNew() }
+                .onSuccess {
+                    graph.game.restyleDemon(chosen.name, Creature.DRAGON, chosen.variant)
+                    then()
+                }
+                .onFailure { starting = false }
         }
     }
 

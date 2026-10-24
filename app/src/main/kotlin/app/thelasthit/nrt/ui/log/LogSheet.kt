@@ -26,14 +26,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -70,12 +68,11 @@ import app.thelasthit.nrt.R
 import app.thelasthit.nrt.domain.log.EntryKind
 import app.thelasthit.nrt.domain.log.QuickTime
 import app.thelasthit.nrt.domain.product.UserProduct
+import app.thelasthit.nrt.ui.components.AppSheet
 import app.thelasthit.nrt.ui.components.Chip
 import app.thelasthit.nrt.ui.components.ChipKind
 import app.thelasthit.nrt.ui.components.PrimaryButton
 import app.thelasthit.nrt.ui.components.Segmented
-import app.thelasthit.nrt.ui.components.sheetEdge
-import app.thelasthit.nrt.ui.components.sheetScrim
 import app.thelasthit.nrt.ui.format.ShortDateFormatter
 import app.thelasthit.nrt.ui.format.formatAt
 import app.thelasthit.nrt.ui.format.icon
@@ -116,16 +113,11 @@ fun LogSheet(
         scope.launch { sheetState.hide() }.invokeOnCompletion { then() }
     }
 
-    ModalBottomSheet(
+    AppSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = colors.surface,
-        scrimColor = sheetScrim,
-        modifier = Modifier.sheetEdge(colors),
-        contentColor = colors.text,
-        dragHandle = { BottomSheetDefaults.DragHandle(color = colors.lineStrong, width = 36.dp, height = 4.dp) },
     ) {
-        val current = state ?: return@ModalBottomSheet
+        val current = state ?: return@AppSheet
         val save = {
             viewModel.save { saved -> close { onSaved(saved) } }
         }

@@ -2,10 +2,12 @@ package app.thelasthit.nrt.ui.plan
 
 import app.thelasthit.nrt.GUM_2
 import app.thelasthit.nrt.GUM_4
+import app.thelasthit.nrt.PATCH_14
 import app.thelasthit.nrt.QUICKMIST
 import app.thelasthit.nrt.TestApp
 import app.thelasthit.nrt.TestApp.Companion.london
 import app.thelasthit.nrt.data.repo.LogRequest
+import app.thelasthit.nrt.domain.creature.Creature
 import app.thelasthit.nrt.domain.programme.MissedWeekChoice
 import app.thelasthit.nrt.domain.programme.ProgrammeLength
 import app.thelasthit.nrt.domain.programme.UsualDay
@@ -20,6 +22,18 @@ import java.time.LocalTime
 // that evening first, as it would be on a phone.
 
 internal val PLAN_START: LocalDate = LocalDate.parse("2026-10-24")
+
+/**
+ * Set up as onboarding leaves it, as `setUp` does, but without 2 mg gum: the mockups' plan
+ * switches to it in week 3, so building the plan says it's added, and starting the plan adds it.
+ */
+internal fun TestApp.setUpForPlan() = runBlocking {
+    graph.tags.ensureBuiltIns()
+    graph.settings.setCountry("GB")
+    listOf(GUM_4, QUICKMIST, PATCH_14).forEach { graph.products.addFromCatalogue(it) }
+    graph.settings.setDemon("Gary", Creature.DRAGON, "forest")
+    graph.settings.completeOnboarding()
+}
 
 private fun date(text: String) = LocalDate.parse(text)
 

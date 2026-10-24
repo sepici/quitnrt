@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -34,7 +36,9 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.thelasthit.nrt.R
@@ -53,6 +57,15 @@ import app.thelasthit.nrt.ui.theme.LastHit
 
 /** How many weeks the schedule shows in overtime before "Show all": the three before this one, and this one. */
 private const val OVERTIME_ROWS = 4
+
+/** The most of a schedule row the amount and status take. */
+private const val AMOUNT_SHARE = 0.55f
+
+/** The pencil's slot, kept on every week to come so their amounts line up whether or not they can change. */
+private val PenSlot = 24.dp
+
+/** The schedule's side padding, which a week that opens the editor reaches past to the screen's edges. */
+private val Gutter = 20.dp
 
 /**
  * Every week of the plan, with its result: met in green, missed and caught up in neutral marks,
@@ -81,12 +94,17 @@ internal fun Schedule(state: PlanState.Running, onEdit: (Int) -> Unit) {
             },
             Modifier.padding(top = 2.dp),
         )
-        Column(Modifier.padding(top = 14.dp)) {
-            weeks.forEachIndexed { index, week ->
-                val isNow = week == state.focus && state.today <= week.endDate
-                val previousNow = index > 0 && weeks[index - 1] == state.focus && state.today <= weeks[index - 1].endDate
-                if (index > 0 && !isNow && !previousNow) HorizontalDivider(color = LastHit.colors.line)
-                ScheduleRow(state, week, isNow, onEdit)
+        BoxWithConstraints(Modifier.padding(top = 14.dp).fillMaxWidth()) {
+            // The amount and status take at most a little over half the row, so a long status wraps
+            // rather than squeezing the dates, and every amount ends at the same edge.
+            val amountWidth = maxWidth * AMOUNT_SHARE
+            Column(Modifier.fillMaxWidth()) {
+                weeks.forEachIndexed { index, week ->
+                    val isNow = week == state.focus && state.today <= week.endDate
+                    val previousNow = index > 0 && weeks[index - 1] == state.focus && state.today <= weeks[index - 1].endDate
+                    if (index > 0 && !isNow && !previousNow) HorizontalDivider(color = LastHit.colors.line)
+                    ScheduleRow(state, week, isNow, amountWidth, onEdit)
+                }
             }
         }
         if (overtime && weeks.size < plan.weeks.size) {
@@ -108,10 +126,13 @@ internal fun Schedule(state: PlanState.Running, onEdit: (Int) -> Unit) {
     }
 }
 
-/** One week of the schedule. */
+/**
+ * One week of the schedule, the full width of the list: this week outlined past both edges, and a
+ * week that opens the editor a button out to the screen's edges, as the mockup's rows are.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ScheduleRow(state: PlanState.Running, week: ProgrammeWeek, isNow: Boolean, onEdit: (Int) -> Unit) {
+private fun ScheduleRow(state: PlanState.Running, week: ProgrammeWeek, isNow: Boolean, amountWidth: Dp, onEdit: (Int) -> Unit) {
     val colors = LastHit.colors
     val resources = LocalResources.current
     val plan = state.plan
@@ -175,13 +196,19 @@ private fun ScheduleRow(state: PlanState.Running, week: ProgrammeWeek, isNow: Bo
         if (editable) append(". ").append(stringResource(R.string.plan_change_it))
     }
     val shape = RoundedCornerShape(16.dp)
+    val bleed = when {
+        isNow -> 12.dp
+        editable -> Gutter
+        else -> 0.dp
+    }
     Column(
         Modifier
+            .then(if (isNow) Modifier.padding(vertical = 4.dp) else Modifier)
+            .bleed(bleed)
+            .fillMaxWidth()
             .then(
                 if (isNow) {
                     Modifier
-                        .padding(vertical = 4.dp)
-                        .bleed(12.dp)
                         .clip(shape)
                         .background(colors.surface)
                         .border(1.5.dp, colors.lineStrong, shape)
@@ -195,17 +222,16 @@ private fun ScheduleRow(state: PlanState.Running, week: ProgrammeWeek, isNow: Bo
                 if (editable) role = Role.Button
             }
             .heightIn(min = 64.dp)
-            .padding(horizontal = if (isNow) 12.dp else 0.dp, vertical = 10.dp),
+            .padding(horizontal = bleed, vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             WeekMark(mark)
             Column(Modifier.weight(1f)) {
                 Text(title, style = LastHit.type.title.copy(fontWeight = if (later) FontWeight.SemiBold else FontWeight.Bold), color = colors.text)
                 Text(dates, style = LastHit.type.caption.copy(fontWeight = FontWeight.Normal), color = colors.text2)
             }
-            // At most half the row, so a long status wraps rather than squeezing the dates.
-            Column(Modifier.weight(1f, fill = false), horizontalAlignment = Alignment.End) {
+            Column(Modifier.widthIn(max = amountWidth), horizontalAlignment = Alignment.End) {
                 // The hits sit before the amount, or above it when a large font leaves no room.
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
@@ -221,11 +247,16 @@ private fun ScheduleRow(state: PlanState.Running, week: ProgrammeWeek, isNow: Bo
                         textAlign = TextAlign.End,
                     )
                 }
-                Text(status, style = LastHit.type.caption.copy(fontWeight = FontWeight.Medium), color = colors.text2, textAlign = TextAlign.End)
+                Text(
+                    status,
+                    style = LastHit.type.caption.copy(fontWeight = FontWeight.Medium, lineBreak = LineBreak.Heading),
+                    color = colors.text2,
+                    textAlign = TextAlign.End,
+                )
             }
-            if (editable) {
-                Box(Modifier.size(24.dp), contentAlignment = Alignment.Center) {
-                    Icon(painterResource(R.drawable.ic_edit), contentDescription = null, tint = colors.text2, modifier = Modifier.size(20.dp))
+            if (later) {
+                Box(Modifier.size(PenSlot), contentAlignment = Alignment.Center) {
+                    if (editable) Icon(painterResource(R.drawable.ic_edit), contentDescription = null, tint = colors.text2, modifier = Modifier.size(20.dp))
                 }
             }
         }
@@ -234,7 +265,7 @@ private fun ScheduleRow(state: PlanState.Running, week: ProgrammeWeek, isNow: Bo
                 mix,
                 style = LastHit.type.label.copy(fontSize = 14.sp, fontWeight = FontWeight.Medium),
                 color = colors.text,
-                modifier = Modifier.padding(start = 40.dp, end = if (editable) 36.dp else 0.dp),
+                modifier = Modifier.padding(start = 40.dp, end = if (later) PenSlot + 12.dp else 0.dp),
             )
         }
     }

@@ -87,7 +87,7 @@ class SettleOnStartTest {
         app.setTime("2026-11-01T09:00")
         owner.move(Lifecycle.State.RESUMED)
 
-        val met = hasContentDescription("Week 1, 24 to 30 October", substring = true) and hasContentDescription("Met", substring = true)
+        val met = hasContentDescription("Week 1, 24 to 30\u00A0October", substring = true) and hasContentDescription("Met", substring = true)
         compose.waitUntilAtLeastOneExists(met, timeoutMillis = 10_000)
         compose.onNode(met).performScrollTo()
     }

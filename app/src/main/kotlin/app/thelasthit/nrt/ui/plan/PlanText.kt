@@ -3,6 +3,7 @@ package app.thelasthit.nrt.ui.plan
 import android.content.res.Resources
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -28,15 +29,21 @@ import java.util.Locale
 /** "Tuesday". */
 internal val DayName: DateTimeFormatter = DateTimeFormatter.ofPattern("EEEE", Locale.UK)
 
+// A day's number and its month are joined by a no-break space, as in the mockups, so a date
+// that wraps never leaves the month on a line of its own.
+
 /** "Saturday 24 October". */
-internal val LongDate: DateTimeFormatter = DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.UK)
+internal val LongDate: DateTimeFormatter = DateTimeFormatter.ofPattern("EEEE d\u00A0MMMM", Locale.UK)
 
 /** "24 Oct", as the plan's table starts each week. */
-internal val ShortDate: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM", Locale.UK)
+internal val ShortDate: DateTimeFormatter = DateTimeFormatter.ofPattern("d\u00A0MMM", Locale.UK)
 
 private val DayOnly = DateTimeFormatter.ofPattern("EEEE d", Locale.UK)
 private val Number = DateTimeFormatter.ofPattern("d", Locale.UK)
-private val NumberMonth = DateTimeFormatter.ofPattern("d MMMM", Locale.UK)
+private val NumberMonth = DateTimeFormatter.ofPattern("d\u00A0MMMM", Locale.UK)
+
+/** A number and the unit after it, as catalogue names end: "Nicorette gum 2 mg". */
+private val NumberUnit = Regex("(\\d) (mg|h)\\b")
 
 /** "a, b and c". */
 internal fun Resources.listText(items: List<String>): String = when (items.size) {
@@ -90,9 +97,14 @@ internal fun Resources.shortRange(start: LocalDate, end: LocalDate): String {
 internal fun Resources.dayNames(start: LocalDate, end: LocalDate): String =
     if (start == end) DayName.format(start) else getString(R.string.plan_range, DayName.format(start), DayName.format(end))
 
-/** A product as lists show it: catalogue names carry their strength, and one added by hand gets it added. */
-internal fun Resources.productTitle(product: UserProduct): String =
-    if (product.catalogueId == null) getString(R.string.dose_named, product.name, product.perUnit.mgText()) else product.name
+/**
+ * A product as lists show it: catalogue names carry their strength, and one added by hand gets it
+ * added. The strength's number keeps to its unit with a no-break space, as the plan's own text does.
+ */
+internal fun Resources.productTitle(product: UserProduct): String {
+    val name = product.name.replace(NumberUnit, "$1\u00A0$2")
+    return if (product.catalogueId == null) getString(R.string.dose_named, name, product.perUnit.mgText()) else name
+}
 
 /** One product's units a day in words: "8 pieces of 4 mg gum", "3 sprays". */
 internal fun Resources.itemText(item: MixItem): String {
@@ -163,16 +175,17 @@ internal fun Dose.apartFrom(other: Dose): Dose = Dose(kotlin.math.abs(micrograms
 internal fun Resources.mg(dose: Dose): String = getString(R.string.plan_mg, dose.mgText())
 
 /**
- * [template] filled with [args], with [bold] set in bold wherever it appears: for a line such as
- * "**3 full days** so far", where the bold part is one of the arguments.
+ * [template] with [bold] set in bold where it appears: for a line such as "**3 full days** so
+ * far", where the bold part is one of the arguments. In a quiet line, [colour] gives the bold part
+ * the text colour, so the figure stands out as it does in the mockups.
  */
-internal fun boldIn(template: String, bold: String): AnnotatedString = buildAnnotatedString {
+internal fun boldIn(template: String, bold: String, colour: Color = Color.Unspecified): AnnotatedString = buildAnnotatedString {
     val at = template.indexOf(bold)
     if (bold.isEmpty() || at < 0) {
         append(template)
     } else {
         append(template.substring(0, at))
-        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(bold) }
+        withStyle(SpanStyle(fontWeight = FontWeight.Bold, color = colour)) { append(bold) }
         append(template.substring(at + bold.length))
     }
 }

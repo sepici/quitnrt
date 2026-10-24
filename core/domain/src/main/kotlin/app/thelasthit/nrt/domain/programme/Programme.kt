@@ -297,7 +297,8 @@ data class Programme(
 
     /**
      * Moves week [number] to [step] on the ladder. Later weeks that would then be above it move
-     * down to it, so allowances never go up.
+     * down to it, so allowances never go up. A week that changes mix has its caps on units a day
+     * redone for the new one ([ExtraGoals.forMix]).
      */
     fun edit(number: Int, step: Int, today: LocalDate): Programme {
         val range = requireNotNull(editableSteps(number, today)) { "Week $number can't be edited on $today" }
@@ -306,7 +307,11 @@ data class Programme(
         return copy(
             weeks = weeks.map { week ->
                 val above = week.number > number && !week.isNrtFree && checkNotNull(week.target.step) < step
-                if (week.number == number || above) week.copy(target = target) else week
+                when {
+                    week.number != number && !above -> week
+                    week.target == target -> week
+                    else -> week.copy(target = target, goals = ExtraGoals.forMix(week.goals, target.mix))
+                }
             },
         )
     }

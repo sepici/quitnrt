@@ -10,10 +10,13 @@ import app.thelasthit.nrt.domain.programme.LedgerKind
 import app.thelasthit.nrt.domain.programme.MissedWeekChoice
 import app.thelasthit.nrt.domain.programme.ProgrammeLength
 import app.thelasthit.nrt.domain.programme.ProgrammeStatus
+import app.thelasthit.nrt.domain.programme.ProgrammeWeek
 import app.thelasthit.nrt.domain.programme.UsualDay
 import app.thelasthit.nrt.domain.programme.WeekGoals
 import app.thelasthit.nrt.domain.programme.WeekKind
 import app.thelasthit.nrt.domain.programme.WeekResult
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -105,7 +108,11 @@ class ProgrammeRepositoryTest {
 
     @Test
     fun onlyOneProgrammeIsCurrent() = runTest {
-        data.programmes.startBaseline()
+        val first = data.programmes.startBaseline()
+        // A second start, as from a quick second tap, keeps the baseline already running.
+        assertEquals(first, data.programmes.startBaseline())
+        data.programmes.abandon()
+        data.startGumPlan()
         assertFailsWith<IllegalStateException> { data.programmes.startBaseline() }
     }
 
@@ -200,6 +207,15 @@ class ProgrammeRepositoryTest {
     }
 
     @Test
+    fun startingAPlanAgainLeavesItAsItIs() = runTest {
+        val started = data.startGumPlan()
+        val plan = checkNotNull(started.plan)
+        // As from a quick second tap on "Start the plan".
+        assertEquals(started, data.programmes.startPlan(plan))
+        assertEquals(started.demon?.id, data.programmes.current()?.demon?.id)
+    }
+
+    @Test
     fun aPlanHasToComeFromTheUsualDayKept() = runTest {
         val gum = data.products.addFromCatalogue(GUM_4)
         data.programmes.keepUsualDay(UsualDay.typed(gum to 8))
@@ -220,14 +236,17 @@ class ProgrammeRepositoryTest {
 
         data.programmes.startPlan(plan)
         assertEquals((1..12).map(::goals), data.programmes.current()?.plan?.weeks?.map { it.goals })
-        data.programmes.editWeek(5, checkNotNull(plan.week(5).target.step) + 1)
+        val lower = checkNotNull(plan.week(5).target.step) + 1
+        data.programmes.editWeek(5, lower)
+        // The edited week's caps follow its new mix, which has no 4 mg gum: each product starts at its units.
+        val edited = goals(5).copy(maxUnitsPerDay = plan.ladder.mixAt(lower).items.associate { it.product.id to it.units })
 
         data.chewAllWeekOne()
         data.setTime("2026-11-01T09:00")
         assertTrue(data.programmes.chooseAfterMiss(1, MissedWeekChoice.REPEAT))
         // The repeat takes week 1's goals, and the weeks after keep their own.
         val weeks = checkNotNull(data.programmes.current()?.plan).weeks
-        assertEquals(listOf(goals(1), goals(1)) + (2..12).map(::goals), weeks.map { it.goals })
+        assertEquals(listOf(goals(1), goals(1)) + (2..12).map { if (it == 5) edited else goals(it) }, weeks.map { it.goals })
     }
 
     @Test
@@ -255,6 +274,19 @@ class ProgrammeRepositoryTest {
         // NRT-free weeks have nothing to pace.
         data.setTime("2027-01-04T12:00")
         assertFalse(data.programmes.setGoals(goals))
+    }
+
+    @Test
+    fun goalChangesInARowEachBuildOnTheOneBefore() = runTest {
+        data.startGumPlan()
+        assertTrue(data.programmes.setGoals(WeekGoals(minGapMinutes = 90)))
+        // Two quick taps on "15 minutes longer", each read from the goals as stored.
+        val longer: (ProgrammeWeek) -> WeekGoals = { week ->
+            week.goals.copy(minGapMinutes = checkNotNull(week.goals.minGapMinutes) + 15)
+        }
+        val taps = listOf(async { data.programmes.updateGoals(longer) }, async { data.programmes.updateGoals(longer) })
+        assertEquals(listOf(true, true), taps.awaitAll())
+        assertEquals(120, data.programmes.current()?.plan?.week(1)?.goals?.minGapMinutes)
     }
 
     @Test
