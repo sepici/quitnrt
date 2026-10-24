@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.thelasthit.nrt.data.DataGraph
 import app.thelasthit.nrt.data.db.TagEntity
+import app.thelasthit.nrt.data.repo.DemonState
 import app.thelasthit.nrt.data.repo.LogRequest
 import app.thelasthit.nrt.data.repo.LogResult
 import app.thelasthit.nrt.domain.creature.Creature
@@ -13,6 +14,7 @@ import app.thelasthit.nrt.domain.log.LabelWarning
 import app.thelasthit.nrt.domain.log.WeekSummary
 import app.thelasthit.nrt.domain.product.PillLabel
 import app.thelasthit.nrt.domain.product.UserProduct
+import app.thelasthit.nrt.domain.programme.PlanToday
 import app.thelasthit.nrt.ui.minuteTicks
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -47,6 +49,15 @@ data class TodayState(
     val creature: Creature,
     /** A label limit crossed by the latest dose, shown until dismissed. */
     val labelNote: LabelWarning?,
+    /** Today in the running plan, with its guide: null before the plan starts, after it's done, or with none. */
+    val plan: PlanToday? = null,
+    /** The day a plan that hasn't started yet begins. */
+    val planStartsOn: LocalDate? = null,
+    /**
+     * The demon once a plan is confirmed, with its HP and banked hits from the ledger. It steps
+     * out on the plan's first day: until then, [planStartsOn] is set and it lurks.
+     */
+    val demon: DemonState? = null,
 ) {
     fun nameOf(entry: Entry): String = productNames[entry.productId] ?: entry.productName
 }
@@ -78,16 +89,29 @@ class TodayViewModel(
         settings.dayBoundary.logicalDate(instant, zone())
     }.distinctUntilChanged()
 
-    private val days: Flow<Pair<DaySummary, WeekSummary>> = today.flatMapLatest { date ->
-        val monday = WeekSummary.mondayOf(date)
-        combine(
-            graph.entries.observeDay(date),
-            graph.entries.observeRange(monday, monday.plusDays(6)),
-            graph.entries.observeFirstDay(),
-        ) { day, week, firstDay ->
-            day to WeekSummary.of(date, week, firstDay)
+    /** Today's place in the running plan, if one has started or is about to. */
+    private data class PlanView(val today: PlanToday?, val startsOn: LocalDate?)
+
+    private data class Days(val day: DaySummary, val week: WeekSummary, val plan: PlanView)
+
+    /**
+     * Today and its week: Monday to Sunday, or once a plan runs, its programme week (ROADMAP
+     * P3-2). Every day of a programme week up to today counts, logged or not, as its result does.
+     */
+    private val days: Flow<Days> = combine(today, graph.programmes.observeCurrent()) { date, record -> date to record?.plan }
+        .distinctUntilChanged()
+        .flatMapLatest { (date, plan) ->
+            val planToday = plan?.let { PlanToday.of(it, date) }
+            val view = PlanView(planToday, plan?.startDate?.takeIf { it > date })
+            val start = planToday?.week?.startDate ?: WeekSummary.mondayOf(date)
+            combine(
+                graph.entries.observeDay(date),
+                graph.entries.observeRange(start, start.plusDays(6)),
+                graph.entries.observeFirstDay(),
+            ) { day, week, firstDay ->
+                Days(day, WeekSummary.from(start, date, week, if (planToday != null) start else firstDay), view)
+            }
         }
-    }
 
     private val lists: Flow<Triple<List<QuickLogPill>, Map<String, String>, Map<String, TagEntity>>> =
         combine(graph.products.quickLog, graph.products.shortNames, graph.tags.all) { quickLog, names, tags ->
@@ -95,18 +119,23 @@ class TodayViewModel(
             Triple(quickLog.map { QuickLogPill(it, labels.getValue(it.id)) }, names, tags.associateBy { it.key })
         }
 
-    val state: StateFlow<TodayState?> = combine(now, days, lists, graph.settings.settings, labelNote) { instant, (day, week), (pills, names, tags), settings, note ->
+    private val look = combine(graph.settings.settings, graph.game.demon) { settings, demon -> settings to demon }
+
+    val state: StateFlow<TodayState?> = combine(now, days, lists, look, labelNote) { instant, days, (pills, names, tags), (settings, demon), note ->
         TodayState(
             now = instant,
-            date = day.date,
-            day = day,
-            week = week,
+            date = days.day.date,
+            day = days.day,
+            week = days.week,
             pills = pills,
             productNames = names,
             tags = tags,
             demonName = settings.demonName,
             creature = settings.demonCreature,
             labelNote = note,
+            plan = days.plan.today,
+            planStartsOn = days.plan.startsOn,
+            demon = demon,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 

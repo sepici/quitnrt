@@ -69,11 +69,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.domain.dose.Dose
 import app.thelasthit.nrt.domain.insights.DailyIntake
+import app.thelasthit.nrt.domain.insights.DaysWithin
 import app.thelasthit.nrt.domain.insights.InsightRange
 import app.thelasthit.nrt.domain.insights.ProductType
 import app.thelasthit.nrt.domain.product.FormWord
 import app.thelasthit.nrt.ui.components.Chip
 import app.thelasthit.nrt.ui.components.ChipKind
+import app.thelasthit.nrt.ui.components.GuideLineKey
 import app.thelasthit.nrt.ui.components.IconTile
 import app.thelasthit.nrt.ui.components.PrimaryButton
 import app.thelasthit.nrt.ui.format.DayMonthFormatter
@@ -138,6 +140,7 @@ fun InsightsScreen(
             TopBar()
             Filters(current, onRange = viewModel::pickRange, onType = viewModel::pickType)
             EachDay(current)
+            PlanWeeksSection(current)
             if (current.onlyPatches) {
                 PatchNote()
             } else {
@@ -348,15 +351,21 @@ private fun EachDay(state: InsightsState) {
         Headline(state, intake)
         val days = intake.days
         val today = state.today
+        val guideLine = state.guideLine
         if (weekly) {
             val weeks = intake.weeks
             val thisMonday = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
             if (asTable) {
                 ChartTable(
-                    weeks.reversed().mapNotNull { week ->
+                    weeks.withIndex().reversed().mapNotNull { (index, week) ->
                         week.averagePerDay?.let {
+                            val guide = guideLine?.getOrNull(index)
                             stringResource(R.string.insights_week_of, DayMonthFormatter.format(week.monday)) to
-                                stringResource(R.string.insights_row_mg_a_day, it.averageText())
+                                if (guide == null) {
+                                    stringResource(R.string.insights_row_mg_a_day, it.averageText())
+                                } else {
+                                    stringResource(R.string.insights_row_mg_a_day_guide, it.averageText(), guide.mgText())
+                                }
                         }
                     },
                     Modifier.padding(top = 14.dp),
@@ -377,27 +386,30 @@ private fun EachDay(state: InsightsState) {
                 MgColumns(
                     columns = columns,
                     line = null,
-                    description = summary(intake, window.days, weekly = true),
+                    description = summary(intake, window.days, weekly = true, daysWithin = state.daysWithin),
                     selected = selected,
                     onSelect = { index -> selected = index?.takeIf { columns[it].value != null } },
                     tip = { index ->
                         val week = weeks[index]
                         ChartTip(
                             stringResource(R.string.insights_tip_week, week.averagePerDay?.averageText().orEmpty()),
-                            listOf(
+                            listOfNotNull(
                                 stringResource(R.string.insights_week_of, DayMonthFormatter.format(week.monday)),
                                 pluralStringResource(
                                     if (week.monday == thisMonday) R.plurals.insights_week_days_so_far else R.plurals.insights_week_days,
                                     week.days,
                                     week.days,
                                 ),
+                                guideLine?.getOrNull(index)?.let { stringResource(R.string.insights_tip_guide, it.mgText()) },
                             ),
                         )
                     },
                     modifier = Modifier.padding(top = 18.dp),
+                    guide = guideLine,
                 )
                 Keys {
                     Key(BarKey(), stringResource(R.string.insights_key_week))
+                    if (guideLine != null) Key({ GuideLineKey() }, stringResource(R.string.insights_key_guide))
                     if (weeks.any { it.monday == thisMonday && it.averagePerDay != null }) {
                         Key(BarKey(outline = true), stringResource(R.string.insights_key_this_week))
                     }
@@ -407,11 +419,16 @@ private fun EachDay(state: InsightsState) {
         } else {
             if (asTable) {
                 ChartTable(
-                    days.reversed().map { day ->
-                        if (day.date == today) {
-                            stringResource(R.string.insights_today) to stringResource(R.string.insights_row_mg_so_far, day.total.mgText())
-                        } else {
-                            DayTitleFormatter.format(day.date) to stringResource(R.string.insights_row_mg, day.total.mgText())
+                    days.withIndex().reversed().map { (index, day) ->
+                        val guide = guideLine?.getOrNull(index)
+                        when {
+                            day.date == today && guide != null ->
+                                stringResource(R.string.insights_today) to stringResource(R.string.insights_row_mg_so_far_guide, day.total.mgText(), guide.mgText())
+                            day.date == today ->
+                                stringResource(R.string.insights_today) to stringResource(R.string.insights_row_mg_so_far, day.total.mgText())
+                            guide != null ->
+                                DayTitleFormatter.format(day.date) to stringResource(R.string.insights_row_mg_guide, day.total.mgText(), guide.mgText())
+                            else -> DayTitleFormatter.format(day.date) to stringResource(R.string.insights_row_mg, day.total.mgText())
                         }
                     },
                     Modifier.padding(top = 14.dp),
@@ -434,29 +451,33 @@ private fun EachDay(state: InsightsState) {
                 MgColumns(
                     columns = columns,
                     line = line,
-                    description = summary(intake, window.days, weekly = false),
+                    description = summary(intake, window.days, weekly = false, daysWithin = state.daysWithin),
                     selected = selected,
                     onSelect = { selected = it },
                     tip = { index ->
                         val day = days[index]
                         val doses = pluralStringResource(R.plurals.insights_doses, day.doses, day.doses)
+                        val guide = guideLine?.getOrNull(index)?.let { stringResource(R.string.insights_tip_guide, it.mgText()) }
                         if (day.date == today) {
-                            ChartTip(stringResource(R.string.insights_tip_today, day.total.mgText(), doses), listOf(stringResource(R.string.insights_today)))
+                            ChartTip(stringResource(R.string.insights_tip_today, day.total.mgText(), doses), listOfNotNull(stringResource(R.string.insights_today), guide))
                         } else {
                             ChartTip(
                                 if (day.doses == 0) stringResource(R.string.insights_tip_no_doses) else stringResource(R.string.insights_tip_day, day.total.mgText(), doses),
                                 listOfNotNull(
                                     DayTitleFormatter.format(day.date),
                                     day.average?.let { stringResource(R.string.insights_tip_average, it.averageText()) },
+                                    guide,
                                 ),
                             )
                         }
                     },
                     modifier = Modifier.padding(top = 18.dp),
+                    guide = guideLine,
                 )
                 Keys {
                     Key(BarKey(), stringResource(R.string.insights_key_day))
                     if (line != null) Key(LineKey(), stringResource(R.string.insights_key_average))
+                    if (guideLine != null) Key({ GuideLineKey() }, stringResource(R.string.insights_key_guide))
                     days.lastOrNull { it.date == today }?.let { Key(BarKey(outline = true), stringResource(R.string.insights_key_today, it.total.mgText())) }
                     if (columns.any { !it.partial && it.value == Dose.ZERO }) Key({ ZeroTickKey() }, stringResource(R.string.insights_tip_no_doses))
                 }
@@ -470,6 +491,8 @@ private fun EachDay(state: InsightsState) {
                 }
             }
         }
+        // Habits has the days within the guide, except for patches alone, when it's left out.
+        if (state.onlyPatches) state.daysWithin?.let { DaysWithinLine(it) }
     }
 }
 
@@ -522,7 +545,7 @@ private fun Headline(state: InsightsState, intake: DailyIntake) {
 
 /** What a screen reader hears for the chart; the table has every number. */
 @Composable
-private fun summary(intake: DailyIntake, windowDays: Int, weekly: Boolean): String {
+private fun summary(intake: DailyIntake, windowDays: Int, weekly: Boolean, daysWithin: DaysWithin? = null): String {
     val period = pluralStringResource(R.plurals.insights_days, windowDays, windowDays)
     val today = intake.days.lastOrNull { it.date == intake.today }
     val highest = intake.days.filter { it.date != intake.today && it.total > Dose.ZERO }.maxByOrNull { it.total }
@@ -534,6 +557,7 @@ private fun summary(intake: DailyIntake, windowDays: Int, weekly: Boolean): Stri
             highest?.let { add(stringResource(R.string.insights_summary_highest, it.total.mgText(), DayTitleFormatter.format(it.date))) }
         }
         today?.let { add(stringResource(R.string.insights_summary_today, it.total.mgText())) }
+        daysWithin?.let { add(daysWithinText(it)) }
         add(stringResource(if (weekly) R.string.insights_summary_table_weeks else R.string.insights_summary_table))
     }.joinToString(" ")
 }
@@ -595,7 +619,7 @@ internal fun Key(sample: @Composable () -> Unit, text: String) {
     }
 }
 
-private fun BarKey(outline: Boolean = false): @Composable () -> Unit = {
+internal fun BarKey(outline: Boolean = false): @Composable () -> Unit = {
     val used = LastHit.colors.used
     Canvas(Modifier.size(width = 8.dp, height = 14.dp)) {
         val radius = CornerRadius(3.dp.toPx())

@@ -270,6 +270,7 @@ fun CalendarMap(
     onSelect: (LocalDate?) -> Unit,
     tip: @Composable (CalendarHeat.Day) -> Unit,
     modifier: Modifier = Modifier,
+    stepOf: (CalendarHeat.Day) -> Int = calendar::step,
 ) {
     val colors = LastHit.colors
     val measurer = rememberTextMeasurer()
@@ -318,7 +319,7 @@ fun CalendarMap(
                     week.forEachIndexed { column, day ->
                         if (day.state == CalendarHeat.State.OUTSIDE) return@forEachIndexed
                         val origin = origin(column, row)
-                        val step = calendar.step(day)
+                        val step = stepOf(day)
                         val ink = if (day.state == CalendarHeat.State.NO_DATA) colors.text3 else colors.heatInk(step)
                         if (day.state == CalendarHeat.State.NO_DATA) {
                             drawDashed(origin, Size(side, side), radius, colors)

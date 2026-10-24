@@ -25,6 +25,7 @@ import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -56,8 +57,25 @@ import app.thelasthit.nrt.ui.theme.LastHitColors
 import kotlin.math.ceil
 import kotlin.math.min
 
-/** One column: a day's total or a week's average a day. A [partial] one, still under way, is an outline. */
-data class ChartColumn(val value: Dose?, val partial: Boolean = false, val label: String? = null, val labelStrong: Boolean = false)
+/**
+ * One column: a day's total or a week's average a day. A [partial] one, still under way, is an
+ * outline. A programme week can have its allowance as a [marker] across the column, never a fill,
+ * and how it went as a [mark] under it, with its [label] inside the mark when it fits.
+ */
+data class ChartColumn(
+    val value: Dose?,
+    val partial: Boolean = false,
+    val label: String? = null,
+    val labelStrong: Boolean = false,
+    val marker: Dose? = null,
+    val mark: ColumnMark? = null,
+)
+
+/**
+ * How a programme week went, on a dot under its column, as Today's week marks its days: green
+ * only for a week met, a missed one plain, and one caught up later on the neutral tint.
+ */
+enum class ColumnMark { MET, MISSED, CAUGHT_UP, RUNNING, WAITING }
 
 private val ChartHeight = 172.dp
 private val PlotTop = 10.dp
@@ -67,11 +85,19 @@ private val TickGap = 8.dp
 private val LabelTop = 150.dp
 private val MaxBar = 24.dp
 
+/** With marks under the columns: room for them, and for labels under the marks too small to hold them. */
+private val MarkTop = 150.dp
+private val MarkMax = 24.dp
+private val MarkedHeight = 196.dp
+
 /**
  * Stone columns of mg on a zero baseline, with an optional [line] over them: thin columns with
  * rounded tops, a hairline grid, and anything partial as an outline. [line] has a value or a gap
  * for each column. Tapping a column selects it and shows [tip] beside it; tapping it again, or
  * outside the columns, lets it go. Screen readers get [description] instead.
+ *
+ * A plan's daily [guide], a value or a gap for each column, is a dashed line that steps with the
+ * weeks, behind the columns, as on Today's week.
  */
 @Composable
 fun MgColumns(
@@ -82,12 +108,17 @@ fun MgColumns(
     onSelect: (Int?) -> Unit,
     tip: @Composable (Int) -> Unit,
     modifier: Modifier = Modifier,
+    guide: List<Dose?>? = null,
 ) {
     val colors = LastHit.colors
     val measurer = rememberTextMeasurer()
     val tick = LastHit.type.caption.copy(fontSize = 12.sp, lineHeight = 14.sp, fontWeight = FontWeight.Medium, fontFeatureSettings = "tnum")
     val unit = stringResource(R.string.unit_mg)
-    val scale = Scale.of(columns.mapNotNull { it.value } + line.orEmpty().filterNotNull())
+    val scale = Scale.of(
+        columns.mapNotNull { it.value } + columns.mapNotNull { it.marker } + line.orEmpty().filterNotNull() + guide.orEmpty().filterNotNull(),
+    )
+    val marked = columns.any { it.mark != null }
+    val chartHeight = if (marked) MarkedHeight else ChartHeight
     // Wide enough for the longest tick at any font size, and never narrower than the mockups' 34 dp.
     val axis = with(LocalDensity.current) {
         maxOf(AxisWidth.toPx(), scale.ticks.maxOf { measurer.measure(tickText(it, scale, unit), tick).size.width } + TickGap.toPx())
@@ -107,6 +138,7 @@ fun MgColumns(
                     },
             ) {
                 drawGrid(scale, axis, measurer, tick.copy(color = colors.text3), unit, colors)
+                guide?.let { drawGuide(it, scale, axis, columns.size, colors) }
                 drawColumns(columns, scale, axis, selected, measurer, tick, colors)
                 line?.let { drawLine(it, scale, axis, columns.size, colors) }
             }
@@ -121,10 +153,10 @@ fun MgColumns(
         },
         modifier = modifier
             .fillMaxWidth()
-            .height(ChartHeight),
+            .height(chartHeight),
     ) { measurables, constraints ->
         val width = constraints.maxWidth
-        val height = ChartHeight.roundToPx()
+        val height = chartHeight.roundToPx()
         val chart = measurables[0].measure(Constraints.fixed(width, height))
         val tipBox = measurables.getOrNull(1)?.measure(Constraints(maxWidth = width))
         val toLeft = measurables.getOrNull(2)?.measure(Constraints())
@@ -346,12 +378,107 @@ private fun DrawScope.drawColumns(
             // A day with no doses is a short tick on the baseline, so it never looks like a gap in the data.
             drawZeroTick(centre, min(width, ZeroTick.toPx()), if (index == selected) colors.text else colors.text2)
         }
-        column.label?.let { label ->
-            val style = if (column.labelStrong) tick.copy(fontWeight = FontWeight.ExtraBold, color = colors.text) else tick.copy(color = colors.text3)
-            val layout = measurer.measure(label, style)
-            drawText(layout, topLeft = Offset(centre - layout.size.width / 2f, LabelTop.toPx()))
+        column.marker?.let { drawMarker(centre, min(slot - 2.dp.toPx(), width + 12.dp.toPx()), y(it, scale), colors) }
+        val mark = column.mark
+        if (mark != null) {
+            drawMark(mark, centre, min(MarkMax.toPx(), slot - 3.dp.toPx()), column.label, measurer, tick, colors)
+        } else {
+            column.label?.let { label ->
+                val style = if (column.labelStrong) tick.copy(fontWeight = FontWeight.ExtraBold, color = colors.text) else tick.copy(color = colors.text3)
+                val layout = measurer.measure(label, style)
+                drawText(layout, topLeft = Offset(centre - layout.size.width / 2f, LabelTop.toPx()))
+            }
         }
     }
+}
+
+/**
+ * An allowance across a column, [width] wide at [y]: a 2.5 dp line in the guide's colour on a halo
+ * of the page, so it reads over the column. A marker, never a fill.
+ */
+private fun DrawScope.drawMarker(centre: Float, width: Float, y: Float, colors: LastHitColors) {
+    for ((stroke, colour) in listOf(6.5.dp.toPx() to colors.bg, 2.5.dp.toPx() to colors.guide)) {
+        drawLine(colour, Offset(centre - width / 2, y), Offset(centre + width / 2, y), strokeWidth = stroke, cap = StrokeCap.Round)
+    }
+}
+
+/**
+ * A week's [mark] as a dot [size] across under its column, with its [label] inside when it fits
+ * and under it when it doesn't: met is green with the label in the page's colour, caught up is on
+ * the neutral tint inside a ring, missed and waiting are outlined, and the week running is ringed.
+ */
+private fun DrawScope.drawMark(
+    mark: ColumnMark,
+    centre: Float,
+    size: Float,
+    label: String?,
+    measurer: TextMeasurer,
+    tick: TextStyle,
+    colors: LastHitColors,
+) {
+    val radius = size / 2
+    val middle = Offset(centre, MarkTop.toPx() + radius)
+    val outline = 1.5.dp.toPx()
+    when (mark) {
+        ColumnMark.MET -> drawCircle(colors.success, radius, middle)
+        // The tint alone is too faint against the page, so it has the outline's ring as well.
+        ColumnMark.CAUGHT_UP -> {
+            drawCircle(colors.sunk, radius, middle)
+            drawCircle(colors.lineStrong, radius - outline / 2, middle, style = Stroke(outline))
+        }
+        ColumnMark.MISSED -> drawCircle(colors.lineStrong, radius - outline / 2, middle, style = Stroke(outline))
+        ColumnMark.WAITING -> drawCircle(
+            colors.lineStrong,
+            radius - outline / 2,
+            middle,
+            style = Stroke(outline, pathEffect = PathEffect.dashPathEffect(floatArrayOf(2.dp.toPx(), 2.dp.toPx()))),
+        )
+        ColumnMark.RUNNING -> drawCircle(colors.text, radius - 1.dp.toPx(), middle, style = Stroke(2.dp.toPx()))
+    }
+    label ?: return
+    val ink = when (mark) {
+        ColumnMark.MET -> colors.onSuccess
+        ColumnMark.CAUGHT_UP, ColumnMark.RUNNING -> colors.text
+        ColumnMark.MISSED, ColumnMark.WAITING -> colors.text2
+    }
+    val style = tick.copy(fontSize = 11.sp, fontWeight = if (mark == ColumnMark.RUNNING || mark == ColumnMark.MET) FontWeight.ExtraBold else FontWeight.SemiBold, color = ink)
+    val inside = measurer.measure(label, style)
+    if (inside.size.width + 6.dp.toPx() <= size && inside.size.height <= size) {
+        drawText(inside, topLeft = middle - Offset(inside.size.width / 2f, inside.size.height / 2f))
+    } else {
+        val under = measurer.measure(label, tick.copy(color = colors.text3))
+        drawText(under, topLeft = Offset(centre - under.size.width / 2f, MarkTop.toPx() + size + 4.dp.toPx()))
+    }
+}
+
+/**
+ * The plan's daily guide as a dashed line in the guide's colour, flat across each column's slot
+ * and stepping where the guide changes, with a gap for columns outside the plan. It's drawn before
+ * the columns, so a column over the guide hides the line where it passes.
+ */
+private fun DrawScope.drawGuide(guide: List<Dose?>, scale: Scale, axis: Float, count: Int, colors: LastHitColors) {
+    val slot = (size.width - axis) / count
+    val stroke = Stroke(
+        1.5.dp.toPx(),
+        cap = StrokeCap.Butt,
+        join = StrokeJoin.Miter,
+        pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx())),
+    )
+    var path: Path? = null
+    guide.forEachIndexed { index, value ->
+        if (value == null) {
+            path?.let { drawPath(it, colors.guide, style = stroke) }
+            path = null
+            return@forEachIndexed
+        }
+        val left = axis + slot * index
+        val y = y(value, scale)
+        val run = path ?: Path().also { it.moveTo(left, y) }
+        run.lineTo(left, y)
+        run.lineTo(left + slot, y)
+        path = run
+    }
+    path?.let { drawPath(it, colors.guide, style = stroke) }
 }
 
 private val ZeroTick = 10.dp

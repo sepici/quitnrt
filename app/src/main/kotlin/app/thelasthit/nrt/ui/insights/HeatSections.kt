@@ -20,6 +20,7 @@ import androidx.compose.ui.zIndex
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.domain.dose.Dose
 import app.thelasthit.nrt.domain.insights.CalendarHeat
+import app.thelasthit.nrt.domain.insights.GuideShade
 import app.thelasthit.nrt.domain.insights.HeatScale
 import app.thelasthit.nrt.domain.insights.HourHeatMap
 import app.thelasthit.nrt.domain.time.DayBoundary
@@ -159,7 +160,8 @@ private fun hourSummary(map: HourHeatMap, shade: Shade, timeText: (LocalTime) ->
 
 /**
  * The calendar: each day of the range shaded by mg, from the lightest finished day with doses to
- * the heaviest, as squares in weeks or a table of every day.
+ * the heaviest, as squares in weeks or a table of every day. Once a plan runs, each day is shaded
+ * against its daily guide instead (PLAN §10), in quarters of it, so the darker two steps are over.
  */
 @Composable
 internal fun CalendarSection(state: InsightsState) {
@@ -170,6 +172,10 @@ internal fun CalendarSection(state: InsightsState) {
     val tracked = calendar.weeks.flatten().filter { it.state == CalendarHeat.State.TRACKED }
     val attribute = state.type?.let { typeAttribute(it) }
     val noun = state.type?.let { typeNoun(it) }
+    val guides = state.guides
+    val row: @Composable (CalendarHeat.Day) -> Pair<String, String> = { day ->
+        if (guides == null) dayRow(day, today) else guideDayRow(guides, day, today)
+    }
     Section(
         title = if (attribute == null) stringResource(R.string.insights_calendar_title) else stringResource(R.string.insights_calendar_title_type, attribute).sentence(),
         // Over the section after it, so a tip under the last row is never hidden.
@@ -192,36 +198,47 @@ internal fun CalendarSection(state: InsightsState) {
     ) {
         Meta(
             when {
+                guides != null -> guideCalendarMeta(guides, calendar, asTable)
                 noun == null -> stringResource(if (asTable) R.string.insights_calendar_meta_table else R.string.insights_calendar_meta)
                 asTable -> stringResource(R.string.insights_calendar_meta_table_type, noun)
                 else -> stringResource(R.string.insights_calendar_meta_type, noun)
             },
         )
         if (asTable) {
-            ChartTable(tracked.reversed().map { day -> dayRow(day, today) }, Modifier.padding(top = 14.dp))
+            ChartTable(tracked.reversed().map { day -> row(day) }, Modifier.padding(top = 14.dp))
         } else {
             CalendarMap(
                 calendar = calendar,
-                description = calendarSummary(calendar),
+                description = if (guides == null) calendarSummary(calendar) else guideCalendarSummary(calendar, state.daysWithin),
                 selected = selected,
                 onSelect = { selected = it },
                 tip = { day ->
-                    val (label, value) = dayRow(day, today)
+                    val (label, value) = row(day)
                     ChartTip(value, listOf(label))
                 },
                 // Over the legend and keys, so a tip that runs past the calendar is never hidden under them.
                 modifier = Modifier
                     .padding(top = 14.dp)
                     .zIndex(1f),
+                stepOf = guides?.let { it::step } ?: calendar::step,
             )
             val low = calendar.lowTotal
             val high = calendar.highTotal
-            CalendarLegend(
-                none = if (tracked.any { it.total == Dose.ZERO }) stringResource(R.string.insights_heat_none) else null,
-                starts = HeatScale.stepStarts(low.micrograms, high.micrograms).map { Dose(it).mgText() },
-                single = if (high > Dose.ZERO && high <= low) high.mgText() else null,
-                unit = stringResource(R.string.unit_mg),
-            )
+            if (guides != null) {
+                CalendarLegend(
+                    none = if (tracked.any { it.total == Dose.ZERO }) stringResource(R.string.insights_heat_none) else null,
+                    starts = GuideShade.STARTS_PERCENT.map { stringResource(R.string.insights_percent, it) },
+                    single = null,
+                    unit = stringResource(R.string.insights_calendar_unit_guide),
+                )
+            } else {
+                CalendarLegend(
+                    none = if (tracked.any { it.total == Dose.ZERO }) stringResource(R.string.insights_heat_none) else null,
+                    starts = HeatScale.stepStarts(low.micrograms, high.micrograms).map { Dose(it).mgText() },
+                    single = if (high > Dose.ZERO && high <= low) high.mgText() else null,
+                    unit = stringResource(R.string.unit_mg),
+                )
+            }
             Keys {
                 if (calendar.weeks.flatten().any { it.state == CalendarHeat.State.NO_DATA }) {
                     Key({ NoDataKey() }, stringResource(R.string.insights_key_no_data))

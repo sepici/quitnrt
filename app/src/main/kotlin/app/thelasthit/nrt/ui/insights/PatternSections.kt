@@ -287,6 +287,7 @@ internal fun HabitsSection(state: InsightsState) {
         val first = habits.firstDose
         if (first == null) {
             Meta(stringResource(R.string.insights_table_none), top = 14.dp)
+            state.daysWithin?.let { DaysWithinTile(it, Modifier.padding(top = 14.dp)) }
         } else {
             val gap = habits.averageGap
             val firstValue = AnnotatedString(timeFormat.format(first))
@@ -348,6 +349,8 @@ internal fun HabitsSection(state: InsightsState) {
                             habits.longestGapChange?.let { TimeChange(it, later = R.string.insights_longer, earlier = R.string.insights_shorter, same = R.string.insights_no_change) }
                         }
                     }
+                    // With a plan, the days within its guide (PLAN §10).
+                    state.daysWithin?.let { DaysWithinTile(it) }
                 }
             }
         }
@@ -356,7 +359,7 @@ internal fun HabitsSection(state: InsightsState) {
 
 /** A habit's figure in a white tile with a hairline edge, its name above. */
 @Composable
-private fun Tile(label: String, modifier: Modifier, content: @Composable ColumnScope.() -> Unit) {
+internal fun Tile(label: String, modifier: Modifier, content: @Composable ColumnScope.() -> Unit) {
     val colors = LastHit.colors
     val shape = RoundedCornerShape(16.dp)
     Column(
@@ -373,7 +376,7 @@ private fun Tile(label: String, modifier: Modifier, content: @Composable ColumnS
 }
 
 @Composable
-private fun TileValue(value: AnnotatedString, spoken: String? = null) {
+internal fun TileValue(value: AnnotatedString, spoken: String? = null) {
     Text(
         value,
         style = tileValue,
