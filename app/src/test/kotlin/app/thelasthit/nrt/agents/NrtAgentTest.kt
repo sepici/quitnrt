@@ -7,6 +7,7 @@ import app.thelasthit.nrt.PATCH_14
 import app.thelasthit.nrt.QUICKMIST
 import app.thelasthit.nrt.TestApp
 import app.thelasthit.nrt.TestApp.Companion.london
+import app.thelasthit.nrt.data.repo.ImportMode
 import app.thelasthit.nrt.data.repo.LogRequest
 import app.thelasthit.nrt.domain.agent.AgentAdviceAnswer
 import app.thelasthit.nrt.domain.agent.AgentLogAsk
@@ -132,15 +133,54 @@ class NrtAgentTest {
 
     @Test
     fun anAmbiguousProductListsItsCandidatesAndLogsNothing() {
-        val outcome = log(AgentLogAsk("nicorette gum", quantity = 2)) as? AgentLogOutcome.Ambiguous ?: failWith("not ambiguous")
+        val outcome = log(AgentLogAsk("two nicorette gums")) as? AgentLogOutcome.Ambiguous ?: failWith("not ambiguous")
         assertEquals(listOf(GUM_2, GUM_4), outcome.choices.map { it.product.id })
+        assertEquals(listOf(2, 2), outcome.choices.map { it.quantity })
         assertTrue(entriesToday().isEmpty())
         assertEquals(
-            "“nicorette gum” could be Nicorette gum 2\u00A0mg or Nicorette gum 4\u00A0mg. Nothing's saved yet. Which one?",
+            "“two nicorette gums” could be Nicorette gum 2\u00A0mg or Nicorette gum 4\u00A0mg. Nothing's saved yet. Which one?",
             text().ambiguous(outcome),
         )
-        // The agent asks, then logs the one chosen by its ID.
-        assertEquals(GUM_4, logged(AgentLogAsk(GUM_4, quantity = 2)).entry.productId)
+        // The agent asks, then logs the one chosen as the KDoc says: by its ID, with its quantity.
+        val chosen = outcome.choices.last().toCandidate(text())
+        val entry = logged(AgentLogAsk(chosen.product.id, quantity = chosen.quantity)).entry
+        assertEquals(GUM_4, entry.productId)
+        assertEquals(Dose.mg(8), entry.total)
+    }
+
+    @Test
+    fun aDoseAfterMidnightSaysWhichDayItCountsTowards() {
+        // 01:20 on Friday, logged at 15:05 on Friday, counts towards Thursday.
+        val outcome = logged(AgentLogAsk("2 mg gum", time = LocalDateTime.parse("2026-10-23T01:20")))
+        assertEquals(LocalDate.parse("2026-10-22"), outcome.entry.logicalDate)
+        assertEquals(
+            "Logged 2\u00A0mg of Nicorette gum at 01:20, which counts towards Thursday. Nothing logged today so far. " +
+                "This week so far: 2\u00A0mg. Last dose at 01:20, which counts towards Thursday.",
+            text().logged(outcome),
+        )
+
+        // On a day before today, it names the day it was taken as well.
+        app.clock.now = app.clock.now.plusSeconds(30)
+        val earlier = logged(AgentLogAsk("4 mg gum", time = LocalDateTime.parse("2026-10-22T02:10")))
+        assertTrue(
+            text().logged(earlier).startsWith("Logged 4\u00A0mg of Nicorette gum on Thu 22 Oct at 02:10, which counts towards Wednesday."),
+        )
+        val undone = runBlocking { agent.undoLast() } as? AgentUndoOutcome.Undone ?: failWith("nothing undone")
+        assertTrue(
+            text().undone(undone).startsWith("Deleted 4\u00A0mg of Nicorette gum, logged on Thu 22 Oct at 02:10, which counted towards Wednesday."),
+        )
+        val first = runBlocking { agent.undoLast() } as? AgentUndoOutcome.Undone ?: failWith("nothing undone")
+        assertTrue(text().undone(first).startsWith("Deleted 2\u00A0mg of Nicorette gum, logged at 01:20, which counted towards Thursday."))
+    }
+
+    @Test
+    fun aDoseAfterMidnightBeforeTheDayStartsIsToday() {
+        // At 02:00 on Saturday it's still Friday, so 01:00 and 23:30 are both today.
+        app.clock.now = london("2026-10-24T02:00")
+        val late = logged(AgentLogAsk("2 mg gum", time = LocalDateTime.parse("2026-10-24T01:00")))
+        assertTrue(text().logged(late).startsWith("Logged 2\u00A0mg of Nicorette gum at 01:00. 2\u00A0mg today so far"))
+        val evening = logged(AgentLogAsk("4 mg gum", time = LocalDateTime.parse("2026-10-23T23:30")))
+        assertTrue(text().logged(evening).startsWith("Logged 4\u00A0mg of Nicorette gum on Fri 23 Oct at 23:30. 6\u00A0mg today so far"))
     }
 
     @Test
@@ -230,6 +270,48 @@ class NrtAgentTest {
             "Nothing's been logged in the last 24\u00A0hours, so there's nothing to undo.",
             text().refusal(AgentRefusal.NothingToUndo),
         )
+    }
+
+    @Test
+    fun undoLeavesOutWhatARestoreBroughtBack() {
+        runBlocking {
+            app.graph.entries.log(LogRequest(GUM_2, at = london("2026-09-20T09:00")))
+            app.graph.entries.log(LogRequest(GUM_4, at = london("2026-10-01T09:00")))
+        }
+        val backup = runBlocking { app.graph.backups.export() }
+        app.clock.now = app.clock.now.plus(Duration.ofDays(2))
+        for (mode in ImportMode.entries) {
+            runBlocking { app.graph.backups.import(backup, mode) }
+            // A restore writes every entry at once, but none of them was just logged.
+            assertEquals(AgentUndoOutcome.Refused(AgentRefusal.NothingToUndo), runBlocking { agent.undoLast() })
+        }
+
+        app.clock.now = app.clock.now.plusSeconds(30)
+        val after = logged(AgentLogAsk("2 mg gum")).entry
+        val undone = runBlocking { agent.undoLast() } as? AgentUndoOutcome.Undone ?: failWith("nothing undone")
+        assertEquals(after.id, undone.entry.id)
+        assertEquals(AgentUndoOutcome.Refused(AgentRefusal.NothingToUndo), runBlocking { agent.undoLast() })
+        assertEquals(2, runBlocking { app.graph.entries.observeRange(LocalDate.parse("2026-09-01"), today.plusDays(2)).first() }.size)
+    }
+
+    @Test
+    fun adviceComesWithTheQuitlinesForTheUsersCountry() {
+        val answer = (runBlocking { agent.advice("strong_craving") } as AgentAnswer.Given).value
+        val advice = answer.toResponse(text())
+        assertEquals(
+            listOf("Smokefree National Helpline", "Quit Your Way Scotland", "Help Me Quit", "Local stop smoking services"),
+            advice.quitlines.map { it.name },
+        )
+        assertEquals("England", advice.quitlines.first().region)
+        assertEquals("0300 123 1044", advice.quitlines.first().phone)
+        assertEquals("https://www.stopsmokingni.info/ways-quit/local-help-and-support", advice.quitlines.last().web)
+        assertEquals("This is general information, not medical advice. For more help, call a free quitline.", advice.note)
+
+        // Where the app has no quitlines, it says nothing about them.
+        runBlocking { app.graph.settings.setCountry("FR") }
+        val elsewhere = (runBlocking { agent.advice("strong_craving") } as AgentAnswer.Given).value.toResponse(text())
+        assertTrue(elsewhere.quitlines.isEmpty())
+        assertEquals("This is general information, not medical advice.", elsewhere.note)
     }
 
     @Test

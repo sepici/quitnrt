@@ -34,8 +34,13 @@ class AgentAdviceTest {
         if (key == "custom_gaming") TagGroup.HABIT else BuiltInTags.find(key)?.group
     }
 
-    private fun answer(tag: String?, entries: List<app.thelasthit.nrt.domain.log.Entry> = emptyList(), forms: Set<ProductForm> = gum) =
-        when (val result = advice.pick(tag, tags, groupOf, entries, TODAY, forms)) {
+    private fun answer(
+        tag: String?,
+        entries: List<app.thelasthit.nrt.domain.log.Entry> = emptyList(),
+        forms: Set<ProductForm> = gum,
+        country: String? = null,
+    ) =
+        when (val result = advice.pick(tag, tags, groupOf, entries, TODAY, forms, country)) {
             is AgentAdviceResult.Answer -> result.answer
             is AgentAdviceResult.Refused -> fail("$tag was refused: ${result.reason}")
         }
@@ -93,6 +98,18 @@ class AgentAdviceTest {
         val few = daily("10:00", 4, tags = setOf("bored"))
         assertEquals(AgentAdviceAnswer(library.find("four_ds")!!, AgentAdviceAnswer.Reason.AnyTime), answer(null, few))
         assertEquals(AgentAdviceAnswer.Reason.AnyTime, answer(null).reason)
+    }
+
+    @Test
+    fun `it comes with the quitlines for the user's country, as PLAN's limits say`() {
+        val gb = answer("strong_craving", country = "GB").quitlines
+        assertEquals(library.quitlinesFor("GB"), gb)
+        assertEquals(listOf("England", "Scotland", "Wales", "Northern Ireland"), gb.map { it.region })
+        assertEquals("Smokefree National Helpline", gb.first().name)
+        assertEquals(library.quitlinesFor("IE"), answer(null, country = "ie").quitlines)
+        // Before a country is picked, or where the library has none.
+        assertEquals(emptyList<Any>(), answer("stressed").quitlines)
+        assertEquals(emptyList<Any>(), answer("stressed", country = "FR").quitlines)
     }
 
     @Test

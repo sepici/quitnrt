@@ -161,6 +161,9 @@ class BackupRepository(
         val gear = backup.gear.mapNotNull { unlock -> unlock.time()?.let { GearEntity(unlock.key, it) } }
         val sessions = backup.breathingSessions.mapNotNull { it.toEntity() }
 
+        // Every entry below is written at `now`, so an agent's undo needs to know where they stop.
+        // Set first, so a restore that fails halfway never leaves restored entries to undo.
+        settings.setRestoredAt(Instant.ofEpochMilli(now))
         val summary = database.withTransaction {
             val game = database.game()
             if (mode == ImportMode.REPLACE) {

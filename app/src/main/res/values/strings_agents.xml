@@ -28,11 +28,16 @@
     <!-- After logging, or a question before anything is saved. -->
     <string name="agents_logged">Logged %1$s\u00A0mg of %2$s at %3$s.</string>
     <string name="agents_logged_on">Logged %1$s\u00A0mg of %2$s on %3$s at %4$s.</string>
+    <!-- A dose after midnight that counts towards the day before, such as 01:20 on Friday counting towards Thursday. -->
+    <string name="agents_logged_counts_towards">Logged %1$s\u00A0mg of %2$s at %3$s, which counts towards %4$s.</string>
+    <string name="agents_logged_on_counts_towards">Logged %1$s\u00A0mg of %2$s on %3$s at %4$s, which counts towards %5$s.</string>
     <string name="agents_possible_duplicate">%1$s was logged at %2$s, within a minute of this one. Nothing\'s saved yet. Keep both?</string>
     <string name="agents_ambiguous_product">“%1$s” could be %2$s. Nothing\'s saved yet. Which one?</string>
     <string name="agents_list_or">%1$s or %2$s</string>
     <string name="agents_undone">Deleted %1$s\u00A0mg of %2$s, logged at %3$s.</string>
     <string name="agents_undone_on">Deleted %1$s\u00A0mg of %2$s, logged on %3$s at %4$s.</string>
+    <string name="agents_undone_counts_towards">Deleted %1$s\u00A0mg of %2$s, logged at %3$s, which counted towards %4$s.</string>
+    <string name="agents_undone_on_counts_towards">Deleted %1$s\u00A0mg of %2$s, logged on %3$s at %4$s, which counted towards %5$s.</string>
 
     <!-- The summary: today, the week, the last dose and the demon, a sentence each. -->
     <string name="agents_today_none">Nothing logged today so far.</string>
@@ -51,6 +56,8 @@
     <string name="agents_week_nrt_free">Week %1$d is NRT-free, with %2$s\u00A0mg logged so far.</string>
     <string name="agents_last_dose">Last dose at %1$s.</string>
     <string name="agents_last_dose_on">Last dose on %1$s at %2$s.</string>
+    <string name="agents_last_dose_counts_towards">Last dose at %1$s, which counts towards %2$s.</string>
+    <string name="agents_last_dose_on_counts_towards">Last dose on %1$s at %2$s, which counts towards %3$s.</string>
     <string name="agents_stage_baseline">The baseline is still being measured, so there\'s no daily guide yet.</string>
     <string name="agents_stage_complete">The programme is complete.</string>
     <string name="agents_demon">%1$s has %2$d of %3$d\u00A0HP.</string>
@@ -65,4 +72,5 @@
     <string name="agents_advice_any_time">There\'s too little logged in the last 14\u00A0days to know your triggers, so this is for any time.</string>
     <string name="agents_advice_timer">The app has a timer for this.</string>
     <string name="agents_advice_note">This is general information, not medical advice.</string>
+    <string name="agents_advice_note_quitlines">This is general information, not medical advice. For more help, call a free quitline.</string>
 </resources>

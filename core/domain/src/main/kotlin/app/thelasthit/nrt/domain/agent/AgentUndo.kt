@@ -10,12 +10,25 @@ import java.time.Instant
  *
  * The window keeps a misheard "undo" from deleting a dose from days ago without anyone seeing,
  * since nothing on screen offers it back. Older entries are deleted from History.
+ *
+ * A restore from backup writes every entry it brings in at the moment it runs, so those would
+ * all look just written, newest first by when they were taken. Nothing written at or before the
+ * last restore is undone: the restore is where undo stops, and a dose logged after it can still
+ * be undone.
  */
 object AgentUndo {
     val WINDOW: Duration = Duration.ofHours(24)
 
-    /** The earliest an entry can have been written, at [now], to be undone. */
-    fun since(now: Instant): Instant = now.minus(WINDOW)
+    /**
+     * The earliest an entry can have been written, at [now], to be undone: a day back, or just
+     * after [restoredAt], the last restore from backup, if that's later.
+     */
+    fun since(now: Instant, restoredAt: Instant? = null): Instant {
+        val dayBack = now.minus(WINDOW)
+        val afterRestore = restoredAt?.plusMillis(1) ?: return dayBack
+        return if (afterRestore.isAfter(dayBack)) afterRestore else dayBack
+    }
 
-    fun canUndo(writtenAt: Instant, now: Instant): Boolean = !writtenAt.isBefore(since(now))
+    fun canUndo(writtenAt: Instant, now: Instant, restoredAt: Instant? = null): Boolean =
+        !writtenAt.isBefore(since(now, restoredAt))
 }

@@ -98,7 +98,16 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         }
     }
 
+    /**
+     * When a backup was last restored, or null if none has been. A restore writes every entry it
+     * brings in at that moment, so an agent's undo leaves out everything written up to it.
+     */
+    suspend fun restoredAt(): Instant? = store.data.first()[RESTORED_AT]?.let(Instant::ofEpochMilli)
+
+    suspend fun setRestoredAt(at: Instant) = store.edit { it[RESTORED_AT] = at.toEpochMilli() }
+
     companion object {
+        private val RESTORED_AT = longPreferencesKey("restored_at")
         private val DAY_START_MINUTES = intPreferencesKey("day_start_minutes")
         private val COUNTRY = stringPreferencesKey("country")
         private val DISCLAIMER_ACCEPTED_AT = longPreferencesKey("disclaimer_accepted_at")

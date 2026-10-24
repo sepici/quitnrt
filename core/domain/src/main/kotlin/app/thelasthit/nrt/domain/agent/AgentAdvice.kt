@@ -2,6 +2,7 @@ package app.thelasthit.nrt.domain.agent
 
 import app.thelasthit.nrt.domain.advice.AdviceLibrary
 import app.thelasthit.nrt.domain.advice.AdviceMatcher
+import app.thelasthit.nrt.domain.advice.Quitline
 import app.thelasthit.nrt.domain.advice.Strategy
 import app.thelasthit.nrt.domain.advice.TopTrigger
 import app.thelasthit.nrt.domain.advice.TopTriggers
@@ -13,8 +14,11 @@ import app.thelasthit.nrt.domain.matcher.TagMatcher
 import app.thelasthit.nrt.domain.product.ProductForm
 import java.time.LocalDate
 
-/** The strategy `getNrtAdvice` gives an agent, and why it's the one. */
-data class AgentAdviceAnswer(val strategy: Strategy, val reason: Reason) {
+/**
+ * The strategy `getNrtAdvice` gives an agent, and why it's the one. [quitlines] are the free lines
+ * for the user's country, since the advice points to them for help beyond it (PLAN §9, Limits).
+ */
+data class AgentAdviceAnswer(val strategy: Strategy, val reason: Reason, val quitlines: List<Quitline> = emptyList()) {
     sealed interface Reason {
         /** The agent asked about the tag [key]. */
         data class AskedTag(val key: String) : Reason
@@ -50,9 +54,25 @@ class AgentAdvice(private val library: AdviceLibrary, private val matcher: Advic
      * [tag] is a tag key or name, or null for the top trigger. [tags] finds it, and [groupOf]
      * gives a tag's group. [entries] cover at least the advice window before [today], and
      * [forms] are the forms of the products someone uses, so advice about gum goes to people who
-     * use gum.
+     * use gum. [country] is the user's, an ISO code such as "GB", for the quitlines.
      */
     fun pick(
+        tag: String?,
+        tags: TagMatcher,
+        groupOf: (String) -> TagGroup?,
+        entries: List<Entry>,
+        today: LocalDate,
+        forms: Set<ProductForm>,
+        country: String? = null,
+    ): AgentAdviceResult = when (val result = choose(tag, tags, groupOf, entries, today, forms)) {
+        is AgentAdviceResult.Answer -> AgentAdviceResult.Answer(result.answer.copy(quitlines = quitlinesFor(country)))
+        is AgentAdviceResult.Refused -> result
+    }
+
+    /** The quitlines for [country], or none when it isn't known yet. */
+    fun quitlinesFor(country: String?): List<Quitline> = country?.let(library::quitlinesFor).orEmpty()
+
+    private fun choose(
         tag: String?,
         tags: TagMatcher,
         groupOf: (String) -> TagGroup?,

@@ -1,6 +1,7 @@
 package app.thelasthit.nrt.agents
 
 import android.content.res.Resources
+import androidx.annotation.StringRes
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.domain.agent.AgentAdviceAnswer
 import app.thelasthit.nrt.domain.agent.AgentLogReader
@@ -15,9 +16,11 @@ import app.thelasthit.nrt.ui.format.labelNoteText
 import app.thelasthit.nrt.ui.format.mgText
 import app.thelasthit.nrt.ui.format.plural
 import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -67,7 +70,7 @@ class AgentText(
 
     /** "Logged 2 mg of Nicorette gum at 15:05.", the pack-limit note if there is one, and the summary. */
     fun logged(outcome: AgentLogOutcome.Logged): String = sentences(
-        at(outcome.entry.occurredAt, R.string.agents_logged, R.string.agents_logged_on, outcome.entry.total.mgText(), shortName(outcome.entry)),
+        taken(outcome.entry, outcome.summary.today, LOGGED, outcome.entry.total.mgText(), shortName(outcome.entry)),
         outcome.warning?.let(resources::labelNoteText),
         summary(outcome.summary),
     )
@@ -80,7 +83,7 @@ class AgentText(
         resources.getString(R.string.agents_ambiguous_product, outcome.text, orList(outcome.choices.map { productLabel(it.product) }))
 
     fun undone(outcome: AgentUndoOutcome.Undone): String = sentences(
-        at(outcome.entry.occurredAt, R.string.agents_undone, R.string.agents_undone_on, outcome.entry.total.mgText(), shortName(outcome.entry)),
+        taken(outcome.entry, outcome.summary.today, UNDONE, outcome.entry.total.mgText(), shortName(outcome.entry)),
         summary(outcome.summary),
     )
 
@@ -88,7 +91,7 @@ class AgentText(
     fun summary(summary: AgentSummary): String = sentences(
         today(summary),
         week(summary),
-        summary.lastDose?.let { at(it.occurredAt, R.string.agents_last_dose, R.string.agents_last_dose_on) },
+        summary.lastDose?.let { taken(it, summary.today, LAST_DOSE) },
         when (summary.stage) {
             PlanStage.BASELINE -> resources.getString(R.string.agents_stage_baseline)
             PlanStage.COMPLETE -> resources.getString(R.string.agents_stage_complete)
@@ -117,7 +120,9 @@ class AgentText(
 
     fun adviceTimer(): String = resources.getString(R.string.agents_advice_timer)
 
-    fun adviceNote(): String = resources.getString(R.string.agents_advice_note)
+    /** General information, not medical advice, and a free quitline for more help when there is one. */
+    fun adviceNote(withQuitlines: Boolean): String =
+        resources.getString(if (withQuitlines) R.string.agents_advice_note_quitlines else R.string.agents_advice_note)
 
     /** "Nicorette gum 2 mg": the short name and the strength on the pack (a cartridge, for the inhalator). */
     fun productLabel(product: UserProduct): String =
@@ -155,15 +160,38 @@ class AgentText(
         }
     }
 
-    /** [today] with the time, or [otherDay] with the date and time when it's another day. */
-    private fun at(instant: Instant, today: Int, otherDay: Int, vararg before: Any): String {
-        val local = LocalDateTime.ofInstant(instant, zone())
-        return if (local.toLocalDate() == LocalDateTime.ofInstant(now(), zone()).toLocalDate()) {
-            resources.getString(today, *before, timeFormat.format(local))
-        } else {
-            resources.getString(otherDay, *before, ShortDateFormatter.format(local), timeFormat.format(local))
+    /**
+     * When [entry] was taken, in [words] after [before]: the time when it was taken today, and the
+     * date too when it was another day, on the clock where it was logged. A dose that counts
+     * towards a day other than the one it was taken on, such as one at 01:20 before the day
+     * starts, also says which day it counts towards, unless that's [today], the logical day the
+     * summary beside it calls today.
+     */
+    private fun taken(entry: Entry, today: LocalDate, words: TakenWords, vararg before: Any): String {
+        val local = LocalDateTime.ofInstant(entry.occurredAt, entry.zone)
+        val time = timeFormat.format(local)
+        val named = local.toLocalDate() != LocalDateTime.ofInstant(now(), entry.zone).toLocalDate()
+        val countsTowards = entry.logicalDate
+            .takeIf { entry.countsTowardEveningBefore && it != today }
+            ?.dayOfWeek?.getDisplayName(TextStyle.FULL, Locale.UK)
+        return when {
+            countsTowards == null && !named -> resources.getString(words.at, *before, time)
+            countsTowards == null -> resources.getString(words.on, *before, ShortDateFormatter.format(local), time)
+            !named -> resources.getString(words.atCountsTowards, *before, time, countsTowards)
+            else -> resources.getString(words.onCountsTowards, *before, ShortDateFormatter.format(local), time, countsTowards)
         }
     }
+
+    /**
+     * The four ways a sentence says when a dose was taken: at a time today, on a date, and each
+     * with the day it counts towards.
+     */
+    private class TakenWords(
+        @StringRes val at: Int,
+        @StringRes val on: Int,
+        @StringRes val atCountsTowards: Int,
+        @StringRes val onCountsTowards: Int,
+    )
 
     /** "a, b or c". */
     private fun orList(items: List<String>): String = when (items.size) {
@@ -173,4 +201,25 @@ class AgentText(
     }
 
     private fun sentences(vararg parts: String?): String = parts.filterNotNull().joinToString(" ")
+
+    private companion object {
+        val LOGGED = TakenWords(
+            R.string.agents_logged,
+            R.string.agents_logged_on,
+            R.string.agents_logged_counts_towards,
+            R.string.agents_logged_on_counts_towards,
+        )
+        val UNDONE = TakenWords(
+            R.string.agents_undone,
+            R.string.agents_undone_on,
+            R.string.agents_undone_counts_towards,
+            R.string.agents_undone_on_counts_towards,
+        )
+        val LAST_DOSE = TakenWords(
+            R.string.agents_last_dose,
+            R.string.agents_last_dose_on,
+            R.string.agents_last_dose_counts_towards,
+            R.string.agents_last_dose_on_counts_towards,
+        )
+    }
 }

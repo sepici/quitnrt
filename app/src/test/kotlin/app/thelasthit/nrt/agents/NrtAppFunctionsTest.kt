@@ -147,12 +147,56 @@ class NrtAppFunctionsTest {
         assertEquals(TestApp.london("2026-10-23T14:30"), saved.occurredAt)
     }
 
+    private fun AppFunctionData.product(): AppFunctionData = requireNotNull(getAppFunctionData("product"))
+
+    /** The call the KDoc asks for once the user picks a candidate: its product's ID and its quantity. */
+    private fun logCandidate(candidate: AppFunctionData): AppFunctionData = result(
+        call("logNrtUsage") {
+            setString("productDescription", requireNotNull(candidate.product().getString("id")))
+            setInt("quantity", candidate.getInt("quantity"))
+        },
+    )
+
     @Test
     fun anAmbiguousProductReturnsItsCandidates() {
         val result = result(call("logNrtUsage") { setString("productDescription", "nicorette gum") })
         assertFalse(result.getBoolean("saved"))
-        assertEquals(listOf(GUM_2, GUM_4), result.getAppFunctionDataList("candidates")!!.map { it.getString("id") })
+        val candidates = result.getAppFunctionDataList("candidates")!!
+        assertEquals(listOf(GUM_2, GUM_4), candidates.map { it.product().getString("id") })
+        assertEquals(listOf(1, 1), candidates.map { it.getInt("quantity") })
         assertTrue(entriesToday().isEmpty())
+    }
+
+    @Test
+    fun aCandidateLoggedAsTheKdocSaysKeepsTheCountFromTheDescription() {
+        val asked = result(call("logNrtUsage") { setString("productDescription", "two nicorette gums") })
+        val candidates = asked.getAppFunctionDataList("candidates")!!
+        assertEquals(listOf(GUM_2, GUM_4), candidates.map { it.product().getString("id") })
+        assertEquals(listOf(2, 2), candidates.map { it.getInt("quantity") })
+
+        val entry = requireNotNull(logCandidate(candidates.last()).getAppFunctionData("entry"))
+        assertEquals(GUM_4, entry.getString("productId"))
+        assertEquals(2, entry.getInt("quantity"))
+        assertEquals(8000L, entry.getLong("totalMicrograms"))
+    }
+
+    @Test
+    fun aCandidateLoggedAsTheKdocSaysKeepsTheInhalatorsUnit() {
+        runBlocking {
+            app.graph.products.addFromCatalogue(INHALATOR_10)
+            app.graph.products.addFromCatalogue(INHALATOR_15)
+        }
+        val asked = result(call("logNrtUsage") { setString("productDescription", "inhalator cartridge") })
+        val candidates = asked.getAppFunctionDataList("candidates")!!
+        assertEquals(listOf(INHALATOR_10, INHALATOR_15), candidates.map { it.product().getString("id") })
+        assertEquals(listOf("session", "session"), candidates.map { it.product().getString("unit") })
+        // A cartridge is 8 sessions on an inhalator logged by session.
+        assertEquals(listOf(8, 8), candidates.map { it.getInt("quantity") })
+
+        val entry = requireNotNull(logCandidate(candidates.last()).getAppFunctionData("entry"))
+        assertEquals(INHALATOR_15, entry.getString("productId"))
+        assertEquals(8, entry.getInt("quantity"))
+        assertEquals(15000L, entry.getLong("totalMicrograms"))
     }
 
     @Test
@@ -185,6 +229,10 @@ class NrtAppFunctionsTest {
         val advice = result(call("getNrtAdvice") { setString("tag", "Bored") })
         assertEquals("busy_hands", advice.getString("key"))
         assertEquals("bored", advice.getString("tag"))
+        val quitlines = advice.getAppFunctionDataList("quitlines")!!
+        assertEquals(listOf("England", "Scotland", "Wales", "Northern Ireland"), quitlines.map { it.getString("region") })
+        assertEquals("0300 123 1044", quitlines.first().getString("phone"))
+        assertTrue(advice.getString("note")!!.endsWith("For more help, call a free quitline."))
 
         val undone = result(call("undoLastNrtEntry"))
         assertEquals(GUM_2, undone.getAppFunctionData("deleted")!!.getString("productId"))
@@ -194,5 +242,9 @@ class NrtAppFunctionsTest {
 
     private companion object {
         const val ID = "app.thelasthit.nrt.agents.NrtAppFunctions"
+
+        /** Two strengths of one inhalator, both logged by session, which "inhalator cartridge" can't tell apart. */
+        const val INHALATOR_10 = "generic-inhalator-10mg"
+        const val INHALATOR_15 = "generic-inhalator-15mg"
     }
 }

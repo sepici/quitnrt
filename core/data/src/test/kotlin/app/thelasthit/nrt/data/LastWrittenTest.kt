@@ -1,7 +1,9 @@
 package app.thelasthit.nrt.data
 
+import app.thelasthit.nrt.data.repo.ImportMode
 import app.thelasthit.nrt.data.repo.LogRequest
 import app.thelasthit.nrt.data.repo.LogResult
+import app.thelasthit.nrt.domain.agent.AgentUndo
 import app.thelasthit.nrt.domain.log.Entry
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -14,7 +16,10 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.time.Duration
 
-/** [app.thelasthit.nrt.data.repo.EntryRepository.lastWritten], which an agent's undo takes back. */
+/**
+ * [app.thelasthit.nrt.data.repo.EntryRepository.lastWritten], which an agent's undo takes back,
+ * and the restore time that keeps a restore's entries out of it.
+ */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
 class LastWrittenTest {
@@ -52,5 +57,29 @@ class LastWrittenTest {
         log(LogRequest(GUM_2))
         data.clock.advance(Duration.ofHours(25))
         assertNull(data.entries.lastWritten(since = dayAgo))
+    }
+
+    @Test
+    fun aRestoreSaysWhenItRanSoUndoCanLeaveOutWhatItWrote() = runTest {
+        assertNull(data.settings.restoredAt())
+        log(LogRequest(GUM_2, at = london("2026-09-20T09:00")))
+        log(LogRequest(GUM_4, at = london("2026-10-01T09:00")))
+        val backup = data.backups.export()
+        data.clock.advance(Duration.ofDays(2))
+
+        for (mode in ImportMode.entries) {
+            // For a merge, entries the phone doesn't have yet.
+            val restoring = if (mode == ImportMode.MERGE) backup.copy(entries = backup.entries.map { it.copy(id = it.id + "-merged") }) else backup
+            data.backups.import(restoring, mode)
+            val restoredAt = data.settings.restoredAt()
+            assertEquals(data.clock.now, restoredAt)
+            // Everything the restore wrote looks just written, the dose from 1 October first.
+            assertEquals(london("2026-10-01T09:00"), data.entries.lastWritten(since = dayAgo)?.occurredAt)
+            assertNull(data.entries.lastWritten(since = AgentUndo.since(data.clock.now, restoredAt)))
+            data.clock.advance(Duration.ofMinutes(1))
+        }
+
+        val after = log(LogRequest(GUM_2))
+        assertEquals(after.id, data.entries.lastWritten(since = AgentUndo.since(data.clock.now, data.settings.restoredAt()))?.id)
     }
 }

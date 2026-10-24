@@ -46,12 +46,15 @@ abstract class NrtAppFunctions : AppFunctionService() {
      * the app's own log sheet.
      *
      * Nothing is saved when the description fits more than one of the user's products: the result
-     * lists them as candidates, so ask which one and call again with its id. Nothing is saved
-     * either when the same product was logged less than a minute before or after, perhaps from the
-     * app's widget: possibleDuplicate is then true, so ask whether it's a second dose and call
-     * again with keepDuplicate set to true if it is. A product that matches nothing, a time that
-     * hasn't come yet, or a tag that names none of the user's tags is refused with a message that
-     * says why, and nothing is logged.
+     * lists them as candidates, each with the quantity it would log, so ask which one and call
+     * again with that candidate's product id as productDescription and its quantity as quantity.
+     * Nothing is saved either when the same product was logged less than a minute before or after
+     * from somewhere else in the app, such as its widget or log sheet: possibleDuplicate is then
+     * true, so ask whether it's a second dose and call again with keepDuplicate set to true if it
+     * is. That check doesn't cover doses this function logged, so each call logs a dose: if you
+     * aren't sure a call went through, check getNrtSummary before calling again. A product that
+     * matches nothing, a time that hasn't come yet, or a tag that names none of the user's tags is
+     * refused with a message that says why, and nothing is logged.
      *
      * @param productDescription The product in the user's words, such as "2mg nicotine gum", "two
      *   4 mg gums", "nicorette 4", "21mg patch", "two sprays of QuickMist" or "inhalator session",
@@ -104,7 +107,7 @@ abstract class NrtAppFunctions : AppFunctionService() {
                 entry = null,
                 possibleDuplicate = false,
                 duplicateOf = null,
-                candidates = outcome.choices.map { it.product.toResponse(text) },
+                candidates = outcome.choices.map { it.toCandidate(text) },
                 summary = null,
             )
             is AgentLogOutcome.Refused -> throw refusal(outcome.reason, text, logging = true)
@@ -146,8 +149,10 @@ abstract class NrtAppFunctions : AppFunctionService() {
     /**
      * Undoes the user's most recent NRT entry: the one logged last, from anywhere, as long as it
      * was logged in the last 24 hours. It goes by when the entry was logged, so a dose just logged
-     * with an earlier time is the one undone. Older entries are deleted in the app's History. Only
-     * call it when the user asks to undo or remove their last entry.
+     * with an earlier time is the one undone. Doses brought back from a backup weren't logged here,
+     * so they're never undone, and nor is anything logged before the restore. Older entries are
+     * deleted in the app's History. Only call it when the user asks to undo or remove their last
+     * entry.
      *
      * @return What was deleted, with the user's day and week now that it's gone.
      */
@@ -170,11 +175,12 @@ abstract class NrtAppFunctions : AppFunctionService() {
      * the trigger asked about, or else for the user's top trigger over the last 14 days. With too
      * little logged to know their triggers, it's the 4 Ds (delay, deep breaths, drink water, do
      * something else). The advice is general information, not medical advice, and never suggests
-     * taking more nicotine.
+     * taking more nicotine. It comes with the free quitlines for the user's country, to pass on
+     * when a craving is strong or keeps up, or the user wants more help.
      *
      * @param tag A trigger, as a tag name or key, such as "Stressed", "Bored" or "after_meal".
      *   Leave it out for the user's top trigger.
-     * @return The strategy, its steps, and why it's the one.
+     * @return The strategy, its steps, why it's the one, and the quitlines.
      */
     @AppFunctionDeclaration(isDescribedByKDoc = true)
     suspend fun getNrtAdvice(tag: String? = null): NrtAdvice {

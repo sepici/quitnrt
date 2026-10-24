@@ -124,16 +124,23 @@ class NrtAgent(
         return AgentAnswer.Given(summaryNow())
     }
 
-    /** Deletes the entry written last, if that was in the last day ([AgentUndo]). */
+    /**
+     * Deletes the entry written last, if that was in the last day and after the last restore from
+     * backup, which writes every entry it brings in at once ([AgentUndo]).
+     */
     suspend fun undoLast(): AgentUndoOutcome {
         if (!isSetUp()) return AgentUndoOutcome.Refused(AgentRefusal.NotSetUp)
-        val last = graph.entries.lastWritten(since = AgentUndo.since(graph.clock.instant()))
+        val since = AgentUndo.since(graph.clock.instant(), restoredAt = graph.settings.restoredAt())
+        val last = graph.entries.lastWritten(since = since)
             ?: return AgentUndoOutcome.Refused(AgentRefusal.NothingToUndo)
         graph.entries.delete(last.id)
         return AgentUndoOutcome.Undone(last, summaryNow())
     }
 
-    /** The best strategy for [tag], or for the top trigger of the last 14 days when it's null. */
+    /**
+     * The best strategy for [tag], or for the top trigger of the last 14 days when it's null, with
+     * the quitlines for the user's country.
+     */
     suspend fun advice(tag: String?): AgentAnswer<AgentAdviceAnswer> {
         notSetUp()?.let { return it }
         val today = graph.programmes.clock().today
@@ -141,8 +148,9 @@ class NrtAgent(
         val groups = tags.associate { it.key to it.group }
         val entries = graph.entries.observeRange(AdviceWindow.of(today).start, today).first()
         val forms = graph.products.all.first().map { it.form }.toSet()
+        val country = graph.settings.current().country
         val result = withContext(Dispatchers.Default) {
-            advice.pick(tag, TagMatcher(tags.map { TagName(it.key, tagNames(it)) }), groups::get, entries, today, forms)
+            advice.pick(tag, TagMatcher(tags.map { TagName(it.key, tagNames(it)) }), groups::get, entries, today, forms, country)
         }
         return when (result) {
             is AgentAdviceResult.Answer -> AgentAnswer.Given(result.answer)

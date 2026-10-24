@@ -23,18 +23,22 @@ Each is described by its KDoc, which the compiler turns into the descriptions th
 | `logNrtUsage(productDescription, quantity?, time?, tags = [], cravingStrength?, keepDuplicate = false)` | Logs a dose through the normal logging path with source `APP_FUNCTION`. Returns the entry, a message to read out, and the day and week after it. |
 | `listNrtProducts()` | The products that can be logged, quick-log ones first, with IDs, strengths and units. |
 | `getNrtSummary()` | Today's mg against the daily guide, the week against its allowance, the last dose, and the demon's HP and banked hits. |
-| `undoLastNrtEntry()` | Deletes the entry written last, if it was written in the last 24 hours. |
-| `getNrtAdvice(tag?)` | The best strategy for a trigger, or for the top trigger of the last 14 days, or the 4 Ds when too little is logged. |
+| `undoLastNrtEntry()` | Deletes the entry written last, if it was written in the last 24 hours and after the last restore from backup. |
+| `getNrtAdvice(tag?)` | The best strategy for a trigger, or for the top trigger of the last 14 days, or the 4 Ds when too little is logged, with the quitlines for the user's country. |
 
 How they behave:
 
 - **The description** goes through the same matcher as `lasthit://log` links, so "two 4 mg gums",
   "nicorette 4", "21mg patch" and a product's ID all work.
-- **An ambiguous product** saves nothing and returns `candidates`. The agent asks which, then calls
-  again with that product's `id`.
-- **The duplicate check** is the app's own: the same product logged within a minute from somewhere
-  else (the widget, say) saves nothing and sets `possibleDuplicate`. The agent asks, then calls
-  again with `keepDuplicate` set to true.
+- **An ambiguous product** saves nothing and returns `candidates`, each a product with the quantity
+  it would log in that product's own unit: "two nicorette gums" is 2 of either gum, and "inhalator
+  cartridge" is 8 sessions of either inhalator. The agent asks which, then calls again with that
+  candidate's product `id` as the description and its `quantity`, since an ID on its own logs one.
+- **The duplicate check** is the app's own (PLAN §4): the same product logged within a minute from
+  somewhere else (the widget, say) saves nothing and sets `possibleDuplicate`. The agent asks, then
+  calls again with `keepDuplicate` set to true. It doesn't cover the function's own logs, so an
+  agent that calls `logNrtUsage` twice, retrying after a timeout say, logs two doses. The KDoc
+  tells it to check `getNrtSummary` first when it isn't sure a call went through.
 - **Refusals** come back as the library's exceptions, with the app's own words from
   `strings_agents.xml`. A product that matches nothing, a time that hasn't come yet, an unknown tag,
   a quantity outside 1 to 99 and a craving strength outside 1 to 5 are invalid arguments. Every call
@@ -42,10 +46,17 @@ How they behave:
 - **The guide and the allowance** are ceilings. The summary gives each beside the total and says
   whether it's within, and never works out what's "left", which would read as an amount to take.
 - **Advice** never suggests taking more: it only comes from the bundled library, which is held to
-  that, and the advice for after a slip is left out.
+  that, and the advice for after a slip is left out. It's general information, not medical advice,
+  and it comes with the free quitlines for the user's country from the same library, as PLAN §9
+  asks, so an agent can pass one on when a craving is strong or the user wants more help.
 - **Undo** goes by when an entry was written, so "log a gum at 3 pm yesterday" then "undo that"
   takes back the backdated one. It stops at 24 hours, so a misheard "undo" can't delete a dose from
-  days ago that nothing on screen offers back.
+  days ago that nothing on screen offers back. A restore from backup writes every entry it brings
+  in at the moment it runs, so undo also stops at the last restore (`SettingsStore.restoredAt`):
+  nothing restored, and nothing logged before it, is undone, and a dose logged after it is.
+- **Days** are the app's logical days. A dose at 01:20 on Friday, before the day starts, counts
+  towards Thursday, and the words sent back say so ("Logged 2 mg of Nicorette gum at 01:20, which
+  counts towards Thursday."), so they agree with the summary beside them.
 - **Times** an agent sends are on the phone's clock. Times sent back are on the clock where each
   dose was logged.
 
@@ -65,7 +76,7 @@ the agent on using the functions together (`res/xml/app_functions_metadata.xml`)
 The compiler also writes `assets/nrt_app_functions.xml`, the list the system indexes. Function IDs
 are `app.thelasthit.nrt.agents.NrtAppFunctions#<name>`.
 
-Tests: `AgentLogReaderTest`, `AgentSummaryTest` and `AgentAdviceTest` in the domain,
+Tests: `AgentLogReaderTest`, `AgentSummaryTest`, `AgentAdviceTest` and `AgentUndoTest` in the domain,
 `LastWrittenTest` in the data layer, `NrtAgentTest` for the functions on the app's data, and
 `NrtAppFunctionsTest`, which calls them through the library's own test rule on Robolectric's
 Android 16.

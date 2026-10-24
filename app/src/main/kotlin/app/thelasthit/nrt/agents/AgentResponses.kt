@@ -3,6 +3,7 @@ package app.thelasthit.nrt.agents
 import androidx.appfunctions.AppFunctionSerializable
 import app.thelasthit.nrt.domain.advice.Interactive
 import app.thelasthit.nrt.domain.agent.AgentAdviceAnswer
+import app.thelasthit.nrt.domain.agent.AgentLogRequest
 import app.thelasthit.nrt.domain.agent.AgentSummary
 import app.thelasthit.nrt.domain.log.Entry
 import app.thelasthit.nrt.domain.product.UserProduct
@@ -113,6 +114,19 @@ class NrtSummary(
     val bankedHits: Int?,
 )
 
+/** A product a description could mean, and what logging it would log. */
+@AppFunctionSerializable(isDescribedByKDoc = true)
+class NrtCandidate(
+    /** The product. Its id goes to logNrtUsage as productDescription. */
+    val product: NrtProduct,
+    /**
+     * How many to log if it's this product, in the product's own unit: "two gums" is 2, and an
+     * inhalator cartridge is 8 on an inhalator logged by session. Pass it to logNrtUsage as
+     * quantity, since the product's id on its own logs one.
+     */
+    val quantity: Int,
+)
+
 /** What came of logNrtUsage. */
 @AppFunctionSerializable(isDescribedByKDoc = true)
 class NrtLogResult(
@@ -124,18 +138,21 @@ class NrtLogResult(
     val entry: NrtEntry?,
     /**
      * True when nothing was saved because the same product was logged less than a minute before
-     * or after, perhaps from the widget. Ask the user whether it's a second dose, and if it is,
-     * call logNrtUsage again with keepDuplicate set to true.
+     * or after from somewhere else in the app, such as the widget or the log sheet. Ask the user
+     * whether it's a second dose, and if it is, call logNrtUsage again with keepDuplicate set to
+     * true. Doses logNrtUsage logged itself aren't checked, so calling it twice logs two doses.
      */
     val possibleDuplicate: Boolean,
     /** The dose already logged, when possibleDuplicate is true. */
     val duplicateOf: NrtEntry?,
     /**
      * When the description fits more than one product, nothing was saved and these are the
-     * products it could mean, most likely first. Ask the user which, then call logNrtUsage again
-     * with that product's id as productDescription.
+     * products it could mean, most likely first, each with the quantity it would log. Ask the
+     * user which, then call logNrtUsage again with that candidate's product id as
+     * productDescription and its quantity as quantity, and the same time, tags and craving
+     * strength.
      */
-    val candidates: List<NrtProduct>,
+    val candidates: List<NrtCandidate>,
     /** The user's day and week after this dose, when saved is true. */
     val summary: NrtSummary?,
 )
@@ -170,8 +187,30 @@ class NrtAdvice(
     val hasTimer: Boolean,
     /** Where the advice comes from, such as "NHS: Quit smoking". */
     val sources: List<String>,
-    /** To pass on with it: it's general information, not medical advice. */
+    /**
+     * To pass on with it: it's general information, not medical advice, and where there are
+     * quitlines, that a free one can help.
+     */
     val note: String,
+    /**
+     * The free quitlines for the user's country, for help beyond this advice. Pass on the one for
+     * where the user lives, by name and number or site, when the craving is strong or keeps up,
+     * withdrawal is hard, or the user asks for more help. Empty where the app has none.
+     */
+    val quitlines: List<NrtQuitline>,
+)
+
+/** A free line for help with stopping, from public health guidance. */
+@AppFunctionSerializable(isDescribedByKDoc = true)
+class NrtQuitline(
+    /** Its name, such as "Smokefree National Helpline". */
+    val name: String,
+    /** The part of the country it's for, such as "Scotland", or null for the whole country. */
+    val region: String?,
+    /** Its phone number, as the service writes it, or null when it only has a site. */
+    val phone: String?,
+    /** Its site, a full https address, or null when it only has a number. */
+    val web: String?,
 )
 
 /** A form or unit as the functions name it: lower case, as in the KDoc lists. */
@@ -237,6 +276,10 @@ internal fun AgentAdviceAnswer.toResponse(text: AgentText): NrtAdvice {
         tag = tag,
         hasTimer = timer == Interactive.BREATHING_TIMER || timer == Interactive.DELAY_TIMER,
         sources = strategy.sources.map { "${it.publisher}: ${it.title}" },
-        note = text.adviceNote(),
+        note = text.adviceNote(withQuitlines = quitlines.isNotEmpty()),
+        quitlines = quitlines.map { NrtQuitline(it.name, it.region, it.phone, it.web) },
     )
 }
+
+/** A candidate for an ambiguous product, with the quantity it would log in its own unit. */
+internal fun AgentLogRequest.toCandidate(text: AgentText) = NrtCandidate(product.toResponse(text), quantity)
