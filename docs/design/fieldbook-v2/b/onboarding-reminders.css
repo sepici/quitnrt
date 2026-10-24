@@ -1,0 +1,5 @@
+/* Fieldbook v2 B: the onboarding reminders step. Loads after screens.css and only adds to it. */
+
+/* The switch rows sit in the country step's card (.opts), with the Settings switch on the right. */
+.reminders .opt{min-height:72px}
+.reminders + .hint{margin-top:12px}

@@ -22,6 +22,7 @@ import app.thelasthit.nrt.ui.game.ChipPlayer
 import app.thelasthit.nrt.ui.settings.SettingsLinks
 import app.thelasthit.nrt.ui.settings.SettingsScreen
 import app.thelasthit.nrt.ui.theme.LastHitTheme
+import kotlin.concurrent.thread
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertFalse
@@ -78,8 +79,10 @@ class LairSettingsTest {
         // The tab's own words: Today's band behind it says "1 hit ready" too.
         val badge = hasContentDescription("Lair, 1 hit ready")
         compose.waitUntilExactlyOneExists(badge, timeoutMillis = 5_000)
-        runBlocking { app.graph.game.spendHit() }
+        // Spent off the main thread: blocking it would stop the work Room posts back to it, and hang.
+        val spending = thread { runBlocking { app.graph.game.spendHit() } }
         compose.waitUntilDoesNotExist(badge, timeoutMillis = 5_000)
+        spending.join()
     }
 
     @Test
