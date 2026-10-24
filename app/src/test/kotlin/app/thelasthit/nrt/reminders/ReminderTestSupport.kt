@@ -50,15 +50,18 @@ private val TestApp.shade: ShadowNotificationManager
 
 /**
  * The notifications this test's app put up. Robolectric keeps one shade for the whole run,
- * cleared as each test starts, so a notice that an earlier test's app posts late, from a thread
- * of its own, can land in a later test's shade. Each notice's tap intent is made with the app
- * that posted it, which tells them apart.
+ * cleared as each test starts. Each test's app stops its own work when the test ends
+ * ([TestApp.onTerminate]), so an earlier test's app shouldn't post into a later test's shade,
+ * and a notice whose tap intent was made with another app is left out in case one does.
+ *
+ * A notice with no tap intent is counted as this test's, so a check that a notice isn't there
+ * can't pass just because the notice lost its tap intent.
  */
 val TestApp.notifications: List<Notification>
     get() = shade.allNotifications.filter { it.isFrom(this) }
 
 private fun Notification.isFrom(app: TestApp): Boolean {
-    val madeWith = contentIntent?.let { shadowOf(it).savedContext } ?: return false
+    val madeWith = shadowOf(contentIntent ?: return true).savedContext
     return madeWith === app || madeWith.applicationContext === app
 }
 
