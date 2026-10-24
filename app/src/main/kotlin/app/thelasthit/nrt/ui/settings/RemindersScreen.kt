@@ -130,8 +130,9 @@ private enum class TimeField(val title: Int) {
 
 /**
  * Settings, Reminders (PLAN §13), in the Settings mockups' style: a switch for each reminder, the
- * check-in time and quiet hours. On Android 13 and newer, switching one on is when the app asks
- * for notifications; if they're off, a note says so with a way to allow them.
+ * check-in time and quiet hours. On Android 13 and newer, the first reminder switched on is when the
+ * app asks for notifications, unless set-up has asked already. While they're off, a note says so,
+ * and its link asks again where Android still lets it, or opens the phone's settings.
  */
 @Composable
 fun RemindersScreen(onBack: () -> Unit, viewModel: RemindersViewModel = graphViewModel { RemindersViewModel(it) }) {
@@ -166,9 +167,10 @@ fun RemindersScreen(onBack: () -> Unit, viewModel: RemindersViewModel = graphVie
             }
         }
 
+        // Only the first time: once asked, here or in set-up, asking again is left to the note's link.
         fun switch(reminder: Reminder, on: Boolean) {
             viewModel.set(reminder, on)
-            if (on && !canPost) allow()
+            if (on && !canPost && !current.marks.permissionAsked) allow()
         }
 
         Intro(stringResource(R.string.reminders_intro))
