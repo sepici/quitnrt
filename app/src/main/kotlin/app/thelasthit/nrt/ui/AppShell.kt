@@ -43,6 +43,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import app.thelasthit.nrt.R
+import app.thelasthit.nrt.ui.advice.AdviceRoutes
+import app.thelasthit.nrt.ui.advice.KeepScreenOnWhileTimersRun
+import app.thelasthit.nrt.ui.advice.advice
 import app.thelasthit.nrt.ui.history.HistoryScreen
 import app.thelasthit.nrt.ui.insights.InsightsScreen
 import app.thelasthit.nrt.ui.lair.LairScreen
@@ -99,7 +102,8 @@ fun AppShell() {
     val showMessage: (Int) -> Unit = { res -> shellScope.launch { snackbars.showSnackbar(resources.getString(res)) } }
     val colors = LastHit.colors
 
-    val inSettings = currentRoute?.startsWith(SettingsRoutes.MAIN) == true
+    // Settings and the advice pages hide the tab bar.
+    val hideTabs = currentRoute?.startsWith(SettingsRoutes.MAIN) == true || AdviceRoutes.isAdvice(currentRoute)
 
     Scaffold(
         containerColor = colors.bg,
@@ -109,7 +113,7 @@ fun AppShell() {
             }
         },
         bottomBar = {
-            if (!inSettings) BottomBar(currentRoute, navController)
+            if (!hideTabs) BottomBar(currentRoute, navController)
         },
     ) { padding ->
         val direction = LocalLayoutDirection.current
@@ -142,7 +146,10 @@ fun AppShell() {
             }
             composable(TopLevelDestination.Lair.route) { LairScreen() }
             settings(navController, snackbars, showMessage)
+            advice(navController)
         }
+        // A running timer keeps the screen on, whichever page is showing.
+        KeepScreenOnWhileTimersRun()
         // Links and shortcuts show their snackbar, question or sheet over whichever page is open.
         LinkHost(snackbars)
     }

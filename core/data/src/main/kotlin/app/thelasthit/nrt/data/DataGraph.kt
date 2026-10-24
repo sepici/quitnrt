@@ -11,6 +11,7 @@ import app.thelasthit.nrt.data.repo.ProductRepository
 import app.thelasthit.nrt.data.repo.ProgrammeRepository
 import app.thelasthit.nrt.data.repo.TagRepository
 import app.thelasthit.nrt.data.settings.SettingsStore
+import app.thelasthit.nrt.domain.advice.AdviceLibrary
 import app.thelasthit.nrt.domain.catalogue.Catalogue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +31,9 @@ class DataGraph(
     settingsStore: SettingsStore = SettingsStore(SettingsStore.createDataStore(context)),
 ) {
     val catalogue: Catalogue by lazy { Catalogue.bundled() }
+
+    /** The bundled advice, read on first use. */
+    val advice: AdviceLibrary by lazy { AdviceLibrary.bundled() }
     val settings: SettingsStore = settingsStore
     val products = ProductRepository(database.products(), catalogue = { catalogue }, clock = clock)
     val tags = TagRepository(database.tags())
