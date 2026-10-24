@@ -8,9 +8,12 @@ import java.time.LocalDate
  * A programme week as Insights' weekly view shows it (PLAN §10): what's logged on its days
  * against its allowance, and how it went: met, missed, or missed and caught up later.
  *
- * [total] is what's logged on its days now. A result stays as it came in (PLAN §6.4), so a dose
- * backdated into a met week can take its total over the allowance, and a delete can take a missed
- * week's under it. [changedSince] says so, so the week can say its result is the one that came in.
+ * [total] is the total its result was judged on, once that's in ([ProgrammeWeek.resultTotal]), so
+ * it always agrees with the result. A result stays as it came in (PLAN §6.4), and results that
+ * came in before the judged total was kept have only what's logged on their days now. A dose
+ * backdated into such a met week can take its total over the allowance, and a delete can take a
+ * missed week's under it. [changedSince] says so, so the week can say its result is the one that
+ * came in.
  */
 data class WeekReport(
     val week: ProgrammeWeek,
@@ -40,12 +43,16 @@ data class WeekReport(
 
     val against: AgainstGuide get() = AgainstGuide(total, allowance)
 
+    /** Whether [total] is the one the result was judged on, rather than what's logged now. */
+    val isJudgedTotal: Boolean get() = week.resultTotal != null
+
     /**
      * Whether the total is now on the other side of the allowance from the result that came in:
-     * a met week now over it, or a missed one (caught up or not) now within it.
+     * a met week now over it, or a missed one (caught up or not) now within it. Never for a week
+     * with its judged total, which always agrees with its result.
      */
     val changedSince: Boolean
-        get() = when (state) {
+        get() = !isJudgedTotal && when (state) {
             State.MET -> !against.isWithin
             State.MISSED, State.CAUGHT_UP -> against.isWithin
             State.RUNNING, State.WAITING -> false
@@ -78,7 +85,7 @@ data class WeekReport(
                 } else {
                     emptyList()
                 }
-                WeekReport(week, week.totalOf(entries), state, caughtUpBy, paidBack, backIfMet, programme.overtimeNumber(week))
+                WeekReport(week, week.shownTotal(entries), state, caughtUpBy, paidBack, backIfMet, programme.overtimeNumber(week))
             }
         }
     }

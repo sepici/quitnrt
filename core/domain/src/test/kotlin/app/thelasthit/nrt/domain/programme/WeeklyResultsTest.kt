@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class WeeklyResultsTest {
 
@@ -79,6 +80,38 @@ class WeeklyResultsTest {
         assertEquals(WeekResult.MET, later.programme.week(1).result)
         assertEquals(due.now, later.programme.week(1).resultAt)
         assertEquals(emptyList<EarnedHit>(), later.newHits)
+    }
+
+    @Test
+    fun `a result keeps the total it was judged on, once`() {
+        val entries = listOf(dose("2026-10-26T09:00", Dose.mg(100)), dose("2026-10-31T01:30", Dose.mg(30)))
+        assertEquals(null, programme.week(1).resultTotal)
+        val first = programme.settle(entries, due).programme
+        assertEquals(Dose.mg(130), first.week(1).resultTotal)
+        // A dose backdated into the week after its result leaves the total as it was judged.
+        val later = first.settle(entries + dose("2026-10-27T10:00", Dose.mg(20)), clockAt("2026-11-08T04:00")).programme
+        assertEquals(Dose.mg(130), later.week(1).resultTotal)
+        assertEquals(Dose.mg(130), later.week(1).shownTotal(entries + dose("2026-10-27T10:00", Dose.mg(20))))
+        assertEquals(Dose.ZERO, later.week(2).resultTotal)
+        assertEquals(null, later.week(3).resultTotal)
+    }
+
+    @Test
+    fun `a missed week keeps its total when it's caught up, and a repeat starts with none`() {
+        val played = play(programme, "xm")
+        assertEquals(WeekResult.CAUGHT_UP, played.programme.week(1).result)
+        assertEquals(Dose.mg(141), played.programme.week(1).resultTotal)
+        assertEquals(Dose.mg(126), played.programme.week(2).resultTotal)
+
+        val repeated = play(programme, "r").programme
+        assertEquals(Dose.mg(141), repeated.week(1).resultTotal)
+        assertEquals(WeekKind.REPEAT, repeated.week(2).kind)
+        assertEquals(null, repeated.week(2).resultTotal)
+    }
+
+    @Test
+    fun `only a week with its result in has a judged total`() {
+        assertThrows<IllegalArgumentException> { programme.week(1).copy(resultTotal = Dose.mg(10)) }
     }
 
     @Test

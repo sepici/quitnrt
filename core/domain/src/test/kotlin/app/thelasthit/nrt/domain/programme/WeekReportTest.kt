@@ -68,28 +68,66 @@ class WeekReportTest {
     }
 
     @Test
-    fun `a met week stays met when a dose is backdated into it, and says its total has changed`() {
+    fun `a met week shows the total it was judged on when a dose is backdated into it`() {
         // Week 1 met at exactly its 140 mg, then a forgotten 20 mg dose logged on its last day.
         val played = play(programme, "m")
         val week = played.programme.week(1)
         val backdated = played.entries + dose(week.endDate.atTime(21, 0), Dose.mg(20))
         val report = WeekReport.of(played.programme, backdated, week.endDate.plusDays(3)).first()
         assertEquals(WeekReport.State.MET, report.state)
-        assertEquals(Dose.mg(160), report.total)
-        assertTrue(report.changedSince)
-
-        assertFalse(WeekReport.of(played.programme, played.entries, week.endDate.plusDays(3)).first().changedSince)
+        assertEquals(Dose.mg(140), report.total)
+        assertTrue(report.isJudgedTotal)
+        assertFalse(report.changedSince)
     }
 
     @Test
-    fun `a missed week stays missed when its doses are deleted, and says its total has changed`() {
+    fun `a missed week shows the total it was judged on when its doses are deleted`() {
         val played = play(programme, "mx")
         val missed = played.programme.week(2)
         val left = played.entries.filterNot { it.logicalDate in missed }
         val reports = WeekReport.of(played.programme, left, played.programme.week(3).startDate)
         assertEquals(WeekReport.State.MISSED, reports[1].state)
+        assertEquals(Dose.mg(127), reports[1].total)
+        assertEquals(listOf(true, true, false), reports.map { it.isJudgedTotal })
+        assertEquals(listOf(false, false, false), reports.map { it.changedSince })
+    }
+
+    @Test
+    fun `a caught-up week keeps the total it was missed on`() {
+        val played = play(programme, "xm")
+        val reports = WeekReport.of(played.programme, played.entries.drop(1), played.programme.week(3).startDate)
+        assertEquals(WeekReport.State.CAUGHT_UP, reports[0].state)
+        assertEquals(Dose.mg(141), reports[0].total)
+        assertFalse(reports[0].changedSince)
+    }
+
+    /** [played] as stored before the judged totals were kept: results with no total. */
+    private fun withoutTotals(played: Programme) = played.copy(weeks = played.weeks.map { it.copy(resultTotal = null) })
+
+    @Test
+    fun `a met week from before totals were kept says its total has changed when a dose is backdated into it`() {
+        val played = play(programme, "m")
+        val stored = withoutTotals(played.programme)
+        val week = stored.week(1)
+        val backdated = played.entries + dose(week.endDate.atTime(21, 0), Dose.mg(20))
+        val report = WeekReport.of(stored, backdated, week.endDate.plusDays(3)).first()
+        assertEquals(WeekReport.State.MET, report.state)
+        assertEquals(Dose.mg(160), report.total)
+        assertFalse(report.isJudgedTotal)
+        assertTrue(report.changedSince)
+
+        assertFalse(WeekReport.of(stored, played.entries, week.endDate.plusDays(3)).first().changedSince)
+    }
+
+    @Test
+    fun `a missed week from before totals were kept says its total has changed when its doses are deleted`() {
+        val played = play(programme, "mx")
+        val stored = withoutTotals(played.programme)
+        val missed = stored.week(2)
+        val left = played.entries.filterNot { it.logicalDate in missed }
+        val reports = WeekReport.of(stored, left, stored.week(3).startDate)
+        assertEquals(WeekReport.State.MISSED, reports[1].state)
         assertEquals(Dose.ZERO, reports[1].total)
-        assertTrue(reports[1].changedSince)
         assertEquals(listOf(false, true, false), reports.map { it.changedSince })
     }
 

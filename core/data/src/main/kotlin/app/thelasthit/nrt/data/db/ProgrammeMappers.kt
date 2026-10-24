@@ -14,6 +14,7 @@ import app.thelasthit.nrt.domain.programme.ProgrammeWeek
 import app.thelasthit.nrt.domain.programme.UsualDay
 import app.thelasthit.nrt.domain.programme.WeekChoice
 import app.thelasthit.nrt.domain.programme.WeekGoals
+import app.thelasthit.nrt.domain.programme.WeekResult
 import app.thelasthit.nrt.domain.programme.WeekTarget
 import app.thelasthit.nrt.domain.product.UserProduct
 import java.time.Instant
@@ -75,6 +76,7 @@ internal fun Programme.toWeekEntities(programmeId: String, choices: Map<Int, Wee
             resultAt = week.resultAt?.toEpochMilli(),
             choice = choice?.choice,
             choiceAt = choice?.at?.toEpochMilli(),
+            resultTotalMicrograms = week.resultTotal?.micrograms,
         )
     }
     val unitRows = weeks.flatMap { week ->
@@ -136,6 +138,9 @@ internal fun ProgrammeWithParts.toRecord(products: Map<String, UserProduct>): Pr
                 kind = week.kind,
                 result = week.result,
                 resultAt = week.resultAt?.let(Instant::ofEpochMilli),
+                // Only a result has a total, so a total on a week still to come, or one below
+                // nothing, is read as none, as for a result from before totals were kept.
+                resultTotal = week.resultTotalMicrograms?.takeIf { it >= 0 && week.result != WeekResult.PENDING }?.let(::Dose),
                 goals = WeekGoals(
                     maxUnitsPerDay = caps[week.number].orEmpty().associate { it.productId to it.maxUnitsPerDay },
                     minGapMinutes = week.minGapMinutes,

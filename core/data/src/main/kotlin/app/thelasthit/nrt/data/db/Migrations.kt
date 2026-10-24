@@ -36,6 +36,24 @@ object Migrations {
         }
     }
 
+    /**
+     * Version 4: each week keeps the total its result was judged on, written once when the result
+     * comes in. Results already in have no total kept, so the column starts null for every week.
+     */
+    val FROM_3_TO_4 = object : Migration(3, 4) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            FROM_3_TO_4_SQL.forEach(db::execSQL)
+        }
+
+        override fun migrate(connection: SQLiteConnection) {
+            FROM_3_TO_4_SQL.forEach(connection::execSQL)
+        }
+    }
+
+    internal val FROM_3_TO_4_SQL = listOf(
+        "ALTER TABLE `programme_weeks` ADD COLUMN `resultTotalMicrograms` INTEGER",
+    )
+
     internal val FROM_2_TO_3_SQL = listOf(
         "CREATE TABLE IF NOT EXISTS `programme_week_caps` (`programmeId` TEXT NOT NULL, `weekNumber` INTEGER NOT NULL, `productId` TEXT NOT NULL, `maxUnitsPerDay` INTEGER NOT NULL, PRIMARY KEY(`programmeId`, `weekNumber`, `productId`), FOREIGN KEY(`programmeId`, `weekNumber`) REFERENCES `programme_weeks`(`programmeId`, `number`) ON UPDATE NO ACTION ON DELETE CASCADE )",
     )

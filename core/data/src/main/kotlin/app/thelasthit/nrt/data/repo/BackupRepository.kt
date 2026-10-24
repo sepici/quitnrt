@@ -379,6 +379,7 @@ private fun ProgrammeWithParts.toBackup(): Backup.Programme {
                 units = mixes[week.number].orEmpty().map { it.units.toBackup() }.sortedBy { it.productId },
                 result = week.result,
                 resultAt = week.resultAt?.instantText(),
+                resultTotalMicrograms = week.resultTotalMicrograms,
                 choice = week.choice,
                 choiceAt = week.choiceAt?.instantText(),
                 caps = caps[week.number].orEmpty().map { Backup.Cap(it.productId, it.maxUnitsPerDay) }.sortedBy { it.productId },
@@ -425,6 +426,7 @@ private fun Backup.Programme.toParts(): ProgrammeWithParts? = runCatching {
                 firstDoseNotBeforeMinuteOfDay = week.firstDoseNotBefore?.let { LocalTime.parse(it) }?.let { it.hour * 60 + it.minute },
                 result = week.result, resultAt = week.resultAt?.let(::epochMillis),
                 choice = week.choice, choiceAt = week.choiceAt?.let(::epochMillis),
+                resultTotalMicrograms = week.resultTotalMicrograms,
             )
         },
         weekUnits = weeks.flatMap { week -> week.units.map { ProgrammeWeekUnitEntity(id, week.number, it.toColumns()) } },

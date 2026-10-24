@@ -12,6 +12,7 @@ import app.thelasthit.nrt.data.db.AppDatabase
 import app.thelasthit.nrt.domain.log.EntryKind
 import app.thelasthit.nrt.domain.log.TagGroup
 import app.thelasthit.nrt.domain.product.ProductForm
+import app.thelasthit.nrt.domain.programme.WeekResult
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -63,6 +64,36 @@ class MigrationTest {
         } finally {
             close()
         }
+    }
+
+    /** The first row's first column of [sql], as text, or null when it's null. */
+    private fun SQLiteConnection.text(sql: String): String? {
+        val statement = prepare(sql)
+        try {
+            check(statement.step()) { "No rows for $sql" }
+            return if (statement.isNull(0)) null else statement.getText(0)
+        } finally {
+            statement.close()
+        }
+    }
+
+    /** A version 2 or 3 programme with week 1's result in, as met. */
+    private fun SQLiteConnection.fillProgrammeWithAResult() {
+        execSQL(
+            """
+            INSERT INTO programmes (id, status, createdAt, endedAt, baselineStartedOn, baselineStart, baselineEnd, baselineSource,
+                baselineMeasuredMicrograms, baselineDailyMicrograms, lengthWeeks, nrtFreeWeeks, startDate)
+            VALUES ('p1', 'ACTIVE', 1761200000000, NULL, NULL, NULL, NULL, 'MANUAL', NULL, 32000, 12, 2, 20385)
+            """.trimIndent(),
+        )
+        execSQL(
+            """
+            INSERT INTO programme_weeks (programmeId, number, startDate, endDate, kind, ladderStep, dailyGuideMicrograms,
+                weeklyAllowanceMicrograms, isNrtFree, maxUnitsPerDay, minGapMinutes, firstDoseNotBeforeMinuteOfDay, result,
+                resultAt, choice, choiceAt)
+            VALUES ('p1', 1, 20385, 20391, 'PLANNED', 2, 24000, 168000, 0, NULL, 90, 540, 'MET', 1761969600000, NULL, NULL)
+            """.trimIndent(),
+        )
     }
 
     /** A version 1 phone: a product, a tagged dose, a deleted dose and the tag. */
@@ -155,6 +186,59 @@ class MigrationTest {
             assertNull(database.programmes().current())
             assertNull(database.game().currentDemon())
             assertEquals(0, database.breathing().completedCount())
+        }
+    }
+
+    // Version 4: the total a week's result was judged on.
+
+    @Test
+    fun version3ResultsSurviveWithNoJudgedTotal() {
+        helper.createDatabase(3).closing { it.fillProgrammeWithAResult() }
+
+        helper.runMigrationsAndValidate(4, AppDatabase.MIGRATIONS.toList()).closing { db ->
+            assertEquals(1L, db.count("programme_weeks"))
+            assertEquals("MET", db.text("SELECT result FROM programme_weeks WHERE number = 1"))
+            assertEquals("1761969600000", db.text("SELECT resultAt FROM programme_weeks WHERE number = 1"))
+            assertNull(db.text("SELECT resultTotalMicrograms FROM programme_weeks WHERE number = 1"))
+            db.execSQL("UPDATE programme_weeks SET resultTotalMicrograms = 150500 WHERE number = 1")
+            assertEquals("150500", db.text("SELECT resultTotalMicrograms FROM programme_weeks WHERE number = 1"))
+        }
+    }
+
+    @Test
+    fun version2ResultsReachVersion4WithNoJudgedTotal() {
+        helper.createDatabase(2).closing { it.fillProgrammeWithAResult() }
+
+        helper.runMigrationsAndValidate(4, AppDatabase.MIGRATIONS.toList()).closing { db ->
+            assertEquals(1L, db.count("programme_weeks"))
+            assertEquals(0L, db.count("programme_week_caps"))
+            assertEquals("90", db.text("SELECT minGapMinutes FROM programme_weeks WHERE number = 1"))
+            assertNull(db.text("SELECT resultTotalMicrograms FROM programme_weeks WHERE number = 1"))
+        }
+    }
+
+    @Test
+    fun version1ReachesVersion4() {
+        helper.createDatabase(1).closing { it.fillVersion1() }
+
+        helper.runMigrationsAndValidate(4, AppDatabase.MIGRATIONS.toList()).closing { db ->
+            assertEquals(1L, db.count("products"))
+            assertEquals(2L, db.count("entries"))
+            assertEquals(0L, db.count("programme_weeks"))
+            assertEquals(0L, db.count("programme_week_caps"))
+        }
+    }
+
+    @Test
+    fun theAppReadsAVersion3ResultWithNoJudgedTotal() {
+        helper.createDatabase(3).closing { it.fillProgrammeWithAResult() }
+
+        val database = Room.databaseBuilder(context, AppDatabase::class.java, name).addMigrations(*AppDatabase.MIGRATIONS).build()
+        helper.closeWhenFinished(database)
+        runBlocking {
+            val week = checkNotNull(database.programmes().current()).weeks.single()
+            assertEquals(WeekResult.MET, week.result)
+            assertNull(week.resultTotalMicrograms)
         }
     }
 }
