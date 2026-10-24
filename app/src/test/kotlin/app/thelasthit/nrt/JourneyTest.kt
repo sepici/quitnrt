@@ -1,9 +1,9 @@
 package app.thelasthit.nrt
 
 import android.os.Looper
-import androidx.activity.ComponentActivity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasAnyAncestor
@@ -31,12 +31,10 @@ import app.thelasthit.nrt.domain.game.Gear
 import app.thelasthit.nrt.domain.game.UnlockNews
 import app.thelasthit.nrt.domain.programme.ProgrammeStatus
 import app.thelasthit.nrt.domain.programme.WeekResult
-import app.thelasthit.nrt.ui.AppRoot
 import app.thelasthit.nrt.ui.PHONE
 import app.thelasthit.nrt.ui.game.BADGE_TOAST_MILLIS
 import app.thelasthit.nrt.ui.game.badgeName as badgeText
 import app.thelasthit.nrt.ui.game.gearName as gearText
-import app.thelasthit.nrt.ui.theme.LastHitTheme
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -60,6 +58,10 @@ import java.util.concurrent.CompletableFuture
  * At each week's result it checks that Today, the Plan tab, Insights, the lair's HP and the
  * badges tell the same story, so the game and the programme agree.
  *
+ * It runs the real [MainActivity], so the results and the badges come in as the app finds them
+ * itself: results as the app comes back or the minute ticks over, and badges from the unlock
+ * checks the activity follows while it's on screen. The test only waits for them to show.
+ *
  * The usual day is 6 pieces of 2 mg gum, 12 mg. Over 8 weeks that's 6 taper weeks of 5, 4, 3, 2,
  * 1 and 1 pieces a day (70, 56, 42, 28, 14 and 14 mg a week), then 2 NRT-free weeks: 8 hits on
  * Gary's 80 HP.
@@ -73,13 +75,15 @@ import java.util.concurrent.CompletableFuture
 class JourneyTest {
 
     @get:Rule
-    val compose = createAndroidComposeRule<ComponentActivity>()
+    val compose = createAndroidComposeRule<MainActivity>()
 
     private val app: TestApp = ApplicationProvider.getApplicationContext()
 
+    /** Every badge and piece of gear the toasts and cards have shown so far, by name. */
+    private val shown = mutableSetOf<String>()
+
     @Test
     fun `from set-up to a defeated demon and a rematch`() {
-        compose.setContent { LastHitTheme { AppRoot() } }
         try {
             setUp()
             baselineWeek()
@@ -123,21 +127,24 @@ class JourneyTest {
 
     /**
      * Friday 23 to Thursday 29 October, 6 pieces a day from the quick log and the log sheet,
-     * except Sunday, the day the clocks go back, with nothing logged.
+     * except Sunday, the day the clocks go back, with nothing logged. The first dose brings a
+     * badge, and so does the first on a third day.
      */
     private fun baselineWeek() {
         for (day in listOf(23, 24, 26, 27, 28, 29)) {
             if (day != 23) nextVisit("2026-10-${day}T20:00")
             waitFor("Nothing logged yet today")
             quickLog(expectTodayMg = 2)
+            when (day) {
+                23 -> drainUnlocks(listOf("First entry"))
+                26 -> drainUnlocks(listOf("Logged on 3\u00A0days"))
+            }
             quickLog(expectTodayMg = 4)
             logSheet(pieces = 4, expectTodayMg = 12)
             waitFor("3\u00A0doses so far")
         }
         assertEquals(18, entries().size)
-        // Six days with doses: the first badges come in.
-        val shown = drainUnlocks()
-        assertTrue("$shown", "First entry" in shown && "Logged on 3\u00A0days" in shown)
+        drainUnlocks()
     }
 
     /** Friday 30 October: the last 7 days are the baseline, kept as they are, and an 8-week plan starts tomorrow. */
@@ -164,7 +171,7 @@ class JourneyTest {
         assertEquals(LocalDate.parse("2026-10-23")..LocalDate.parse("2026-10-29"), record.baselineDays)
         assertEquals(listOf(70, 56, 42, 28, 14, 14, 0, 0).map { Dose.mg(it) }, checkNotNull(record.plan).weeks.map { it.target.weeklyAllowance })
         assertEquals(80, record.demon?.maxHp)
-        assertTrue("Baseline done" in drainUnlocks() + badgesEarned())
+        drainUnlocks(listOf("Baseline done"))
 
         tab("Today")
         waitFor("Your plan starts tomorrow.")
@@ -206,10 +213,10 @@ class JourneyTest {
 
         // A hit in the lair.
         tab("Lair")
-        waitForDescription("80 of 80 HP")
+        waitForHp(80)
         click("Hit")
         waitFor("Gary staggers.")
-        waitForDescription("70 of 80 HP")
+        waitForHp(70)
         waitFor("No hits banked")
         tab("Today")
         waitForDescription("Gary, 70 of 80 HP. Opens the lair.")
@@ -232,7 +239,8 @@ class JourneyTest {
         ).performScrollTo()
         assertEquals(WeekResult.MISSED, background { checkNotNull(app.graph.programmes.current()?.plan).week(2).result })
         // Nothing for the programme comes from a missed week.
-        assertTrue(drainUnlocks().none { it == "Back in step" || it == "3\u00A0weeks met" })
+        drainUnlocks()
+        assertTrue("$shown", shown.none { it == "Back in step" || it == "3\u00A0weeks met" })
         waitForDescription("Gary, 70 of 80 HP. Opens the lair.")
 
         tab("Today")
@@ -242,7 +250,7 @@ class JourneyTest {
         waitForDescription("Week 2, 70 of 56\u00A0mg, missed, back if week 3 is met.")
         tab("Lair")
         waitFor("Gary looks smug. Meet next week and take that hit back.")
-        waitForDescription("70 of 80 HP")
+        waitForHp(70)
     }
 
     /**
@@ -318,7 +326,7 @@ class JourneyTest {
         waitForDescription("5 hits banked")
         click("5× attack")
         waitFor("Gary reels. It didn't see five coming.")
-        waitForDescription("20 of 80 HP")
+        waitForHp(20)
         waitFor("No hits banked")
     }
 
@@ -354,15 +362,15 @@ class JourneyTest {
     private fun theLastHits() {
         tab("Lair")
         waitFor("Programme done")
-        waitForDescription("20 of 80 HP")
+        waitForHp(20)
         waitForDescription("2 hits banked")
         click("Hit")
         waitFor("Gary staggers.")
-        waitForDescription("10 of 80 HP")
+        waitForHp(10)
         waitForDescription("1 hit banked")
         click("Hit")
         waitFor("Victory")
-        waitForDescription("0 of 80 HP")
+        waitForHp(0)
         waitFor("Nothing left of Gary but a few stray pixels.")
         waitFor("6\u00A0pieces of 2\u00A0mg gum, down to none")
         waitFor("8, the last one today")
@@ -370,8 +378,7 @@ class JourneyTest {
         assertEquals(0, demon.balance.hp)
         assertEquals(0, demon.balance.banked)
         assertTrue(demon.demon.defeatedAt != null)
-        val shown = drainUnlocks()
-        assertTrue("$shown", shown.containsAll(listOf("Demon defeated", "Legendary blade")))
+        drainUnlocks(listOf("Demon defeated", "Legendary blade"))
         checkShelf(listOf("Demon defeated"))
     }
 
@@ -408,12 +415,13 @@ class JourneyTest {
     /**
      * Checks week [number]'s result as every screen tells it: the Plan tab's schedule and band,
      * Today's band, Insights' week by week, and the lair's HP, hits and trophy shelf, with Gary at
-     * [hp] of 80 and [banked] hits ready. First the unlock checks run, as the app's do after the
-     * result comes in, and [badges] (badges and gear, by name) have to be among what they show.
+     * [hp] of 80 and [banked] hits ready.
+     *
+     * The result has to come in by itself first, as the app came back, so the Plan tab's row
+     * shows it before the test does anything. Then [badges] (badges and gear, by name) have to
+     * show in the toasts and cards, as the app finds them.
      */
     private fun checkWeek(number: Int, plan: String, insights: String, hp: Int, banked: Int, badges: List<String> = emptyList()) {
-        val shown = drainUnlocks()
-        assertTrue("Week $number brought $shown", shown.containsAll(badges))
         val ready = if (banked == 1) "1 hit ready" else "$banked hits ready"
         val band = "Gary, $hp of 80 HP, $ready. Opens the lair."
 
@@ -421,6 +429,7 @@ class JourneyTest {
         val row = hasContentDescription(plan)
         compose.waitUntilAtLeastOneExists(row, timeoutMillis = 10_000)
         compose.onNode(row).performScrollTo()
+        drainUnlocks(badges)
         waitForDescription(band)
         tab("Today")
         waitFor("Week ${number + 1} of 8, day 2.")
@@ -432,7 +441,7 @@ class JourneyTest {
         compose.waitUntilAtLeastOneExists(week, timeoutMillis = 10_000)
         compose.onNode(week).performScrollTo()
         tab("Lair")
-        waitForDescription("$hp of 80 HP")
+        waitForHp(hp)
         waitForDescription(if (banked == 1) "1 hit banked" else "$banked hits banked")
         compose.waitUntilAtLeastOneExists(hasContentDescription("Lair, $ready"), timeoutMillis = 5_000)
         checkShelf(badges)
@@ -494,7 +503,7 @@ class JourneyTest {
     /** A tap on the quick-log pill, which logs a piece now, leaving [expectTodayMg] today. */
     private fun quickLog(expectTodayMg: Int) {
         compose.onNode(hasContentDescription("Log Nicorette gum 2\u00A0mg")).performClick()
-        waitForDescription("$expectTodayMg\u00A0mg today")
+        waitForTodayMg(expectTodayMg)
     }
 
     /** The log sheet from Today's Log button: [pieces] of the gum, an hour ago. */
@@ -505,55 +514,78 @@ class JourneyTest {
         waitFor("$pieces\u00A0pieces")
         compose.onNode(hasText("1\u00A0h ago")).performScrollTo().performClick()
         compose.onNode(hasText("Log") and hasText(" at ", substring = true)).performClick()
-        waitForDescription("$expectTodayMg\u00A0mg today")
+        waitForTodayMg(expectTodayMg)
     }
 
     /**
-     * Runs the unlock checks, as the app does after each write, then lets every toast and card
-     * they bring show and go. Returns the badges and gear shown, by name.
+     * Lets every toast and card the app puts up for new badges and gear show and go, reading
+     * each name off the toast or card itself into [shown]. The app finds them on its own, so
+     * this waits up to 10 seconds at a time for each of [expect] still to show, then takes
+     * whatever else is up, and checks that [expect] were all shown.
      */
-    private fun drainUnlocks(): List<String> {
-        background { app.graph.unlocks.check() }
-        val shown = mutableListOf<String>()
+    private fun drainUnlocks(expect: List<String> = emptyList()) {
+        val news = app.graph.unlocks.news
         while (true) {
-            compose.waitForIdle()
-            val next = app.graph.unlocks.news.value.firstOrNull() ?: break
-            when (next) {
+            val next = if (expect.any { it !in shown }) {
+                awaitNews()
+            } else {
+                compose.waitForIdle()
+                news.value.firstOrNull()
+            } ?: break
+            val names = when (next) {
                 is UnlockNews.Badge -> {
-                    waitFor("New badge")
-                    shown += badgeOnScreen()
-                    compose.mainClock.advanceTimeBy(BADGE_TOAST_MILLIS + 1_000)
+                    val name = badgeName(next.achievement)
+                    val toast = hasText(app.getString(R.string.unlock_badge_label)) and hasText(name) and hasClickAction()
+                    listOf(name).takeIf { showsUp(next, toast) }
                 }
                 is UnlockNews.NewGear -> {
-                    waitFor("New gear")
-                    shown += gearOnScreen(next)
-                    click("Not now")
+                    val name = gearName(next.gear)
+                    listOf(name).takeIf { showsUp(next, hasText(app.getString(R.string.unlock_gear_label)) and hasText(name)) }
                 }
                 is UnlockNews.Summary -> {
-                    waitFor("See the shelf")
-                    shown += next.achievements.map { badgeName(it) } + next.gear.map { gearName(it) }
-                    click("Close")
+                    // The card says how many, and shows the badges as pictures only.
+                    val count = next.achievements.size
+                    val title = app.resources.getQuantityString(R.plurals.unlock_summary_title, count, count)
+                    (next.achievements.map { badgeName(it) } + next.gear.map { gearName(it) }).takeIf { showsUp(next, hasText(title)) }
+                }
+            }
+            if (names != null) {
+                shown += names
+                when (next) {
+                    is UnlockNews.Badge -> compose.mainClock.advanceTimeBy(BADGE_TOAST_MILLIS + 1_000)
+                    is UnlockNews.NewGear -> click("Not now")
+                    is UnlockNews.Summary -> click("Close")
                 }
             }
             compose.waitUntil(10_000) {
                 compose.waitForIdle()
-                app.graph.unlocks.news.value.firstOrNull() != next
+                news.value.firstOrNull() != next
             }
         }
-        return shown
+        assertTrue("Waited for $expect, shown $shown", shown.containsAll(expect))
     }
 
-    private fun badgeOnScreen(): String {
-        val name = Achievement.entries.map { badgeName(it) }.first { name ->
-            compose.onAllNodes(hasText(name)).fetchSemanticsNodes().isNotEmpty()
+    /** The first unlock waiting to be shown, after up to 10 seconds for one to come in. */
+    private fun awaitNews(): UnlockNews? {
+        val news = app.graph.unlocks.news
+        try {
+            compose.waitUntil(10_000) {
+                compose.waitForIdle()
+                news.value.isNotEmpty()
+            }
+        } catch (_: ComposeTimeoutException) {
+            return null
         }
-        return name
+        return news.value.firstOrNull()
     }
 
-    private fun gearOnScreen(item: UnlockNews.NewGear): String {
-        val name = gearName(item.gear)
-        waitFor(name)
-        return name
+    /** Whether [item]'s toast or card, found by [card], shows. False if it went by unseen. */
+    private fun showsUp(item: UnlockNews, card: SemanticsMatcher): Boolean {
+        compose.waitUntil(10_000) {
+            compose.waitForIdle()
+            compose.onAllNodes(card).fetchSemanticsNodes().isNotEmpty() || app.graph.unlocks.news.value.firstOrNull() != item
+        }
+        return compose.onAllNodes(card).fetchSemanticsNodes().isNotEmpty()
     }
 
     private fun badgeName(achievement: Achievement): String = app.getString(badgeText(achievement))
@@ -583,6 +615,14 @@ class JourneyTest {
 
     private fun waitForDescription(text: String) =
         compose.waitUntilAtLeastOneExists(hasContentDescription(text, substring = true), timeoutMillis = 10_000)
+
+    /** The lair's HP, as its whole description, so 10 HP can't pass for 0. */
+    private fun waitForHp(hp: Int) =
+        compose.waitUntilAtLeastOneExists(hasContentDescription("$hp of 80 HP"), timeoutMillis = 10_000)
+
+    /** Today's total, as its whole description, so 12 mg can't pass for 2. */
+    private fun waitForTodayMg(mg: Int) =
+        compose.waitUntilAtLeastOneExists(hasContentDescription("${mg}\u00A0mg today"), timeoutMillis = 10_000)
 
     /** Taps the first control showing [text], scrolling to it in a scrolling page. */
     private fun click(text: String) {
