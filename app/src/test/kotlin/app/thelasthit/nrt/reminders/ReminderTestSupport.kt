@@ -45,13 +45,27 @@ fun TestApp.allowNotifications(allowed: Boolean = true) {
     }
 }
 
-val TestApp.notifications: ShadowNotificationManager
+private val TestApp.shade: ShadowNotificationManager
     get() = shadowOf(getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+
+/**
+ * The notifications this test's app put up. Robolectric keeps one shade for the whole run,
+ * cleared as each test starts, so a notice that an earlier test's app posts late, from a thread
+ * of its own, can land in a later test's shade. Each notice's tap intent is made with the app
+ * that posted it, which tells them apart.
+ */
+val TestApp.notifications: List<Notification>
+    get() = shade.allNotifications.filter { it.isFrom(this) }
+
+private fun Notification.isFrom(app: TestApp): Boolean {
+    val madeWith = contentIntent?.let { shadowOf(it).savedContext } ?: return false
+    return madeWith === app || madeWith.applicationContext === app
+}
 
 fun TestApp.clearNotifications() = (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancelAll()
 
-/** The notification showing under [id], if any. */
-fun TestApp.notification(id: Int): Notification? = notifications.getNotification(id)
+/** The notification this test's app put up under [id], if any. */
+fun TestApp.notification(id: Int): Notification? = shade.getNotification(id)?.takeIf { it.isFrom(this) }
 
 /** Waits up to [timeoutMs] for a notification under [id], for nudges that follow a log on another thread. */
 fun TestApp.awaitNotification(id: Int, timeoutMs: Long = 5_000, matching: (Notification) -> Boolean = { true }): Notification? {
@@ -101,7 +115,7 @@ fun TestApp.told(count: Int, block: () -> Unit): List<NewDose> = runBlocking {
 
 /** The achievements notices in the shade. */
 fun TestApp.achievementNotices(): List<Notification> =
-    notifications.allNotifications.filter { it.channelId == NoticeChannel.ACHIEVEMENTS.id }
+    notifications.filter { it.channelId == NoticeChannel.ACHIEVEMENTS.id }
 
 /** Waits up to [timeoutMs] for [count] achievements notices, for ones told on another thread. */
 fun TestApp.awaitAchievementNotices(count: Int = 1, timeoutMs: Long = 5_000): List<Notification> {
