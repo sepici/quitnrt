@@ -43,6 +43,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import app.thelasthit.nrt.R
+import app.thelasthit.nrt.ui.game.UnlockHost
 import app.thelasthit.nrt.ui.history.HistoryScreen
 import app.thelasthit.nrt.ui.insights.InsightsScreen
 import app.thelasthit.nrt.ui.lair.LairScreen
@@ -145,6 +146,8 @@ fun AppShell() {
         }
         // Links and shortcuts show their snackbar, question or sheet over whichever page is open.
         LinkHost(snackbars)
+        // New badges and gear slide in over whichever page is open.
+        UnlockHost(onOpenLair = { navController.navigateTo(TopLevelDestination.Lair) })
     }
 }
 

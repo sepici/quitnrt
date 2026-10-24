@@ -10,6 +10,7 @@ import app.thelasthit.nrt.data.repo.GameRepository
 import app.thelasthit.nrt.data.repo.ProductRepository
 import app.thelasthit.nrt.data.repo.ProgrammeRepository
 import app.thelasthit.nrt.data.repo.TagRepository
+import app.thelasthit.nrt.data.repo.UnlockRepository
 import app.thelasthit.nrt.data.settings.SettingsStore
 import app.thelasthit.nrt.domain.catalogue.Catalogue
 import kotlinx.coroutines.CoroutineScope
@@ -41,6 +42,9 @@ class DataGraph(
     /** Reading the demon and spending hits settle the due results first. */
     val game = GameRepository(database, settings, results = programmes, clock = clock)
     val breathing = BreathingRepository(database.breathing())
+
+    /** Badges and gear: the unlock checks, the trophy shelf and the gear equipped. */
+    val unlocks = UnlockRepository(database, settings, results = programmes, clock = clock, zone = { ZoneId.systemDefault() })
     val backups = BackupRepository(database, settings, entries, results = programmes, clock = clock)
 
     companion object {

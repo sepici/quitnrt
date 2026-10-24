@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Badges and gear (PLAN 8): their names, the unlock toast and cards, the trophy shelf, and the
+     gear row in the lair. Badges say plainly what they're for; the gear belongs to the game layer. -->
+<resources>
+    <!-- Badges, in PLAN 8.1's order, each with its name and a line saying what it's for. -->
+    <string name="badge_first_entry">First entry</string>
+    <string name="badge_first_entry_for">Your first dose logged.</string>
+    <string name="badge_logged_days_3">Logged on 3\u00A0days</string>
+    <string name="badge_logged_days_3_for">Doses logged on 3\u00A0different days.</string>
+    <string name="badge_logged_days_7">Logged on 7\u00A0days</string>
+    <string name="badge_logged_days_7_for">Doses logged on 7\u00A0different days.</string>
+    <string name="badge_logged_days_14">Logged on 14\u00A0days</string>
+    <string name="badge_logged_days_14_for">Doses logged on 14\u00A0different days.</string>
+    <string name="badge_logged_days_28">Logged on 28\u00A0days</string>
+    <string name="badge_logged_days_28_for">Doses logged on 28\u00A0different days.</string>
+    <string name="badge_logged_days_60">Logged on 60\u00A0days</string>
+    <string name="badge_logged_days_60_for">Doses logged on 60\u00A0different days.</string>
+    <string name="badge_logged_days_90">Logged on 90\u00A0days</string>
+    <string name="badge_logged_days_90_for">Doses logged on 90\u00A0different days.</string>
+    <string name="badge_streak_10">10\u00A0days in a row</string>
+    <string name="badge_streak_10_for">Something logged every day for 10\u00A0days running.</string>
+    <string name="badge_streak_21">21\u00A0days in a row</string>
+    <string name="badge_streak_21_for">Something logged every day for 21\u00A0days running.</string>
+    <string name="badge_streak_40">40\u00A0days in a row</string>
+    <string name="badge_streak_40_for">Something logged every day for 40\u00A0days running.</string>
+    <string name="badge_baseline_done">Baseline done</string>
+    <string name="badge_baseline_done_for">A week of logging as normal, with doses on at least 5 of the 7\u00A0days.</string>
+    <string name="badge_honest_ledger">Honest ledger</string>
+    <string name="badge_honest_ledger_for">A forgotten dose logged after the fact.</string>
+    <string name="badge_tagged_25">Tagged 25\u00A0doses</string>
+    <string name="badge_tagged_25_for">25\u00A0doses logged with a tag.</string>
+    <string name="badge_tagged_100">Tagged 100\u00A0doses</string>
+    <string name="badge_tagged_100_for">100\u00A0doses logged with a tag.</string>
+    <string name="badge_first_day_in_guide">First day within the guide</string>
+    <string name="badge_first_day_in_guide_for">A day at or under its daily guide.</string>
+    <string name="badge_first_week_met">First week met</string>
+    <string name="badge_first_week_met_for">A programme week at or under its allowance.</string>
+    <string name="badge_weeks_met_3">3\u00A0weeks met</string>
+    <string name="badge_weeks_met_3_for">3\u00A0programme weeks met, counting missed weeks paid back.</string>
+    <string name="badge_weeks_met_6">6\u00A0weeks met</string>
+    <string name="badge_weeks_met_6_for">6\u00A0programme weeks met, counting missed weeks paid back.</string>
+    <string name="badge_weeks_met_10">10\u00A0weeks met</string>
+    <string name="badge_weeks_met_10_for">10\u00A0programme weeks met, counting missed weeks paid back.</string>
+    <string name="badge_back_in_step">Back in step</string>
+    <string name="badge_back_in_step_for">A missed week paid back by meeting a later one.</string>
+    <string name="badge_halfway">Halfway</string>
+    <string name="badge_halfway_for">A week met on a daily guide of half your usual day or less.</string>
+    <string name="badge_down_a_strength">Down a strength</string>
+    <string name="badge_down_a_strength_for">A week met on a lower strength, such as 2\u00A0mg gum after 4\u00A0mg.</string>
+    <string name="badge_final_taper_week">Final taper week</string>
+    <string name="badge_final_taper_week_for">The plan\'s last week with NRT, reached.</string>
+    <string name="badge_week_under_by_10" formatted="false">10% under</string>
+    <string name="badge_week_under_by_10_for" formatted="false">A week met at least 10% under its allowance, with every day logged.</string>
+    <string name="badge_five_days_under">5\u00A0days under</string>
+    <string name="badge_five_days_under_for">5\u00A0days under the daily guide in one week.</string>
+    <string name="badge_three_weeks_under">3\u00A0weeks under</string>
+    <string name="badge_three_weeks_under_for">3\u00A0weeks in a row under the allowance, with every day logged.</string>
+    <string name="badge_later_first_dose">Later first dose</string>
+    <string name="badge_later_first_dose_for">The day\'s first dose 30\u00A0minutes later than at your baseline, across a week.</string>
+    <string name="badge_longer_gaps">Longer gaps</string>
+    <string name="badge_longer_gaps_for">Gaps between doses 30\u00A0minutes longer than at your baseline, across a week.</string>
+    <string name="badge_top_trigger_down">Top trigger down</string>
+    <string name="badge_top_trigger_down_for">Your baseline\'s top trigger down by a third of its share, across a week.</string>
+    <string name="badge_breathing_1">1\u00A0breathing session</string>
+    <string name="badge_breathing_1_for">A breathing session run to the end.</string>
+    <string name="badge_breathing_10">10\u00A0breathing sessions</string>
+    <string name="badge_breathing_10_for">10\u00A0breathing sessions run to the end.</string>
+    <string name="badge_breathing_25">25\u00A0breathing sessions</string>
+    <string name="badge_breathing_25_for">25\u00A0breathing sessions run to the end.</string>
+    <string name="badge_demon_defeated">Demon defeated</string>
+    <string name="badge_demon_defeated_for">The final hit landed.</string>
+
+    <!-- PLAN 8.1's badge groups, as the shelf heads them. -->
+    <string name="badge_group_logging">Logging</string>
+    <string name="badge_group_matching">Matching the plan</string>
+    <string name="badge_group_beating">Beating the plan</string>
+    <string name="badge_group_habits">Habits</string>
+    <string name="badge_group_end">The end</string>
+
+    <!-- Gear in unlock order (PLAN 8.2), each with its name and what brings it. -->
+    <string name="gear_wooden_stick">Wooden stick</string>
+    <string name="gear_wooden_stick_for">There from the start.</string>
+    <string name="gear_wooden_sword">Wooden sword</string>
+    <string name="gear_wooden_sword_for">For the first day within the guide.</string>
+    <string name="gear_iron_sword">Iron sword</string>
+    <string name="gear_iron_sword_for">For the first week met.</string>
+    <string name="gear_axe">Axe</string>
+    <string name="gear_axe_for">For 3\u00A0weeks met.</string>
+    <string name="gear_war_hammer">War hammer</string>
+    <string name="gear_war_hammer_for">For half a programme\'s hits earned.</string>
+    <string name="gear_fire_staff">Fire staff</string>
+    <string name="gear_fire_staff_for">For reaching the final taper week.</string>
+    <string name="gear_lightning_bow">Lightning bow</string>
+    <string name="gear_lightning_bow_for">For meeting the final taper week.</string>
+    <string name="gear_legendary_blade">Legendary blade</string>
+    <string name="gear_legendary_blade_for">For defeating a demon.</string>
+
+    <!-- The toast and cards when something new comes in. -->
+    <string name="unlock_badge_label">New badge</string>
+    <string name="unlock_open_lair">Open the lair</string>
+    <string name="unlock_gear_label">New gear</string>
+    <string name="unlock_gear_equip">Equip</string>
+    <string name="unlock_gear_not_now">Not now</string>
+    <plurals name="unlock_summary_title">
+        <item quantity="one">%1$d\u00A0new badge</item>
+        <item quantity="other">%1$d\u00A0new badges</item>
+    </plurals>
+    <string name="unlock_summary_body">For what you\'ve done so far. They\'re on the shelf in the lair.</string>
+    <plurals name="unlock_summary_body_gear">
+        <item quantity="one">For what you\'ve done so far, with a piece of gear. They\'re all in the lair.</item>
+        <item quantity="other">For what you\'ve done so far, with %1$d\u00A0pieces of gear. They\'re all in the lair.</item>
+    </plurals>
+    <string name="unlock_summary_more">+%1$d</string>
+    <string name="unlock_summary_see">See the shelf</string>
+    <string name="unlock_summary_close">Close</string>
+
+    <!-- The trophy shelf in the lair. -->
+    <string name="shelf_title">Trophy shelf</string>
+    <string name="shelf_count">%1$d of %2$d</string>
+    <plurals name="shelf_count_spoken">
+        <item quantity="one">%1$d of %2$d badge earned</item>
+        <item quantity="other">%1$d of %2$d badges earned</item>
+    </plurals>
+    <string name="shelf_hint">Tap a badge to see what it\'s for.</string>
+    <string name="shelf_earned_on">Earned %1$s</string>
+    <string name="shelf_not_yet">Not earned yet</string>
+    <string name="shelf_badge_earned">%1$s, earned %2$s</string>
+    <string name="shelf_badge_locked">%1$s, not earned yet</string>
+
+    <!-- The gear row in the lair, and its sheet. -->
+    <string name="gear_equipped">Equipped</string>
+    <string name="gear_change">Change</string>
+    <string name="gear_change_spoken">Change gear</string>
+    <string name="gear_sheet_title">Gear</string>
+    <string name="gear_sheet_intro">Gear changes how your hits look and sound, and nothing else.</string>
+    <string name="gear_still_to_come">%1$s, still to come. %2$s</string>
+</resources>

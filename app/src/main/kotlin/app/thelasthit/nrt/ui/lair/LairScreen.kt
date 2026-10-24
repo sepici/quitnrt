@@ -97,6 +97,7 @@ fun LairScreen(viewModel: LairViewModel = graphViewModel { LairViewModel(it) }) 
             rule = stringResource(R.string.lair_hits_rule),
             modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 28.dp, bottom = 32.dp),
         )
+        LairTrophies()
     }
 }
 
