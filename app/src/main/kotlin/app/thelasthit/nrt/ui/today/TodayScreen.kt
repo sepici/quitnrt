@@ -50,6 +50,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
@@ -59,6 +60,8 @@ import app.thelasthit.nrt.R
 import app.thelasthit.nrt.domain.log.Elapsed
 import app.thelasthit.nrt.domain.log.LabelWarning
 import app.thelasthit.nrt.ui.advice.AdviceLinks
+import app.thelasthit.nrt.ui.absorbed.HERO_ESTIMATE_TAG
+import app.thelasthit.nrt.ui.absorbed.absorbedLine
 import app.thelasthit.nrt.ui.components.EntryRow
 import app.thelasthit.nrt.ui.components.IconTile
 import app.thelasthit.nrt.ui.components.pressable
@@ -197,7 +200,7 @@ fun TodayScreen(
                 if (entry != current.day.entries.first()) {
                     HorizontalDivider(Modifier.padding(start = 78.dp, end = 20.dp), color = LastHit.colors.line)
                 }
-                EntryRow(entry, name = current.nameOf(entry), tags = current.tags)
+                EntryRow(entry, name = current.nameOf(entry), tags = current.tags, absorbed = current.absorbed?.of(entry))
             }
         }
     }
@@ -288,7 +291,13 @@ private fun Hero(
                 style = LastHit.type.label.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold),
                 color = colors.onHero2,
             )
-            val amountDescription = stringResource(R.string.today_amount_description, total)
+            // Beside the labelled mg when the setting is on, never in place of it.
+            val absorbed = state.absorbedToday
+            val amountDescription = if (absorbed == null) {
+                stringResource(R.string.today_amount_description, total)
+            } else {
+                stringResource(R.string.absorbed_today_description, total, absorbed.mgText())
+            }
             Row(
                 Modifier
                     .padding(top = 6.dp)
@@ -301,6 +310,15 @@ private fun Hero(
                     style = LastHit.type.hero.copy(fontSize = 40.sp, lineHeight = 40.sp, letterSpacing = (-0.025).em),
                     color = colors.onHero,
                     modifier = Modifier.padding(start = 10.dp).alignByBaseline(),
+                )
+            }
+            if (absorbed != null) {
+                // Screen readers hear it with the total, so it's hidden from them here.
+                Text(
+                    absorbedLine(absorbed),
+                    style = LastHit.type.label.copy(fontSize = 15.sp, fontWeight = FontWeight.Normal),
+                    color = colors.onHero2,
+                    modifier = Modifier.clearAndSetSemantics { testTag = HERO_ESTIMATE_TAG },
                 )
             }
             val plan = state.plan

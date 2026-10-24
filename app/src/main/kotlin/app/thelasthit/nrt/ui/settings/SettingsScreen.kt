@@ -41,6 +41,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.data.repo.ImportMode
 import app.thelasthit.nrt.domain.time.DayBoundary
+import app.thelasthit.nrt.ui.absorbed.AbsorbedSection
 import app.thelasthit.nrt.ui.components.AppSheet
 import app.thelasthit.nrt.ui.components.FieldLabel
 import app.thelasthit.nrt.ui.components.PrimaryButton
@@ -64,6 +65,7 @@ data class SettingsLinks(
     val about: () -> Unit,
     val reminders: () -> Unit = {},
     val widgetTile: () -> Unit = {},
+    val absorbed: () -> Unit = {},
 )
 
 @Composable
@@ -172,6 +174,8 @@ fun SettingsScreen(
                 SettingsRow(stringResource(R.string.settings_reminders), remindersSummary(rows.reminders, rows.marks), first = false, onClick = links.reminders, chevron = true)
             }
         }
+
+        AbsorbedSection(onOpen = links.absorbed)
 
         SoundSection()
 

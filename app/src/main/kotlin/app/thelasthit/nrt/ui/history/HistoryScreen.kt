@@ -59,8 +59,11 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.thelasthit.nrt.R
+import app.thelasthit.nrt.domain.dose.Dose
 import app.thelasthit.nrt.domain.log.HistoryFilter
 import app.thelasthit.nrt.domain.log.LoggedDay
+import app.thelasthit.nrt.ui.absorbed.BesideTheAmount
+import app.thelasthit.nrt.ui.absorbed.absorbedText
 import app.thelasthit.nrt.ui.components.Chip
 import app.thelasthit.nrt.ui.components.ChipKind
 import app.thelasthit.nrt.ui.components.EntryRow
@@ -174,7 +177,15 @@ fun HistoryScreen(
                 item(key = "filter") { FilterBar(current, onClear = { applyFilter(null) }) }
             }
             current.days.forEach { day ->
-                item(key = "day-${day.date}") { DayHeader(day, today = current.today, filtered = filtered, ticked = day.date in current.ticked) }
+                item(key = "day-${day.date}") {
+                    DayHeader(
+                        day,
+                        today = current.today,
+                        filtered = filtered,
+                        ticked = day.date in current.ticked,
+                        absorbed = current.absorbed?.of(day.entries),
+                    )
+                }
                 items(day.entries, key = { it.id }) { entry ->
                     Column {
                         if (entry != day.entries.first()) {
@@ -190,6 +201,7 @@ fun HistoryScreen(
                                     sheetViewModel.openEdit(entry)
                                     sheetOpen = true
                                 },
+                                absorbed = current.absorbed?.of(entry),
                             )
                         }
                     }
@@ -320,10 +332,12 @@ private fun ClearChip(name: String, onClear: () -> Unit, modifier: Modifier = Mo
 
 /**
  * Under a filter, the day's line counts its matches against every dose it had: "1 of 5 doses". A
- * [ticked] day stayed at or under the plan's guide, and has a green tick by its total.
+ * [ticked] day stayed at or under the plan's guide, and has a green tick by its total. With
+ * [absorbed], the estimated absorbed amount sits under the total while that setting is on, or on a
+ * line of its own under the header where beside the total it would wrap the day's date.
  */
 @Composable
-private fun DayHeader(day: LoggedDay, today: LocalDate, filtered: Boolean, ticked: Boolean = false) {
+private fun DayHeader(day: LoggedDay, today: LocalDate, filtered: Boolean, ticked: Boolean = false, absorbed: Dose? = null) {
     val colors = LastHit.colors
     val isToday = day.date == today
     val title = if (isToday) {
@@ -339,13 +353,14 @@ private fun DayHeader(day: LoggedDay, today: LocalDate, filtered: Boolean, ticke
     val count = day.entries.size
     val total = day.total.mgText()
     // Under a filter, screen readers hear the day's line too, since its count isn't in the rows.
-    val description = when {
+    val labelled = when {
         filtered && isToday -> pluralStringResource(R.plurals.history_today_description_filtered, day.doses, total, count, day.doses)
         filtered -> pluralStringResource(R.plurals.history_day_description_filtered, day.doses, "$title $date", total, count, day.doses)
         isToday -> stringResource(R.string.history_today_description, total)
         ticked -> stringResource(R.string.history_day_within_description, "$title $date", total)
         else -> stringResource(R.string.history_day_description, "$title $date", total)
     }
+    val description = if (absorbed == null) labelled else stringResource(R.string.absorbed_with_description, labelled, absorbed.mgText())
     Column {
         Row(
             Modifier
@@ -357,46 +372,65 @@ private fun DayHeader(day: LoggedDay, today: LocalDate, filtered: Boolean, ticke
                 },
             verticalAlignment = Alignment.Bottom,
         ) {
-            Column(Modifier.weight(1f)) {
-                Text(
-                    title,
-                    style = LastHit.type.headline.copy(fontSize = 24.sp, lineHeight = 30.sp, letterSpacing = (-0.025).em),
-                    color = colors.text,
-                )
-                Text(
-                    if (filtered) {
-                        pluralStringResource(R.plurals.history_day_meta_filtered, day.doses, date, count, day.doses)
-                    } else {
-                        pluralStringResource(R.plurals.history_day_meta, count, date, count)
-                    },
-                    style = LastHit.type.label,
-                    color = colors.text2,
-                )
-            }
-            Row(verticalAlignment = Alignment.Bottom) {
-                if (isToday) {
+            val titles = @Composable { columnModifier: Modifier ->
+                Column(columnModifier) {
                     Text(
-                        stringResource(R.string.history_so_far),
-                        style = LastHit.type.caption,
+                        title,
+                        style = LastHit.type.headline.copy(fontSize = 24.sp, lineHeight = 30.sp, letterSpacing = (-0.025).em),
+                        color = colors.text,
+                    )
+                    Text(
+                        if (filtered) {
+                            pluralStringResource(R.plurals.history_day_meta_filtered, day.doses, date, count, day.doses)
+                        } else {
+                            pluralStringResource(R.plurals.history_day_meta, count, date, count)
+                        },
+                        style = LastHit.type.label,
                         color = colors.text2,
-                        modifier = Modifier.padding(end = 6.dp, bottom = 2.dp),
                     )
                 }
-                if (ticked) {
-                    // Centred on the total's 26 sp line, which sits on the row's bottom.
-                    TickDot(
-                        16.dp,
-                        fill = colors.success,
-                        ink = colors.bg,
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .padding(end = 6.dp),
+            }
+            val amount = @Composable {
+                Row(verticalAlignment = Alignment.Bottom) {
+                    if (isToday) {
+                        Text(
+                            stringResource(R.string.history_so_far),
+                            style = LastHit.type.caption,
+                            color = colors.text2,
+                            modifier = Modifier.padding(end = 6.dp, bottom = 2.dp),
+                        )
+                    }
+                    if (ticked) {
+                        // Centred on the total's 26 sp line, which sits on the row's bottom.
+                        TickDot(
+                            16.dp,
+                            fill = colors.success,
+                            ink = colors.bg,
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                                .padding(end = 6.dp),
+                        )
+                    }
+                    Text(
+                        stringResource(R.string.dose_mg, total),
+                        style = LastHit.type.title.copy(fontSize = 20.sp, lineHeight = 26.sp, fontWeight = FontWeight.ExtraBold),
+                        color = colors.text,
                     )
                 }
-                Text(
-                    stringResource(R.string.dose_mg, total),
-                    style = LastHit.type.title.copy(fontSize = 20.sp, lineHeight = 26.sp, fontWeight = FontWeight.ExtraBold),
-                    color = colors.text,
+            }
+            if (absorbed == null) {
+                titles(Modifier.weight(1f))
+                amount()
+            } else {
+                BesideTheAmount(
+                    gap = 12.dp,
+                    start = { titles(Modifier) },
+                    amount = amount,
+                    estimate = {
+                        Text(absorbedText(absorbed), style = LastHit.type.caption, color = colors.text2, textAlign = TextAlign.End)
+                    },
+                    modifier = Modifier.weight(1f),
+                    bottom = true,
                 )
             }
         }

@@ -54,6 +54,7 @@ data class Backup(
         val demonVariant: String? = null,
         val soundOn: Boolean? = null,
         val equippedGear: String? = null,
+        val showAbsorbed: Boolean? = null,
     )
 
     @Serializable

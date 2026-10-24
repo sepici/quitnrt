@@ -464,6 +464,7 @@
    "flavours": [
     "Mint"
    ],
+   "absorptionPerMille": 800,
    "strengths": [
     {
      "mg": 1,
@@ -550,6 +551,7 @@
    "flavours": [
     "Mint"
    ],
+   "absorptionPerMille": 800,
    "strengths": [
     {
      "mg": 1,
@@ -2045,6 +2047,7 @@
    "flavours": [
     "Peppermint"
    ],
+   "absorptionPerMille": 800,
    "strengths": [
     {
      "mg": 1,
@@ -2683,6 +2686,7 @@
    "flavours": [
     "Mint"
    ],
+   "absorptionPerMille": 800,
    "strengths": [
     {
      "mg": 1,

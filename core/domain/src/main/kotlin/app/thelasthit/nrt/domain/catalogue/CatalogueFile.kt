@@ -24,6 +24,8 @@ internal data class CatalogueFile(
         val flavours: List<String>,
         val strengths: List<StrengthEntry>,
         val window: WindowEntry? = null,
+        /** The line's own absorption factor in thousandths, where its form's doesn't fit it. Usually left out. */
+        val absorptionPerMille: Int? = null,
     )
 
     @Serializable

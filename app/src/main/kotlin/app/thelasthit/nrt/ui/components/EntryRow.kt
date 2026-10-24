@@ -20,7 +20,10 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.data.db.TagEntity
+import app.thelasthit.nrt.domain.dose.Dose
 import app.thelasthit.nrt.domain.log.Entry
+import app.thelasthit.nrt.ui.absorbed.BesideTheAmount
+import app.thelasthit.nrt.ui.absorbed.RowEstimate
 import app.thelasthit.nrt.ui.format.formatAt
 import app.thelasthit.nrt.ui.format.icon
 import app.thelasthit.nrt.ui.format.mgText
@@ -34,7 +37,9 @@ import java.util.Locale
 /**
  * One logged dose: the product (with the amount when it's more than one), the time with its
  * tags, and the mg. A dose after midnight that counts toward the evening before names its day:
- * "01:20 Friday".
+ * "01:20 Friday". With [absorbed], the estimated absorbed amount sits under the mg, in the
+ * secondary colour, while that setting is on. The name and time keep the lines they have
+ * without it: where it would crowd them, it takes a line of its own.
  */
 @Composable
 fun EntryRow(
@@ -43,6 +48,7 @@ fun EntryRow(
     tags: Map<String, TagEntity>,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
+    absorbed: Dose? = null,
 ) {
     val clock = rememberTimeFormatter().formatAt(entry.occurredAt, entry.zone)
     val time = if (entry.countsTowardEveningBefore) {
@@ -67,21 +73,37 @@ fun EntryRow(
         horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         IconTile(entry.form.icon, dose = true)
-        Column(Modifier.weight(1f)) {
-            Text(
-                title,
-                style = LastHit.type.title.copy(fontWeight = FontWeight.Bold),
-                color = LastHit.colors.text,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(detail, style = LastHit.type.label.copy(fontWeight = FontWeight.Normal), color = LastHit.colors.text2)
+        val details = @Composable { columnModifier: Modifier ->
+            Column(columnModifier) {
+                Text(
+                    title,
+                    style = LastHit.type.title.copy(fontWeight = FontWeight.Bold),
+                    color = LastHit.colors.text,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(detail, style = LastHit.type.label.copy(fontWeight = FontWeight.Normal), color = LastHit.colors.text2)
+            }
         }
-        Text(
-            stringResource(R.string.dose_mg, entry.total.mgText()),
-            style = LastHit.type.title.copy(fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, lineHeight = 24.sp, letterSpacing = (-0.015).em),
-            color = LastHit.colors.text,
-            maxLines = 1,
-        )
+        val amount = @Composable {
+            Text(
+                stringResource(R.string.dose_mg, entry.total.mgText()),
+                style = LastHit.type.title.copy(fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, lineHeight = 24.sp, letterSpacing = (-0.015).em),
+                color = LastHit.colors.text,
+                maxLines = 1,
+            )
+        }
+        if (absorbed == null) {
+            details(Modifier.weight(1f))
+            amount()
+        } else {
+            BesideTheAmount(
+                gap = 14.dp,
+                start = { details(Modifier) },
+                amount = amount,
+                estimate = { RowEstimate(absorbed) },
+                modifier = Modifier.weight(1f),
+            )
+        }
     }
 }

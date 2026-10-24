@@ -50,6 +50,7 @@ import androidx.navigation.compose.rememberNavController
 import app.thelasthit.nrt.LastHitApp
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.reminders.NoticeTarget
+import app.thelasthit.nrt.ui.absorbed.AbsorbedScreen
 import app.thelasthit.nrt.ui.advice.AdviceRoutes
 import app.thelasthit.nrt.ui.advice.KeepScreenOnWhileTimersRun
 import app.thelasthit.nrt.ui.advice.advice
@@ -106,6 +107,7 @@ private object SettingsRoutes {
     const val LICENCE = "settings/licence/{font}"
     const val REMINDERS = "settings/reminders"
     const val WIDGET_TILE = "settings/widget-tile"
+    const val ABSORBED = "settings/absorbed"
 
     fun licence(font: FontLicence) = "settings/licence/${font.name}"
 }
@@ -233,6 +235,7 @@ private fun NavGraphBuilder.settings(navController: NavController, snackbars: Sn
                 about = { navController.navigate(SettingsRoutes.ABOUT) },
                 reminders = { navController.navigate(SettingsRoutes.REMINDERS) },
                 widgetTile = { navController.navigate(SettingsRoutes.WIDGET_TILE) },
+                absorbed = { navController.navigate(SettingsRoutes.ABSORBED) },
             ),
         )
     }
@@ -253,6 +256,7 @@ private fun NavGraphBuilder.settings(navController: NavController, snackbars: Sn
     }
     page(SettingsRoutes.REMINDERS) { RemindersScreen(onBack = back) }
     page(SettingsRoutes.WIDGET_TILE) { WidgetTileScreen(onBack = back) }
+    page(SettingsRoutes.ABSORBED) { AbsorbedScreen(onBack = back) }
     page(SettingsRoutes.LICENCE) { entry ->
         val font = entry.arguments?.getString("font")?.let { name -> FontLicence.entries.firstOrNull { it.name == name } }
         if (font != null) LicenceScreen(font, onBack = back)

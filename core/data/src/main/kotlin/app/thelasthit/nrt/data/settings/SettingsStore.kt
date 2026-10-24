@@ -39,6 +39,8 @@ data class Settings(
     val soundOn: Boolean = true,
     /** The gear shown in the lair, by its key, or null for none picked yet. */
     val equippedGear: String? = null,
+    /** Estimated absorbed amounts beside the labelled mg (ROADMAP P9-1). Off by default. */
+    val showAbsorbed: Boolean = false,
 ) {
     val dayBoundary: DayBoundary get() = DayBoundary(dayStart)
 }
@@ -57,6 +59,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
             demonVariant = prefs[DEMON_VARIANT],
             soundOn = prefs[SOUND_ON] ?: true,
             equippedGear = prefs[EQUIPPED_GEAR],
+            showAbsorbed = prefs[SHOW_ABSORBED] ?: false,
         )
     }
 
@@ -98,6 +101,8 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         }
     }
 
+    suspend fun setShowAbsorbed(on: Boolean) = store.edit { it[SHOW_ABSORBED] = on }
+
     /**
      * When a backup was last restored, or null if none has been. A restore writes every entry it
      * brings in at that moment, so an agent's undo leaves out everything written up to it.
@@ -118,6 +123,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         private val DEMON_VARIANT = stringPreferencesKey("demon_variant")
         private val SOUND_ON = booleanPreferencesKey("sound_on")
         private val EQUIPPED_GEAR = stringPreferencesKey("equipped_gear")
+        private val SHOW_ABSORBED = booleanPreferencesKey("show_absorbed")
 
         /** Only one DataStore may exist per file, so the app creates this once. */
         fun createDataStore(context: Context): DataStore<Preferences> =

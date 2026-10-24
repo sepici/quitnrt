@@ -11,6 +11,8 @@ import app.thelasthit.nrt.domain.log.TagGroup
 import app.thelasthit.nrt.domain.product.PillLabel
 import app.thelasthit.nrt.domain.product.UserProduct
 import app.thelasthit.nrt.domain.programme.isWithinGuide
+import app.thelasthit.nrt.ui.absorbed.AbsorbedFigures
+import app.thelasthit.nrt.ui.absorbed.absorbedFigures
 import app.thelasthit.nrt.ui.minuteTicks
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -49,6 +51,8 @@ data class HistoryState(
     val ticked: Set<LocalDate> = emptySet(),
     /** Whether the plan has a day that's over, so the line at the top says what a tick means. */
     val explainsTicks: Boolean = false,
+    /** Estimated absorbed amounts for rows and day totals, while the setting is on (ROADMAP P9-1). */
+    val absorbed: AbsorbedFigures? = null,
 ) {
     fun nameOf(entry: Entry): String = productNames[entry.productId] ?: entry.productName
 
@@ -166,9 +170,9 @@ class HistoryViewModel(
         combine(graph.products.shortNames, graph.tags.all, graph.programmes.observeCurrent()) { names, tags, programme ->
             Triple(names, tags.associateBy { it.key }, programme?.plan)
         },
-        graph.settings.settings,
+        combine(graph.settings.settings, graph.absorbedFigures(), ::Pair),
         options,
-    ) { today, page, (names, tags, plan), settings, options ->
+    ) { today, page, (names, tags, plan), (settings, absorbed), options ->
         val ticks = plan != null && page.filter == null
         HistoryState(
             today = today,
@@ -181,6 +185,7 @@ class HistoryViewModel(
             options = options,
             ticked = if (ticks && plan != null) page.days.filter { plan.isWithinGuide(it.date, it.total, today) }.map { it.date }.toSet() else emptySet(),
             explainsTicks = ticks && plan != null && plan.startDate < today,
+            absorbed = absorbed,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 

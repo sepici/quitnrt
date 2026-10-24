@@ -307,7 +307,16 @@ private fun AmountField(state: LogSheetState, viewModel: LogSheetViewModel) {
                     pluralStringResource(product.unit.plural, state.form.quantity, state.form.quantity),
                     style = LastHit.type.title.copy(fontSize = 24.sp, lineHeight = 28.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.02).em),
                 )
-                Text(stringResource(R.string.log_amount_dose, state.dose.mgText()), style = LastHit.type.caption, color = colors.text2)
+                val absorbed = state.absorbedDose
+                Text(
+                    if (absorbed == null) {
+                        stringResource(R.string.log_amount_dose, state.dose.mgText())
+                    } else {
+                        stringResource(R.string.absorbed_log_amount, state.dose.mgText(), absorbed.mgText())
+                    },
+                    style = LastHit.type.caption,
+                    color = colors.text2,
+                )
             }
             StepButton(R.drawable.ic_minus, stringResource(R.string.log_one_fewer), enabled = state.form.quantity > 1) { viewModel.changeQuantity(-1) }
             Spacer(Modifier.width(8.dp))
