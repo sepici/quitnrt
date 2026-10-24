@@ -9,12 +9,12 @@ Last updated: 24 October 2026, while the build runs unattended towards a testing
 | 0. Foundation and direction | Done. Gradle set-up, CI, copy lint, style guide, design direction chosen, first creature signed off |
 | 1. Logging | **Done.** Domain rules, catalogue, data layer, backup, theme, sprites, plus **onboarding, Today, the log sheet, History, Settings and the lair**, reviewed, with the owner's calls on the reviews applied. |
 | 2. Insights | **Done.** The stats, every Insights section and the History filter, reviewed by the copy agent and the fresh-eyes reviewer, with their findings fixed. Calls that touch signed-off designs wait for the owner. |
-| 3. Programme | **Slices 1 to 6 done:** the mix-based taper (P3-6), the data, the Plan tab, and Today, History and Insights with a plan. Being built: the extra goals in stats, the log sheet's spacing note, and the total each week was judged on. |
+| 3. Programme | **Built:** the mix-based taper (P3-6), the data, the Plan tab, Today, History and Insights with a plan, the extra goals in stats, the log sheet's spacing note, and the total each week was judged on. Final reviews are running. |
 | 4. Demon and achievements | **Built:** the seven other creatures (off until the owner's look), the game rules, unlocks with toasts and the trophy shelf, gear, and the lair's battle with animations, haptics and sound. |
-| 5. Advice | **Slices 1 to 3 done:** the content, the rules, the full list, strategy pages and both timers. Being built: advice on Today, after logging and in Insights. |
-| 6. Quick-log | **Done:** the matcher, links and shortcuts, the widget, the tile, notifications and reminders. Being built: a reminders step in onboarding. |
+| 5. Advice | **Built:** the content, the rules, the full list, strategy pages, both timers (the delay with its own notice), and advice on Today, after logging and in Insights. |
+| 6. Quick-log | **Built:** the matcher, links and shortcuts, the widget, the tile, notifications, reminders, and a reminders step in onboarding. |
 | 7. AppFunctions | **Built** on `androidx.appfunctions` 1.0.0-beta01, waiting for a run on the owner's phone. |
-| 9. Polish | The release build is done. Being built: estimated absorbed figures. Then the reviews, accessibility, store documents and the final review. Wear OS (8) comes after release. |
+| 9. Polish | **Built:** the release build and estimated absorbed figures. Running: the copy, design and accessibility reviews of every new screen, the store documents, and an end-to-end journey test. Wear OS (8) comes after release. |
 
 The full check passes locally on `main`.
 
@@ -41,7 +41,12 @@ Nothing blocks the build. These are worth a look when you're next in:
   - **Reminders:**
     - Tapping a weekly result opens the Plan tab, where a missed week's choice waits, and tapping a badge or gear notice opens the lair at its trophy shelf. Other notices open the app where it was left.
     - The achievements notice is for badges and gear the weekly result's check finds while the app isn't on screen. On screen, the toast tells of them instead. Badges from logs made with the widget, the tile or an agent are found when the app is next opened, with a toast and no notice.
-- **The delay timer's notification** is being built with advice on Today (wave D): a quiet notice at the end, on a channel of its own, so it buzzes even when Android has closed the app.
+- **Calls from wave D (24 October):**
+  - The onboarding reminders step (`onboarding-6b-reminders`, a new mockup made and critiqued while running): the four reminders that are on by default, each with a switch, then the notification question. Skip shows only where there's a question to skip (Android 13 and newer, notifications not yet allowed), and keeps the defaults. Day start's button now reads "Next: your reminders", and the done page has a Reminders row.
+  - The delay timer's notice, on its own channel, ignores quiet hours, since you start the timer yourself (being changed to a reminder rather than an alarm, so Do Not Disturb holds it).
+  - Absorbed figures: patches count as 80% of the labelled mg, from the Nicotinell leaflet's 77% bioavailability (open: 100% if you'd rather read the labelled mg as what's absorbed). Today's dose rows show the estimate too, as History's do. Thrive's lozenge figure rests on retailer ingredient lists, since Health Canada's monograph couldn't be reached.
+  - Goals count only days that are over; gaps are measured to the minute within a logical day; patches are left out of gaps and the first dose but can have a cap. "Your goals" in Insights, the Plan tab's goal lines and the spacing note had no mockups and follow B's tiles and lines.
+  - The tip after a slip comes with the dose that takes today over its guide. Tip titles read "Next time, <strategy>", and the slip lines read "Last week went over its allowance. One week over doesn't undo what you've done."
 - **Calls from building the phase 3 to 7 screens (24 October),** each taken so building could go on (recommendation in brackets where it's still open):
   - "Start a 7-day baseline" does the same as "Use your last 7 days" when the last 7 days already qualify, so someone whose last week wasn't typical can't measure a fresh one (open: make "Start a 7-day baseline" always start today, and use the last 7 days only through their own button).
   - Gary lurks on Today until the plan's first day, though the demon is written when the plan is confirmed.
@@ -327,6 +332,14 @@ Built in parallel worktrees, each reviewed through a code lens and a design lens
 - **Reminders** (`reminders/`): WorkManager with a channel each and quiet hours; the nudge from each log, the 21:30 check-in, the weekly result (it opens the Plan tab), achievements (they open the lair's shelf), and "Forgot to log". The widget is Glance; the tile logs or opens the sheet. New `EntrySource.NOTIFICATION`. After changing the widget, re-record `WidgetScreenshotTest` and copy `widget-preview-*.png` into `res/drawable(-night)-nodpi`.
 - **AppFunctions** (`agents/`, on `androidx.appfunctions` 1.0.0-beta01): the five functions through the matcher and the normal logging path. An ambiguous product returns candidates with the quantity each would log. `undoLastNrtEntry` stops at the last restore from backup. `docs/APPFUNCTIONS.md` and `scripts/appfunctions.sh` cover the phone run.
 - **Strings** for each feature are in their own `strings_*.xml`, which `checkCopy` reads too.
+
+## Wave D (24 October)
+
+- **Goals in stats** (`programme/GoalProgress.kt`, `GoalWeeks`, `GapNote`): "Your goals" in Insights after Habits, a line per goal on the Plan tab's week, and the log sheet's spacing note when a dose comes sooner than the gap goal. It never blocks.
+- **Judged totals:** each result keeps the total it was judged on (`ProgrammeWeek.resultTotal`). Room version 4 adds `programme_weeks.resultTotalMicrograms`, and backups are format version 3, still reading 1 and 2. Week by week, the schedule and the missed-week sheet show the judged total.
+- **Advice in place:** Today's advice line, the tip after logging (`TipCard`, one a day per tag, kept in `ReminderStore`), after-a-slip advice from the running programme (`domain/advice/Slips`), and Insights' Triggers. The delay timer's end is a notice booked with AlarmManager on its own channel, and the app keeps a partial wake lock while it runs, since the booking can be a few minutes late on Android 12 and newer.
+- **Absorbed figures** (`domain/absorbed`, P9-1): each form's share with its range and sources, in whole micrograms, never used for a guide, allowance, result, achievement or Insights (a test reads the sources to check). Off by default, under Settings, Doses, "Absorbed amounts". When on, "about 1 mg absorbed" shows in the secondary colour on Today, History and the log sheet. Backups carry the setting.
+- **Onboarding** has 8 steps, with reminders between the day start and done. Notifications are asked once: there, or at the first reminder switched on in Settings.
 
 ## How design and copy are reviewed
 
