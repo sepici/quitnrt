@@ -491,7 +491,8 @@ private fun EachDay(state: InsightsState) {
                 }
             }
         }
-        state.daysWithin?.let { DaysWithinLine(it) }
+        // Habits has the days within the guide, except for patches alone, when it's left out.
+        if (state.onlyPatches) state.daysWithin?.let { DaysWithinLine(it) }
     }
 }
 

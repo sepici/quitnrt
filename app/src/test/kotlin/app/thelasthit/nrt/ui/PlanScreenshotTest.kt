@@ -13,9 +13,11 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.core.app.ApplicationProvider
 import app.thelasthit.nrt.GUM_4
+import app.thelasthit.nrt.QUICKMIST
 import app.thelasthit.nrt.TestApp
 import app.thelasthit.nrt.TestApp.Companion.london
 import app.thelasthit.nrt.data.repo.LogRequest
+import app.thelasthit.nrt.domain.creature.Creature
 import app.thelasthit.nrt.seedMockupPlan
 import app.thelasthit.nrt.seedPlan
 import app.thelasthit.nrt.seedWeek
@@ -88,13 +90,31 @@ class PlanScreenshotTest {
         compose.captureLooks("today-plan-nrt-free", ready = meter) { Today() }
     }
 
-    /** A plan from tomorrow: the week is still Monday to Sunday, and Gary is out at full HP. */
+    /** A plan from tomorrow: the week is still Monday to Sunday, and Gary lurks until its first day. */
     @Test @Config(qualifiers = FULL_PAGE)
     fun todayPlanStartsTomorrow() {
         app.setUp()
         app.seedWeek()
         app.seedPlan(start = LocalDate.parse("2026-10-24"), spend = 0)
         compose.captureLooks("today-plan-tomorrow", ready = hasText("Your plan starts tomorrow.")) { Today() }
+    }
+
+    /** A 1 mg spray in an NRT-free week: a small fill on a track that runs to the usual day. */
+    @Test @Config(qualifiers = FULL_PAGE)
+    fun todayPlanNrtFreeSlip() {
+        app.setUp()
+        app.seedPlan(start = LocalDate.parse("2026-08-07"), spend = 8)
+        runBlocking { app.graph.entries.log(LogRequest(QUICKMIST, at = london("2026-10-23T14:00"))) }
+        compose.captureLooks("today-plan-nrt-free-slip", ready = hasContentDescription("over the 0 mg guide", substring = true)) { Today() }
+    }
+
+    /** A long name with hits ready: the chip drops under the name rather than cutting it. */
+    @Test @Config(qualifiers = FULL_PAGE)
+    fun todayPlanLongName() {
+        app.setUp()
+        runBlocking { app.graph.settings.setDemon("Bartholomew Grimsby III", Creature.DRAGON, "forest") }
+        app.seedPlan()
+        compose.captureLooks("today-plan-long-name", ready = hasContentDescription("Bartholomew Grimsby III, 120 of 120 HP", substring = true)) { Today() }
     }
 
     @Test @Config(qualifiers = FULL_PAGE)

@@ -20,6 +20,7 @@
     <string name="today_plan_week_over">%1$s\u00A0mg over this week\'s allowance.</string>
     <string name="today_plan_week_free">An NRT-free week.</string>
     <string name="today_plan_awaiting">Week %1$d\'s result comes in after today, so late logs still count.</string>
+    <string name="today_plan_awaiting_overtime">Overtime\'s result comes in after today, so late logs still count.</string>
     <string name="today_plan_starts_tomorrow">Your plan starts tomorrow.</string>
     <string name="today_plan_starts_on">Your plan starts on %1$s.</string>
     <string name="today_plan_key_used">Used</string>
@@ -50,6 +51,12 @@
         <item quantity="one">At or under the guide on %1$d of %2$d\u00A0day.</item>
         <item quantity="other">At or under the guide on %1$d of %2$d\u00A0days.</item>
     </plurals>
+    <!-- A Habits tile, or under Each day for a plan of patches alone, where Habits has nothing to show -->
+    <string name="insights_days_within_title">Days within the guide</string>
+    <plurals name="insights_days_within_value">
+        <item quantity="one">%1$d of %2$d\u00A0day</item>
+        <item quantity="other">%1$d of %2$d\u00A0days</item>
+    </plurals>
     <string name="insights_row_mg_guide">%1$s\u00A0mg, guide %2$s\u00A0mg</string>
     <string name="insights_row_mg_so_far_guide">%1$s\u00A0mg so far, guide %2$s\u00A0mg</string>
     <string name="insights_row_mg_a_day_guide">%1$s\u00A0mg a day, guide %2$s\u00A0mg</string>
@@ -62,15 +69,27 @@
     <string name="insights_weeks_meta">Each week of your plan against its allowance.</string>
     <string name="insights_weeks_name">Week %1$d</string>
     <string name="insights_weeks_overtime">Overtime</string>
+    <string name="insights_weeks_overtime_n">Overtime %1$d</string>
     <string name="insights_weeks_value">%1$s of %2$s\u00A0mg</string>
+    <string name="insights_weeks_value_so_far">%1$s of %2$s\u00A0mg so far</string>
     <string name="insights_weeks_dates">%1$s, %2$s to %3$s</string>
     <string name="insights_weeks_row">%1$s, %2$s</string>
     <string name="insights_weeks_summary_week">%1$s, %2$s, %3$s.</string>
+    <string name="insights_weeks_summary_running">%1$s, %2$s.</string>
     <string name="insights_weeks_met">met</string>
-    <string name="insights_weeks_met_paid_back">met, paid back week %1$d</string>
-    <string name="insights_weeks_met_paid_back_weeks">met, paid back weeks %1$d to %2$d</string>
     <string name="insights_weeks_missed">missed</string>
+    <!-- A result stays as it came in, so a total changed since by a late log or a delete says so -->
+    <string name="insights_weeks_met_then">met when its result came in</string>
+    <string name="insights_weeks_missed_then">missed when its result came in</string>
+    <!-- After "met" or "missed", following a comma -->
+    <string name="insights_weeks_paid_back">paid back week %1$d</string>
+    <string name="insights_weeks_paid_back_weeks">paid back weeks %1$d to %2$d</string>
+    <string name="insights_weeks_back_if">back if week %1$d is met</string>
+    <string name="insights_weeks_back_if_overtime">back if overtime is met</string>
+    <string name="insights_weeks_back_if_overtime_n">back if overtime %1$d is met</string>
     <string name="insights_weeks_caught_up_in">caught up in week %1$d</string>
+    <string name="insights_weeks_caught_up_in_overtime">caught up in overtime</string>
+    <string name="insights_weeks_caught_up_in_overtime_n">caught up in overtime %1$d</string>
     <string name="insights_weeks_caught_up">caught up later</string>
     <string name="insights_weeks_running">this week, so far</string>
     <string name="insights_weeks_waiting">its result comes in after today</string>
@@ -83,7 +102,8 @@
     <!-- The calendar against the guide -->
     <string name="insights_calendar_meta_guide">Each day shaded by mg against its daily guide.</string>
     <string name="insights_calendar_meta_guide_table">Total mg each day, against its daily guide.</string>
-    <string name="insights_calendar_meta_guide_before">Days before your plan are against your usual day of %1$s\u00A0mg.</string>
+    <string name="insights_calendar_meta_guide_before">Days before your plan are shaded against your usual day of %1$s\u00A0mg.</string>
+    <string name="insights_calendar_meta_guide_before_table">Days before your plan are compared with your usual day of %1$s\u00A0mg.</string>
     <string name="insights_calendar_unit_guide">of the guide</string>
     <string name="insights_calendar_summary_guide">Calendar of mg each day, shaded against its daily guide.</string>
 </resources>

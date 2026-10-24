@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -23,6 +24,8 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -68,16 +71,18 @@ fun DemonHpBand(state: DemonState, onOpenLair: () -> Unit, modifier: Modifier = 
                 role = Role.Button
             },
     ) {
-        Row(Modifier.fillMaxWidth().heightIn(min = 32.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                name,
-                style = LastHit.type.headline.copy(fontSize = 22.sp, lineHeight = 28.sp, letterSpacing = (-0.02).em),
-                color = colors.stageText,
-                maxLines = 1,
-                modifier = Modifier.weight(1f),
-            )
-            if (ready != null) ReadyChip(ready)
-        }
+        NameAndChip(
+            name = {
+                Text(
+                    name,
+                    style = LastHit.type.headline.copy(fontSize = 22.sp, lineHeight = 28.sp, letterSpacing = (-0.02).em),
+                    color = colors.stageText,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            },
+            chip = ready?.let { { ReadyChip(it) } },
+        )
         HpBar(hp = hp, maxHp = balance.maxHp, modifier = Modifier.padding(top = 10.dp))
         Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(stringResource(R.string.demon_band_hp_value, hp, balance.maxHp), style = LastHit.type.pixel, color = colors.stageText)
@@ -91,13 +96,52 @@ fun DemonHpBand(state: DemonState, onOpenLair: () -> Unit, modifier: Modifier = 
     }
 }
 
+/**
+ * The demon's [name] with the [chip] for banked hits at the end of its line, as the mockups have
+ * them. A long name (up to 24 letters) and the chip don't always fit side by side, so then the
+ * chip drops to a line of its own under the name, and a name too long even for its own line ends
+ * in an ellipsis rather than being cut through a letter.
+ */
+@Composable
+private fun NameAndChip(name: @Composable () -> Unit, chip: (@Composable () -> Unit)?) {
+    Layout(
+        content = {
+            name()
+            chip?.invoke()
+        },
+        modifier = Modifier.fillMaxWidth(),
+    ) { measurables, constraints ->
+        val width = constraints.maxWidth
+        val loose = constraints.copy(minWidth = 0, minHeight = 0)
+        val badge = measurables.getOrNull(1)?.measure(loose)
+        val gap = 8.dp.roundToPx()
+        val line = 32.dp.roundToPx()
+        val beside = badge == null || measurables[0].maxIntrinsicWidth(Constraints.Infinity) + gap + badge.width <= width
+        if (beside) {
+            val label = measurables[0].measure(loose.copy(maxWidth = (width - (badge?.let { it.width + gap } ?: 0)).coerceAtLeast(0)))
+            val height = maxOf(line, label.height, badge?.height ?: 0)
+            layout(width, height) {
+                label.place(0, (height - label.height) / 2)
+                badge?.place(width - badge.width, (height - badge.height) / 2)
+            }
+        } else {
+            val label = measurables[0].measure(loose)
+            val top = maxOf(line, label.height)
+            val chipTop = top + 4.dp.roundToPx()
+            layout(width, chipTop + badge!!.height) {
+                label.place(0, (top - label.height) / 2)
+                badge.place(0, chipTop)
+            }
+        }
+    }
+}
+
 /** Banked hits, as a marigold chip with a darker edge along its bottom, like a pixel button. */
 @Composable
 private fun ReadyChip(text: String) {
     val colors = LastHit.colors
     Box(
         Modifier
-            .padding(start = 8.dp)
             .heightIn(min = 32.dp)
             .drawBehind {
                 drawRect(colors.marigold)

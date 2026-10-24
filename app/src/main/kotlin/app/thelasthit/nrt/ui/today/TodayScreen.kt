@@ -149,12 +149,14 @@ fun TodayScreen(
         }
         item {
             val demon = current.demon
-            if (demon != null) {
+            // The demon row is written when the plan is confirmed, but Gary lurks until its first
+            // day (PLAN §7.1), as the lair says. Once it has started, the band stays out until the end.
+            if (demon != null && current.planStartsOn == null) {
                 DemonHpBand(demon, onOpenLair = onOpenLair, modifier = Modifier.padding(top = 28.dp))
             } else {
                 DemonBand(
-                    name = current.demonName,
-                    creature = current.creature,
+                    name = demon?.demon?.name ?: current.demonName,
+                    creature = demon?.demon?.creature ?: current.creature,
                     onOpenLair = onOpenLair,
                     modifier = Modifier.padding(top = 28.dp),
                 )

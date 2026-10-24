@@ -405,7 +405,7 @@ private fun DrawScope.drawMarker(centre: Float, width: Float, y: Float, colors: 
 /**
  * A week's [mark] as a dot [size] across under its column, with its [label] inside when it fits
  * and under it when it doesn't: met is green with the label in the page's colour, caught up is on
- * the neutral tint, missed and waiting are outlined, and the week running is ringed.
+ * the neutral tint inside a ring, missed and waiting are outlined, and the week running is ringed.
  */
 private fun DrawScope.drawMark(
     mark: ColumnMark,
@@ -421,7 +421,11 @@ private fun DrawScope.drawMark(
     val outline = 1.5.dp.toPx()
     when (mark) {
         ColumnMark.MET -> drawCircle(colors.success, radius, middle)
-        ColumnMark.CAUGHT_UP -> drawCircle(colors.sunk, radius, middle)
+        // The tint alone is too faint against the page, so it has the outline's ring as well.
+        ColumnMark.CAUGHT_UP -> {
+            drawCircle(colors.sunk, radius, middle)
+            drawCircle(colors.lineStrong, radius - outline / 2, middle, style = Stroke(outline))
+        }
         ColumnMark.MISSED -> drawCircle(colors.lineStrong, radius - outline / 2, middle, style = Stroke(outline))
         ColumnMark.WAITING -> drawCircle(
             colors.lineStrong,

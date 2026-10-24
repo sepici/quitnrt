@@ -53,7 +53,10 @@ data class TodayState(
     val plan: PlanToday? = null,
     /** The day a plan that hasn't started yet begins. */
     val planStartsOn: LocalDate? = null,
-    /** The demon once a plan has started, with its HP and banked hits from the ledger. */
+    /**
+     * The demon once a plan is confirmed, with its HP and banked hits from the ledger. It steps
+     * out on the plan's first day: until then, [planStartsOn] is set and it lurks.
+     */
     val demon: DemonState? = null,
 ) {
     fun nameOf(entry: Entry): String = productNames[entry.productId] ?: entry.productName

@@ -3,6 +3,7 @@ package app.thelasthit.nrt.ui.insights
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
@@ -20,12 +21,16 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.domain.insights.CalendarHeat
 import app.thelasthit.nrt.domain.insights.DaysWithin
 import app.thelasthit.nrt.domain.insights.PlanGuides
-import app.thelasthit.nrt.domain.programme.WeekKind
 import app.thelasthit.nrt.domain.programme.WeekReport
 import app.thelasthit.nrt.ui.components.TickDot
 import app.thelasthit.nrt.ui.components.drawBackArc
@@ -43,7 +48,7 @@ private const val LABEL_EVERY_WEEK = 13
 /**
  * Week by week (PLAN §10): each week of the plan so far as a column of what was used, with its
  * allowance as a marker across it and how it went on a dot under it: green for met, the neutral
- * tint for missed then caught up, an outline for missed. The table lists the same.
+ * tint in a ring for missed then caught up, an outline for missed. The table lists the same.
  */
 @Composable
 internal fun PlanWeeksSection(state: InsightsState) {
@@ -64,9 +69,7 @@ internal fun PlanWeeksSection(state: InsightsState) {
         Meta(stringResource(R.string.insights_weeks_meta))
         if (asTable) {
             ChartTable(
-                weeks.reversed().map { report ->
-                    weekName(report) to stringResource(R.string.insights_weeks_row, weekValue(report), weekState(report))
-                },
+                weeks.reversed().map { report -> weekName(report) to weekRow(report, weeks) },
                 Modifier.padding(top = 14.dp),
             )
         } else {
@@ -83,14 +86,14 @@ internal fun PlanWeeksSection(state: InsightsState) {
             MgColumns(
                 columns = columns,
                 line = null,
-                description = weeks.map { stringResource(R.string.insights_weeks_summary_week, weekName(it), weekValue(it), weekState(it)) }
+                description = weeks.map { weekSummary(it, weeks) }
                     .plus(stringResource(R.string.insights_summary_table_weeks))
                     .joinToString(" "),
                 selected = selected,
                 onSelect = { selected = it },
                 tip = { index ->
                     val report = weeks[index]
-                    ChartTip(weekValue(report), listOf(weekDates(report), weekState(report).sentence()))
+                    ChartTip(weekValue(report), listOf(weekDates(report), weekState(report, weeks).sentence()))
                 },
                 modifier = Modifier.padding(top = 18.dp),
             )
@@ -115,14 +118,38 @@ private val WeekReport.State.mark: ColumnMark
         WeekReport.State.CAUGHT_UP -> ColumnMark.CAUGHT_UP
     }
 
-/** "Week 4", or "Overtime" for the NRT-free weeks after a missed final one. */
+/**
+ * "Week 4", or for the NRT-free weeks after a missed final one, "Overtime", then "Overtime 2" and
+ * so on, so two overtime weeks can be told apart.
+ */
 @Composable
-private fun weekName(report: WeekReport): String =
-    if (report.week.kind == WeekKind.OVERTIME) stringResource(R.string.insights_weeks_overtime) else stringResource(R.string.insights_weeks_name, report.week.number)
+private fun weekName(report: WeekReport): String = when (val overtime = report.overtime) {
+    null -> stringResource(R.string.insights_weeks_name, report.week.number)
+    1 -> stringResource(R.string.insights_weeks_overtime)
+    else -> stringResource(R.string.insights_weeks_overtime_n, overtime)
+}
 
 /** "128 of 133 mg". */
 @Composable
 private fun weekValue(report: WeekReport): String = stringResource(R.string.insights_weeks_value, report.total.mgText(), report.allowance.mgText())
+
+/** A table row's value: "128 of 133 mg, met, paid back week 1", or for this week "61 of 98 mg so far". */
+@Composable
+private fun weekRow(report: WeekReport, weeks: List<WeekReport>): String =
+    if (report.state == WeekReport.State.RUNNING) {
+        stringResource(R.string.insights_weeks_value_so_far, report.total.mgText(), report.allowance.mgText())
+    } else {
+        stringResource(R.string.insights_weeks_row, weekValue(report), weekState(report, weeks))
+    }
+
+/** What a screen reader hears for a week: "Week 2, 128 of 133 mg, met, paid back week 1." */
+@Composable
+private fun weekSummary(report: WeekReport, weeks: List<WeekReport>): String =
+    if (report.state == WeekReport.State.RUNNING) {
+        stringResource(R.string.insights_weeks_summary_running, weekName(report), weekRow(report, weeks))
+    } else {
+        stringResource(R.string.insights_weeks_summary_week, weekName(report), weekValue(report), weekState(report, weeks))
+    }
 
 /** "Week 2, 31 October to 6 November", with the month once when both ends share it. */
 @Composable
@@ -134,21 +161,49 @@ private fun weekDates(report: WeekReport): String {
 }
 
 /**
- * How the week went, in the Plan tab's words, to follow a comma: "met, paid back week 1", "caught
- * up in week 2". A tip starts with it, so gives it its capital.
+ * How the week went, in the Plan tab's words, to follow a comma: "met, paid back week 1", "missed,
+ * back if week 4 is met", "caught up in week 2". A tip starts with it, so gives it its capital.
+ *
+ * A result stays as it came in, so when a late log or a delete has since taken the total to the
+ * other side of the allowance, it says the result is the one that came in: "met when its result
+ * came in". Other weeks are named as [weekName] names them, from [weeks].
  */
 @Composable
-private fun weekState(report: WeekReport): String = when (report.state) {
-    WeekReport.State.RUNNING -> stringResource(R.string.insights_weeks_running)
-    WeekReport.State.WAITING -> stringResource(R.string.insights_weeks_waiting)
-    WeekReport.State.MISSED -> stringResource(R.string.insights_weeks_missed)
-    WeekReport.State.CAUGHT_UP -> report.caughtUpBy?.let { stringResource(R.string.insights_weeks_caught_up_in, it) }
-        ?: stringResource(R.string.insights_weeks_caught_up)
-    WeekReport.State.MET -> when (report.paidBack.size) {
-        0 -> stringResource(R.string.insights_weeks_met)
-        1 -> stringResource(R.string.insights_weeks_met_paid_back, report.paidBack.single())
-        else -> stringResource(R.string.insights_weeks_met_paid_back_weeks, report.paidBack.first(), report.paidBack.last())
+private fun weekState(report: WeekReport, weeks: List<WeekReport>): String {
+    fun overtimeOf(number: Int): Int? = weeks.firstOrNull { it.week.number == number }?.overtime
+    val state = report.state
+    if (state == WeekReport.State.RUNNING) return stringResource(R.string.insights_weeks_running)
+    if (state == WeekReport.State.WAITING) return stringResource(R.string.insights_weeks_waiting)
+    val judged = if (state == WeekReport.State.MET) {
+        stringResource(if (report.changedSince) R.string.insights_weeks_met_then else R.string.insights_weeks_met)
+    } else {
+        stringResource(if (report.changedSince) R.string.insights_weeks_missed_then else R.string.insights_weeks_missed)
     }
+    val then = when (state) {
+        WeekReport.State.MET -> when (report.paidBack.size) {
+            0 -> null
+            1 -> stringResource(R.string.insights_weeks_paid_back, report.paidBack.single())
+            else -> stringResource(R.string.insights_weeks_paid_back_weeks, report.paidBack.first(), report.paidBack.last())
+        }
+        WeekReport.State.MISSED -> report.backIfMet?.let { number ->
+            when (val overtime = overtimeOf(number)) {
+                null -> stringResource(R.string.insights_weeks_back_if, number)
+                1 -> stringResource(R.string.insights_weeks_back_if_overtime)
+                else -> stringResource(R.string.insights_weeks_back_if_overtime_n, overtime)
+            }
+        }
+        else -> {
+            val by = report.caughtUpBy
+            val caughtUp = when (val overtime = by?.let(::overtimeOf)) {
+                null -> if (by == null) stringResource(R.string.insights_weeks_caught_up) else stringResource(R.string.insights_weeks_caught_up_in, by)
+                1 -> stringResource(R.string.insights_weeks_caught_up_in_overtime)
+                else -> stringResource(R.string.insights_weeks_caught_up_in_overtime_n, overtime)
+            }
+            // "Caught up" says it was missed, so it stands alone unless the total has changed since.
+            if (!report.changedSince) return caughtUp else caughtUp
+        }
+    }
+    return if (then == null) judged else stringResource(R.string.insights_weeks_row, judged, then)
 }
 
 /** The key's sample for an allowance: the marker the chart draws across a column. */
@@ -162,7 +217,8 @@ private fun AllowanceKey() {
 
 /**
  * The key's sample for a week's mark: the dot the chart draws, with the Plan tab's sign for it in
- * place of the number, a tick, a minus or the arc back, as the Plan mockups' key has them.
+ * place of the number, a tick, a minus or the arc back, as the Plan mockups' key has them. Caught
+ * up has the chart's ring around its tint, so it matches the dot it explains.
  */
 @Composable
 private fun MarkKey(mark: ColumnMark) {
@@ -178,6 +234,7 @@ private fun MarkKey(mark: ColumnMark) {
             }
             ColumnMark.CAUGHT_UP -> {
                 drawCircle(colors.sunk)
+                drawCircle(colors.lineStrong, size.minDimension / 2 - outline / 2, style = Stroke(outline))
                 drawBackArc(center, box, colors.text, stroke * 0.85f)
             }
             else -> {
@@ -188,7 +245,11 @@ private fun MarkKey(mark: ColumnMark) {
     }
 }
 
-/** Under the daily chart: "At or under the guide on 18 of 22 days.", with the guide's green tick. */
+/**
+ * Under the daily chart: "At or under the guide on 18 of 22 days.", with the guide's green tick.
+ * Only for a plan of patches alone, where Habits, which has it as a tile (PLAN §10), has nothing
+ * to show.
+ */
 @Composable
 internal fun DaysWithinLine(days: DaysWithin) {
     val colors = LastHit.colors
@@ -204,6 +265,30 @@ internal fun DaysWithinLine(days: DaysWithin) {
     }
 }
 
+/** Habits' tile for the days within the guide (PLAN §10): "19 of 25 days", the numbers large. */
+@Composable
+internal fun DaysWithinTile(days: DaysWithin, modifier: Modifier = Modifier) {
+    val text = pluralStringResource(R.plurals.insights_days_within_value, days.days, days.within, days.days)
+    Tile(stringResource(R.string.insights_days_within_title), modifier.fillMaxWidth()) {
+        TileValue(numbersLarge(text))
+    }
+}
+
+/** A tile value's words, a size down from its numbers, as Habits' durations have their units. */
+private val HabitTileSmall = SpanStyle(fontSize = 18.sp, letterSpacing = (-0.3).sp)
+
+/** [text] with its numbers at the tile's size and its words a size down, as "3 h 23 min" has them. */
+private fun numbersLarge(text: String): AnnotatedString = buildAnnotatedString {
+    var start = 0
+    while (start < text.length) {
+        val digit = text[start].isDigit()
+        var end = start
+        while (end < text.length && text[end].isDigit() == digit) end++
+        if (digit) append(text.substring(start, end)) else withStyle(HabitTileSmall) { append(text.substring(start, end)) }
+        start = end
+    }
+}
+
 @Composable
 internal fun daysWithinText(days: DaysWithin): String =
     pluralStringResource(R.plurals.insights_days_within, days.days, days.within, days.days)
@@ -216,7 +301,9 @@ internal fun guideCalendarMeta(guides: PlanGuides, calendar: CalendarHeat, asTab
     val tracked = calendar.weeks.flatten().filter { it.state == CalendarHeat.State.TRACKED }.map { it.date }
     val first = stringResource(if (asTable) R.string.insights_calendar_meta_guide_table else R.string.insights_calendar_meta_guide)
     return if (guides.hasDaysBefore(tracked)) {
-        first + " " + stringResource(R.string.insights_calendar_meta_guide_before, guides.usualDay.mgText())
+        // The table shades nothing, so it says what the days are compared with.
+        val before = if (asTable) R.string.insights_calendar_meta_guide_before_table else R.string.insights_calendar_meta_guide_before
+        first + " " + stringResource(before, guides.usualDay.mgText())
     } else {
         first
     }

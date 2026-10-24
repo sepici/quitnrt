@@ -87,7 +87,8 @@ class GuideDaysTest {
         assertEquals(12, first.plannedWeeks)
         assertEquals(Dose.mg(20), first.guide)
         assertEquals(Dose.mg(140), first.allowance)
-        assertNull(first.awaitingResultOf)
+        assertNull(first.awaiting)
+        assertEquals(Dose.mg(20), first.scale)
 
         // Thursday 19 November is day 6 of week 4, from Saturday 14 November, at 14 mg a day.
         val fourth = checkNotNull(PlanToday.of(programme, date("2026-11-19")))
@@ -110,16 +111,42 @@ class GuideDaysTest {
         assertTrue(today.isNrtFree)
         assertEquals(12, today.plannedWeeks)
         assertEquals(3, today.day)
-        assertNull(today.awaitingResultOf)
+        assertNull(today.awaiting)
     }
 
     @Test
     fun `waiting for the final result, today is the overtime that would follow`() {
         val waiting = checkNotNull(PlanToday.of(programme, date("2027-01-16")))
-        assertEquals(12, waiting.awaitingResultOf)
+        assertEquals(12, waiting.awaiting?.number)
+        assertEquals(WeekKind.PLANNED, waiting.awaiting?.kind)
         assertTrue(waiting.isOvertime)
         assertEquals(1, waiting.day)
         assertEquals(Dose.ZERO, waiting.guide)
+    }
+
+    @Test
+    fun `waiting for an overtime week's result, it's overtime that's awaited`() {
+        // Week 12 missed, so overtime runs from 16 to 22 January. The day after, its result is due.
+        val overtime = play(programme, "mmmmmmmmmmmx").programme
+        val waiting = checkNotNull(PlanToday.of(overtime, date("2027-01-23")))
+        assertEquals(13, waiting.awaiting?.number)
+        assertEquals(WeekKind.OVERTIME, waiting.awaiting?.kind)
+        assertEquals(1, overtime.overtimeNumber(checkNotNull(waiting.awaiting)))
+        // Today is the overtime that would follow, the second.
+        assertEquals(14, waiting.week.number)
+        assertEquals(2, overtime.overtimeNumber(waiting.week))
+        assertNull(overtime.overtimeNumber(overtime.week(12)))
+    }
+
+    @Test
+    fun `an NRT-free week is drawn against the usual day, so a slip draws small`() {
+        val nrtFree = checkNotNull(PlanToday.of(programme, date("2027-01-04")))
+        assertTrue(nrtFree.isNrtFree)
+        assertEquals(Dose.ZERO, nrtFree.guide)
+        // 12 pieces of 2 mg gum.
+        assertEquals(Dose.mg(24), nrtFree.usualDay)
+        assertEquals(Dose.mg(24), nrtFree.scale)
+        assertEquals(Dose.mg(14), checkNotNull(PlanToday.of(programme, date("2026-11-19"))).scale)
     }
 
     @Test

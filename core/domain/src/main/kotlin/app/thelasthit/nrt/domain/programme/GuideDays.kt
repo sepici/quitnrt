@@ -54,6 +54,14 @@ fun Programme.isWithinGuide(date: LocalDate, total: Dose, today: LocalDate): Boo
 }
 
 /**
+ * Which overtime week [week] is, from 1, or null for a week of the plan as built or a repeat.
+ * Overtime only follows the final week, so it's the weeks after every other kind. [week] can be
+ * the overtime [guideWeekOn] makes up while the final result is due, which isn't one of [weeks].
+ */
+fun Programme.overtimeNumber(week: ProgrammeWeek): Int? =
+    if (week.kind != WeekKind.OVERTIME) null else week.number - weeks.count { it.kind != WeekKind.OVERTIME }
+
+/**
  * Where today sits in the running plan, for Today: the programme [week] it falls in and which
  * [day] of it, 1 to 7. Programme weeks run from the start day picked, so Today's week follows
  * them rather than Mondays (ROADMAP P3-2).
@@ -64,10 +72,13 @@ data class PlanToday(
     /** The plan's weeks as built, with repeats and without overtime: the 12 of "Week 4 of 12". */
     val plannedWeeks: Int,
     /**
-     * The final week whose result is still to come, while [week] is the overtime it would start
-     * if it's missed. Null the rest of the time.
+     * The last week, whose result is still to come, while [week] is the overtime it would start
+     * if it's missed. It's the final planned week, or an overtime week when overtime has already
+     * begun. Null the rest of the time.
      */
-    val awaitingResultOf: Int?,
+    val awaiting: ProgrammeWeek?,
+    /** The usual day the plan steps down from, which an NRT-free week is drawn against. */
+    val usualDay: Dose,
 ) {
     init {
         require(day in 1..WeekTarget.DAYS) { "A week has days 1 to ${WeekTarget.DAYS}: $day" }
@@ -81,6 +92,13 @@ data class PlanToday(
 
     val isOvertime: Boolean get() = week.kind == WeekKind.OVERTIME
 
+    /**
+     * What today's meter measures against: the daily guide, or in an NRT-free week, where the
+     * guide is nothing, the usual day. Against nothing, any use at all would fill the meter, so
+     * this way a small slip draws small (PLAN §6.4: nothing shames).
+     */
+    val scale: Dose get() = if (guide > Dose.ZERO) guide else usualDay
+
     /** Today's [total] against the daily guide. */
     fun today(total: Dose): AgainstGuide = AgainstGuide(total, guide)
 
@@ -92,8 +110,8 @@ data class PlanToday(
         fun of(programme: Programme, today: LocalDate): PlanToday? {
             val week = programme.guideWeekOn(today) ?: return null
             val day = ChronoUnit.DAYS.between(week.startDate, today).toInt() + 1
-            val awaiting = if (week.number > programme.weeks.size) programme.weeks.last().number else null
-            return PlanToday(week, day, programme.weeks.count { it.kind != WeekKind.OVERTIME }, awaiting)
+            val awaiting = if (week.number > programme.weeks.size) programme.weeks.last() else null
+            return PlanToday(week, day, programme.weeks.count { it.kind != WeekKind.OVERTIME }, awaiting, programme.usualDay.total)
         }
     }
 }

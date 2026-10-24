@@ -29,6 +29,7 @@ import app.thelasthit.nrt.R
 import app.thelasthit.nrt.domain.dose.Dose
 import app.thelasthit.nrt.domain.log.WeekSummary
 import app.thelasthit.nrt.domain.programme.PlanToday
+import app.thelasthit.nrt.domain.programme.WeekKind
 import app.thelasthit.nrt.ui.components.GuideLineKey
 import app.thelasthit.nrt.ui.components.TickDot
 import app.thelasthit.nrt.ui.components.UsedKey
@@ -46,6 +47,8 @@ private const val GUIDE_AT = 0.7f
  * track, and the guide as a marker, never a fill. Under it, what's left with a green tick while
  * today stays at or under the guide, or how far over it is without one, and the guide's mg under
  * its marker. An NRT-free guide sits at the start of the track and says so in the line itself.
+ * With nothing to measure against, the track then runs to the usual day ([PlanToday.scale]), so
+ * a small slip is a small fill rather than a full track.
  */
 @Composable
 internal fun GuideMeter(plan: PlanToday, total: Dose, modifier: Modifier = Modifier) {
@@ -60,9 +63,10 @@ internal fun GuideMeter(plan: PlanToday, total: Dose, modifier: Modifier = Modif
         else -> stringResource(R.string.today_plan_over, against.over.mgText())
     }
     val description = stringResource(R.string.today_plan_meter_description, total.mgText(), guide.mgText(), status)
-    // The guide sits at 70% of the track, so the end of the track is 10/7 of it, until today goes past that.
-    val end = maxOf(guide.micrograms * 10 / 7, total.micrograms)
-    val used = if (end == 0L) 0f else total.micrograms.toFloat() / end
+    // The guide sits at 70% of the track, so the end of the track is 10/7 of it, until today goes
+    // past that. An NRT-free track ends at the usual day, and a day past that fills it.
+    val end = if (plan.isNrtFree) plan.scale.micrograms else maxOf(guide.micrograms * 10 / 7, total.micrograms)
+    val used = if (end == 0L) 0f else (total.micrograms.toFloat() / end).coerceAtMost(1f)
     val mark = if (end == 0L) 0f else guide.micrograms.toFloat() / end
     Column(modifier.fillMaxWidth().clearAndSetSemantics { contentDescription = description }) {
         Canvas(Modifier.fillMaxWidth().height(26.dp)) {
@@ -165,16 +169,26 @@ internal fun PlanWeekSection(plan: PlanToday, week: WeekSummary) {
                 modifier = Modifier.padding(top = 4.dp),
             )
         }
-        Spacer(Modifier.height(28.dp))
+        // 40 dp from the line above to the top of the bars, as the mockups' .pl-cols, less the room
+        // the columns keep for their numbers. An NRT-free week has no bars (.pl-nobar), so its
+        // numbers sit 24 dp down.
+        Spacer(Modifier.height(if (plan.isNrtFree) 24.dp else 40.dp - WeekColumnsLabelRoom))
         WeekColumns(week, guide = plan.guide)
-        PlanWeekKey(plan, used = week.days.any { it.total > Dose.ZERO })
+        PlanWeekKey(plan)
     }
 }
 
 /** "Week 4 of 12, day 5. 37 mg left this week." */
 @Composable
 private fun weekMeta(plan: PlanToday, left: Dose, over: Dose, within: Boolean): String {
-    plan.awaitingResultOf?.let { return stringResource(R.string.today_plan_awaiting, it) }
+    plan.awaiting?.let { awaiting ->
+        // Today calls every overtime week "Overtime", so the one awaited isn't given its number.
+        return if (awaiting.kind == WeekKind.OVERTIME) {
+            stringResource(R.string.today_plan_awaiting_overtime)
+        } else {
+            stringResource(R.string.today_plan_awaiting, awaiting.number)
+        }
+    }
     val where = if (plan.isOvertime) {
         stringResource(R.string.today_plan_overtime_meta, plan.day)
     } else {
@@ -189,10 +203,10 @@ private fun weekMeta(plan: PlanToday, left: Dose, over: Dose, within: Boolean): 
     return "$where $rest"
 }
 
-/** The key under the columns: used, the guide's line and the green dot, or for an NRT-free week the dot alone. */
+/** The key under the columns: used, the guide's line and the green dot, or for an NRT-free week, with no bars, the dot alone. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun PlanWeekKey(plan: PlanToday, used: Boolean) {
+private fun PlanWeekKey(plan: PlanToday) {
     FlowRow(
         Modifier
             .padding(top = 14.dp)
@@ -200,7 +214,7 @@ private fun PlanWeekKey(plan: PlanToday, used: Boolean) {
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        if (!plan.isNrtFree || used) KeyItem({ UsedKey() }, stringResource(R.string.today_plan_key_used))
+        if (!plan.isNrtFree) KeyItem({ UsedKey() }, stringResource(R.string.today_plan_key_used))
         if (plan.isNrtFree) {
             KeyItem({ WithinKey() }, stringResource(R.string.today_plan_key_free))
         } else {

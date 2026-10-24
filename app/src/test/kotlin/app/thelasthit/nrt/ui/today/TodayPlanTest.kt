@@ -16,6 +16,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import app.thelasthit.nrt.GUM_2
 import app.thelasthit.nrt.GUM_4
+import app.thelasthit.nrt.QUICKMIST
 import app.thelasthit.nrt.TestApp
 import app.thelasthit.nrt.TestApp.Companion.london
 import app.thelasthit.nrt.data.repo.LogRequest
@@ -133,7 +134,7 @@ class TodayPlanTest {
     }
 
     @Test
-    fun `before the plan starts, Today is as it was, with the demon out`() {
+    fun `before the plan starts, Today is as it was, and Gary lurks`() {
         app.setUp()
         app.seedWeek()
         runBlocking {
@@ -146,7 +147,33 @@ class TodayPlanTest {
         compose.waitUntilAtLeastOneExists(hasText("Your plan starts tomorrow."), timeoutMillis = 5_000)
         compose.onNodeWithText("3 doses so far").assertExists()
         compose.onNode(hasContentDescription("Daily guide", substring = true)).assertDoesNotExist()
-        compose.onNode(hasContentDescription("Gary, 120 of 120 HP. Opens the lair.")).assertExists()
+        // The demon row is there from the plan's confirmation, but Gary steps out on its first day.
+        compose.onNode(hasContentDescription("Gary, lurking until your plan starts. HP unknown. Opens the lair.")).assertExists()
+        compose.onNode(hasContentDescription("of 120 HP", substring = true)).assertDoesNotExist()
+    }
+
+    @Test
+    fun `the day after an overtime week, its result is awaited as overtime`() {
+        app.setUp()
+        // A plan from Friday 24 July: week 12 is 9 to 15 October, and over its 0 mg guide, so
+        // overtime runs from 16 to 22 October. Its result comes in tomorrow morning.
+        runBlocking { app.graph.entries.log(LogRequest(GUM_2, at = london("2026-10-10T12:00"))) }
+        app.seedPlan(start = LocalDate.parse("2026-07-24"))
+        showToday()
+
+        compose.waitUntilAtLeastOneExists(hasText("Overtime's result comes in after today, so late logs still count."), timeoutMillis = 5_000)
+        compose.onNode(hasText("Week 13", substring = true)).assertDoesNotExist()
+    }
+
+    @Test
+    fun `a slip in an NRT-free week is over the 0 mg guide`() {
+        app.setUp()
+        app.seedPlan(start = LocalDate.parse("2026-08-07"))
+        runBlocking { app.graph.entries.log(LogRequest(QUICKMIST, at = london("2026-10-23T14:00"))) }
+        showToday()
+
+        waitForDescription("1 mg used. Daily guide 0 mg. 1 mg over the 0 mg guide.")
+        compose.onNodeWithText("Week 12 of 12, day 1. An NRT-free week.").assertExists()
     }
 
     @Test
