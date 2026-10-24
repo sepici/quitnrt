@@ -15,8 +15,11 @@ class AdviceCopyTest {
 
     /** Every piece of a strategy that shows on screen, labelled for failure messages. */
     private val texts: List<Pair<String, String>> = library.strategies.flatMap { strategy ->
-        listOf("${strategy.key} title" to strategy.title, "${strategy.key} body" to strategy.body) +
-            strategy.steps.mapIndexed { index, step -> "${strategy.key} step ${index + 1}" to step }
+        listOf(
+            "${strategy.key} title" to strategy.title,
+            "${strategy.key} summary" to strategy.summary,
+            "${strategy.key} body" to strategy.body,
+        ) + strategy.steps.mapIndexed { index, step -> "${strategy.key} step ${index + 1}" to step }
     } + library.quitlines.map { "${it.country} ${it.region ?: ""} quitline" to it.name }
 
     private fun problems(check: (String) -> String?): List<String> =
@@ -88,6 +91,27 @@ class AdviceCopyTest {
     }
 
     @Test
+    fun `every strategy has a summary for its row, a short phrase with no full stop`() {
+        val wrong = library.strategies.mapNotNull { s ->
+            val summary = s.summary
+            when {
+                summary.isBlank() -> "${s.key}: no summary"
+                !(summary.first().isUpperCase() || summary.first().isDigit()) -> "${s.key}: summary starts with \"${summary.first()}\""
+                summary.endsWith('.') -> "${s.key}: summary ends with a full stop"
+                summary.length > SUMMARY_LENGTH -> "${s.key}: summary is ${summary.length} characters"
+                else -> null
+            }
+        }
+        assertNone(wrong)
+    }
+
+    @Test
+    fun `the timers' strategies have the timers' own names, as the 4 Ds card and the timer pages use`() {
+        assertEquals("Delay", library.opening(Interactive.DELAY_TIMER).title)
+        assertEquals("Deep breaths", library.opening(Interactive.BREATHING_TIMER).title)
+    }
+
+    @Test
     fun `sentences start with a capital or a number and end with a full stop`() {
         val sentences = library.strategies.flatMap { s ->
             listOf("${s.key} body" to s.body) + s.steps.mapIndexed { i, step -> "${s.key} step ${i + 1}" to step }
@@ -154,5 +178,10 @@ class AdviceCopyTest {
             }
         }
         assertNone(wrong)
+    }
+
+    private companion object {
+        /** About two lines under a row's title on a phone at large font. */
+        const val SUMMARY_LENGTH = 64
     }
 }

@@ -46,6 +46,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import app.thelasthit.nrt.LastHitApp
 import app.thelasthit.nrt.R
+import app.thelasthit.nrt.ui.advice.AdviceRoutes
+import app.thelasthit.nrt.ui.advice.KeepScreenOnWhileTimersRun
+import app.thelasthit.nrt.ui.advice.advice
 import app.thelasthit.nrt.ui.game.UnlockHost
 import app.thelasthit.nrt.ui.history.HistoryScreen
 import app.thelasthit.nrt.ui.insights.InsightsScreen
@@ -110,7 +113,10 @@ fun AppShell() {
     val showMessage: (Int) -> Unit = { res -> shellScope.launch { snackbars.showSnackbar(resources.getString(res)) } }
     val colors = LastHit.colors
 
-    val inSettings = currentRoute?.startsWith(SettingsRoutes.MAIN) == true || PlanRoutes.isPage(currentRoute)
+    // Settings, the Plan tab's own pages and the advice pages hide the tab bar.
+    val hideTabs = currentRoute?.startsWith(SettingsRoutes.MAIN) == true ||
+        PlanRoutes.isPage(currentRoute) ||
+        AdviceRoutes.isAdvice(currentRoute)
     val graph = (LocalContext.current.applicationContext as LastHitApp).graph
     // Results that fell due while the app was away arrive when it comes back (ROADMAP P3-3).
     SettleOnStart { graph.programmes.settle() }
@@ -125,7 +131,7 @@ fun AppShell() {
             }
         },
         bottomBar = {
-            if (!inSettings) BottomBar(currentRoute, navController)
+            if (!hideTabs) BottomBar(currentRoute, navController)
         },
     ) { padding ->
         val direction = LocalLayoutDirection.current
@@ -165,7 +171,10 @@ fun AppShell() {
             planPages(navController, onOpenCatalogue = { navController.navigate(SettingsRoutes.CATALOGUE) })
             composable(TopLevelDestination.Lair.route) { LairScreen(toShelf = toShelf, onShelfShown = { toShelf = false }) }
             settings(navController, snackbars, showMessage)
+            advice(navController)
         }
+        // A running timer keeps the screen on, whichever page is showing.
+        KeepScreenOnWhileTimersRun()
         // Links and shortcuts show their snackbar, question or sheet over whichever page is open.
         LinkHost(snackbars)
         // New badges and gear slide in over whichever page is open.

@@ -15,6 +15,8 @@ internal data class AdviceFile(
     data class StrategyEntry(
         val key: String,
         val title: String,
+        /** Left out by test files. The bundled one gives every strategy a summary, which a test checks. */
+        val summary: String = "",
         val body: String,
         val steps: List<String>,
         val tags: List<String>,

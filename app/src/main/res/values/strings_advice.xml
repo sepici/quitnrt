@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The advice list and a strategy's page. -->
+    <string name="advice_back">Back</string>
+    <string name="advice_title">Advice</string>
+    <string name="advice_intro">Ways to handle a craving without a dose, from NHS, CDC and other public health guidance. Your own top triggers come first.</string>
+    <string name="advice_top_title">Your top triggers</string>
+    <string name="advice_top_window">From your last 14\u00A0days, by share of doses.</string>
+    <string name="advice_top_empty">Tag doses as you log them, and the advice for your most common triggers will come first here.</string>
+    <string name="advice_share">%1$d%% of doses</string>
+    <string name="advice_from_logs">From your logs:</string>
+    <string name="advice_try_before_meal">try %1$s, before %2$s</string>
+    <string name="advice_try_before_eating">try %1$s, before you eat</string>
+    <string name="advice_try_later">try %1$s this week, 15\u00A0minutes later</string>
+    <string name="advice_meal_breakfast">breakfast</string>
+    <string name="advice_meal_lunch">lunch</string>
+    <string name="advice_meal_dinner">dinner</string>
+    <string name="advice_timer_tag">Timer</string>
+    <string name="advice_ds_title">The 4 Ds</string>
+    <string name="advice_ds_body">For any craving, wherever you are.</string>
+    <string name="advice_ds_delay">Delay</string>
+    <string name="advice_ds_delay_sub">Wait 5 to 10\u00A0minutes while it peaks and passes</string>
+    <string name="advice_ds_breaths">Deep breaths</string>
+    <string name="advice_ds_breaths_sub">Box breathing or 4-7-8, for 1 to 3\u00A0minutes</string>
+    <string name="advice_ds_water">Drink water</string>
+    <string name="advice_ds_water_sub">A full glass, sipped slowly</string>
+    <string name="advice_ds_else">Do something else</string>
+    <string name="advice_ds_else_sub">Move, change rooms or keep your hands busy</string>
+    <string name="advice_every_title">Every strategy</string>
+    <string name="advice_every_body">By the kind of trigger they suit.</string>
+    <string name="advice_any_time">Any time</string>
+    <string name="advice_help_title">Free help</string>
+    <string name="advice_help_body_gb">A pharmacist or your local NHS stop smoking service can help you plan the pace of coming off NRT.</string>
+    <string name="advice_help_body">A pharmacist or your local stop smoking service can help you plan the pace of coming off NRT.</string>
+    <string name="advice_help_region">%1$s, %2$s</string>
+    <string name="advice_help_call">Call</string>
+    <string name="advice_help_call_description">Call %1$s</string>
+    <string name="advice_help_open">Open</string>
+    <string name="advice_help_open_description">Open the site for %1$s</string>
+    <string name="advice_fineprint">General information, not medical advice. If cravings are strong or keep coming back, talk to a pharmacist or your GP.</string>
+    <string name="advice_all">All advice</string>
+    <string name="advice_good_for">Good for</string>
+    <string name="advice_any_craving">Any craving</string>
+    <string name="advice_open_timer">Open the timer</string>
+    <string name="advice_logs_eyebrow">From your last 14\u00A0days</string>
+    <string name="advice_logs_share">%1$d of your %2$d doses were tagged %3$s.</string>
+    <string name="advice_logs_around">Most came around %1$s.</string>
+    <string name="advice_logs_first">Your first dose usually came around %1$s.</string>
+    <string name="advice_and">%1$s and %2$s</string>
+    <string name="advice_strip_description">%1$s doses by hour: %2$s. Try %3$s.</string>
+    <string name="advice_strip_hour">%1$d at %2$s</string>
+    <string name="advice_key_doses">Fewer to more doses</string>
+    <string name="advice_key_move">Move it here</string>
+    <string name="advice_tip_meal_one">Try having your dose at %1$s, before %2$s, instead of after.</string>
+    <string name="advice_tip_meal_many">Try having your dose at %1$s, before you eat, instead of after.</string>
+    <string name="advice_tip_later">Try having your first dose at %1$s this week, 15\u00A0minutes later than usual.</string>
+    <string name="advice_how_title">How to do it</string>
+    <string name="advice_also">Also for %1$s</string>
+    <string name="advice_based_on">Based on</string>
+    <string name="advice_source_own_label">Timing:</string>
+    <string name="advice_source_own">this app\'s own suggestion, from your logs.</string>
+    <string name="advice_checked">Checked %1$s. General information, not medical advice. If cravings are strong or keep coming back, talk to a pharmacist or your GP.</string>
+    <string name="advice_step_description">Step %1$d. %2$s</string>
+
+    <!-- Timers. Both keep the screen on while they run. -->
+    <string name="timer_min">%1$d\u00A0min</string>
+    <string name="timer_stop_back">Stop and go back</string>
+    <string name="timer_close">Close</string>
+    <string name="timer_done">Done</string>
+
+    <!-- The breathing timer. -->
+    <string name="breathing_title">Deep breaths</string>
+    <string name="breathing_intro">Breathing slowly can calm you while a craving passes. Follow the square and the count.</string>
+    <string name="breathing_pattern">Pattern</string>
+    <string name="breathing_box">Box breathing</string>
+    <string name="breathing_box_sub">In 4, hold 4, out 4, hold 4. Even and steady.</string>
+    <string name="breathing_box_lower">box breathing</string>
+    <string name="breathing_478">4-7-8 breathing</string>
+    <string name="breathing_478_sub">In 4, hold 7, out 8. A long, slow breath out.</string>
+    <string name="breathing_478_lower">4-7-8 breathing</string>
+    <string name="breathing_length">How long</string>
+    <string name="breathing_hint">%1$s, about %2$s</string>
+    <string name="breathing_buzz">Buzz at each change</string>
+    <string name="breathing_buzz_sub">So you can follow it with your eyes closed</string>
+    <string name="breathing_none">No sessions yet</string>
+    <string name="breathing_first_badge">Your first finished session earns a breathing badge.</string>
+    <string name="breathing_next_badge">The next breathing badge comes at %1$d.</string>
+    <string name="breathing_all_badges">All 3 breathing badges earned.</string>
+    <string name="breathing_earned_next">That earns a breathing badge. The next comes at %1$d.</string>
+    <string name="breathing_earned_last">That earns the last breathing badge.</string>
+    <string name="breathing_start_box">Start box breathing</string>
+    <string name="breathing_start_478">Start 4-7-8 breathing</string>
+    <string name="breathing_left">%1$s left</string>
+    <string name="breathing_in">Breathe in</string>
+    <string name="breathing_hold">Hold</string>
+    <string name="breathing_out">Breathe out</string>
+    <string name="breathing_paused">Paused</string>
+    <string name="breathing_round">Round %1$d of %2$d</string>
+    <string name="breathing_now_description">%1$s. Round %2$d of %3$d.</string>
+    <string name="breathing_pause">Pause</string>
+    <string name="breathing_resume">Resume</string>
+    <string name="breathing_done_title">Session %1$d done</string>
+    <string name="breathing_done_sub">%1$s of %2$s, %3$s.</string>
+    <string name="breathing_another">Breathe for another minute</string>
+
+    <!-- The delay timer. -->
+    <string name="delay_title">Delay</string>
+    <string name="delay_intro">Cravings peak and pass. Most fade within a few minutes, so keep busy until the timer ends.</string>
+    <string name="delay_length">How long</string>
+    <string name="delay_range">5 to 10\u00A0minutes</string>
+    <string name="delay_less">One minute less</string>
+    <string name="delay_more">One minute more</string>
+    <string name="delay_wait_title">While you wait</string>
+    <string name="delay_tip_water_lead">Drink water.</string>
+    <string name="delay_tip_water">A full glass, sipped slowly.</string>
+    <string name="delay_tip_else_lead">Do something else.</string>
+    <string name="delay_tip_else">Walk to another room, text someone or wash up.</string>
+    <string name="delay_tip_breaths_lead">Deep breaths.</string>
+    <string name="delay_tip_breaths">Slow ones, in through your nose.</string>
+    <string name="delay_breathe">Breathe with the timer</string>
+    <string name="delay_time_left">Time left</string>
+    <string name="delay_of">of %1$d\u00A0min</string>
+    <string name="delay_started">Started %1$s</string>
+    <string name="delay_ends">Ends %1$s</string>
+    <string name="delay_say">Keep your hands and your head busy. The urge often fades before the timer does.</string>
+    <string name="delay_left_description">%1$s left of %2$s</string>
+    <string name="delay_stop">Stop the timer</string>
+    <string name="delay_done_when">Started %1$s, ended %2$s.</string>
+    <string name="delay_done_say">If the urge is still there, give it another %1$s. If it\'s gone, you rode it out.</string>
+
+    <!-- Counts. -->
+    <plurals name="breathing_rounds">
+        <item quantity="one">%1$d round</item>
+        <item quantity="other">%1$d rounds</item>
+    </plurals>
+    <plurals name="breathing_sessions">
+        <item quantity="one">%1$d session done</item>
+        <item quantity="other">%1$d sessions done</item>
+    </plurals>
+    <plurals name="timer_minutes">
+        <item quantity="one">%1$d\u00A0minute</item>
+        <item quantity="other">%1$d\u00A0minutes</item>
+    </plurals>
+    <plurals name="timer_minutes_spoken">
+        <item quantity="one">%1$d minute</item>
+        <item quantity="other">%1$d minutes</item>
+    </plurals>
+    <plurals name="timer_seconds_spoken">
+        <item quantity="one">%1$d second</item>
+        <item quantity="other">%1$d seconds</item>
+    </plurals>
+    <plurals name="delay_start">
+        <item quantity="one">Start %1$d\u00A0minute</item>
+        <item quantity="other">Start %1$d\u00A0minutes</item>
+    </plurals>
+    <plurals name="delay_done_title">
+        <item quantity="one">%1$d\u00A0minute done</item>
+        <item quantity="other">%1$d\u00A0minutes done</item>
+    </plurals>
+    <plurals name="delay_again">
+        <item quantity="one">Another %1$d\u00A0minute</item>
+        <item quantity="other">Another %1$d\u00A0minutes</item>
+    </plurals>
+</resources>
