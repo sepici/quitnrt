@@ -1,6 +1,7 @@
 package app.thelasthit.nrt
 
 import app.thelasthit.nrt.data.DataGraph
+import kotlinx.coroutines.cancel
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDateTime
@@ -21,6 +22,16 @@ class TestApp : LastHitApp() {
     }
 
     override fun createGraph(): DataGraph = DataGraph.inMemory(this, clock)
+
+    /**
+     * Robolectric ends each test's app here. Its own work, such as the reminders following the
+     * logs, stops with it, so nothing an earlier test's app does late can reach a later test,
+     * whose app is a new one.
+     */
+    override fun onTerminate() {
+        appScope.cancel()
+        super.onTerminate()
+    }
 
     companion object {
         val LONDON: ZoneId = ZoneId.of("Europe/London")

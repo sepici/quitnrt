@@ -130,7 +130,7 @@ fun AppShell(notices: NoticeTargetViewModel = viewModel()) {
         AdviceRoutes.isAdvice(currentRoute)
     val graph = (LocalContext.current.applicationContext as LastHitApp).graph
     // Results that fell due while the app was away arrive when it comes back (ROADMAP P3-3).
-    SettleOnStart { graph.programmes.settle() }
+    SettleOnStart(graph.clock) { graph.programmes.settle() }
     // True while the lair is to open at its trophy shelf, as an unlock's toast or card asks.
     var toShelf by remember { mutableStateOf(false) }
     val adviceLinks = remember(navController) { navController.adviceLinks() }

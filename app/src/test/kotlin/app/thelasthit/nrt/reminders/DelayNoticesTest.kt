@@ -66,7 +66,8 @@ class DelayNoticesTest {
         assertEquals("5\u00A0minutes done", notice.title)
         assertEquals("If the urge is still there, give it another 5\u00A0minutes. If it's gone, you rode it out.", notice.text)
         assertEquals(NoticeChannel.DELAY.id, notice.channelId)
-        assertEquals(Notification.CATEGORY_ALARM, notice.category)
+        // A reminder, not an alarm, so Do Not Disturb holds it as it does the others.
+        assertEquals(Notification.CATEGORY_REMINDER, notice.category)
 
         // Told once: the app finding the end afterwards neither buzzes nor tells again.
         app.clearNotifications()
@@ -96,7 +97,7 @@ class DelayNoticesTest {
         // The booking isn't needed now.
         assertNull(alarms.nextScheduledAlarm)
         notices.bookingCame(run)
-        assertEquals(1, app.notifications.allNotifications.count { it.channelId == NoticeChannel.DELAY.id })
+        assertEquals(1, app.notifications.count { it.channelId == NoticeChannel.DELAY.id })
     }
 
     @Test

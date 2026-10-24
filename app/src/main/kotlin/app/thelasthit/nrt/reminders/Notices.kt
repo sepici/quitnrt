@@ -225,9 +225,12 @@ class NoticePoster(private val context: Context) {
         // A reminder alerts each time, even over yesterday's still in the shade. The tile's note
         // is quiet on a low channel already.
         .setOnlyAlertOnce(notice.reminder == null)
+        // The delay timer's end is a reminder, not an alarm: an alarm gets through Do Not
+        // Disturb, and this shouldn't. Quiet hours still don't hold it, since you start the
+        // timer yourself (see DelayNotices).
         .setCategory(
             when {
-                notice.channel == NoticeChannel.DELAY -> NotificationCompat.CATEGORY_ALARM
+                notice.channel == NoticeChannel.DELAY -> NotificationCompat.CATEGORY_REMINDER
                 notice.reminder == Reminder.CHECK_IN || notice.reminder == Reminder.FORGOT_TO_LOG -> NotificationCompat.CATEGORY_REMINDER
                 else -> NotificationCompat.CATEGORY_STATUS
             },
