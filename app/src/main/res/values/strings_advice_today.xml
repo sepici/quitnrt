@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Today's advice line, under the hero (PLAN §9). %1$s is the tag, set in bold. -->
+    <string name="advice_line_trigger">%1$s is your top trigger this fortnight.</string>
+    <!-- After a slip. %1$s is "Last week" or "Yesterday", set in bold. -->
+    <string name="advice_line_missed_week">%1$s went over its allowance. One week over doesn\'t undo what you\'ve done.</string>
+    <string name="advice_line_over_guide">%1$s went over its guide. One day over doesn\'t undo what you\'ve done.</string>
+    <string name="advice_line_last_week">Last week</string>
+    <string name="advice_line_yesterday">Yesterday</string>
+    <!-- What to try: a strategy's title as a sentence, or the timers' and the 4 Ds' own lines. -->
+    <string name="advice_line_strategy">%1$s.</string>
+    <string name="advice_line_breathing">Try a minute of box breathing.</string>
+    <string name="advice_line_delay">Try waiting 5 to 10\u00A0minutes while the urge peaks and passes.</string>
+    <string name="advice_line_four_ds">Try the 4 Ds: delay, deep breaths, drink water, do something else.</string>
+    <string name="advice_line_before_meal">Try having your dose at %1$s, before %2$s.</string>
+    <string name="advice_line_before_eating">Try having your dose at %1$s, before you eat.</string>
+    <string name="advice_line_how">How to do it</string>
+
+    <!-- The tip straight after logging, in the advice line's place until it's closed or the day ends. -->
+    <string name="advice_tip_description">Tip after logging</string>
+    <string name="advice_tip_close">Close tip</string>
+    <!-- %1$s is a strategy's title, starting in lower case: "Next time, get up from the table". -->
+    <string name="advice_tip_title">Next time, %1$s</string>
+    <string name="advice_tip_title_breathing">Try box breathing next time</string>
+    <string name="advice_tip_title_delay">Try the delay timer next time</string>
+    <string name="advice_tip_title_four_ds">Try the 4 Ds next time</string>
+    <string name="advice_tip_title_slip">Today is over its guide</string>
+    <string name="advice_tip_tagged">You tagged that dose %1$s.</string>
+    <string name="advice_tip_breathing_body">Slow breathing eases both stress and cravings.</string>
+    <string name="advice_tip_slip_body">That doesn\'t undo what you\'ve done. It shows you where the hard moments are.</string>
+    <string name="advice_tip_breathe">Breathe for 1\u00A0minute</string>
+    <string name="advice_tip_how">How to do it</string>
+    <string name="advice_tip_other">Other ideas</string>
+
+    <!-- Insights: the advice under the top trigger's row, from the last 14 days. -->
+    <!-- %1$s is the tag, set in bold, when the advice sits at the top of the list. -->
+    <string name="advice_in_top">%1$s is your top trigger.</string>
+    <string name="advice_in_around">These doses come mostly around %1$s.</string>
+    <string name="advice_in_times">%1$s, %2$s and %3$s</string>
+
+    <!-- The delay timer's end, as a notification when the app isn't on screen. -->
+    <string name="channel_delay">Delay timer</string>
+    <string name="channel_delay_detail">When a delay you started ends</string>
+</resources>

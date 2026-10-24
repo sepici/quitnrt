@@ -78,7 +78,7 @@ import java.time.Instant
 fun BreathingScreen(
     onBack: () -> Unit,
     viewModel: BreathingViewModel = timerViewModel { graph, saved, context ->
-        BreathingViewModel(graph.clock, saved, graph.breathing, VibratorBuzzer(context), TimerPrefs(context))
+        BreathingViewModel(graph.clock, saved, graph.breathing, VibratorBuzzer(context), graph.reminders)
     },
 ) {
     val stage by viewModel.stage.collectAsStateWithLifecycle()

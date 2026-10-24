@@ -27,16 +27,17 @@ sealed interface DelayStage {
  * so it's right whenever it's looked at again, even after the app was closed.
  *
  * While it runs it keeps the screen on, and [awake] keeps the processor running until just after
- * the end, so it buzzes on time under the breathing timer, behind another app or with the phone
- * locked. If Android closes or freezes the app in the meantime, there's no buzz, and the timer
- * shows as done when it's opened again. There's no notification for it: whether to add one is
- * open in docs/STATUS.md.
+ * the end, so it ends on time under the breathing timer, behind another app or with the phone
+ * locked. At the end it buzzes with the app on screen, and otherwise [notices] puts up a notice.
+ * The notice is booked as the timer starts, so it still comes if Android closes or freezes the
+ * app in the meantime, and the timer shows as done when the app is opened again.
  */
 class DelayViewModel(
     private val clock: Clock,
     private val saved: SavedStateHandle,
     private val buzzer: Buzzer,
     private val awake: WakeHold,
+    private val notices: DelayEnding = DelayEnding.None,
 ) : ViewModel() {
 
     private val _stage = MutableStateFlow(restore())
@@ -65,6 +66,7 @@ class DelayViewModel(
         }
         val run = DelayRun(clock.instant(), minutes)
         set(DelayStage.Running(run))
+        notices.book(run)
         watch(run)
         tick()
     }
@@ -73,7 +75,13 @@ class DelayViewModel(
     fun stop() {
         val running = _stage.value as? DelayStage.Running ?: return
         ending?.cancel()
+        notices.clear()
         set(DelayStage.SetUp(running.run.minutes))
+    }
+
+    /** The end frame is on screen, so a notice of it in the shade has done its job. */
+    fun seen() {
+        if (_stage.value is DelayStage.Done) notices.clear()
     }
 
     /** Looks at the clock: the page calls this a few times a second while it shows. */
@@ -84,7 +92,7 @@ class DelayViewModel(
         if (running.run.isDone(now)) {
             ending?.cancel()
             set(DelayStage.Done(running.run))
-            if (running.run.buzzesAt(now)) buzzer.alarm()
+            if (notices.ended(running.run, now)) buzzer.alarm()
         }
     }
 

@@ -15,7 +15,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.platform.InfiniteAnimationPolicy
 import androidx.compose.ui.platform.LocalView
-import androidx.core.content.edit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -173,17 +172,3 @@ inline fun <reified VM : ViewModel> timerViewModel(crossinline create: (DataGrap
             initializer { create(graph, createSavedStateHandle(), checkNotNull(this[APPLICATION_KEY])) }
         },
     )
-
-/** Whether the breathing timer buzzes at each change: remembered on this phone, and on by default. */
-class TimerPrefs(context: Context) {
-    private val prefs = context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
-
-    var breathingBuzz: Boolean
-        get() = prefs.getBoolean(BREATHING_BUZZ, true)
-        set(value) = prefs.edit { putBoolean(BREATHING_BUZZ, value) }
-
-    private companion object {
-        const val FILE = "timers"
-        const val BREATHING_BUZZ = "breathing_buzz"
-    }
-}

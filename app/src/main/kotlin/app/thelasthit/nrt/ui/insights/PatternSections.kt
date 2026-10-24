@@ -42,6 +42,8 @@ import app.thelasthit.nrt.R
 import app.thelasthit.nrt.domain.insights.ByProduct
 import app.thelasthit.nrt.domain.insights.TimeOfDay
 import app.thelasthit.nrt.domain.insights.Triggers
+import app.thelasthit.nrt.ui.advice.AdviceLinks
+import app.thelasthit.nrt.ui.advice.AdviceNow
 import app.thelasthit.nrt.ui.components.IconTile
 import app.thelasthit.nrt.ui.format.DayTitleFormatter
 import app.thelasthit.nrt.ui.format.icon
@@ -65,9 +67,12 @@ private const val TOP_TAGS = 5
 /**
  * Triggers: the most used tags with their change against the period before, each group's share,
  * the top tag in each part of the day, and how many doses had no tag. Patches are left out.
+ *
+ * The [advice] from the last 14 days sits under its tag's row, or at the top of the list when
+ * that tag isn't one of the rows shown.
  */
 @Composable
-internal fun TriggersSection(state: InsightsState) {
+internal fun TriggersSection(state: InsightsState, advice: AdviceNow? = null, links: AdviceLinks = AdviceLinks.None) {
     val triggers = state.triggers ?: return
     val period = periodBefore(state.range)
     val attribute = state.type?.let { typeAttribute(it) }
@@ -89,10 +94,19 @@ internal fun TriggersSection(state: InsightsState) {
             triggers.doses == 0 -> Meta(stringResource(R.string.insights_table_none), top = 14.dp)
             triggers.tags.isEmpty() -> Meta(stringResource(R.string.insights_triggers_none), top = 14.dp)
             else -> {
+                val shown = triggers.tags.take(TOP_TAGS)
+                val adviceFor = advice?.triggerKey
+                val underRow = shown.any { it.key == adviceFor }
                 Column(Modifier.padding(top = 8.dp)) {
-                    triggers.tags.take(TOP_TAGS).forEachIndexed { index, tag ->
+                    if (advice != null && adviceFor != null && !underRow) {
+                        TriggerAdviceCard(advice, atTop = true, links, Modifier.padding(top = 6.dp, bottom = 4.dp))
+                    }
+                    shown.forEachIndexed { index, tag ->
                         if (index > 0) HorizontalDivider(color = LastHit.colors.line)
                         TagRow(tag, tagName(state, tag.key))
+                        if (advice != null && tag.key == adviceFor) {
+                            TriggerAdviceCard(advice, atTop = false, links, Modifier.padding(top = 1.dp, bottom = 16.dp))
+                        }
                     }
                 }
                 SubHeading(stringResource(R.string.insights_by_group))
