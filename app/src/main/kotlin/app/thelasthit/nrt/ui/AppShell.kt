@@ -22,8 +22,10 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -101,6 +103,8 @@ fun AppShell() {
     val colors = LastHit.colors
 
     val inSettings = currentRoute?.startsWith(SettingsRoutes.MAIN) == true
+    // True while the lair is to open at its trophy shelf, as an unlock's toast or card asks.
+    var toShelf by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = colors.bg,
@@ -141,13 +145,18 @@ fun AppShell() {
             page(TopLevelDestination.Plan.route) {
                 PlaceholderScreen(title = stringResource(TopLevelDestination.Plan.label))
             }
-            composable(TopLevelDestination.Lair.route) { LairScreen() }
+            composable(TopLevelDestination.Lair.route) { LairScreen(toShelf = toShelf, onShelfShown = { toShelf = false }) }
             settings(navController, snackbars, showMessage)
         }
         // Links and shortcuts show their snackbar, question or sheet over whichever page is open.
         LinkHost(snackbars)
         // New badges and gear slide in over whichever page is open.
-        UnlockHost(onOpenLair = { navController.navigateTo(TopLevelDestination.Lair) })
+        UnlockHost(
+            onOpenShelf = {
+                toShelf = true
+                navController.navigateTo(TopLevelDestination.Lair)
+            },
+        )
     }
 }
 

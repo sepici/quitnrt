@@ -4,8 +4,13 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import app.thelasthit.nrt.domain.time.DayBoundary
 import org.junit.jupiter.api.Test
 import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
 
 class UnlockNewsTest {
 
@@ -52,7 +57,7 @@ class UnlockNewsTest {
     @Test
     fun `the shelf holds every badge in PLAN's groups and order, earned or not`() {
         val at = Instant.parse("2026-10-23T14:05:00Z")
-        val shelf = TrophyShelf.of(mapOf("first_entry" to at, "weeks_met_3" to at, "from_a_later_version" to at))
+        val shelf = TrophyShelf.of(mapOf("first_entry" to at, "weeks_met_3" to at, "from_a_later_version" to at), DayBoundary(), LONDON)
 
         assertEquals(Achievement.Group.entries, shelf.groups.map { it.group })
         assertEquals(Achievement.entries, shelf.badges.map { it.achievement })
@@ -61,9 +66,22 @@ class UnlockNewsTest {
         val first = shelf.badges.first()
         assertTrue(first.isEarned)
         assertEquals(at, first.earnedAt)
+        assertEquals(LocalDate.parse("2026-10-23"), first.earnedOn)
         val later = shelf.badges.first { it.achievement == Achievement.LOGGED_3_DAYS }
         assertFalse(later.isEarned)
         assertNull(later.earnedAt)
+        assertNull(later.earnedOn)
+    }
+
+    @Test
+    fun `a badge earned before the day starts counts toward the day before, as History has it`() {
+        val late = LocalDateTime.parse("2026-10-24T02:30").atZone(LONDON).toInstant()
+        val shelf = TrophyShelf.of(mapOf("first_entry" to late), DayBoundary(), LONDON)
+        assertEquals(LocalDate.parse("2026-10-23"), shelf.badges.first().earnedOn)
+
+        // With the day starting at midnight, it's the calendar day.
+        val midnight = TrophyShelf.of(mapOf("first_entry" to late), DayBoundary(LocalTime.MIDNIGHT), LONDON)
+        assertEquals(LocalDate.parse("2026-10-24"), midnight.badges.first().earnedOn)
     }
 
     @Test
@@ -104,3 +122,5 @@ class UnlockNewsTest {
         )
     }
 }
+
+private val LONDON: ZoneId = ZoneId.of("Europe/London")

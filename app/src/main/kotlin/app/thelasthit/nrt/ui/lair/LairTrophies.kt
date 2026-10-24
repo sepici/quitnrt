@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,28 +18,34 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -64,8 +71,7 @@ import app.thelasthit.nrt.domain.game.Achievement
 import app.thelasthit.nrt.domain.game.Gear
 import app.thelasthit.nrt.domain.game.Loadout
 import app.thelasthit.nrt.domain.game.TrophyShelf
-import app.thelasthit.nrt.ui.components.sheetEdge
-import app.thelasthit.nrt.ui.components.sheetScrim
+import app.thelasthit.nrt.ui.components.LastHitSheet
 import app.thelasthit.nrt.ui.format.DayMonthFormatter
 import app.thelasthit.nrt.ui.format.DayMonthYearFormatter
 import app.thelasthit.nrt.ui.game.GameIcons
@@ -82,15 +88,21 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 
-/** The badges on the shelf and the gear, unlocked and equipped. [year] is this year's, for dates. */
+/**
+ * The badges on the shelf and the gear, unlocked and equipped. [year] is the year today counts
+ * toward, from the day start, so a date in it can leave the year out.
+ */
 data class TrophyState(val shelf: TrophyShelf, val loadout: Loadout, val year: Int)
 
-class TrophyViewModel(private val graph: DataGraph) : ViewModel() {
-    val state: StateFlow<TrophyState?> = combine(graph.unlocks.shelf, graph.unlocks.loadout) { shelf, loadout ->
-        TrophyState(shelf, loadout, graph.clock.instant().atZone(ZoneId.systemDefault()).year)
+class TrophyViewModel(
+    private val graph: DataGraph,
+    private val zone: () -> ZoneId = { ZoneId.systemDefault() },
+) : ViewModel() {
+    val state: StateFlow<TrophyState?> = combine(graph.unlocks.shelf, graph.unlocks.loadout, graph.settings.settings) { shelf, loadout, settings ->
+        TrophyState(shelf, loadout, settings.dayBoundary.logicalDate(graph.clock.instant(), zone()).year)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Equips [gear], through the loadout, so only unlocked gear can be. */
@@ -101,14 +113,42 @@ class TrophyViewModel(private val graph: DataGraph) : ViewModel() {
 
 /**
  * The lair's gear row, where the piece equipped can be changed, then the trophy shelf: every
- * badge earned, and the rest as plain outlines (PLAN 8.2 and 8.3).
+ * badge earned, and the rest as plain outlines (PLAN 8.2 and 8.3). With [toShelf], the lair
+ * scrolls to bring them in, from just under the status bar, then [onShelfShown] is called.
  */
 @Composable
-fun LairTrophies(modifier: Modifier = Modifier, viewModel: TrophyViewModel = graphViewModel { TrophyViewModel(it) }) {
+fun LairTrophies(
+    modifier: Modifier = Modifier,
+    toShelf: Boolean = false,
+    onShelfShown: () -> Unit = {},
+    viewModel: TrophyViewModel = graphViewModel { TrophyViewModel(it) },
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val current = state ?: return
     var choosing by rememberSaveable { mutableStateOf(false) }
-    Column(modifier.fillMaxWidth()) {
+    val requester = remember { BringIntoViewRequester() }
+    val size = remember { IntArray(2) }
+    val density = LocalDensity.current
+    val above = WindowInsets.statusBars.getTop(density) + with(density) { SHELF_MARGIN.roundToPx() }
+    LaunchedEffect(toShelf) {
+        if (!toShelf) return@LaunchedEffect
+        try {
+            // Once the page under the stage has been laid out, so the scroll knows its height.
+            withFrameNanos { }
+            requester.bringIntoView(Rect(0f, -above.toFloat(), size[0].toFloat(), size[1].toFloat()))
+        } finally {
+            onShelfShown()
+        }
+    }
+    Column(
+        modifier
+            .fillMaxWidth()
+            .bringIntoViewRequester(requester)
+            .onSizeChanged {
+                size[0] = it.width
+                size[1] = it.height
+            },
+    ) {
         GearRow(current.loadout.equipped, onChange = { choosing = true })
         Shelf(current.shelf, current.year)
     }
@@ -129,7 +169,7 @@ private fun GearRow(equipped: Gear, onChange: () -> Unit) {
             .topRule(colors.line)
             .clickable(role = Role.Button, onClickLabel = stringResource(R.string.gear_change_spoken), onClick = onChange)
             .heightIn(min = 72.dp)
-            .padding(start = 20.dp, end = 16.dp, top = 12.dp, bottom = 12.dp),
+            .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
@@ -169,21 +209,12 @@ private fun GearTile(gear: Gear, unlocked: Boolean) {
 private fun GearSheet(loadout: Loadout, onEquip: (Gear) -> Unit, onDismiss: () -> Unit) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
-    val colors = LastHit.colors
 
     fun close() {
         scope.launch { sheetState.hide() }.invokeOnCompletion { onDismiss() }
     }
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = colors.surface,
-        scrimColor = sheetScrim,
-        modifier = Modifier.sheetEdge(colors),
-        contentColor = colors.text,
-        dragHandle = { BottomSheetDefaults.DragHandle(color = colors.lineStrong, width = 36.dp, height = 4.dp) },
-    ) {
+    LastHitSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(
             Modifier
                 .fillMaxWidth()
@@ -352,9 +383,9 @@ private fun BadgeTile(badge: TrophyShelf.Badge, selected: Boolean, year: Int, on
     val colors = LastHit.colors
     val shape = RoundedCornerShape(14.dp)
     val name = stringResource(badgeName(badge.achievement))
-    val earnedAt = badge.earnedAt
-    val description = if (earnedAt != null) {
-        stringResource(R.string.shelf_badge_earned, name, dateText(earnedAt, year))
+    val earnedOn = badge.earnedOn
+    val description = if (earnedOn != null) {
+        stringResource(R.string.shelf_badge_earned, name, dateText(earnedOn, year))
     } else {
         stringResource(R.string.shelf_badge_locked, name)
     }
@@ -380,7 +411,7 @@ private fun BadgeTile(badge: TrophyShelf.Badge, selected: Boolean, year: Int, on
 @Composable
 private fun BadgeDetail(badge: TrophyShelf.Badge, year: Int) {
     val colors = LastHit.colors
-    val earnedAt = badge.earnedAt
+    val earnedOn = badge.earnedOn
     Column(
         Modifier
             .padding(top = 10.dp)
@@ -393,7 +424,7 @@ private fun BadgeDetail(badge: TrophyShelf.Badge, year: Int) {
         Text(stringResource(badgeName(badge.achievement)), style = RowTitle, color = colors.text)
         Text(stringResource(badgeFor(badge.achievement)), style = RowSub, color = colors.text2)
         Text(
-            if (earnedAt != null) stringResource(R.string.shelf_earned_on, dateText(earnedAt, year)) else stringResource(R.string.shelf_not_yet),
+            if (earnedOn != null) stringResource(R.string.shelf_earned_on, dateText(earnedOn, year)) else stringResource(R.string.shelf_not_yet),
             style = LastHit.type.caption.copy(fontWeight = FontWeight.SemiBold),
             color = colors.text,
             modifier = Modifier.padding(top = 6.dp),
@@ -402,10 +433,8 @@ private fun BadgeDetail(badge: TrophyShelf.Badge, year: Int) {
 }
 
 /** "23 October", with the year when it isn't this one. */
-private fun dateText(at: Instant, year: Int): String {
-    val date = at.atZone(ZoneId.systemDefault())
-    return (if (date.year == year) DayMonthFormatter else DayMonthYearFormatter).format(date)
-}
+private fun dateText(day: LocalDate, year: Int): String =
+    (if (day.year == year) DayMonthFormatter else DayMonthYearFormatter).format(day)
 
 /** A hairline across the top, as lair.html draws above the gear row. */
 private fun Modifier.topRule(colour: Color): Modifier = drawBehind {
@@ -413,6 +442,9 @@ private fun Modifier.topRule(colour: Color): Modifier = drawBehind {
 }
 
 private val TILE = 52.dp
+
+/** The room left between the status bar and the gear row when the lair opens at the shelf. */
+private val SHELF_MARGIN = 12.dp
 
 private val RowTitle
     @Composable get() = LastHit.type.title.copy(fontWeight = FontWeight.Bold)

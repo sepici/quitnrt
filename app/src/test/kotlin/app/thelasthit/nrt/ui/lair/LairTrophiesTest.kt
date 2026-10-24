@@ -16,6 +16,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.test.core.app.ApplicationProvider
 import app.thelasthit.nrt.GUM_4
 import app.thelasthit.nrt.TestApp
+import app.thelasthit.nrt.TestApp.Companion.london
 import app.thelasthit.nrt.data.repo.LogRequest
 import app.thelasthit.nrt.setUp
 import app.thelasthit.nrt.ui.PHONE
@@ -57,6 +58,33 @@ class LairTrophiesTest {
         for (group in listOf("Logging", "Matching the plan", "Beating the plan", "Habits", "The end")) {
             compose.onNodeWithText(group).assertExists()
         }
+    }
+
+    @Test
+    fun `a badge earned before the day starts is dated the day before, as History has it`() {
+        app.setUp()
+        // A dose at 02:30 on Saturday counts toward Friday 23 October, and so does its badge.
+        app.clock.now = london("2026-10-24T02:30")
+        runBlocking { app.graph.entries.log(LogRequest(GUM_4)) }
+        app.checkUnlocks()
+        showLair()
+
+        val first = hasContentDescription("First entry, earned 23 October")
+        compose.waitUntilExactlyOneExists(first, timeoutMillis = 5_000)
+        compose.onNode(first).performScrollTo().performClick()
+        compose.waitUntilExactlyOneExists(hasText("Earned 23 October"), timeoutMillis = 5_000)
+    }
+
+    @Test
+    fun `just after midnight at new year, a badge from the year that's ending leaves its year off`() {
+        app.setUp()
+        // 01:00 on 1 January still counts toward 31 December, so it's still this year.
+        app.clock.now = london("2027-01-01T01:00")
+        runBlocking { app.graph.entries.log(LogRequest(GUM_4)) }
+        app.checkUnlocks()
+        showLair()
+
+        compose.waitUntilExactlyOneExists(hasContentDescription("First entry, earned 31 December"), timeoutMillis = 5_000)
     }
 
     @Test

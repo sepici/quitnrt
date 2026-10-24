@@ -13,11 +13,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -50,9 +48,8 @@ import app.thelasthit.nrt.domain.product.word
 import app.thelasthit.nrt.ui.components.Chip
 import app.thelasthit.nrt.ui.components.ChipKind
 import app.thelasthit.nrt.ui.components.FieldLabel
+import app.thelasthit.nrt.ui.components.LastHitSheet
 import app.thelasthit.nrt.ui.components.PrimaryButton
-import app.thelasthit.nrt.ui.components.sheetEdge
-import app.thelasthit.nrt.ui.components.sheetScrim
 import app.thelasthit.nrt.ui.format.formDetail
 import app.thelasthit.nrt.ui.format.icon
 import app.thelasthit.nrt.ui.format.mgText
@@ -229,15 +226,7 @@ private fun ProductSheet(
         scope.launch { sheetState.hide() }.invokeOnCompletion { onDismiss() }
     }
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = colors.surface,
-        scrimColor = sheetScrim,
-        modifier = Modifier.sheetEdge(colors),
-        contentColor = colors.text,
-        dragHandle = { BottomSheetDefaults.DragHandle(color = colors.lineStrong, width = 36.dp, height = 4.dp) },
-    ) {
+    LastHitSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(Modifier.fillMaxWidth().imePadding()) {
             Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState())) {
                 Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 4.dp), verticalAlignment = Alignment.CenterVertically) {

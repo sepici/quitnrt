@@ -1,6 +1,7 @@
 package app.thelasthit.nrt.data
 
 import app.thelasthit.nrt.data.repo.LogRequest
+import app.thelasthit.nrt.data.repo.SpendResult
 import app.thelasthit.nrt.data.repo.UnlockRepository
 import app.thelasthit.nrt.domain.advice.BreathingPattern
 import app.thelasthit.nrt.domain.game.Achievement
@@ -23,6 +24,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.time.Duration
+import java.time.LocalDate
+import java.time.LocalTime
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
@@ -146,6 +149,51 @@ class UnlockRepositoryTest {
     }
 
     @Test
+    fun followingChecksAfterResultsSettleAndHitsAreSpentElsewhere() = runBlocking<Unit> {
+        data.startGumPlan()
+        // Logged before the plan, two days late: the first check finds it, and then there's
+        // nothing to check until something else writes.
+        data.chew("2026-10-21T12:00")
+        val following = launch(Dispatchers.Default) { unlocks.follow() }
+        try {
+            awaitBadge(Achievement.FIRST_ENTRY)
+
+            // Week 1's result falls due, and another reader, such as Today, settles it.
+            data.setTime("2026-11-01T09:00")
+            assertTrue(data.programmes.settle() != null)
+            awaitBadge(Achievement.FIRST_WEEK_MET)
+            awaitGear(Gear.IRON_SWORD)
+
+            // Every week's result is in, then the hits are spent from the lair: only the hit
+            // ledger is written, and the final hit brings the defeat and its blade.
+            data.setTime("2027-01-17T09:00")
+            assertTrue(data.programmes.settle() != null)
+            awaitBadge(Achievement.WEEKS_MET_10)
+            assertFalse(Achievement.DEMON_DEFEATED.key in storedBadges())
+            repeat(2) { assertTrue(data.game.comboAttack() is SpendResult.Spent) }
+            repeat(2) { assertTrue(data.game.spendHit() is SpendResult.Spent) }
+            awaitBadge(Achievement.DEMON_DEFEATED)
+            awaitGear(Gear.LEGENDARY_BLADE)
+        } finally {
+            following.cancel()
+        }
+    }
+
+    /** Waits for [achievement] to come in, on its own toast or in a summary. */
+    private suspend fun awaitBadge(achievement: Achievement) = withTimeout(10_000) {
+        unlocks.news.first { news ->
+            news.any { it == UnlockNews.Badge(achievement) || (it is UnlockNews.Summary && achievement in it.achievements) }
+        }
+    }
+
+    /** Waits for [gear] to come in, on its own card or in a summary. */
+    private suspend fun awaitGear(gear: Gear) = withTimeout(10_000) {
+        unlocks.news.first { news ->
+            news.any { it == UnlockNews.NewGear(gear) || (it is UnlockNews.Summary && gear in it.gear) }
+        }
+    }
+
+    @Test
     fun theStickIsAlwaysThereAndOnlyUnlockedGearCanBeEquipped() = runTest {
         val start = unlocks.loadout.first()
         assertEquals(setOf(Gear.WOODEN_STICK), start.unlocked)
@@ -173,6 +221,21 @@ class UnlockRepositoryTest {
         val shelf = unlocks.shelf.first()
         assertEquals(33, shelf.total)
         assertEquals(1, shelf.earned)
-        assertEquals(london("2026-10-23T15:05"), shelf.badges.first { it.achievement == Achievement.FIRST_ENTRY }.earnedAt)
+        val first = shelf.badges.first { it.achievement == Achievement.FIRST_ENTRY }
+        assertEquals(london("2026-10-23T15:05"), first.earnedAt)
+        assertEquals(LocalDate.parse("2026-10-23"), first.earnedOn)
+    }
+
+    @Test
+    fun aBadgeEarnedBeforeTheDayStartsIsOnTheShelfOnTheDayBefore() = runTest {
+        // A dose logged at 02:30 on Saturday counts toward Friday, and so does its badge.
+        data.setTime("2026-10-24T02:30")
+        data.chew("2026-10-24T02:30")
+        unlocks.check()
+        assertEquals(LocalDate.parse("2026-10-23"), unlocks.shelf.first().badges.first().earnedOn)
+
+        // With the day starting at midnight, it's the calendar day.
+        data.settings.setDayStart(LocalTime.MIDNIGHT)
+        assertEquals(LocalDate.parse("2026-10-24"), unlocks.shelf.first().badges.first().earnedOn)
     }
 }

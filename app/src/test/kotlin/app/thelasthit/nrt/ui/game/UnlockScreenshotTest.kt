@@ -42,6 +42,13 @@ class UnlockScreenshotTest {
     @Test @Config(qualifiers = PHONE, fontScale = LARGE_FONT)
     fun summaryLarge() = captureSummary()
 
+    /** At 360 dp, where the row of badges and the buttons have least room. */
+    @Test @Config(qualifiers = NARROW_PHONE)
+    fun summaryNarrow() = captureSummary("unlock-summary-narrow")
+
+    @Test @Config(qualifiers = NARROW_PHONE, fontScale = LARGE_FONT)
+    fun summaryNarrowLarge() = captureSummary("unlock-summary-narrow")
+
     @Test @Config(qualifiers = PHONE)
     fun gear() = captureGear()
 
@@ -57,13 +64,13 @@ class UnlockScreenshotTest {
     }
 
     /** Two months of history when the game first looks: one card for every badge it brings. */
-    private fun captureSummary() {
+    private fun captureSummary(name: String = "unlock-summary") {
         app.setUp()
         app.seedHistory()
         app.seedWeek()
         val found = app.checkUnlocks()
         check(found.isSummary)
-        compose.captureLooks("unlock-summary", ready = hasText("See the shelf")) { AppShell() }
+        compose.captureLooks(name, ready = hasText("See the shelf")) { AppShell() }
     }
 
     /** Week 1 met: its badge's toast has gone, and the iron sword's card is in. */

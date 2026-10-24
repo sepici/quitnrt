@@ -48,7 +48,7 @@
     <string name="badge_down_a_strength">Down a strength</string>
     <string name="badge_down_a_strength_for">A week met on a lower strength, such as 2\u00A0mg gum after 4\u00A0mg.</string>
     <string name="badge_final_taper_week">Final taper week</string>
-    <string name="badge_final_taper_week_for">The plan\'s last week with NRT, reached.</string>
+    <string name="badge_final_taper_week_for">Reached the plan\'s last week with NRT.</string>
     <string name="badge_week_under_by_10" formatted="false">10% under</string>
     <string name="badge_week_under_by_10_for" formatted="false">A week met at least 10% under its allowance, with every day logged.</string>
     <string name="badge_five_days_under">5\u00A0days under</string>

@@ -2,27 +2,42 @@ package app.thelasthit.nrt.ui.components
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.dismiss
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.thelasthit.nrt.ui.theme.LastHit
 import app.thelasthit.nrt.ui.theme.LastHitColors
+import kotlinx.coroutines.launch
 
 /**
  * A round tile with an icon, leading list rows. A [dose] gets the neutral stone tile rather than
@@ -74,8 +89,76 @@ fun Modifier.bleed(by: Dp): Modifier = layout { measurable, constraints ->
 val sheetScrim: Color
     @Composable get() = LastHit.colors.scrim.copy(alpha = 0.56f)
 
-/** A sheet's top corners, as Material draws them from the theme's extra large shape. */
-private val SheetTop = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+/** The radius of a sheet's top corners, as Material draws them from the theme's extra large shape. */
+private val SheetCorner = 28.dp
 
-/** In dark mode, a hairline round a sheet's top edge, so it stands clear of the dimmed page. */
-fun Modifier.sheetEdge(colors: LastHitColors): Modifier = if (colors.isDark) border(1.dp, colors.line, SheetTop) else this
+/**
+ * In dark mode, a hairline along a sheet's top edge and down its sides, so it stands clear of the
+ * dimmed page. It goes on what the sheet holds, which moves as the sheet slides and is dragged, as
+ * [LastHitSheet] has it. On the sheet's own modifier it would stay put at the top of the screen.
+ */
+fun Modifier.sheetEdge(colors: LastHitColors): Modifier = if (!colors.isDark) {
+    this
+} else {
+    drawWithCache {
+        val stroke = 1.dp.toPx()
+        val inset = stroke / 2
+        val radius = SheetCorner.toPx()
+        val edge = Path().apply {
+            moveTo(inset, size.height)
+            lineTo(inset, radius)
+            arcTo(Rect(inset, inset, radius * 2 - inset, radius * 2 - inset), 180f, 90f, forceMoveTo = false)
+            lineTo(size.width - radius, inset)
+            arcTo(Rect(size.width - radius * 2 + inset, inset, size.width - inset, radius * 2 - inset), 270f, 90f, forceMoveTo = false)
+            lineTo(size.width - inset, size.height)
+        }
+        onDrawWithContent {
+            drawContent()
+            drawPath(edge, colors.line, style = Stroke(stroke))
+        }
+    }
+}
+
+/**
+ * A bottom sheet as the app draws them: the surface over the scrim, the handle, and in dark mode
+ * the hairline round its top edge. The handle and the edge are drawn inside the sheet, with the
+ * window insets inside the edge, so they move with the sheet. [content] goes below the handle.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LastHitSheet(onDismissRequest: () -> Unit, sheetState: SheetState, content: @Composable ColumnScope.() -> Unit) {
+    val colors = LastHit.colors
+    val scope = rememberCoroutineScope()
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        sheetState = sheetState,
+        containerColor = colors.surface,
+        contentColor = colors.text,
+        scrimColor = sheetScrim,
+        dragHandle = null,
+        contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
+    ) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .sheetEdge(colors)
+                .windowInsetsPadding(BottomSheetDefaults.windowInsets),
+        ) {
+            BottomSheetDefaults.DragHandle(
+                Modifier
+                    .align(Alignment.CenterHorizontally)
+                    // As Material's own handle does, so TalkBack can close the sheet from it too.
+                    .semantics {
+                        dismiss {
+                            scope.launch { sheetState.hide() }.invokeOnCompletion { if (!sheetState.isVisible) onDismissRequest() }
+                            true
+                        }
+                    },
+                width = 36.dp,
+                height = 4.dp,
+                color = colors.lineStrong,
+            )
+            content()
+        }
+    }
+}

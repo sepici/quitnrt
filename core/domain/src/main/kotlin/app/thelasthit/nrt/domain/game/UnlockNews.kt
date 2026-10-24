@@ -1,6 +1,9 @@
 package app.thelasthit.nrt.domain.game
 
+import app.thelasthit.nrt.domain.time.DayBoundary
 import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 /**
  * One thing to show when unlocks come in (PLAN 8.3): a toast for a badge, a "new gear" card for
@@ -35,7 +38,11 @@ val NewUnlocks.news: List<UnlockNews>
  */
 data class TrophyShelf(val groups: List<Group>) {
 
-    data class Badge(val achievement: Achievement, val earnedAt: Instant?) {
+    /**
+     * A badge, with the time it was earned and [earnedOn], the logical day that time falls on,
+     * as History has it: one earned at 02:30 counts toward the day before.
+     */
+    data class Badge(val achievement: Achievement, val earnedAt: Instant?, val earnedOn: LocalDate?) {
         val isEarned: Boolean get() = earnedAt != null
     }
 
@@ -49,12 +56,18 @@ data class TrophyShelf(val groups: List<Group>) {
 
     companion object {
         /**
-         * The shelf from the stored achievement keys and when each was unlocked. Keys this version
-         * doesn't know are left off.
+         * The shelf from the stored achievement keys and when each was unlocked, with the days
+         * they fall on from [boundary] in [zone]. Keys this version doesn't know are left off.
          */
-        fun of(stored: Map<String, Instant>): TrophyShelf = TrophyShelf(
+        fun of(stored: Map<String, Instant>, boundary: DayBoundary, zone: ZoneId): TrophyShelf = TrophyShelf(
             Achievement.entries.groupBy { it.group }.map { (group, achievements) ->
-                Group(group, achievements.map { Badge(it, stored[it.key]) })
+                Group(
+                    group,
+                    achievements.map { achievement ->
+                        val at = stored[achievement.key]
+                        Badge(achievement, at, at?.let { boundary.logicalDate(it, zone) })
+                    },
+                )
             },
         )
     }

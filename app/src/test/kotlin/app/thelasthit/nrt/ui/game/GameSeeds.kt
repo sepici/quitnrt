@@ -10,6 +10,9 @@ import app.thelasthit.nrt.domain.game.NewUnlocks
 import app.thelasthit.nrt.domain.programme.UsualDay
 import kotlinx.coroutines.runBlocking
 
+/** A narrow phone, 360 dp wide, where the summary card has least room. */
+const val NARROW_PHONE = "en-rGB-w360dp-h780dp-normal-long-notround-any-420dpi-keyshidden-nonav"
+
 /** Runs the unlock checks now, as the app does when it opens, and returns what they stored. */
 fun TestApp.checkUnlocks(): NewUnlocks = runBlocking { graph.unlocks.check() }
 

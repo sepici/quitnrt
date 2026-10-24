@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -129,9 +128,9 @@ class UnlockRepository(
 
     // The shelf and the gear.
 
-    /** Every badge, earned or still to come, with when each was earned. */
-    val shelf: Flow<TrophyShelf> = game.observeAchievements().map { rows ->
-        TrophyShelf.of(rows.associate { it.key to Instant.ofEpochMilli(it.unlockedAt) })
+    /** Every badge, earned or still to come, with when each was earned and the day that counts toward. */
+    val shelf: Flow<TrophyShelf> = combine(game.observeAchievements(), settings.settings) { rows, current ->
+        TrophyShelf.of(rows.associate { it.key to Instant.ofEpochMilli(it.unlockedAt) }, current.dayBoundary, zone())
     }.distinctUntilChanged()
 
     /** The gear unlocked and the piece equipped. */

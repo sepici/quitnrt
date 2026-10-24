@@ -82,6 +82,22 @@ class GameRecordMappingTest {
     }
 
     @Test
+    fun aProgrammeAbandonedBeforeTheDayStartsEndsOnTheDayBefore() = runTest {
+        data.startGumPlan()
+        // Abandoned at 02:00 on Sunday 8 November, which still counts toward Saturday 7th, so
+        // week 2's result isn't in yet.
+        data.setTime("2026-11-08T02:00")
+        assertTrue(data.programmes.abandon())
+
+        val programme = unlocks.record().programmes.single()
+        assertEquals(LocalDate.parse("2026-11-07"), programme.endedOn)
+        assertEquals(12, programme.weeks.size)
+        assertEquals(listOf(GameWeek.Result.MET, GameWeek.Result.PENDING), programme.weeks.take(2).map { it.result })
+        assertTrue(programme.ranOn(LocalDate.parse("2026-11-06")))
+        assertFalse(programme.ranOn(LocalDate.parse("2026-11-07")))
+    }
+
+    @Test
     fun aRunningOrCompleteProgrammeHasNoEndDay() = runTest {
         data.startGumPlan()
         assertNull(unlocks.record().programmes.single().endedOn)

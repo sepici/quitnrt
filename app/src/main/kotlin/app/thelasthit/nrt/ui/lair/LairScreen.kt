@@ -59,10 +59,15 @@ class LairViewModel(graph: DataGraph) : ViewModel() {
 
 /**
  * The lair. For now the demon only lurks on its rock, a shadow with unknown HP, because the
- * battle needs a plan to start. The stage runs up behind the status bar.
+ * battle needs a plan to start. The stage runs up behind the status bar. With [toShelf], it
+ * scrolls down to the gear and the trophy shelf once they're in, then calls [onShelfShown].
  */
 @Composable
-fun LairScreen(viewModel: LairViewModel = graphViewModel { LairViewModel(it) }) {
+fun LairScreen(
+    toShelf: Boolean = false,
+    onShelfShown: () -> Unit = {},
+    viewModel: LairViewModel = graphViewModel { LairViewModel(it) },
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val current = state ?: return
     val colors = LastHit.colors
@@ -97,7 +102,7 @@ fun LairScreen(viewModel: LairViewModel = graphViewModel { LairViewModel(it) }) 
             rule = stringResource(R.string.lair_hits_rule),
             modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 28.dp, bottom = 32.dp),
         )
-        LairTrophies()
+        LairTrophies(toShelf = toShelf, onShelfShown = onShelfShown)
     }
 }
 
