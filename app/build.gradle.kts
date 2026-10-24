@@ -148,6 +148,10 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
 
+    // Reminders run on WorkManager; the home-screen widget is Glance.
+    implementation(libs.androidx.work.runtime)
+    implementation(libs.androidx.glance.appwidget)
+
     // Compose UI tests and Roborazzi screenshots run on the JVM under Robolectric, so CI needs no emulator.
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui.test.junit4)
@@ -158,4 +162,6 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.roborazzi)
     testImplementation(libs.roborazzi.compose)
+    testImplementation(libs.androidx.work.testing)
+    testImplementation(libs.androidx.glance.appwidget.testing)
 }

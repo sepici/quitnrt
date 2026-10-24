@@ -65,6 +65,8 @@ data class SettingsLinks(
     val tags: () -> Unit,
     val dayStart: () -> Unit,
     val about: () -> Unit,
+    val reminders: () -> Unit = {},
+    val widgetTile: () -> Unit = {},
 )
 
 @Composable
@@ -73,8 +75,10 @@ fun SettingsScreen(
     onBack: () -> Unit,
     links: SettingsLinks,
     viewModel: SettingsViewModel = graphViewModel { SettingsViewModel(it) },
+    phoneRows: PhoneRowsViewModel = graphViewModel { PhoneRowsViewModel(it) },
 ) {
     val summary by viewModel.summary.collectAsStateWithLifecycle()
+    val phone by phoneRows.state.collectAsStateWithLifecycle()
     val restore by viewModel.restore.collectAsStateWithLifecycle()
     val resources = LocalResources.current
     val resolver = LocalContext.current.contentResolver
@@ -147,6 +151,9 @@ fun SettingsScreen(
                 if (hiddenTags > 0) add(pluralStringResource(R.plurals.settings_hidden_count, hiddenTags, hiddenTags))
             }
             SettingsRow(stringResource(R.string.settings_tags), tagParts.joinToString(", "), first = false, onClick = links.tags, chevron = true)
+            phone?.let { rows ->
+                SettingsRow(stringResource(R.string.settings_widget_tile), widgetTileSummary(rows.tile), first = false, onClick = links.widgetTile, chevron = true)
+            }
         }
 
         SectionHeading(stringResource(R.string.settings_your_day))
@@ -164,6 +171,9 @@ fun SettingsScreen(
                 value = timeFormat.format(current.dayStart),
                 chevron = true,
             )
+            phone?.let { rows ->
+                SettingsRow(stringResource(R.string.settings_reminders), remindersSummary(rows.reminders), first = false, onClick = links.reminders, chevron = true)
+            }
         }
 
         SectionHeading(stringResource(R.string.settings_backup))

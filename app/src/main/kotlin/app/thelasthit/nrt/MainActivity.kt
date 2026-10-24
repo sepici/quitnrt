@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import app.thelasthit.nrt.link.LogLinks
+import app.thelasthit.nrt.reminders.NoticePoster
 import app.thelasthit.nrt.ui.AppRoot
 import app.thelasthit.nrt.ui.link.LinkViewModel
 import app.thelasthit.nrt.ui.theme.LastHitTheme
@@ -36,5 +37,7 @@ class MainActivity : ComponentActivity() {
 
     private fun openLink(intent: Intent?) {
         LogLinks.from(intent)?.let(links::open)
+        // A reminder's Log button: its notification has done its job.
+        NoticePoster.dismissFrom(this, intent)
     }
 }

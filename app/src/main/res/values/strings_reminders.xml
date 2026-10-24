@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Phase 6: the reminders, the home-screen widget and the Quick Settings tile. -->
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Settings rows -->
+    <string name="settings_reminders">Reminders</string>
+    <string name="settings_reminders_some">%1$d of %2$d on</string>
+    <string name="settings_reminders_quiet">%1$d of %2$d on, quiet from %3$s to %4$s</string>
+    <string name="settings_reminders_off">All off</string>
+    <string name="settings_reminders_blocked">Notifications are off for this app</string>
+    <string name="settings_widget_tile">Widget and tile</string>
+    <string name="settings_widget_tile_logs">The tile logs %1$s</string>
+    <string name="settings_widget_tile_logs_first">The tile logs the first product on your quick log</string>
+    <string name="settings_widget_tile_sheet">The tile opens the log sheet</string>
+
+    <!-- The Reminders page -->
+    <string name="reminders_title">Reminders</string>
+    <string name="reminders_intro">Switch each one on or off. None of them will ever say it\'s time for a dose.</string>
+    <string name="reminders_blocked_title">Notifications are off</string>
+    <string name="reminders_blocked_body">Reminders can\'t show until notifications are allowed for The Last Hit.</string>
+    <string name="reminders_allow">Allow notifications</string>
+    <string name="reminders_after_log">After you log</string>
+    <string name="reminders_allowance">Allowance nudges</string>
+    <string name="reminders_allowance_detail" formatted="false">When a dose takes the week past 80% or 100% of its allowance, or today past the guide</string>
+    <string name="reminders_each_day">Each day</string>
+    <string name="reminders_check_in">Evening check-in</string>
+    <string name="reminders_check_in_detail">Today\'s total against the guide, with buttons for Log and All good</string>
+    <string name="reminders_check_in_time">Check-in time</string>
+    <string name="reminders_check_in_quiet">%1$s is in your quiet hours, so the check-in won\'t show.</string>
+    <string name="reminders_forgot">Forgot to log</string>
+    <string name="reminders_forgot_detail">When nothing\'s logged by about 2 hours after your usual first dose</string>
+    <string name="reminders_forgot_detail_due">When nothing\'s logged by %1$s, about 2 hours after your usual first dose</string>
+    <string name="reminders_plan_and_game">Your plan and the lair</string>
+    <string name="reminders_results">Weekly results</string>
+    <string name="reminders_results_detail">When a week\'s result comes in, with the hits it earned</string>
+    <string name="reminders_achievements">Achievements</string>
+    <string name="reminders_achievements_detail">When a badge or gear unlocks</string>
+    <string name="reminders_quiet">Quiet hours</string>
+    <string name="reminders_quiet_switch">Use quiet hours</string>
+    <string name="reminders_quiet_detail">Nothing shows from %1$s to %2$s. Results and badges wait until %2$s.</string>
+    <string name="reminders_quiet_off_detail">Reminders can show at any time</string>
+    <string name="reminders_quiet_start">Starts</string>
+    <string name="reminders_quiet_end">Ends</string>
+    <string name="reminders_foot">Reminders are worked out on the phone. Nothing is sent anywhere.</string>
+    <string name="reminders_pick_check_in">Check-in time</string>
+    <string name="reminders_pick_quiet_start">Quiet hours start</string>
+    <string name="reminders_pick_quiet_end">Quiet hours end</string>
+    <string name="reminders_set_time">Set time</string>
+
+    <!-- The Widget and tile page -->
+    <string name="widget_tile_title">Widget and tile</string>
+    <string name="widget_tile_intro">Both log from your quick log without opening the app.</string>
+    <string name="widget_tile_tile">Quick Settings tile</string>
+    <string name="widget_tile_tile_log">Log the first product</string>
+    <string name="widget_tile_tile_log_detail">One %1$s, with Undo in a notification</string>
+    <string name="widget_tile_tile_log_first">The first product on your quick log, with Undo in a notification</string>
+    <string name="widget_tile_tile_sheet">Open the log sheet</string>
+    <string name="widget_tile_tile_sheet_detail">Pick the product, time and tags first</string>
+    <string name="widget_tile_widget">Home-screen widget</string>
+    <string name="widget_tile_tags">Pick tags after a tap</string>
+    <string name="widget_tile_tags_detail">Each dose the widget logs opens your tags, so you can add what led to it</string>
+    <string name="widget_tile_foot">Add the tile by editing your Quick Settings, and the widget by touching and holding your home screen.</string>
+
+    <!-- Notification channels, as the phone settings list them -->
+    <string name="channel_allowance">Allowance nudges</string>
+    <string name="channel_allowance_detail">When a dose takes the week near or past its allowance, or today past the guide</string>
+    <string name="channel_check_in">Evening check-in</string>
+    <string name="channel_check_in_detail">Today\'s total once a day, to catch a dose you forgot</string>
+    <string name="channel_results">Weekly results</string>
+    <string name="channel_results_detail">Each week\'s result as it comes in</string>
+    <string name="channel_achievements">Achievements</string>
+    <string name="channel_achievements_detail">New badges and gear</string>
+    <string name="channel_forgot">Forgot to log</string>
+    <string name="channel_forgot_detail">When nothing\'s logged by your usual time</string>
+    <string name="channel_logged">Logged from the tile</string>
+    <string name="channel_logged_detail">A short note with Undo after the tile logs a dose</string>
+
+    <!-- Allowance nudges -->
+    <string name="nudge_week_over_title">This week is past its allowance</string>
+    <string name="nudge_week_over_text">%1$s of %2$s\u00A0mg so far. Meet next week and you get this one back.</string>
+    <string name="nudge_nrt_free_title">A dose in an NRT-free week</string>
+    <string name="nudge_nrt_free_text">This week won\'t be met now. Meet the next one and you get it back. NRT for longer is far safer than smoking.</string>
+    <string name="nudge_week_near_title">%1$d%% of this week\'s allowance</string>
+    <string name="nudge_week_near_text">%1$s of %2$s\u00A0mg so far, with %3$s\u00A0mg left for the rest of the week.</string>
+    <string name="nudge_day_over_title">Past today\'s guide</string>
+    <string name="nudge_day_over_text">Today %1$s\u00A0mg, guide %2$s\u00A0mg. The week has %3$s\u00A0mg left.</string>
+
+    <!-- The evening check-in and Forgot to log -->
+    <string name="check_in_title">Evening check-in</string>
+    <string name="check_in_text_guide">Today %1$s\u00A0mg, guide %2$s\u00A0mg. Anything missing?</string>
+    <string name="check_in_text">Today %1$s\u00A0mg. Anything missing?</string>
+    <string name="check_in_text_none">Nothing logged today. Anything missing?</string>
+    <string name="check_in_all_good">All good</string>
+    <string name="forgot_title">Nothing logged yet today</string>
+    <string name="forgot_text">Forgot one?</string>
+
+    <!-- Weekly results -->
+    <!-- The number is the week's, not a count. -->
+    <string name="result_met_title" tools:ignore="PluralsCandidate">Week %1$d met</string>
+    <plurals name="result_hits_named">
+        <item quantity="one">%1$d hit ready for %2$s.</item>
+        <item quantity="other">%1$d hits ready for %2$s.</item>
+    </plurals>
+    <plurals name="result_hits">
+        <item quantity="one">%1$d hit ready.</item>
+        <item quantity="other">%1$d hits ready.</item>
+    </plurals>
+    <string name="result_paid_back_one">Week %1$d is paid back too.</string>
+    <string name="result_paid_back_many">Weeks %1$s are paid back too.</string>
+    <string name="result_missed_title" tools:ignore="PluralsCandidate">Week %1$d missed</string>
+    <string name="result_missed_text">Missed this one. Meet next week and you get it back.</string>
+    <string name="list_and">%1$s and %2$s</string>
+
+    <!-- Achievements -->
+    <string name="achievement_badge_text">New badge. It\'s on the trophy shelf in the lair.</string>
+    <plurals name="achievement_badges_title">
+        <item quantity="one">%1$d new badge</item>
+        <item quantity="other">%1$d new badges</item>
+    </plurals>
+    <string name="achievement_badges_text">%1$s. They\'re on the trophy shelf in the lair.</string>
+    <string name="achievement_badges_summary">They\'re on the trophy shelf in the lair.</string>
+    <string name="achievement_gear_title">New gear: %1$s</string>
+    <string name="achievement_gear_text">Equip it in the lair.</string>
+    <string name="achievement_gear_too">New gear too: %1$s.</string>
+
+    <!-- The widget -->
+    <string name="widget_name">Today and quick log</string>
+    <string name="widget_description">Today\'s mg against the guide, and your favourites to log in one tap</string>
+    <string name="widget_left">%1$s\u00A0mg left today</string>
+    <string name="widget_over">%1$s\u00A0mg over the guide</string>
+    <string name="widget_guide">%1$s\u00A0mg guide</string>
+    <string name="widget_nrt_free">NRT-free so far today</string>
+    <string name="widget_set_up">Finish setting up the app to log from here.</string>
+    <string name="widget_no_favourites">Add products to your quick log to log them from here.</string>
+    <string name="widget_tags">Tags</string>
+    <string name="widget_tags_description">Add tags to this dose</string>
+    <string name="widget_discard">Discard</string>
+
+    <!-- The quick tag picker, after the widget logs -->
+    <string name="quick_tags_title">Add tags</string>
+    <string name="quick_tags_logged">%1$s\u00A0mg of %2$s at %3$s</string>
+    <string name="quick_tags_save">Save tags</string>
+    <string name="quick_tags_undo">Undo this dose</string>
+    <string name="quick_tags_none">No tags yet. Add some in Settings.</string>
+
+    <!-- The Quick Settings tile -->
+    <string name="tile_opens_sheet">Opens the log sheet</string>
+</resources>

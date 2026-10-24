@@ -1,7 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- No INTERNET permission, on purpose: everything stays on the phone. -->
+
+    <!-- Reminders, asked for on Android 13 and newer the first time one is switched on. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!--
+        WorkManager asks for this to watch the network for jobs that need it. The reminders don't,
+        and the app never goes online, so it's left out.
+    -->
+    <uses-permission
+        android:name="android.permission.ACCESS_NETWORK_STATE"
+        tools:node="remove" />
 
     <application
         android:name=".LastHitApp"
@@ -47,6 +58,44 @@
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
         </activity>
+
+        <!-- The home-screen widget: today against the guide, and favourites that log at a tap. -->
+        <receiver
+            android:name=".widget.LastHitWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_info" />
+        </receiver>
+
+        <!-- The widget's tag picker: a sheet over the home screen, in a task of its own. -->
+        <activity
+            android:name=".widget.QuickTagsActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:taskAffinity=""
+            android:theme="@style/Theme.TheLastHit.Sheet" />
+
+        <!-- The Quick Settings tile, which logs the first product on the quick log. -->
+        <service
+            android:name=".tile.LogTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_tile_log"
+            android:label="@string/shortcut_log"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <!-- "All good" and Undo on a notification. -->
+        <receiver
+            android:name=".reminders.NoticeActionReceiver"
+            android:exported="false" />
     </application>
 
 </manifest>
