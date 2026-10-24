@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The launcher icon's pixel sword, cropped to its art, for the status bar. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="72"
+    android:viewportHeight="72">
+    <group
+        android:translateX="-18"
+        android:translateY="-18">
+        <path android:fillColor="#FFFFFFFF" android:pathData="M70,22h4v4h-4zM74,22h4v4h-4zM78,22h4v4h-4zM82,22h4v4h-4zM66,26h4v4h-4zM82,26h4v4h-4zM62,30h4v4h-4zM78,30h4v4h-4zM58,34h4v4h-4zM74,34h4v4h-4zM54,38h4v4h-4zM70,38h4v4h-4zM50,42h4v4h-4zM66,42h4v4h-4zM30,46h4v4h-4zM34,46h4v4h-4zM46,46h4v4h-4zM62,46h4v4h-4zM30,50h4v4h-4zM38,50h4v4h-4zM42,50h4v4h-4zM58,50h4v4h-4zM34,54h4v4h-4zM46,54h4v4h-4zM54,54h4v4h-4zM38,58h4v4h-4zM50,58h4v4h-4zM34,62h4v4h-4zM42,62h4v4h-4zM54,62h4v4h-4zM30,66h4v4h-4zM38,66h4v4h-4zM42,66h4v4h-4zM50,66h4v4h-4zM58,66h4v4h-4zM26,70h4v4h-4zM34,70h4v4h-4zM54,70h4v4h-4zM58,70h4v4h-4zM22,74h4v4h-4zM34,74h4v4h-4zM22,78h4v4h-4zM26,78h4v4h-4zM30,78h4v4h-4zM70,26h4v4h-4zM74,26h4v4h-4zM66,30h4v4h-4zM70,30h4v4h-4zM62,34h4v4h-4zM66,34h4v4h-4zM58,38h4v4h-4zM62,38h4v4h-4zM54,42h4v4h-4zM58,42h4v4h-4zM50,46h4v4h-4zM54,46h4v4h-4zM46,50h4v4h-4zM50,50h4v4h-4zM78,26h4v4h-4zM74,30h4v4h-4zM70,34h4v4h-4zM66,38h4v4h-4zM62,42h4v4h-4zM58,46h4v4h-4zM54,50h4v4h-4zM50,54h4v4h-4zM34,50h4v4h-4zM38,54h4v4h-4zM42,54h4v4h-4zM42,58h4v4h-4zM46,58h4v4h-4zM46,62h4v4h-4zM50,62h4v4h-4zM54,66h4v4h-4zM38,62h4v4h-4zM34,66h4v4h-4zM30,70h4v4h-4zM26,74h4v4h-4zM30,74h4v4h-4z" />
+    </group>
+</vector>

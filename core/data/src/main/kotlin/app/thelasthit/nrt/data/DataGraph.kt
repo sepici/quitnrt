@@ -11,6 +11,7 @@ import app.thelasthit.nrt.data.repo.ProductRepository
 import app.thelasthit.nrt.data.repo.ProgrammeRepository
 import app.thelasthit.nrt.data.repo.TagRepository
 import app.thelasthit.nrt.data.repo.UnlockRepository
+import app.thelasthit.nrt.data.settings.ReminderStore
 import app.thelasthit.nrt.data.settings.SettingsStore
 import app.thelasthit.nrt.domain.advice.AdviceLibrary
 import app.thelasthit.nrt.domain.catalogue.Catalogue
@@ -30,12 +31,16 @@ class DataGraph(
     val clock: Clock = Clock.systemUTC(),
     database: AppDatabase = AppDatabase.open(context),
     settingsStore: SettingsStore = SettingsStore(SettingsStore.createDataStore(context)),
+    reminderStore: ReminderStore = ReminderStore(ReminderStore.createDataStore(context)),
 ) {
     val catalogue: Catalogue by lazy { Catalogue.bundled() }
 
     /** The bundled advice, read on first use. */
     val advice: AdviceLibrary by lazy { AdviceLibrary.bundled() }
     val settings: SettingsStore = settingsStore
+
+    /** The reminders, the widget and the tile: this phone's own settings, kept out of backups. */
+    val reminders: ReminderStore = reminderStore
     val products = ProductRepository(database.products(), catalogue = { catalogue }, clock = clock)
     val tags = TagRepository(database.tags())
     val programmes = ProgrammeRepository(database, products, settings, catalogue = { catalogue }, clock = clock, zone = { ZoneId.systemDefault() })
@@ -54,12 +59,10 @@ class DataGraph(
     companion object {
         /** An in-memory database and a throwaway settings file, for UI tests. */
         fun inMemory(context: Context, clock: Clock = Clock.systemUTC()): DataGraph {
-            val file = File(context.cacheDir, "settings-${System.nanoTime()}.preferences_pb")
-            val store = PreferenceDataStoreFactory.create(
-                scope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
-                produceFile = { file },
-            )
-            return DataGraph(context, clock, AppDatabase.inMemory(context), SettingsStore(store))
+            fun throwaway(name: String) = File(context.cacheDir, "$name-${System.nanoTime()}.preferences_pb").let { file ->
+                PreferenceDataStoreFactory.create(scope = CoroutineScope(SupervisorJob() + Dispatchers.IO), produceFile = { file })
+            }
+            return DataGraph(context, clock, AppDatabase.inMemory(context), SettingsStore(throwaway("settings")), ReminderStore(throwaway("reminders")))
         }
     }
 }

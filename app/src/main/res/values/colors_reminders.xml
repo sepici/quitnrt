@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- A notification's accent: the hero green, and the marigold edge for the game layer's badges and gear. -->
+    <color name="notice_accent">#FF0B4A33</color>
+    <color name="notice_game">#FF9A6508</color>
+</resources>

@@ -68,9 +68,11 @@ import app.thelasthit.nrt.ui.settings.FontLicence
 import app.thelasthit.nrt.ui.settings.LicenceScreen
 import app.thelasthit.nrt.ui.settings.ProductsScreen
 import app.thelasthit.nrt.ui.settings.QuickLogScreen
+import app.thelasthit.nrt.ui.settings.RemindersScreen
 import app.thelasthit.nrt.ui.settings.SettingsLinks
 import app.thelasthit.nrt.ui.settings.SettingsScreen
 import app.thelasthit.nrt.ui.settings.TagsScreen
+import app.thelasthit.nrt.ui.settings.WidgetTileScreen
 import app.thelasthit.nrt.ui.theme.LastHit
 import app.thelasthit.nrt.ui.today.TodayScreen
 import kotlinx.coroutines.launch
@@ -97,6 +99,8 @@ private object SettingsRoutes {
     const val DAY_START = "settings/day-start"
     const val ABOUT = "settings/about"
     const val LICENCE = "settings/licence/{font}"
+    const val REMINDERS = "settings/reminders"
+    const val WIDGET_TILE = "settings/widget-tile"
 
     fun licence(font: FontLicence) = "settings/licence/${font.name}"
 }
@@ -206,6 +210,8 @@ private fun NavGraphBuilder.settings(navController: NavController, snackbars: Sn
                 tags = { navController.navigate(SettingsRoutes.TAGS) },
                 dayStart = { navController.navigate(SettingsRoutes.DAY_START) },
                 about = { navController.navigate(SettingsRoutes.ABOUT) },
+                reminders = { navController.navigate(SettingsRoutes.REMINDERS) },
+                widgetTile = { navController.navigate(SettingsRoutes.WIDGET_TILE) },
             ),
         )
     }
@@ -224,6 +230,8 @@ private fun NavGraphBuilder.settings(navController: NavController, snackbars: Sn
     page(SettingsRoutes.ABOUT) {
         AboutScreen(onBack = back, onLicence = { navController.navigate(SettingsRoutes.licence(it)) })
     }
+    page(SettingsRoutes.REMINDERS) { RemindersScreen(onBack = back) }
+    page(SettingsRoutes.WIDGET_TILE) { WidgetTileScreen(onBack = back) }
     page(SettingsRoutes.LICENCE) { entry ->
         val font = entry.arguments?.getString("font")?.let { name -> FontLicence.entries.firstOrNull { it.name == name } }
         if (font != null) LicenceScreen(font, onBack = back)

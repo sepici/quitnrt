@@ -1,3 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Android 11 and older: back up everything the app stores. -->
-<full-backup-content />
+<!--
+    Android 11 and older: back up everything the app stores, except the reminder settings and
+    their notes, which belong to this phone (ReminderStore). A new phone asks for notifications
+    again and starts its reminders fresh.
+-->
+<full-backup-content>
+    <exclude domain="file" path="datastore/reminders.preferences_pb" />
+</full-backup-content>
