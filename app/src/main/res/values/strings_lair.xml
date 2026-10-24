@@ -27,7 +27,7 @@
     <string name="lair_line_last_hit">%1$s has one hit left in it.</string>
     <string name="lair_line_smug">%1$s looks smug. Meet next week and take that hit back.</string>
     <string name="lair_line_staggers">%1$s staggers.</string>
-    <string name="lair_line_reels">%1$s reels. It didn\'t see five coming.</string>
+    <string name="lair_line_reels">%1$s reels. It didn\'t see the 5× coming.</string>
     <string name="lair_line_gone">Nothing left of %1$s but a few stray pixels.</string>
 
     <!-- The hits banked. -->

@@ -47,6 +47,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
@@ -91,6 +94,7 @@ internal fun EditWeekSheet(plan: Programme, number: Int, today: LocalDate, onSav
     AppSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
+        title = stringResource(R.string.plan_week_n, number),
     ) {
         Column(Modifier.fillMaxWidth()) {
             SheetHeader(
@@ -171,7 +175,10 @@ internal fun EditWeekSheet(plan: Programme, number: Int, today: LocalDate, onSav
                 Column(Modifier.padding(top = if (ruled) 16.dp else 14.dp)) {
                     if (ruled) HorizontalDivider(color = colors.line, modifier = Modifier.padding(bottom = 14.dp))
                     val line = if (down.isEmpty() && restLine != null) "$change $restLine" else change
-                    Meta(boldIn(line, forWeek, colors.text))
+                    // It changes with each step picked, so it's read out as it does.
+                    Box(Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }) {
+                        Meta(boldIn(line, forWeek, colors.text))
+                    }
                 }
                 if (down.isNotEmpty()) {
                     Knock(picked, plan, down.map { it.number }, restLine)
@@ -330,7 +337,7 @@ internal fun SheetHeader(title: String, subtitle: String?, closeDescription: Str
     val titleLine = with(LocalDensity.current) { titleStyle.lineHeight.toDp() }
     Box(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 4.dp)) {
         Column(Modifier.fillMaxWidth().padding(end = 48.dp)) {
-            Text(title, style = titleStyle, color = LastHit.colors.text)
+            Text(title, style = titleStyle, color = LastHit.colors.text, modifier = Modifier.semantics { heading() })
             if (subtitle != null) Text(subtitle, style = LastHit.type.label, color = LastHit.colors.text2)
         }
         IconButton(

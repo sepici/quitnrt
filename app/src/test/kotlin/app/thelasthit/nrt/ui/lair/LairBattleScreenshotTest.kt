@@ -56,6 +56,9 @@ class LairBattleScreenshotTest {
             before = {
                 onNodeWithText("Lair").performClick()
                 waitUntil(5_000) { onAllNodes(hasText(ready)).fetchSemanticsNodes().isNotEmpty() }
+                // The gear row and the shelf come in after the demon. Until then a short page leaves
+                // the stage its spare height as sky, which on this tall window is most of it.
+                waitUntil(5_000) { onAllNodes(hasText("Trophy shelf")).fetchSemanticsNodes().isNotEmpty() }
                 after()
             },
         ) {

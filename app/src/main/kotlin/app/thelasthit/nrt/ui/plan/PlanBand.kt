@@ -22,6 +22,8 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -30,6 +32,7 @@ import app.thelasthit.nrt.domain.creature.Creature
 import app.thelasthit.nrt.domain.creature.SpriteFrame
 import app.thelasthit.nrt.ui.game.BandScene
 import app.thelasthit.nrt.ui.theme.LastHit
+import app.thelasthit.nrt.ui.game.NameAndChip
 
 /** The demon as the Plan tab shows it. */
 sealed interface BandLook {
@@ -95,19 +98,24 @@ internal fun PlanBand(look: BandLook, onOpenLair: () -> Unit, modifier: Modifier
                 role = Role.Button
             },
     ) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                name,
-                style = LastHit.type.headline.copy(fontSize = 22.sp, lineHeight = 28.sp, letterSpacing = (-0.02).em),
-                color = colors.stageText,
-                maxLines = 1,
-                modifier = Modifier.weight(1f),
-            )
-            when {
-                look is BandLook.Defeated -> Chip(stringResource(R.string.plan_defeated))
-                ready != null -> Chip(ready)
-            }
+        // As Today's band has them: the chip drops under a name it won't fit beside, and a name too
+        // long for two lines ends in an ellipsis rather than being cut through a letter.
+        val chip = when {
+            look is BandLook.Defeated -> stringResource(R.string.plan_defeated)
+            else -> ready
         }
+        NameAndChip(
+            name = {
+                Text(
+                    name,
+                    style = LastHit.type.headline.copy(fontSize = 22.sp, lineHeight = 28.sp, letterSpacing = (-0.02).em, lineBreak = LineBreak.Heading),
+                    color = colors.stageText,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            },
+            chip = chip?.let { { Chip(it) } },
+        )
         when (look) {
             is BandLook.Lurking -> {
                 Text(stringResource(R.string.demon_lurking), style = LastHit.type.label, color = colors.stageText2, modifier = Modifier.padding(top = 2.dp))

@@ -7,7 +7,9 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -72,8 +74,14 @@ class TodayPlanTest {
         app.seedPlan()
         showToday()
 
-        waitForDescription("8 mg used. Daily guide 14 mg. 6 mg left today.")
-        compose.onNodeWithText("of 98 mg this week").assertExists()
+        waitForDescription("Daily guide 14 mg. 6 mg left today.")
+        // The hero reads as one: the amount once, then the meter from its guide, not "8 mg used" again.
+        compose.onNode(
+            hasText("You've had") and
+                SemanticsMatcher.expectValue(SemanticsProperties.ContentDescription, listOf("8 mg today", "Daily guide 14 mg. 6 mg left today.")),
+        ).assertExists()
+        // The week's figure is said as the meters say it, not as "61 of 98", which sounds like progress.
+        compose.onNode(hasContentDescription("61 mg used of the 98 mg allowance this week")).assertExists()
         compose.onNodeWithText("Week 4 of 12, day 5. 37 mg left this week.").assertExists()
         // Monday to Thursday are over and at or under the guide; today isn't over yet.
         compose.onNode(
@@ -104,7 +112,7 @@ class TodayPlanTest {
         runBlocking { app.graph.entries.log(LogRequest(GUM_4, quantity = 2, at = london("2026-10-23T14:00"))) }
         showToday()
 
-        waitForDescription("16 mg used. Daily guide 14 mg. 2 mg over today's guide.")
+        waitForDescription("Daily guide 14 mg. 2 mg over today's guide.")
         compose.onNodeWithText("Week 4 of 12, day 5. 29 mg left this week.").assertExists()
     }
 
@@ -129,7 +137,7 @@ class TodayPlanTest {
         showToday()
 
         waitForDescription("Daily guide 20 mg. Saturday 0 mg, at or under the guide, Sunday 0 mg")
-        compose.onNodeWithText("of 140 mg this week").assertExists()
+        compose.onNode(hasContentDescription("61 mg used of the 140 mg allowance this week")).assertExists()
         compose.onNodeWithText("Week 1 of 12, day 7. 79 mg left this week.").assertExists()
     }
 
@@ -172,7 +180,7 @@ class TodayPlanTest {
         runBlocking { app.graph.entries.log(LogRequest(QUICKMIST, at = london("2026-10-23T14:00"))) }
         showToday()
 
-        waitForDescription("1 mg used. Daily guide 0 mg. 1 mg over the 0 mg guide.")
+        waitForDescription("Daily guide 0 mg. 1 mg over the 0 mg guide.")
         compose.onNodeWithText("Week 12 of 12, day 1. An NRT-free week.").assertExists()
     }
 
@@ -183,9 +191,9 @@ class TodayPlanTest {
         app.seedPlan(start = LocalDate.parse("2026-08-07"))
         showToday()
 
-        waitForDescription("0 mg used. Daily guide 0 mg. At the 0 mg guide.")
+        waitForDescription("Daily guide 0 mg. At the 0 mg guide.")
         compose.onNodeWithText("Week 12 of 12, day 1. An NRT-free week.").assertExists()
-        compose.onNodeWithText("mg this week").assertExists()
+        compose.onNode(hasContentDescription("0 mg this week")).assertExists()
     }
 
     @Test

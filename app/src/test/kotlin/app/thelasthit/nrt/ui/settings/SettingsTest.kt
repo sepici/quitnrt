@@ -25,6 +25,7 @@ import androidx.compose.ui.test.performCustomAccessibilityActionWithLabel
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.assert
 import androidx.test.core.app.ApplicationProvider
 import app.thelasthit.nrt.GUM_2
 import app.thelasthit.nrt.GUM_4
@@ -111,10 +112,11 @@ class SettingsTest {
         compose.onNodeWithText("Add by hand").performClick()
         waitFor("For anything the catalogue doesn't list")
 
-        val fields = compose.onAllNodes(androidx.compose.ui.test.hasSetTextAction())
-        fields[0].performTextInput("Holiday gum")
-        fields[1].performTextInput("1.5")
-        fields[2].performTextInput("12")
+        // Each field is named after the title above it, which a screen reader then doesn't hear twice.
+        fun field(name: String) = compose.onNode(androidx.compose.ui.test.hasSetTextAction() and hasContentDescription(name))
+        field("Name").performTextInput("Holiday gum")
+        field("Strength").performTextInput("1.5")
+        field("Pack limit").performTextInput("12")
         compose.onNodeWithText("Add product").performClick()
 
         waitFor("Holiday gum 1.5\u00A0mg")
@@ -153,10 +155,13 @@ class SettingsTest {
     fun `the quick log reorders, loses and gains products`() {
         show { QuickLogScreen(onBack = {}) }
         waitFor("On the quick log")
+        // Each row says where it is in the order, and says it again after a move.
+        compose.onNodeWithText("Gum 2\u00A0mg").assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Position 1 of 4"))
 
         compose.onNodeWithText("Gum 2\u00A0mg").performCustomAccessibilityActionWithLabel("Move down")
         // Wait on the screen, not the database: Gum 4 mg's row moves above Gum 2 mg's.
         compose.waitUntil(5_000) { top("Gum 4\u00A0mg") < top("Gum 2\u00A0mg") }
+        compose.onNodeWithText("Gum 2\u00A0mg").assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Position 2 of 4"))
 
         compose.onNodeWithContentDescription("Take Patch 14\u00A0mg off the quick log").performClick()
         waitFor("Add")
@@ -179,7 +184,7 @@ class SettingsTest {
 
         compose.onNodeWithText("Add a tag").performClick()
         waitFor("It shows when you log a dose, in the group you pick")
-        compose.onAllNodes(androidx.compose.ui.test.hasSetTextAction())[0].performTextInput("School run")
+        compose.onNode(androidx.compose.ui.test.hasSetTextAction() and hasContentDescription("Name")).performTextInput("School run")
         compose.onNode(hasText("Routine") and SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.RadioButton)).performClick()
         compose.onNodeWithText("Add tag").performClick()
         compose.waitUntilExactlyOneExists(hasContentDescription("School run, added by you"), timeoutMillis = 5_000)

@@ -5,13 +5,9 @@
     <!-- The day start's button, naming the step after it -->
     <string name="onboarding_next_reminders">Next: your reminders</string>
 
-    <!-- The reminders step. The switches' titles are the Reminders page's own. -->
+    <!-- The reminders step. The switches' titles and details are the Reminders page's own. -->
     <string name="onboarding_reminders_title">Which reminders do you want?</string>
-    <string name="onboarding_reminders_body">Four are on to start with. None of them will ever say it\'s time for a dose.</string>
-    <string name="onboarding_reminders_allowance_detail">When a dose takes the week near or past its allowance, or today past the guide</string>
-    <string name="onboarding_reminders_check_in_detail">Today\'s total at %1$s, with a button to log anything missing</string>
-    <string name="onboarding_reminders_results_detail">When each week of your plan ends, with any hits ready for %1$s</string>
-    <string name="onboarding_reminders_achievements_detail">When you earn a badge or new gear</string>
+    <string name="onboarding_reminders_body">To start with, 4 are on. None of them will ever say it\'s time for a dose.</string>
     <string name="onboarding_reminders_hint_quiet">Nothing shows from %1$s to %2$s. You can change all of this later in Settings, under Reminders.</string>
     <string name="onboarding_reminders_hint">You can change all of this later in Settings, under Reminders.</string>
     <string name="onboarding_reminders_allow">Allow notifications and finish</string>
@@ -19,4 +15,13 @@
 
     <!-- The done step's summary row, beside the Settings row's own summary -->
     <string name="onboarding_summary_reminders">Reminders</string>
+    <!-- Set-up offers only some reminders, so its summary counts what's on rather than "4 of 5 on" -->
+    <plurals name="onboarding_summary_reminders_on">
+        <item quantity="one">%1$d reminder on</item>
+        <item quantity="other">%1$d reminders on</item>
+    </plurals>
+    <plurals name="onboarding_summary_reminders_on_quiet">
+        <item quantity="one">%1$d reminder on, quiet from %2$s to %3$s</item>
+        <item quantity="other">%1$d reminders on, quiet from %2$s to %3$s</item>
+    </plurals>
 </resources>

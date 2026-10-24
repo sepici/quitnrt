@@ -16,7 +16,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,6 +36,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
+import androidx.compose.material3.LocalContentColor
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
@@ -290,13 +292,19 @@ private fun BottomBar(currentRoute: String?, navController: NavController) {
                 },
                 label = {
                     val spoken = if (destination == TopLevelDestination.Lair) lairSpoken else null
-                    Text(
+                    val ink = LocalContentColor.current
+                    // On one line: at the largest fonts a label steps down in size to fit, rather
+                    // than breaking "Insights" across two lines.
+                    BasicText(
                         stringResource(destination.label),
                         modifier = if (spoken != null) Modifier.semantics { contentDescription = spoken } else Modifier,
                         style = LastHit.type.caption.copy(
                             fontSize = 12.sp,
                             fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.SemiBold,
                         ),
+                        color = { ink },
+                        maxLines = 1,
+                        autoSize = TextAutoSize.StepBased(minFontSize = 8.sp, maxFontSize = 12.sp, stepSize = 0.5.sp),
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(

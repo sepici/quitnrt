@@ -15,6 +15,11 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.isHeading
+import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.test.core.app.ApplicationProvider
 import app.thelasthit.nrt.GUM_2
 import app.thelasthit.nrt.TestApp
@@ -141,6 +146,11 @@ class TodayAdviceTest {
 
         logWithTag("Stressed")
         compose.waitUntilExactlyOneExists(hasText("Try box breathing next time"), timeoutMillis = 5_000)
+        // The card's title is a heading, read out as the tip arrives, and the card isn't a pane, so
+        // scrolling it back into view doesn't say it again.
+        compose.onNodeWithText("Try box breathing next time").assert(isHeading())
+        compose.onNode(hasAnyDescendant(hasText("Try box breathing next time")) and SemanticsMatcher.keyIsDefined(SemanticsProperties.PaneTitle))
+            .assertDoesNotExist()
         compose.onNodeWithText("You tagged that dose Stressed. Slow breathing eases both stress and cravings.").assertExists()
         // The snackbar keeps only the amount and Undo.
         compose.onNodeWithText("Logged 2\u00A0mg of Nicorette gum").assertExists()
@@ -212,7 +222,9 @@ class TodayAdviceTest {
             hasText("Yesterday went over its guide. One day over doesn't undo what you've done."),
             timeoutMillis = 5_000,
         )
-        compose.onNodeWithText("How to do it").performScrollTo().performClick()
+        // A slip's line suggests nothing to do, so its link says what the page has.
+        compose.onNodeWithText("How to do it").assertDoesNotExist()
+        compose.onNodeWithText("What helps").performScrollTo().performClick()
         assertEquals(listOf("strategy:after_a_slip"), opened)
     }
 
@@ -230,6 +242,9 @@ class TodayAdviceTest {
 
         compose.waitUntilExactlyOneExists(hasText("Today is over its guide"), timeoutMillis = 5_000)
         compose.onNodeWithText("That doesn't undo what you've done. It shows you where the hard moments are.").assertExists()
+        compose.onNodeWithText("How to do it").assertDoesNotExist()
+        compose.onNodeWithText("What helps").performScrollTo().performClick()
+        assertEquals(listOf("strategy:after_a_slip"), opened)
     }
 
     @Test

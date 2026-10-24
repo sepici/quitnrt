@@ -105,6 +105,31 @@ fun Resources.pillLabelText(label: PillLabel): String = when (label) {
     is PillLabel.ByName -> getString(R.string.pill_label, label.name, label.strength.mgText())
 }
 
+@Composable
+fun pillDescription(label: PillLabel, productName: String): String = LocalResources.current.pillDescription(label, productName)
+
+/**
+ * What a screen reader says for a quick-log pill: the words on it first, so a voice command that
+ * reads them matches, then the product they stand for. "Log Mouth spray 1 mg, QuickMist", or
+ * "Log QuickMist 1 mg" when the pill already shows the name.
+ */
+fun Resources.pillDescription(label: PillLabel, productName: String): String = when (label) {
+    is PillLabel.ByForm -> getString(R.string.today_quick_log_named, pillLabelText(label), productName)
+    is PillLabel.ByName -> getString(R.string.today_quick_log_description, pillLabelText(label))
+}
+
+/**
+ * The note in fewer words, for the smallest widget at a large font, where the whole of it won't
+ * fit above its buttons: it still names the limit and the pharmacist.
+ */
+fun Resources.labelNoteShortText(note: LabelWarning): String = when (note) {
+    is LabelWarning.OverDaily -> getString(R.string.widget_over_daily, note.limit)
+    is LabelWarning.OverWindow -> {
+        val hours = note.limit.span.toHours().toInt().coerceAtLeast(1)
+        getQuantityString(R.plurals.widget_over_window, hours, note.limit.maxUnits, hours)
+    }
+}
+
 /** The calm note for a dose over the pack's limit, on Today and after a link's dose. */
 fun Resources.labelNoteText(note: LabelWarning): String = when (note) {
     is LabelWarning.OverDaily -> getString(R.string.today_over_daily, note.limit)

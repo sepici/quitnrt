@@ -75,7 +75,12 @@ android {
         // Robolectric needs the merged resources to render Compose screens and their fonts.
         unitTests.isIncludeAndroidResources = true
         // Robolectric's Android 16, which the AppFunctions tests run on, reads a JDK internal.
-        unitTests.all { it.jvmArgs("--add-exports=java.base/jdk.internal.access=ALL-UNNAMED") }
+        // The screenshots of whole tall pages, at up to twice the font size, need more than the
+        // test worker's default heap when they're recorded.
+        unitTests.all {
+            it.jvmArgs("--add-exports=java.base/jdk.internal.access=ALL-UNNAMED")
+            it.maxHeapSize = "2g"
+        }
     }
 }
 

@@ -45,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -228,18 +229,21 @@ private fun TagSheet(
         scope.launch { sheetState.hide() }.invokeOnCompletion { onDismiss() }
     }
 
+    val title = stringResource(if (tag == null) R.string.tag_add_title else R.string.tag_edit_title)
     AppSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
+        title = title,
     ) {
         Column(Modifier.fillMaxWidth().imePadding()) {
             Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState())) {
                 Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
                         Text(
-                            stringResource(if (tag == null) R.string.tag_add_title else R.string.tag_edit_title),
+                            title,
                             style = LastHit.type.headline.copy(fontSize = 28.sp, lineHeight = 34.sp),
                             color = colors.text,
+                            modifier = Modifier.semantics { heading() },
                         )
                         Text(
                             when {
@@ -254,8 +258,9 @@ private fun TagSheet(
                         Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.action_close), tint = colors.text)
                     }
                 }
-                SheetField(stringResource(R.string.tag_name)) {
+                SheetField(stringResource(R.string.tag_name), forTextField = true) { label ->
                     SheetTextField(
+                        label = label,
                         value = name,
                         onChange = { name = it.take(40) },
                         keyboard = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
@@ -274,7 +279,11 @@ private fun TagSheet(
                     }
                 }
                 SheetField(stringResource(R.string.tag_group)) {
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FlowRow(
+                        Modifier.selectableGroup(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
                         TagGroup.entries.forEach { each ->
                             Chip(stringResource(each.text), selected = each == group, kind = ChipKind.Choice, onClick = { group = each })
                         }

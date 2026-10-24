@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
@@ -26,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -33,8 +37,11 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.domain.creature.Creature
 import app.thelasthit.nrt.ui.components.FieldLabel
@@ -55,7 +62,13 @@ fun DemonPreview(name: String, creature: Creature, variant: String, modifier: Mo
     BandScene(creature, variant, height = 168.dp, textStart = 172.dp, textTop = 30.dp, modifier = modifier) {
         Column {
             if (name.isNotEmpty()) {
-                Text(name, style = LastHit.type.headline.copy(fontSize = 30.sp, lineHeight = 34.sp), color = colors.stageText, maxLines = 1)
+                Text(
+                    name,
+                    style = LastHit.type.headline.copy(fontSize = 30.sp, lineHeight = 34.sp),
+                    color = colors.stageText,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
             Text(kind, style = LastHit.type.label.copy(fontWeight = FontWeight.SemiBold), color = colors.stageText2, modifier = Modifier.padding(top = 2.dp))
             if (name.isNotEmpty()) {
@@ -111,13 +124,33 @@ private fun VariantTiles(creature: Creature, selected: String, onPick: (String) 
     }
 }
 
-/** Items four to a row, each the same width. */
+/**
+ * A tile's name on one line: at the largest fonts it steps down in size to fit, rather than
+ * breaking "Dragon" across two lines.
+ */
+@Composable
+private fun TileName(text: String, color: Color) {
+    val style = LastHit.type.label.copy(fontWeight = FontWeight.SemiBold)
+    BasicText(
+        text,
+        style = style,
+        color = { color },
+        maxLines = 1,
+        autoSize = TextAutoSize.StepBased(minFontSize = 9.sp, maxFontSize = style.fontSize, stepSize = 0.5.sp),
+        modifier = Modifier.padding(horizontal = 4.dp),
+    )
+}
+
+/**
+ * Items four to a row, each the same width, and as tall as the tallest in its row: at least
+ * 118 dp, and more when a large font wraps a name, so the name never pushes the sprite out.
+ */
 @Composable
 private fun <T> Tiles(items: List<T>, modifier: Modifier = Modifier, tile: @Composable BoxScope.(T) -> Unit) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         items.chunked(4).forEach { row ->
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                row.forEach { item -> Box(Modifier.weight(1f)) { tile(item) } }
+            Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                row.forEach { item -> Box(Modifier.weight(1f).fillMaxHeight()) { tile(item) } }
                 repeat(4 - row.size) { Box(Modifier.weight(1f)) }
             }
         }
@@ -133,7 +166,8 @@ private fun BoxScope.CreatureTile(creature: Creature, selected: Boolean, variant
         Column(
             Modifier
                 .fillMaxWidth()
-                .height(118.dp)
+                .fillMaxHeight()
+                .heightIn(min = 118.dp)
                 .clip(shape)
                 .background(if (selected) colors.stageSky else colors.bg)
                 .border(if (selected) 2.dp else 1.5.dp, if (selected) colors.text else colors.line, shape)
@@ -144,7 +178,7 @@ private fun BoxScope.CreatureTile(creature: Creature, selected: Boolean, variant
         ) {
             // 64 dp is twice the sprite's size, with room between its feet and the name.
             CreatureImage(creature, variant, Modifier.padding(bottom = 8.dp).size(64.dp))
-            Text(name, style = LastHit.type.label.copy(fontWeight = FontWeight.SemiBold), color = if (selected) colors.stageText else colors.text)
+            TileName(name, if (selected) colors.stageText else colors.text)
         }
         if (selected) Tick()
     } else {
@@ -152,7 +186,8 @@ private fun BoxScope.CreatureTile(creature: Creature, selected: Boolean, variant
         Column(
             Modifier
                 .fillMaxWidth()
-                .height(118.dp)
+                .fillMaxHeight()
+                .heightIn(min = 118.dp)
                 .clip(shape)
                 .border(1.5.dp, colors.line, shape)
                 .clearAndSetSemantics {
@@ -173,7 +208,7 @@ private fun BoxScope.CreatureTile(creature: Creature, selected: Boolean, variant
                     style = Stroke(width = 3.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(dash, dash))),
                 )
             }
-            Text(name, style = LastHit.type.label.copy(fontWeight = FontWeight.SemiBold), color = colors.text3)
+            TileName(name, colors.text3)
         }
     }
 }
@@ -185,7 +220,8 @@ private fun BoxScope.VariantSwatch(creature: Creature, variant: String, selected
     Column(
         Modifier
             .fillMaxWidth()
-            .height(118.dp)
+            .fillMaxHeight()
+            .heightIn(min = 118.dp)
             .clip(shape)
             .background(colors.stageSky)
             .then(if (selected) Modifier.border(2.dp, colors.text, shape) else Modifier)
@@ -195,7 +231,7 @@ private fun BoxScope.VariantSwatch(creature: Creature, variant: String, selected
         verticalArrangement = Arrangement.Bottom,
     ) {
         CreatureImage(creature, variant, Modifier.padding(bottom = 8.dp).size(64.dp))
-        Text(stringResource(variantName(variant)), style = LastHit.type.label.copy(fontWeight = FontWeight.SemiBold), color = colors.stageText)
+        TileName(stringResource(variantName(variant)), colors.stageText)
     }
     if (selected) Tick()
 }

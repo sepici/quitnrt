@@ -64,6 +64,26 @@ class BattleMotionTest {
     }
 
     @Test
+    fun `no second holds more than three flashes, so none can bring on a seizure`() {
+        val finalCombo = Strike(4, Attack.COMBO, hpBefore = 50, maxHp = 120)
+        for (strike in listOf(hit, combo, lastHit, finalCombo)) {
+            val flashes = BattleMotion(strike, reduced = false).poses().map { it.flash }
+            // Where a flash starts, sampled every 10 ms.
+            val starts = flashes.indices.filter { i -> flashes[i] && (i == 0 || !flashes[i - 1]) }.map { it * 10L }
+            assertTrue("${strike.attack} flashes", starts.isNotEmpty())
+            for (from in starts) {
+                val inASecond = starts.count { it >= from && it < from + 1_000 }
+                assertTrue("${strike.attack}: $inASecond flashes from $from ms", inASecond <= 3)
+            }
+        }
+        // The five quick strikes still each show the hurt frame and a knock.
+        val strikes = BattleMotion(combo, reduced = false)
+        assertEquals(SpriteFrame.HURT, strikes.at(10).frame)
+        assertEquals(1, strikes.at(10).knockBack)
+        assertFalse(strikes.at(10).flash)
+    }
+
+    @Test
     fun `the final hit knocks the demon out and breaks it apart, through every defeat frame`() {
         val motion = BattleMotion(lastHit, reduced = false)
         val frames = motion.poses().mapNotNull { it.frame }.distinct()

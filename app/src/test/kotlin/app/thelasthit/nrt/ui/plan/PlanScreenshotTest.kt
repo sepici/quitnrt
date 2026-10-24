@@ -11,6 +11,9 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
+import java.time.LocalDate
+import app.thelasthit.nrt.seedPlan
+import app.thelasthit.nrt.GUM_2
 import androidx.test.core.app.ApplicationProvider
 import app.thelasthit.nrt.TestApp
 import app.thelasthit.nrt.ui.AppShell
@@ -18,6 +21,7 @@ import app.thelasthit.nrt.ui.FULL_PAGE
 import app.thelasthit.nrt.ui.LARGE_FONT
 import app.thelasthit.nrt.ui.PHONE
 import app.thelasthit.nrt.ui.captureLooks
+import app.thelasthit.nrt.ui.HUGE_FONT
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
@@ -139,6 +143,16 @@ class PlanScreenshotTest {
 
     @Test @Config(qualifiers = PHONE, fontScale = LARGE_FONT)
     fun missedLarge() = missed()
+
+    /** Week 12 of a plan from 7 August: NRT-free, its days' 0 mg over their letters, at the largest font. */
+    @Test @Config(qualifiers = TALLER, fontScale = HUGE_FONT)
+    fun weekNrtFreeX2() = tab("plan-week-nrt-free", "Schedule") {
+        runBlocking { app.graph.products.addFromCatalogue(GUM_2) }
+        app.seedPlan(start = LocalDate.parse("2026-08-07"))
+    }
+
+    @Test @Config(qualifiers = TALL)
+    fun weekNrtFree() = weekNrtFreeX2()
 
     @Test @Config(qualifiers = FULL_PAGE)
     fun overtime() = tab("plan-overtime", "Schedule") { app.seedOvertime() }

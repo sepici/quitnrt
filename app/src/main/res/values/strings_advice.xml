@@ -3,7 +3,7 @@
     <!-- The advice list and a strategy's page. -->
     <string name="advice_back">Back</string>
     <string name="advice_title">Advice</string>
-    <string name="advice_intro">Ways to handle a craving without a dose, from NHS, CDC and other public health guidance. Your own top triggers come first.</string>
+    <string name="advice_intro">Ways to handle a craving without a dose, based on guidance from the NHS, the CDC and other public health bodies. Your own top triggers come first.</string>
     <string name="advice_top_title">Your top triggers</string>
     <string name="advice_top_window">From your last 14\u00A0days, by share of doses.</string>
     <string name="advice_top_empty">Tag doses as you log them, and the advice for your most common triggers will come first here.</string>

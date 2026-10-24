@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -20,6 +21,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.ui.components.FieldLabel
 import app.thelasthit.nrt.ui.components.Chip
@@ -44,11 +48,13 @@ fun DemonStep(state: OnboardingState, viewModel: OnboardingViewModel) {
         DemonPreview(name = draft.demonName.trim(), creature = draft.creature, variant = draft.variant, modifier = Modifier.padding(top = 24.dp))
 
         Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 28.dp)) {
-            FieldLabel(stringResource(R.string.onboarding_name))
+            val nameLabel = stringResource(R.string.onboarding_name)
+            // The field carries the name, which stays once the placeholder has gone, so the label isn't read twice.
+            FieldLabel(nameLabel, Modifier.clearAndSetSemantics {})
             OutlinedTextField(
                 value = draft.demonName,
                 onValueChange = viewModel::nameDemon,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().semantics { contentDescription = nameLabel },
                 placeholder = { Text(stringResource(R.string.onboarding_name_hint)) },
                 singleLine = true,
                 shape = RoundedCornerShape(16.dp),
@@ -67,7 +73,7 @@ fun DemonStep(state: OnboardingState, viewModel: OnboardingViewModel) {
                 ),
             )
             FlowRow(
-                Modifier.padding(top = 12.dp),
+                Modifier.padding(top = 12.dp).selectableGroup(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {

@@ -37,6 +37,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalAccessibilityManager
 import androidx.compose.ui.platform.LocalDensity
@@ -48,6 +49,8 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.LineBreak
@@ -130,6 +133,12 @@ fun UnlockHost(onOpenShelf: () -> Unit, viewModel: UnlockViewModel = graphViewMo
     Box(
         Modifier
             .fillMaxSize()
+            // Composed after the pages, so without this a card waiting to be closed would be
+            // reached only after the whole page. It sits over the page's top, and is read first.
+            .semantics {
+                isTraversalGroup = true
+                traversalIndex = -1f
+            }
             .statusBarsPadding()
             .padding(horizontal = 8.dp, vertical = 8.dp),
         contentAlignment = Alignment.TopCenter,
@@ -295,19 +304,41 @@ private val COUNT_PADDING = 4.dp
 private fun UnlockCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     val colors = LastHit.colors
     val shape = RoundedCornerShape(24.dp)
+    val band = colors.scrim.copy(alpha = if (colors.isDark) 0.8f else 0.45f)
     Column(
         Modifier
             .fillMaxWidth()
+            // A short shadow band fading out under the card, so the page's text cut off at its
+            // edge fades rather than showing half a letter.
+            .drawBehind {
+                // Full strength behind the rounded corners and down to the card's edge, then fading.
+                val from = size.height - BAND_OVERLAP.toPx()
+                val to = size.height + BAND_BELOW.toPx()
+                val edge = BAND_OVERLAP.toPx() / (to - from)
+                drawRect(
+                    Brush.verticalGradient(0f to band, edge to band, 1f to Color.Transparent, startY = from, endY = to),
+                    topLeft = Offset(0f, from),
+                    size = Size(size.width, to - from),
+                )
+            }
             .shadow(16.dp, shape, ambientColor = Color.Black.copy(alpha = 0.18f), spotColor = Color.Black.copy(alpha = 0.18f))
             .clip(shape)
             .background(colors.surface)
             .border(1.dp, if (colors.isDark) colors.lineStrong else colors.line, shape)
-            .semantics { liveRegion = LiveRegionMode.Polite }
+            .semantics {
+                liveRegion = LiveRegionMode.Polite
+                isTraversalGroup = true
+                traversalIndex = -1f
+            }
             .then(modifier)
             .padding(14.dp),
         content = content,
     )
 }
+
+/** How far the shadow band under a card starts inside it, behind its rounded corners, and how far below it reaches. */
+private val BAND_OVERLAP = 24.dp
+private val BAND_BELOW = 40.dp
 
 /** A square marigold block with a pressed lower edge, as the lair's banked hits sit in. */
 @Composable

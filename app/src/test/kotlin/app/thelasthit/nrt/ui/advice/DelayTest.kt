@@ -17,6 +17,11 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.isHeading
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
@@ -92,6 +97,8 @@ class DelayTest {
         compose.onNodeWithContentDescription("One minute less").assertIsNotEnabled()
         repeat(5) { compose.onNodeWithContentDescription("One minute more").performClick() }
         compose.waitUntilExactlyOneExists(hasText("10\u00A0min"))
+        // The length is read out again after each step, so it's heard without leaving the button.
+        compose.onNode(hasText("10\u00A0min")).assert(SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite))
         compose.onNodeWithContentDescription("One minute more").assertIsNotEnabled()
         compose.onNodeWithText("Start 10\u00A0minutes").assertExists()
     }
@@ -122,6 +129,9 @@ class DelayTest {
 
         at("15:05:00")
         waitForLeft("3 minutes 12 seconds left of 5 minutes")
+        // A screen reader hears the time left once a minute, in whole minutes rounded up.
+        compose.onNode(hasContentDescription("4\u00A0minutes left"))
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite))
         compose.onNodeWithText("Started 15:03").assertExists()
         compose.onNodeWithText("Ends 15:08").assertExists()
     }
@@ -135,6 +145,9 @@ class DelayTest {
 
         at("15:05:00")
         compose.waitUntilExactlyOneExists(hasText("5\u00A0minutes done"), timeoutMillis = 5_000)
+        // The page changes in place, so it's told as a new pane, and its title is a heading.
+        compose.onNode(SemanticsMatcher.expectValue(SemanticsProperties.PaneTitle, "5\u00A0minutes done")).assertExists()
+        compose.onNodeWithText("5\u00A0minutes done").assert(isHeading())
         compose.onNodeWithText("Started 15:00, ended 15:05.").assertExists()
         compose.onNodeWithText("If the urge is still there, give it another 5\u00A0minutes. If it's gone, you rode it out.").assertExists()
         assertEquals(1, buzzer.alarms)

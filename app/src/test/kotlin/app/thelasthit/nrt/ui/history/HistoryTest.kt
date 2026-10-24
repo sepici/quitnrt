@@ -20,6 +20,12 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.isHeading
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.test.core.app.ApplicationProvider
 import app.thelasthit.nrt.GUM_2
 import app.thelasthit.nrt.TestApp
@@ -119,6 +125,9 @@ class HistoryTest {
         show()
 
         compose.waitUntilExactlyOneExists(hasText("13:40, After a meal"))
+        // A screen reader says what a tap does: "double-tap to edit".
+        compose.onNodeWithText("13:40, After a meal")
+            .assert(SemanticsMatcher("taps to edit") { it.config.getOrNull(SemanticsActions.OnClick)?.label == "Edit" })
         compose.onNodeWithText("13:40, After a meal").performClick()
         compose.waitUntilExactlyOneExists(hasText("Edit dose"))
         compose.waitForIdle()
@@ -214,6 +223,9 @@ class HistoryTest {
         show()
 
         openFilter(allDoses = 6)
+        // The sheet's title is a heading, and opening it says the title rather than "Bottom sheet".
+        compose.onNodeWithText("Filter").assert(isHeading())
+        compose.onNode(SemanticsMatcher.expectValue(SemanticsProperties.PaneTitle, "Filter")).assertExists()
         compose.onNodeWithText("Stressed").assertDoesNotExist()
         // All used once, so they keep their own order: the first four show, the rest wait behind More.
         compose.onNodeWithText("Just woke up").assertExists()

@@ -93,7 +93,14 @@ internal fun WidgetContent(model: WidgetModel?) {
         if (model == null || layout == null) return@Column
         val width = size.width - SIDE * 2
         if (layout.hero != Hero.NONE) {
-            Column(GlanceModifier.fillMaxWidth().defaultWeight().clickable(actionStartActivity<MainActivity>())) {
+            // Read as one, in Today's words, rather than "You've had, 8, mg" a piece at a time.
+            Column(
+                GlanceModifier
+                    .fillMaxWidth()
+                    .defaultWeight()
+                    .clickable(actionStartActivity<MainActivity>())
+                    .semantics { contentDescription = layout.heroDescription },
+            ) {
                 Top(model, layout, width)
             }
         }
@@ -127,6 +134,10 @@ private fun Top(model: WidgetModel, layout: WidgetLayout, width: Dp) {
                 Left(model.today <= guide, layout.left.orEmpty(), lines = 1, end = false)
                 guideLabel()
             }
+        }
+        layout.lastDose?.let { last ->
+            Spacer(GlanceModifier.height(WidgetSizes.LAST_DOSE_GAP))
+            Text(last, style = small(Tones.onHero2, bold = false), maxLines = layout.lastDoseLines)
         }
         return
     }

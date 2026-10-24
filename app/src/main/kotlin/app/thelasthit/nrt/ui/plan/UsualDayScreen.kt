@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -38,6 +39,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -155,18 +158,15 @@ private fun UnitRowView(row: UnitRow, onStep: (String, Int) -> Unit) {
     val title = resources.productTitle(product)
     val unit = stringResource(unitWord(product.unit))
     val count = pluralStringResource(product.unit.plural, row.units, row.units)
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .heightIn(min = 76.dp)
-            .padding(vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
+    // At a large font the stepper would take half the row and break the name, so it goes under it.
+    val stacked = LocalDensity.current.fontScale > STACKED_FONT_SCALE
+    val icon = @Composable {
         Box(Modifier.size(40.dp).clip(CircleShape).background(colors.sunk), contentAlignment = Alignment.Center) {
             Icon(painterResource(product.form.icon), contentDescription = null, tint = if (off) colors.text3 else colors.text2, modifier = Modifier.size(22.dp))
         }
-        Column(Modifier.weight(1f).semantics(mergeDescendants = true) {}) {
+    }
+    val details = @Composable { modifier: Modifier ->
+        Column(modifier.semantics(mergeDescendants = true) {}) {
             Text(title, style = LastHit.type.title.copy(fontWeight = FontWeight.Bold), color = if (off) colors.text2 else colors.text)
             Text(
                 if (off) stringResource(R.string.plan_not_in_usual) else stringResource(R.string.plan_units_detail, count, row.total.mgText()),
@@ -174,27 +174,63 @@ private fun UnitRowView(row: UnitRow, onStep: (String, Int) -> Unit) {
                 color = colors.text2,
             )
         }
-        val group = stringResource(R.string.plan_units_a_day_description, title, count)
-        Row(
-            Modifier.semantics(mergeDescendants = false) { contentDescription = group },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
-        ) {
-            StepButton(R.drawable.ic_minus, stringResource(R.string.plan_one_fewer, unit), enabled = !off, onClick = { onStep(product.id, -1) })
-            Text(
-                row.units.toString(),
-                style = LastHit.type.title.copy(fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.018).em),
-                color = if (off) colors.text3 else colors.text,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.widthIn(min = 34.dp).clearAndSetSemantics {},
-            )
-            StepButton(
-                R.drawable.ic_plus,
-                stringResource(R.string.plan_one_more, unit),
-                enabled = row.units < UsualDayViewModel.MAX_UNITS,
-                onClick = { onStep(product.id, 1) },
-            )
+    }
+    val stepper = @Composable { modifier: Modifier -> UnitStepper(row, title, unit, count, off, onStep, modifier) }
+    if (stacked) {
+        Column(Modifier.fillMaxWidth().padding(vertical = 12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                icon()
+                details(Modifier.weight(1f))
+            }
+            stepper(Modifier.padding(start = 52.dp, top = 8.dp))
         }
+    } else {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .heightIn(min = 76.dp)
+                .padding(vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            icon()
+            details(Modifier.weight(1f))
+            stepper(Modifier)
+        }
+    }
+}
+
+/** Above this font scale, a product's stepper goes on a line of its own under its name. */
+private const val STACKED_FONT_SCALE = 1.2f
+
+/** One fewer, the count and one more. The count is read out after each step, with what it's for. */
+@Composable
+private fun UnitStepper(row: UnitRow, title: String, unit: String, count: String, off: Boolean, onStep: (String, Int) -> Unit, modifier: Modifier) {
+    val colors = LastHit.colors
+    val product = row.product
+    val group = stringResource(R.string.plan_units_a_day_description, title, count)
+    Row(
+        modifier.semantics(mergeDescendants = false) {
+            contentDescription = group
+            liveRegion = LiveRegionMode.Polite
+        },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        StepButton(R.drawable.ic_minus, stringResource(R.string.plan_one_fewer, unit), enabled = !off, onClick = { onStep(product.id, -1) })
+        Text(
+            row.units.toString(),
+            style = LastHit.type.title.copy(fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.018).em),
+            color = if (off) colors.text3 else colors.text,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.widthIn(min = 34.dp).clearAndSetSemantics {},
+        )
+        StepButton(
+            R.drawable.ic_plus,
+            stringResource(R.string.plan_one_more, unit),
+            enabled = row.units < UsualDayViewModel.MAX_UNITS,
+            onClick = { onStep(product.id, 1) },
+        )
     }
 }
 
@@ -244,6 +280,7 @@ private fun AddProductSheet(products: List<UserProduct>, onPick: (String) -> Uni
     AppSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
+        title = stringResource(R.string.plan_add_product),
     ) {
         Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
             SheetHeader(

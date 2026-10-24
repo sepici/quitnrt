@@ -10,12 +10,18 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.isHeading
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import app.thelasthit.nrt.TestApp
 import app.thelasthit.nrt.setUp
 import app.thelasthit.nrt.ui.PHONE
 import app.thelasthit.nrt.ui.theme.LastHitTheme
+import app.thelasthit.nrt.ui.lair.setAnimatorScale
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -102,6 +108,21 @@ class BreathingTest {
     }
 
     @Test
+    fun `with the phone's animations off, the steps still change and are read out`() {
+        app.setAnimatorScale(0f)
+        show()
+        compose.onNodeWithText("Start box breathing").performClick()
+        waitFor("Breathe in. Round 1 of 4.")
+
+        later(4_000)
+        waitFor("Hold. Round 1 of 4.")
+        later(4_000)
+        waitFor("Breathe out. Round 1 of 4.")
+        compose.onNodeWithContentDescription("Breathe out. Round 1 of 4.")
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite))
+    }
+
+    @Test
     fun `a session run to the end is saved and counts towards the badges`() {
         app.seedBreathing(4)
         show()
@@ -112,6 +133,9 @@ class BreathingTest {
 
         later(64_000)
         compose.waitUntilExactlyOneExists(hasText("Session 5 done"), timeoutMillis = 5_000)
+        // The page changes in place as the last round ends, so it's told as a new pane.
+        compose.onNode(SemanticsMatcher.expectValue(SemanticsProperties.PaneTitle, "Session 5 done")).assertExists()
+        compose.onNodeWithText("Session 5 done").assert(isHeading())
         compose.onNodeWithText("1\u00A0minute of box breathing, 4 rounds.").assertExists()
         compose.onNodeWithText("The next breathing badge comes at 10.").assertExists()
         assertEquals(5, runBlocking { app.graph.breathing.completedCount() })

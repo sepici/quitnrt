@@ -55,7 +55,7 @@ class PlanGoalsTest {
         compose.onNodeWithText("Extra goals this week").assertExists()
         compose.onNode(hasText("gum a day: kept on 3${NB}of${NB}4", substring = true)).assertExists()
         compose.onNode(hasText("At most 3", substring = true) and hasText("sprays a day: kept on 4${NB}of${NB}4", substring = true)).assertExists()
-        compose.onNode(hasText("between doses: kept for 26${NB}of${NB}28", substring = true)).assertExists()
+        compose.onNode(hasText("between doses: 26${NB}of${NB}28${NB}gaps long enough", substring = true)).assertExists()
         compose.onNode(hasText("First dose from 09:00: kept on 3${NB}of${NB}4", substring = true)).assertExists()
     }
 

@@ -18,6 +18,7 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -147,10 +148,15 @@ private const val GENERIC_BRAND = "Generic"
 @Composable
 private fun SearchField(query: String, onChange: (String) -> Unit) {
     val colors = LastHit.colors
+    // Named for a screen reader, since the placeholder goes once something is typed.
+    val label = stringResource(R.string.catalogue_search_label)
     OutlinedTextField(
         value = query,
         onValueChange = onChange,
-        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 20.dp).fillMaxWidth(),
+        modifier = Modifier
+            .padding(start = 20.dp, end = 20.dp, top = 20.dp)
+            .fillMaxWidth()
+            .semantics { contentDescription = label },
         placeholder = { Text(stringResource(R.string.onboarding_search_hint), maxLines = 1) },
         leadingIcon = { Icon(painterResource(R.drawable.ic_search), contentDescription = null, tint = colors.text2) },
         trailingIcon = if (query.isEmpty()) {
@@ -186,7 +192,8 @@ private fun BrandChips(brands: List<String>, selected: String?, onPick: (String)
         Modifier
             .padding(top = 16.dp)
             .horizontalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp),
+            .padding(horizontal = 20.dp)
+            .selectableGroup(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         brands.forEach { brand ->

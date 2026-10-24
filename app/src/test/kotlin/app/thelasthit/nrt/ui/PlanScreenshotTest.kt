@@ -25,6 +25,7 @@ import app.thelasthit.nrt.setUp
 import app.thelasthit.nrt.ui.history.HistoryScreen
 import app.thelasthit.nrt.ui.insights.InsightsScreen
 import app.thelasthit.nrt.ui.today.TodayScreen
+import app.thelasthit.nrt.ui.HUGE_FONT
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
@@ -54,13 +55,17 @@ class PlanScreenshotTest {
 
     private val app: TestApp = ApplicationProvider.getApplicationContext()
 
-    private val meter = hasContentDescription("mg used. Daily guide", substring = true)
+    private val meter = hasContentDescription("Daily guide", substring = true)
 
     @Test @Config(qualifiers = FULL_PAGE)
     fun todayPlan() = captureToday()
 
     @Test @Config(qualifiers = FULL_PAGE, fontScale = LARGE_FONT)
     fun todayPlanLarge() = captureToday()
+
+    /** At the largest font, where fixed heights around text would clip first. */
+    @Test @Config(qualifiers = FULL_PAGE, fontScale = HUGE_FONT)
+    fun todayPlanX2() = captureToday()
 
     private fun captureToday() {
         app.setUp()

@@ -2,6 +2,9 @@ package app.thelasthit.nrt.ui.settings
 
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.core.app.ApplicationProvider
 import app.thelasthit.nrt.TestApp
 import app.thelasthit.nrt.reminders.allowNotifications
@@ -10,6 +13,8 @@ import app.thelasthit.nrt.setUp
 import app.thelasthit.nrt.ui.FULL_PAGE
 import app.thelasthit.nrt.ui.LARGE_FONT
 import app.thelasthit.nrt.ui.captureLooks
+import app.thelasthit.nrt.ui.HUGE_FONT
+import app.thelasthit.nrt.ui.PHONE
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,6 +48,31 @@ class RemindersScreenshotTest {
     private fun captureReminders() {
         setUpWithAWeek()
         compose.captureLooks("settings-reminders", ready = hasText("Allowance nudges")) { RemindersScreen(onBack = {}) }
+    }
+
+    /**
+     * The check-in's time: on the clock dial at the normal font, and typed at the large and
+     * largest fonts, where the dial's fixed boxes would crowd.
+     */
+    @Test @Config(qualifiers = PHONE)
+    fun timeDialog() = captureTimeDialog()
+
+    @Test @Config(qualifiers = PHONE, fontScale = HUGE_FONT)
+    fun timeDialogX2() = captureTimeDialog()
+
+    @Test @Config(qualifiers = PHONE, fontScale = LARGE_FONT)
+    fun timeDialogLarge() = captureTimeDialog()
+
+    private fun captureTimeDialog() {
+        setUpWithAWeek()
+        compose.captureLooks(
+            "settings-reminders-time",
+            ready = hasText("Allowance nudges"),
+            before = {
+                onNode(hasText("Check-in time") and hasClickAction()).performScrollTo().performClick()
+                waitUntil(5_000) { onAllNodes(hasText("Set time")).fetchSemanticsNodes().isNotEmpty() }
+            },
+        ) { RemindersScreen(onBack = {}) }
     }
 
     @Test @Config(qualifiers = FULL_PAGE)

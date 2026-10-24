@@ -56,6 +56,10 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.collapse
+import androidx.compose.ui.semantics.expand
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextDecoration
@@ -398,7 +402,13 @@ private fun BadgeTile(badge: TrophyShelf.Badge, selected: Boolean, year: Int, on
             .clickable(role = Role.Button) { onSelect(badge.achievement) }
             .semantics {
                 contentDescription = description
-                this.selected = selected
+                // A tap shows what the badge is for under the group, so it reads as expanded or
+                // collapsed, rather than as an option chosen.
+                if (selected) {
+                    collapse { onSelect(badge.achievement); true }
+                } else {
+                    expand { onSelect(badge.achievement); true }
+                }
             },
         contentAlignment = Alignment.Center,
     ) {
@@ -418,7 +428,8 @@ private fun BadgeDetail(badge: TrophyShelf.Badge, year: Int) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(colors.sunk)
-            .semantics(mergeDescendants = true) {}
+            // Read out as it opens, since it's under the whole group's grid.
+            .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }
             .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
         Text(stringResource(badgeName(badge.achievement)), style = RowTitle, color = colors.text)

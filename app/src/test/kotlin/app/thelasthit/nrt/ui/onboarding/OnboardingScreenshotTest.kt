@@ -11,6 +11,7 @@ import app.thelasthit.nrt.reminders.allowNotifications
 import app.thelasthit.nrt.ui.FULL_PAGE
 import app.thelasthit.nrt.ui.LARGE_FONT
 import app.thelasthit.nrt.ui.captureLooks
+import app.thelasthit.nrt.ui.HUGE_FONT
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -61,6 +62,10 @@ class OnboardingScreenshotTest {
     @Test @Config(fontScale = LARGE_FONT)
     fun demonLarge() = capture("onboarding-5-demon", OnboardingStep.DEMON, "Next: when your day starts")
 
+    /** At the largest font, where the creature tiles' names wrap. */
+    @Test @Config(fontScale = HUGE_FONT)
+    fun demonX2() = capture("onboarding-5-demon", OnboardingStep.DEMON, "Next: when your day starts")
+
     @Test fun dayStart() = capture("onboarding-6-day-start", OnboardingStep.DAY_START, "Next: your reminders")
 
     // A fresh install on Android 13 or newer, which hasn't been asked for notifications yet.
@@ -78,12 +83,12 @@ class OnboardingScreenshotTest {
     // Once notifications are allowed, so the reminders row reads as it does by default.
     @Test fun done() {
         app.allowNotifications()
-        capture("onboarding-7-done", OnboardingStep.DONE, "4 of 5 on, quiet from 22:00 to 07:00")
+        capture("onboarding-7-done", OnboardingStep.DONE, "4 reminders on, quiet from 22:00 to 07:00")
     }
 
     @Test @Config(fontScale = LARGE_FONT)
     fun doneLarge() {
         app.allowNotifications()
-        capture("onboarding-7-done", OnboardingStep.DONE, "4 of 5 on, quiet from 22:00 to 07:00")
+        capture("onboarding-7-done", OnboardingStep.DONE, "4 reminders on, quiet from 22:00 to 07:00")
     }
 }

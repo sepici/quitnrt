@@ -21,7 +21,13 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertHeightIsAtLeast
+import androidx.compose.ui.test.hasParent
+import androidx.compose.ui.test.hasAnyChild
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.test.core.app.ApplicationProvider
 import app.thelasthit.nrt.GUM_2
 import app.thelasthit.nrt.GUM_4
@@ -103,6 +109,15 @@ class InsightsTest {
         waitFor("90 days opens tomorrow, after 60 days of logging.")
         compose.onNode(hasText("30 days") and isSelectable()).assertIsSelected()
         compose.waitUntilExactlyOneExists(hasText("than the 30 days before", substring = true) or hasText("The same as the 30 days before"))
+        // Each range takes taps over its whole share of the track, 48 dp at least, locked or not.
+        listOf("7 days", "30 days", "60 days", "90 days").forEach { range ->
+            // A locked one keeps its words in a node of their own.
+            compose.onNode((hasText(range) or hasAnyChild(hasText(range))) and hasParent(SemanticsMatcher.keyIsDefined(SemanticsProperties.SelectableGroup)))
+                .assertHeightIsAtLeast(48.dp)
+        }
+        // The headline's figure and unit are read as one: "12.5 mg a day".
+        compose.onNode(hasText("mg a day"))
+            .assert(SemanticsMatcher("figure and unit together") { it.config[SemanticsProperties.Text].size == 2 })
     }
 
     @Test

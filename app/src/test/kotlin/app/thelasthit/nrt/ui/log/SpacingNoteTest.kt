@@ -5,7 +5,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -73,6 +77,8 @@ class SpacingNoteTest {
         showSheet()
 
         compose.waitUntilAtLeastOneExists(hasText(lastDose), timeoutMillis = 10_000)
+        // It comes in as a time is picked, so a screen reader says it then.
+        compose.onNode(hasText(lastDose)).assert(SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite))
         compose.onNode(hasText("Log") and hasClickAction()).performClick()
         compose.waitUntilAtLeastOneExists(hasText("Saved"), timeoutMillis = 10_000)
         val today = runBlocking { app.graph.entries.observeDay(LocalDate.parse("2026-11-18")).first().entries }

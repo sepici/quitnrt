@@ -30,6 +30,12 @@ const val PHONE = "en-rGB-w411dp-h914dp-normal-long-notround-any-420dpi-keyshidd
 const val LARGE_FONT = 1.3f
 
 /**
+ * The largest font Android offers, for the screens most likely to clip: fixed heights around text
+ * show here first. Captures at it have `-x2` in the name.
+ */
+const val HUGE_FONT = 2.0f
+
+/**
  * Shows [content] and captures the whole screen, sheets and dialogs included, in light and dark.
  * [ready] waits for the data to load first and [before] can open a sheet. Images are only written
  * by `./gradlew :app:recordRoborazziDebug`, into `app/build/outputs/roborazzi/`, with `-large` in
@@ -51,11 +57,18 @@ fun ComposeContentTestRule.captureLooks(
     }
     ready?.let { waitUntilAtLeastOneExists(it, timeoutMillis = 5_000) }
     before()
-    val large = ApplicationProvider.getApplicationContext<Context>().resources.configuration.fontScale > 1f
+    val scale = ApplicationProvider.getApplicationContext<Context>().resources.configuration.fontScale
     for (isDark in listOf(false, true)) {
         dark = isDark
         waitForIdle()
-        val look = (if (isDark) "dark" else "light") + if (large) "-large" else ""
+        val look = (if (isDark) "dark" else "light") + fontSuffix(scale)
         captureScreenRoboImage("build/outputs/roborazzi/$name-$look.png")
     }
+}
+
+/** "-large" at [LARGE_FONT], "-x2" at [HUGE_FONT], and nothing at the normal size. */
+fun fontSuffix(scale: Float): String = when {
+    scale > 1.5f -> "-x2"
+    scale > 1f -> "-large"
+    else -> ""
 }

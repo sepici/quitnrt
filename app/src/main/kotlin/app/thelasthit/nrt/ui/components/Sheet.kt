@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.dismiss
+import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.thelasthit.nrt.R
@@ -28,15 +29,26 @@ import kotlinx.coroutines.launch
  * The hairline is drawn on the sheet's own content, with the handle and the window's insets
  * inside it, so it moves with the sheet. Drawn on the sheet's modifier instead, it would sit
  * outside the sheet's drag offset, at the top of the window, and cut across a short sheet.
+ *
+ * [title] is what a screen reader says as the sheet opens, in place of Material's "Bottom sheet".
+ * [dismissLabel] names what closing it from the handle does, when that's more than closing.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppSheet(onDismissRequest: () -> Unit, sheetState: SheetState, content: @Composable ColumnScope.() -> Unit) {
+fun AppSheet(
+    onDismissRequest: () -> Unit,
+    sheetState: SheetState,
+    title: String? = null,
+    dismissLabel: String? = null,
+    content: @Composable ColumnScope.() -> Unit,
+) {
     val colors = LastHit.colors
     val scope = rememberCoroutineScope()
-    val close = stringResource(R.string.action_close)
+    val close = dismissLabel ?: stringResource(R.string.action_close)
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
+        // Set before Material's own pane title, so this one is the one spoken.
+        modifier = if (title != null) Modifier.semantics { paneTitle = title } else Modifier,
         sheetState = sheetState,
         containerColor = colors.surface,
         contentColor = colors.text,

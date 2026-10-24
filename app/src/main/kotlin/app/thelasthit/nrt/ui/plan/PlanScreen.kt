@@ -23,6 +23,8 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.domain.dose.Dose
@@ -180,7 +182,9 @@ private fun RowsHeading(text: String) {
         text,
         style = LastHit.type.label.copy(fontWeight = FontWeight.Bold),
         color = LastHit.colors.text2,
-        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 28.dp),
+        modifier = Modifier
+            .padding(start = 20.dp, end = 20.dp, top = 28.dp)
+            .semantics { heading() },
     )
 }
 

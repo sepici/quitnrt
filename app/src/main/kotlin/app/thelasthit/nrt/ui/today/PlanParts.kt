@@ -50,8 +50,12 @@ private const val GUIDE_AT = 0.7f
  * With nothing to measure against, the track then runs to the usual day ([PlanToday.scale]), so
  * a small slip is a small fill rather than a full track.
  */
+/**
+ * With [sayTotal] off, a screen reader hears only the guide and the status, for a place that
+ * already says the total, such as the hero, which reads "8 mg today" just before it.
+ */
 @Composable
-internal fun GuideMeter(plan: PlanToday, total: Dose, modifier: Modifier = Modifier) {
+internal fun GuideMeter(plan: PlanToday, total: Dose, modifier: Modifier = Modifier, sayTotal: Boolean = true) {
     val colors = LastHit.colors
     val against = plan.today(total)
     val guide = plan.guide
@@ -62,7 +66,11 @@ internal fun GuideMeter(plan: PlanToday, total: Dose, modifier: Modifier = Modif
         against.isWithin -> stringResource(R.string.today_plan_at)
         else -> stringResource(R.string.today_plan_over, against.over.mgText())
     }
-    val description = stringResource(R.string.today_plan_meter_description, total.mgText(), guide.mgText(), status)
+    val description = if (sayTotal) {
+        stringResource(R.string.today_plan_meter_description, total.mgText(), guide.mgText(), status)
+    } else {
+        stringResource(R.string.today_plan_meter_guide_description, guide.mgText(), status)
+    }
     // The guide sits at 70% of the track, so the end of the track is 10/7 of it, until today goes
     // past that. An NRT-free track ends at the usual day, and a day past that fills it.
     val end = if (plan.isNrtFree) plan.scale.micrograms else maxOf(guide.micrograms * 10 / 7, total.micrograms)
@@ -149,8 +157,16 @@ internal fun PlanWeekSection(plan: PlanToday, week: WeekSummary) {
     val colors = LastHit.colors
     val against = plan.week(week.total)
     Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 30.dp)) {
+        // Heard as the meters say it, "61 mg used of the 98 mg allowance", since "61 of 98" spoken
+        // sounds like progress towards the allowance, as if it were a target.
+        val spoken = if (plan.isNrtFree) {
+            stringResource(R.string.today_plan_week_free_description, week.total.mgText())
+        } else {
+            stringResource(R.string.today_plan_week_description, week.total.mgText(), plan.allowance.mgText())
+        }
         Column(Modifier.semantics(mergeDescendants = true) {}) {
-            Row(verticalAlignment = Alignment.Bottom) {
+            Row(Modifier.clearAndSetSemantics { contentDescription = spoken }, verticalAlignment = Alignment.Bottom) {
+
                 Text(week.total.mgText(), style = LastHit.type.display, color = colors.text, modifier = Modifier.alignByBaseline())
                 Text(
                     if (plan.isNrtFree) stringResource(R.string.today_week_total) else stringResource(R.string.today_plan_week_of, plan.allowance.mgText()),

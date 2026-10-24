@@ -1,13 +1,18 @@
 package app.thelasthit.nrt.ui.lair
 
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -149,7 +154,7 @@ class LairBattleTest {
         compose.onNode(hasText("Uses 5 hits")).assertExists()
         compose.onNode(hasText("5× attack") and hasClickAction()).assertIsEnabled().performClick()
 
-        compose.waitUntilExactlyOneExists(hasText("Gary reels. It didn't see five coming."), timeoutMillis = 5_000)
+        compose.waitUntilExactlyOneExists(hasText("Gary reels. It didn't see the 5× coming."), timeoutMillis = 5_000)
         compose.onNode(hp(30)).assertExists()
         compose.onNodeWithContentDescription("Gary the dragon, barely standing on a rock").assertExists()
         assertEquals(30, demon().balance.hp)
@@ -170,8 +175,11 @@ class LairBattleTest {
         compose.onNode(hasText("Hit") and hasClickAction()).performClick()
 
         compose.waitUntilExactlyOneExists(hasText("Victory"), timeoutMillis = 10_000)
-        compose.onNode(hp(0)).assertExists()
-        compose.onNodeWithText("Nothing left of Gary but a few stray pixels.").assertExists()
+        // The HP says the demon is beaten as it lands, and the victory and the demon's last line are read out as they come in.
+        compose.onNode(hasContentDescription("0 of 120 HP. Gary is defeated.")).assertExists()
+        compose.onNodeWithText("Victory").assert(isHeading()).assert(SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite))
+        compose.onNodeWithText("Nothing left of Gary but a few stray pixels.")
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite))
         compose.onNodeWithContentDescription("An empty rock, with the last of Gary drifting off as pixels").assertExists()
         compose.onNodeWithText("Weeks").assertExists()
         compose.onNodeWithText("12").assertExists()
@@ -208,7 +216,8 @@ class LairBattleTest {
         compose.onNodeWithContentDescription("Rename or restyle Gary").performClick()
         compose.waitUntilExactlyOneExists(hasText("Rename or restyle"), timeoutMillis = 5_000)
         compose.onNodeWithText("HP and hits stay as they are.").assertExists()
-        compose.onNode(hasSetTextAction()).performTextReplacement("Mildred")
+        // The field keeps its name once the placeholder has gone: it opens on "Gary".
+        compose.onNode(hasSetTextAction() and hasContentDescription("Name")).performTextReplacement("Mildred")
         compose.onNode(hasText("Ember") and hasClickAction()).performScrollTo().performClick()
         compose.onNode(hasText("Save") and hasClickAction()).performClick()
 

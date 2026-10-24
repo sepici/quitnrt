@@ -41,7 +41,7 @@ internal fun Resources.gapText(minutes: Int): String {
     }
 }
 
-/** "Kept on 6 of 7 days" or "Kept for 18 of 22 gaps", as a tile's figure, or null with nothing counted yet. */
+/** "Kept on 6 of 7 days" or "18 of 22 gaps long enough", as a tile's figure, or null with nothing counted yet. */
 internal fun Resources.keptValue(count: GoalProgress.Count): String? = when {
     count.of == 0 -> null
     count is GoalProgress.Gap -> getQuantityString(R.plurals.goals_kept_gaps, count.of, count.kept, count.of)

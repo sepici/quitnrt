@@ -2,6 +2,7 @@ package app.thelasthit.nrt.ui.game
 
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.test.core.app.ApplicationProvider
 import app.thelasthit.nrt.TestApp
 import app.thelasthit.nrt.domain.game.Achievement
@@ -60,7 +61,7 @@ class UnlockScreenshotTest {
         app.setUp()
         app.seedWeek()
         app.checkUnlocks()
-        compose.captureLooks("unlock-toast", ready = hasText("First entry")) { AppShell() }
+        compose.captureLooks("unlock-toast", ready = hasText("First entry"), before = { todayIsIn() }) { AppShell() }
     }
 
     /** Two months of history when the game first looks: one card for every badge it brings. */
@@ -70,7 +71,7 @@ class UnlockScreenshotTest {
         app.seedWeek()
         val found = app.checkUnlocks()
         check(found.isSummary)
-        compose.captureLooks(name, ready = hasText("See the shelf")) { AppShell() }
+        compose.captureLooks(name, ready = hasText("See the shelf"), before = { todayIsIn() }) { AppShell() }
     }
 
     /** Week 1 met: its badge's toast has gone, and the iron sword's card is in. */
@@ -79,6 +80,11 @@ class UnlockScreenshotTest {
         app.meetFirstWeek()
         app.checkUnlocks()
         app.graph.unlocks.shown(UnlockNews.Badge(Achievement.FIRST_WEEK_MET))
-        compose.captureLooks("unlock-gear", ready = hasText("Iron sword")) { AppShell() }
+        compose.captureLooks("unlock-gear", ready = hasText("Iron sword"), before = { todayIsIn() }) { AppShell() }
+    }
+
+    /** Today under the card, so the capture shows what the card sits over, not a page still loading. */
+    private fun ComposeContentTestRule.todayIsIn() {
+        waitUntil(10_000) { onAllNodes(hasText("You've had")).fetchSemanticsNodes().isNotEmpty() }
     }
 }

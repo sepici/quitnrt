@@ -185,8 +185,8 @@
     <string name="plan_use_start">Use this day</string>
     <string name="plan_week_by_week">Week by week</string>
     <string name="plan_steps_each">Each step is one %1$s fewer, or a lower strength.</string>
-    <string name="plan_steps_two_one">Week %1$d takes two steps, while you\'re still using more.</string>
-    <string name="plan_steps_two_many">Weeks %1$s take two steps, while you\'re still using more.</string>
+    <string name="plan_steps_two_one">Week %1$d takes 2 steps, while you\'re still using more.</string>
+    <string name="plan_steps_two_many">Weeks %1$s take 2 steps, while you\'re still using more.</string>
     <string name="plan_steps_n_one">Week %1$d takes %2$d steps, while you\'re still using more.</string>
     <string name="plan_steps_n_many">Weeks %1$s take %2$d steps, while you\'re still using more.</string>
     <string name="plan_steps_more_one">Week %1$d takes more than one step, while you\'re still using more.</string>
@@ -249,7 +249,7 @@
     <string name="plan_overtime_meta">An NRT-free week, like weeks %1$s. %2$s</string>
     <string name="plan_overtime_title">Week %1$d went over, so the plan runs on</string>
     <string name="plan_overtime_body">Each week stays NRT-free until one is met. Meet this one and it pays back %1$s.</string>
-    <string name="plan_overtime_safe">If a craving gets too much, NRT is far safer than going back to smoking.</string>
+    <string name="plan_overtime_safe">Taking longer is fine: NRT for longer is far safer than going back to smoking.</string>
     <string name="plan_for_week_one">mg for week 1</string>
     <string name="plan_week_one_mix">Week 1\'s mix is %1$s, %2$s\u00A0mg.</string>
     <string name="plan_runs_dates">Week 1 runs %1$s.</string>
@@ -315,7 +315,7 @@
     <string name="plan_new_programme">Start a new programme</string>
     <string name="plan_rematch_prose">If you\'re using NRT again, a rematch starts from what you use now, with a new baseline.</string>
     <string name="plan_finish_first">%1$s still has %2$d\u00A0HP. Once the last hits land in the lair, a new programme can start.</string>
-    <string name="plan_open_lair">Go to the lair</string>
+    <string name="plan_open_lair">Open the lair</string>
     <string name="plan_round_two">%1$s, round two</string>
     <string name="plan_round_two_detail">The same %1$s, back with full HP</string>
     <string name="plan_new_demon">A new demon</string>

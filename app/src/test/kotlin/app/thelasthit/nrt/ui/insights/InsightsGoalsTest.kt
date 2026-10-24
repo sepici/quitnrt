@@ -3,6 +3,7 @@ package app.thelasthit.nrt.ui.insights
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelectable
@@ -66,7 +67,7 @@ class InsightsGoalsTest {
             .assertExists()
         compose.onNode(hasText("sprays a day", substring = true) and hasText("Kept on 4${NB}of${NB}4", substring = true) and hasText("Week 3: kept on 7${NB}of${NB}7", substring = true))
             .assertExists()
-        compose.onNode(hasText("between doses", substring = true) and hasText("Kept for 26${NB}of${NB}28", substring = true) and hasText("Week 3: kept for 47${NB}of${NB}54", substring = true))
+        compose.onNode(hasText("between doses", substring = true) and hasText("26${NB}of${NB}28${NB}gaps long enough", substring = true) and hasText("Week 3: 47${NB}of${NB}54${NB}gaps long enough", substring = true))
             .assertExists()
         compose.onNode(hasText("First dose from 09:00") and hasText("Kept on 3${NB}of${NB}4", substring = true) and hasText("Week 3, from 08:45: kept on 5${NB}of${NB}7", substring = true))
             .assertExists()
@@ -82,9 +83,10 @@ class InsightsGoalsTest {
         compose.onNodeWithText("Your goals").performScrollTo()
         compose.onNodeWithText("This week's goals count once today is over, and they never change whether a week is met.").assertExists()
         compose.onNode(hasText("First dose from 09:00") and hasText("Week 3, from 08:45: kept on 5${NB}of${NB}7", substring = true)).assertExists()
-        compose.onNode(hasText("between doses", substring = true) and hasText("Week 3: kept for 47${NB}of${NB}54", substring = true)).assertExists()
-        // No tile has a figure for this week, or a line in its place.
+        compose.onNode(hasText("between doses", substring = true) and hasText("Week 3: 47${NB}of${NB}54${NB}gaps long enough", substring = true)).assertExists()
+        // No tile has a figure for this week, or a line in its place: the only gap count is last week's.
         compose.onNode(hasText("Kept ", substring = true)).assertDoesNotExist()
+        compose.onAllNodes(hasText("gaps long enough", substring = true), useUnmergedTree = true).assertCountEquals(1)
         compose.onNode(hasText("No full days yet", substring = true)).assertDoesNotExist()
         compose.onNode(hasText("No gaps yet", substring = true)).assertDoesNotExist()
     }

@@ -188,10 +188,13 @@ private fun ScheduleRow(state: PlanState.Running, week: ProgrammeWeek, isNow: Bo
     val mix = if (week.isNrtFree) null else mixText(week.target.mix)
     val hits = plan.hitsEarnedBy(week.number)
     val name = state.demonName ?: stringResource(R.string.demon_default_name)
+    // Heard as the meters say it, "194 mg used of the 189 mg allowance": "194 of 189" spoken
+    // sounds like progress towards the allowance, as if it were a target.
+    val spokenAmount = if (later) amount else stringResource(R.string.plan_amount_spoken, total.mgText(), allowance.mgText())
     val description = buildString {
         append(title).append(", ").append(dates).append(": ")
         if (mix != null) append(mix).append(". ")
-        append(amount).append(", ").append(status)
+        append(spokenAmount).append(", ").append(status)
         if (hits > 0) append(". ").append(pluralStringResource(R.plurals.plan_hits_for, hits, hits, name))
         if (editable) append(". ").append(stringResource(R.string.plan_change_it))
     }

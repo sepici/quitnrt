@@ -34,8 +34,8 @@
     <string name="reminders_plan_and_game">Your plan and the lair</string>
     <string name="reminders_results">Weekly results</string>
     <string name="reminders_results_detail">When a week\'s result comes in, with the hits it earned</string>
-    <string name="reminders_achievements">Achievements</string>
-    <string name="reminders_achievements_detail">When a badge or gear unlocks</string>
+    <string name="reminders_achievements">Badges and gear</string>
+    <string name="reminders_achievements_detail">When you earn a badge or new gear</string>
     <string name="reminders_quiet">Quiet hours</string>
     <string name="reminders_quiet_switch">Use quiet hours</string>
     <string name="reminders_quiet_detail">Nothing shows from %1$s to %2$s. Results and badges wait until %2$s.</string>
@@ -69,7 +69,7 @@
     <string name="channel_check_in_detail">Today\'s total once a day, to catch a dose you forgot</string>
     <string name="channel_results">Weekly results</string>
     <string name="channel_results_detail">Each week\'s result as it comes in</string>
-    <string name="channel_achievements">Achievements</string>
+    <string name="channel_achievements">Badges and gear</string>
     <string name="channel_achievements_detail">New badges and gear</string>
     <string name="channel_forgot">Forgot to log</string>
     <string name="channel_forgot_detail">When nothing\'s logged by your usual time</string>
@@ -126,12 +126,14 @@
 
     <!-- The widget -->
     <string name="widget_name">Today and quick log</string>
-    <string name="widget_description">Today\'s mg against the guide, and your favourites to log in one tap</string>
+    <string name="widget_description">Today\'s mg against the guide, with your quick log products a tap away</string>
     <string name="widget_left">%1$s\u00A0mg left today</string>
     <string name="widget_over">%1$s\u00A0mg over the guide</string>
     <string name="widget_guide">%1$s\u00A0mg guide</string>
     <string name="widget_nrt_free">NRT-free so far today</string>
     <string name="widget_set_up">Finish setting up the app to log from here.</string>
+    <!-- Under a tall widget's hero, when today's full last-dose line won't fit -->
+    <string name="widget_last_dose_short">Last dose at %1$s</string>
     <string name="widget_no_favourites">Add products to your quick log to log them from here.</string>
     <string name="widget_tags">Tags</string>
     <string name="widget_tags_description">Add tags to this dose</string>

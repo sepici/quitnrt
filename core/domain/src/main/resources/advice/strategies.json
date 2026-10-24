@@ -7,7 +7,7 @@
    "summary": "Delay, deep breaths, drink water, do something else",
    "body": "Most urges pass within 3 to 5\u00a0minutes. These 4 steps help you get through one.",
    "steps": [
-    "Delay. Give it 5\u00a0minutes before you decide anything.",
+    "Delay. Give it 5 to 10\u00a0minutes before you decide anything.",
     "Deep breaths. Take 20 slow ones.",
     "Drink water. Sip a cold glass slowly.",
     "Do something else. Step outside, call someone or climb the stairs."
@@ -110,7 +110,7 @@
   },
   {
    "key": "talk_back",
-   "title": "Answer the urge back",
+   "title": "Talk back to the urge",
    "summary": "Spot the thought behind it and answer it",
    "body": "Urges come with thoughts like “I deserve one” or “one more won't matter”. Once you've spotted them, they're easier to answer.",
    "steps": [
@@ -341,7 +341,7 @@
    "key": "low_mood",
    "title": "Look after yourself when you're low",
    "summary": "Move, plan your day and talk to someone",
-   "body": "Mood can dip for a while as your body adjusts. A dose may seem to help, but it only eases withdrawal for a while.",
+   "body": "Mood can dip for a while as your body adjusts. A dose may seem to help, but the relief doesn't last.",
    "steps": [
     "Get outside and move, even for a few minutes.",
     "Plan your day, with something you enjoy in it.",
@@ -562,7 +562,7 @@
    "key": "dose_before_meal",
    "title": "Move the dose to before the meal",
    "summary": "Have it before you eat, not after",
-   "body": "If a dose follows every meal, the meal becomes the cue. Having that dose before you eat breaks the link without adding one.",
+   "body": "If a dose follows every meal, the meal becomes the cue. Moving it to before you eat breaks the link without adding a dose.",
    "steps": [
     "Have your usual after-meal dose before the meal instead.",
     "Time it so it's finished before you start eating. Gum and lozenges work less well with food and drink.",
@@ -613,9 +613,9 @@
   },
   {
    "key": "gum_and_drinks",
-   "title": "Time drinks around gum and lozenges",
+   "title": "Keep drinks away from gum and lozenges",
    "summary": "Coffee and fizzy drinks stop gum and lozenges working as well",
-   "body": "Coffee, fizzy drinks and other acidic food and drink can stop gum and lozenges working as well, so each one does less for the urge.",
+   "body": "Coffee, fizzy drinks and other acidic food and drink can make gum and lozenges work less well, so each one does less for the urge.",
    "steps": [
     "Don't eat or drink for 15\u00a0minutes before a piece of gum or a lozenge.",
     "Don't eat or drink while it's in your mouth."
@@ -851,7 +851,7 @@
   {
    "key": "drinks_limit",
    "title": "Decide your limit before you go out",
-   "summary": "Decide how many doses fit tonight before you go",
+   "summary": "Settle on a number while your head is clear",
    "body": "Drinking and nights out are common cues. Deciding before you go takes the choice out of the moment.",
    "steps": [
     "Before you go, decide how many doses fit tonight.",
@@ -950,7 +950,7 @@
    "key": "withdrawal_passes",
    "title": "Remember withdrawal passes",
    "summary": "It's strongest in the first week, then fades",
-   "body": "Withdrawal is uncomfortable, but it can't hurt you. It's usually strongest in the first week and fades over 3 to 4\u00a0weeks. Cutting down can bring some of it back for a while.",
+   "body": "Withdrawal is uncomfortable, but it doesn't last. It's usually strongest in the first week and fades over 3 to 4\u00a0weeks. Cutting down can bring some of it back for a while.",
    "steps": [
     "Remind yourself the feeling is temporary.",
     "Use the 4 Ds when an urge hits.",

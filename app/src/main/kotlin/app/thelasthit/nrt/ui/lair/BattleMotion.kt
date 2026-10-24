@@ -51,7 +51,8 @@ data class Pose(
  *
  * - **A hit:** the gear winds up and swings in; on impact the demon flashes white, shows its hurt
  *   frame and is knocked back, pixels fly off, and "-10" floats up.
- * - **The 5×:** five quick strikes, then a heavier finisher with a screen shake and "-50".
+ * - **The 5×:** five quick strikes, each with the hurt frame, a knock and sparks but no flash,
+ *   then a heavier finisher that flashes, with a screen shake and "-50".
  * - **The final hit:** after the impact, the demon is knocked out and breaks apart into pixels,
  *   through its defeat frames, then the victory jingle.
  *
@@ -175,7 +176,9 @@ class BattleMotion(val strike: Strike, val reduced: Boolean, private val impact:
             hp = if (landed) strike.hpAfter else strike.hpBefore,
             frame = defeatFrame(ms) ?: if (ms < FINISHER_IMPACT + 400 && (striking || landed)) SpriteFrame.HURT else null,
             knockBack = knockBack,
-            flash = (striking && inStrike < 50) || (landed && since < 120),
+            // Only the finisher flashes. Five quick strikes flashing as well would be six flashes
+            // in a second, over the three a second that can bring on a seizure (WCAG 2.3.1).
+            flash = landed && since < 120,
             weapon = weapon,
             damage = damage(since, big = true),
             sparks = strikeSparks + if (landed) sparks(since, count = 12, speed = 1.4f) else emptyList(),
