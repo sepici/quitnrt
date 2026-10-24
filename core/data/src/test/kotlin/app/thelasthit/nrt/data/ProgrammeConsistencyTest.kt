@@ -45,6 +45,8 @@ import kotlin.time.Duration.Companion.minutes
  * - the banked hits are never negative
  * - the hits on offer match the demon's HP blocks, and the ledger holds the hits the results earned
  * - a result never changes once it's in, apart from a missed week being caught up
+ * - a result counts the week's doses as they stood when it fell due (PLAN §6.4), even when a
+ *   write comes before anything looks at the programme and brings the result in
  * - allowances never go up from one week to the next, and a week's target is fixed once it starts
  *
  * A failure names its seed and the steps that led to it, so the run can be played again.
@@ -71,7 +73,11 @@ class ProgrammeConsistencyTest {
         fun assertEverythingHappened() {
             val needed = listOf(
                 "log", "backdate into a week whose result is in", "backdate into a week still to come in",
+                "backdate into a week whose result is due",
                 "edit", "delete", "undo a delete", "hit", "5x attack", "spend refused",
+                "backdate before a due result came in", "edit before a due result came in",
+                "delete before a due result came in", "undo a delete before a due result came in",
+                "round trip before a due result came in", "day start change before a due result came in",
                 "missed", "caught up", "carry on", "repeat", "carry on, then repeat", "overtime",
                 "merge onto itself", "replace onto itself", "merge onto a new phone", "replace onto a new phone",
                 "merge onto a new phone with a baseline", "week edited", "day start changed", "defeated", "rematch", "abandoned",
@@ -141,6 +147,15 @@ class ProgrammeConsistencyTest {
         /** What each week's doses aim for, by programme and start date. */
         private val aims = mutableMapOf<Pair<String, LocalDate>, Aim>()
 
+        /** The current programme as the last check saw it, so the run can aim at it without looking again. */
+        private var seen: ProgrammeRecord? = null
+
+        /**
+         * The total each week's result is to be judged on, by programme and start date: the week's
+         * doses as they stood when its result fell due, read straight from the table.
+         */
+        private val judgedOn = mutableMapOf<Pair<String, LocalDate>, Dose>()
+
         // Seeds that make sure the rarer paths come up.
         private val repeatFirstMiss = seed % 3 == 0
         private val missFinalWeek = seed % 4 == 1
@@ -200,7 +215,11 @@ class ProgrammeConsistencyTest {
         /** One day of the programme: the day's doses, then whatever else happens on it. */
         private suspend fun live(day: LocalDate) {
             val late = random.nextInt(8) == 0
-            setTime(if (late) day.plusDays(1).atTime(2, 30) else day.atTime(19 + random.nextInt(4), random.nextInt(60)))
+            val due = setTime(if (late) day.plusDays(1).atTime(2, 30) else day.atTime(19 + random.nextInt(4), random.nextInt(60)))
+            // On most days a result has just fallen due, a write comes first, before anything
+            // looks at the programme and brings the result in. The result still has to count the
+            // logs as they stood when it fell due.
+            if (due.isNotEmpty() && random.nextInt(4) != 0) writeFirst(due.random(random))
             val record = checkNotNull(data.programmes.current())
             val plan = checkNotNull(record.plan)
             plan.weekOn(day)?.let { week -> logDay(record, plan, week, day) }
@@ -251,20 +270,45 @@ class ProgrammeConsistencyTest {
             }
         }
 
-        /** A dose forgotten on one of the last 16 days, logged now. */
-        private suspend fun backdate() {
-            val day = today().minusDays(1L + random.nextInt(16))
-            val record = data.programmes.current()
-            val week = record?.plan?.weekOn(day)
+        /**
+         * A write made before anything has looked at the programme since [week]'s result fell
+         * due, so it's still to come in. Aimed at [week]'s doses where it can be.
+         */
+        private suspend fun writeFirst(week: ProgrammeWeek) {
+            val days = week.startDate.toEpochDay()..week.endDate.toEpochDay()
+            val inWeek = data.database.entries().allLive().filter { it.logicalEpochDay in days }.map { it.id }
+            val deletedFromWeek = deleted.filter { id -> data.database.entries().get(id)?.entry?.logicalEpochDay in days }
+            val kind = random.nextInt(6)
+            val what = when {
+                kind == 1 && inWeek.isNotEmpty() -> "edit".also { editADose(inWeek.random(random)) }
+                kind == 2 && inWeek.isNotEmpty() -> "delete".also { deleteADose(inWeek.random(random)) }
+                kind == 3 && deleted.isNotEmpty() -> "undo a delete".also { undoADelete(deletedFromWeek.randomOrNull(random) ?: deleted.last()) }
+                kind == 4 -> "round trip".also { roundTrip() }
+                kind == 5 -> "day start change".also { changeDayStart() }
+                else -> "backdate".also { backdate(into = week) }
+            }
+            tally.count("$what before a due result came in")
+        }
+
+        /** A dose forgotten on one of the last 16 days, or on one of [into]'s days, logged now. */
+        private suspend fun backdate(into: ProgrammeWeek? = null) {
+            val day = into?.startDate?.plusDays(random.nextLong(7)) ?: today().minusDays(1L + random.nextInt(16))
+            // The programme as last seen, since looking again would bring in a result that's due.
+            val week = seen?.plan?.weekOn(day)
             if (week != null) {
-                val into = if (week.result == WeekResult.PENDING) "a week still to come in" else "a week whose result is in"
-                tally.count("backdate into $into")
+                val clock = data.programmes.clock()
+                val what = when {
+                    week.result != WeekResult.PENDING -> "a week whose result is in"
+                    clock.now >= clock.resultDue(week) -> "a week whose result is due"
+                    else -> "a week still to come in"
+                }
+                tally.count("backdate into $what")
             }
             log(listOf(GUM_2, GUM_4, QUICKMIST).random(random), 1, day.atTime(12 + random.nextInt(8), random.nextInt(60)))
         }
 
-        private suspend fun editADose() {
-            val id = live.randomOrNull(random) ?: return
+        private suspend fun editADose(id: String? = live.randomOrNull(random)) {
+            if (id == null) return
             val entry = data.entries.get(id) ?: return
             // A different amount, or the time moved by up to a day and a half either way.
             val request = if (random.nextBoolean()) {
@@ -277,16 +321,16 @@ class ProgrammeConsistencyTest {
             tally.count("edit")
         }
 
-        private suspend fun deleteADose() {
-            val id = live.randomOrNull(random) ?: return
+        private suspend fun deleteADose(id: String? = live.randomOrNull(random)) {
+            if (id == null) return
             step("delete $id") { data.entries.delete(id) }
             live -= id
             deleted.addLast(id)
             tally.count("delete")
         }
 
-        private suspend fun undoADelete() {
-            val id = deleted.removeLast()
+        private suspend fun undoADelete(id: String = deleted.last()) {
+            deleted.remove(id)
             step("undo the delete of $id") { data.entries.undoDelete(id) }
             live += id
             tally.count("undo a delete")
@@ -358,8 +402,9 @@ class ProgrammeConsistencyTest {
          * or onto a new one that the run then carries on with. Nothing changes either way.
          */
         private suspend fun roundTrip() {
-            val before = snapshot(data)
+            // The export first, which brings in any result that's due before it reads.
             val backup = Backup.decode(data.backups.export().encode())
+            val before = snapshot(data)
             val mode = if (random.nextBoolean()) ImportMode.MERGE else ImportMode.REPLACE
             val where = when (random.nextInt(5)) {
                 0, 1 -> "onto itself"
@@ -430,7 +475,10 @@ class ProgrammeConsistencyTest {
         }
 
         private suspend fun verify(after: String) {
+            // A day start moved earlier can bring a result due without the clock moving.
+            noteDue()
             val record = data.programmes.current()
+            seen = record
             val ledger = data.database.game().allLedger()
             for ((id, rows) in closed) {
                 assertEquals("After $after, a closed programme's ledger changed", rows, ledger.filter { it.programmeId == id })
@@ -456,7 +504,8 @@ class ProgrammeConsistencyTest {
             assertEquals("After $after, a week earned more than one hit", earnedRows.size, earnedRows.map { it.week }.toSet().size)
             if (record.status == ProgrammeStatus.COMPLETE) assertEquals("A complete programme has hits still on offer", 0, plan.hitsStillOnOffer)
 
-            // Results never change once in, apart from a missed week being caught up.
+            // Results never change once in, apart from a missed week being caught up, and each
+            // counts the week's doses as they stood when it fell due.
             for (week in plan.weeks) {
                 val key = record.id to week.number
                 val first = results[key]
@@ -464,6 +513,10 @@ class ProgrammeConsistencyTest {
                     assertEquals("After $after, week ${week.number}'s result changed", first, week.signature().copy(result = first.result))
                     val caughtUp = first.result == WeekResult.MISSED && week.result == WeekResult.CAUGHT_UP
                     assertTrue("After $after, week ${week.number} went from ${first.result} to ${week.result}", week.result == first.result || caughtUp)
+                } else if (week.result != WeekResult.PENDING) {
+                    val judged = judgedOn[record.id to week.startDate]
+                    assertTrue("After $after, week ${week.number}'s result came in without the run seeing it fall due", judged != null)
+                    assertEquals("After $after, week ${week.number}'s result didn't count its doses as they stood when it fell due", judged, week.resultTotal)
                 }
                 if (week.result != WeekResult.PENDING) results[key] = week.signature()
             }
@@ -500,10 +553,35 @@ class ProgrammeConsistencyTest {
 
         private suspend fun today(): LocalDate = data.programmes.clock().today
 
-        /** The clock to [at], never backwards. */
-        private fun setTime(at: LocalDateTime) {
+        /**
+         * The clock to [at], never backwards. Returns the weeks whose results fell due on the way,
+         * with the totals they're to be judged on kept in [judgedOn].
+         */
+        private suspend fun setTime(at: LocalDateTime): List<ProgrammeWeek> {
             val instant = at.atZone(LONDON).toInstant()
             if (instant > data.clock.now) data.clock.now = instant
+            return noteDue()
+        }
+
+        /**
+         * For each week of the programme as last [seen] whose result has fallen due since, keeps
+         * in [judgedOn] its doses as they stand now, read from the table so nothing settles
+         * first. Returns those weeks.
+         */
+        private suspend fun noteDue(): List<ProgrammeWeek> {
+            val record = seen ?: return emptyList()
+            val plan = record.plan ?: return emptyList()
+            val clock = data.programmes.clock()
+            val due = plan.weeks.filter { week ->
+                week.result == WeekResult.PENDING && clock.now >= clock.resultDue(week) && (record.id to week.startDate) !in judgedOn
+            }
+            if (due.isEmpty()) return due
+            val rows = data.database.entries().allLive()
+            for (week in due) {
+                val days = week.startDate.toEpochDay()..week.endDate.toEpochDay()
+                judgedOn[record.id to week.startDate] = Dose(rows.filter { it.logicalEpochDay in days }.sumOf { it.totalMicrograms })
+            }
+            return due
         }
 
         private suspend fun usualDay(): UsualDay {
