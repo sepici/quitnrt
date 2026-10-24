@@ -52,6 +52,17 @@ class BaselineTest {
     }
 
     @Test
+    fun `a baseline as it builds shows the usual day so far`() {
+        val started = date("2026-10-20")
+        val entries = daily(20 to 20, 21 to 24, 22 to 22, 23 to 10)
+        val days = BaselineDays.measure(today, entries, started)
+        assertNull(days.usualDay(products))
+        // Tuesday to Thursday average 22 mg, or 11 pieces once rounded. Today doesn't count yet.
+        assertEquals(UsualDay(mix(GUM_2 to 11), BaselineSource.MEASURED, measured = Dose.mg(22)), days.usualDaySoFar(products))
+        assertNull(BaselineDays.measure(today, emptyList(), startedOn = today).usualDaySoFar(products))
+    }
+
+    @Test
     fun `a started baseline is ready once its seventh day is over`() {
         val entries = daily(19 to 20, 20 to 22, 22 to 26, 24 to 30, 25 to 22)
         val started = date("2026-10-19")

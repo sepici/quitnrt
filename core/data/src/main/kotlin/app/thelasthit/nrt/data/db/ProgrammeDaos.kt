@@ -89,15 +89,19 @@ abstract class ProgrammeDao {
     @Insert
     abstract suspend fun insertWeekUnits(units: List<ProgrammeWeekUnitEntity>)
 
-    /** Clears a programme's weeks, and their mixes with them. */
+    @Insert
+    abstract suspend fun insertWeekCaps(caps: List<ProgrammeWeekCapEntity>)
+
+    /** Clears a programme's weeks, and their mixes and caps with them. */
     @Query("DELETE FROM programme_weeks WHERE programmeId = :programmeId")
     abstract suspend fun clearWeeks(programmeId: String)
 
     @Transaction
-    open suspend fun replaceWeeks(programmeId: String, weeks: List<ProgrammeWeekEntity>, units: List<ProgrammeWeekUnitEntity>) {
+    open suspend fun replaceWeeks(programmeId: String, rows: WeekRows) {
         clearWeeks(programmeId)
-        insertWeeks(weeks)
-        insertWeekUnits(units)
+        insertWeeks(rows.weeks)
+        insertWeekUnits(rows.units)
+        insertWeekCaps(rows.caps)
     }
 
     /** Inserts a whole programme read from a backup. */
@@ -108,6 +112,7 @@ abstract class ProgrammeDao {
         insertLadder(parts.ladder)
         insertWeeks(parts.weeks)
         insertWeekUnits(parts.weekUnits)
+        insertWeekCaps(parts.weekCaps)
     }
 }
 

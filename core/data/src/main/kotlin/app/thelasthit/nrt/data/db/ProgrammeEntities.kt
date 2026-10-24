@@ -89,6 +89,9 @@ data class LadderUnitEntity(
  * One week of a programme, by its number in the run. [ladderStep] is null for an NRT-free week.
  * The extra goals (PLAN §6.3) are null while they're off. [choice] is what was picked after the
  * week was missed, if anything.
+ *
+ * [maxUnitsPerDay] is no longer used: the cap on units a day became one for each product, in
+ * `programme_week_caps` from version 3, and this column stays null.
  */
 @Entity(
     tableName = "programme_weeks",
@@ -134,6 +137,26 @@ data class ProgrammeWeekUnitEntity(
     val programmeId: String,
     val weekNumber: Int,
     @Embedded val units: UnitsColumns,
+)
+
+/** A week's extra goal of the most units a day of one product (PLAN §6.3), from version 3. */
+@Entity(
+    tableName = "programme_week_caps",
+    primaryKeys = ["programmeId", "weekNumber", "productId"],
+    foreignKeys = [
+        ForeignKey(
+            entity = ProgrammeWeekEntity::class,
+            parentColumns = ["programmeId", "number"],
+            childColumns = ["programmeId", "weekNumber"],
+            onDelete = ForeignKey.CASCADE,
+        ),
+    ],
+)
+data class ProgrammeWeekCapEntity(
+    val programmeId: String,
+    val weekNumber: Int,
+    val productId: String,
+    val maxUnitsPerDay: Int,
 )
 
 // The game (PLAN §7 and §8), from version 2.
@@ -220,6 +243,15 @@ data class ProgrammeWithParts(
     val weekUnits: List<ProgrammeWeekUnitEntity>,
     @Relation(parentColumn = "id", entityColumn = "programmeId")
     val demons: List<DemonEntity>,
+    @Relation(parentColumn = "id", entityColumn = "programmeId")
+    val weekCaps: List<ProgrammeWeekCapEntity> = emptyList(),
+)
+
+/** A programme's weeks as rows: each week, its mix, and its caps on units a day. */
+data class WeekRows(
+    val weeks: List<ProgrammeWeekEntity>,
+    val units: List<ProgrammeWeekUnitEntity>,
+    val caps: List<ProgrammeWeekCapEntity>,
 )
 
 /** A demon with its ledger's sums. */

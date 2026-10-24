@@ -15,11 +15,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -43,12 +41,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.data.repo.ImportMode
 import app.thelasthit.nrt.domain.time.DayBoundary
+import app.thelasthit.nrt.ui.components.AppSheet
 import app.thelasthit.nrt.ui.components.FieldLabel
 import app.thelasthit.nrt.ui.components.PrimaryButton
 import app.thelasthit.nrt.ui.components.RadioList
 import app.thelasthit.nrt.ui.components.RadioOption
-import app.thelasthit.nrt.ui.components.sheetEdge
-import app.thelasthit.nrt.ui.components.sheetScrim
 import app.thelasthit.nrt.ui.format.DayMonthYearFormatter
 import app.thelasthit.nrt.ui.format.pillLabelText
 import app.thelasthit.nrt.ui.format.rememberTimeFormatter
@@ -205,15 +202,13 @@ fun SettingsScreen(
     restore?.let { candidate ->
         RestoreSheet(candidate, viewModel)
         candidate.replacing?.let { counts ->
-            val doses = pluralStringResource(R.plurals.restore_doses, counts.entries, counts.entries)
-            val products = pluralStringResource(R.plurals.restore_products, counts.products, counts.products)
             val madeOn = candidate.madeOn?.let { DayMonthYearFormatter.format(it) } ?: candidate.fileName
             AlertDialog(
                 onDismissRequest = viewModel::cancelReplace,
                 title = { Text(stringResource(R.string.replace_title)) },
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Text(stringResource(R.string.replace_body, doses, products, madeOn))
+                        Text(LocalResources.current.replaceBody(counts, madeOn))
                         Text(stringResource(R.string.replace_small), style = LastHit.type.label, color = LastHit.colors.text2)
                     }
                 },
@@ -233,14 +228,9 @@ fun SettingsScreen(
 private fun RestoreSheet(candidate: RestoreCandidate, viewModel: SettingsViewModel) {
     val colors = LastHit.colors
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    ModalBottomSheet(
+    AppSheet(
         onDismissRequest = viewModel::closeRestore,
         sheetState = sheetState,
-        containerColor = colors.surface,
-        scrimColor = sheetScrim,
-        modifier = Modifier.sheetEdge(colors),
-        contentColor = colors.text,
-        dragHandle = { BottomSheetDefaults.DragHandle(color = colors.lineStrong, width = 36.dp, height = 4.dp) },
     ) {
         Column(Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
             Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 4.dp), verticalAlignment = Alignment.CenterVertically) {

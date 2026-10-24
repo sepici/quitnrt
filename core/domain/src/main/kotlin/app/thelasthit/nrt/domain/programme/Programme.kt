@@ -35,19 +35,26 @@ enum class WeekResult {
 }
 
 /**
- * A week's extra goals (PLAN §6.3), each off while it's null. They show in stats and advice, and
- * never change whether a week is met.
+ * A week's extra goals (PLAN §6.3), each off while it's null or empty. They show in stats and
+ * advice, and never change whether a week is met.
  */
 data class WeekGoals(
-    /** The most units a day. */
-    val maxUnitsPerDay: Int? = null,
+    /**
+     * The most units a day of each product, by product ID, such as 5 pieces of gum. A cap for
+     * each product, since one cap across them would count a 1 mg spray the same as a 4 mg piece.
+     * Empty while the goal is off.
+     */
+    val maxUnitsPerDay: Map<String, Int> = emptyMap(),
     /** The shortest gap between doses, in minutes. */
     val minGapMinutes: Int? = null,
     /** The time on the wall clock the day's first dose waits for. */
     val firstDoseNotBefore: LocalTime? = null,
 ) {
+    /** How many of the three goals are on. */
+    val onCount: Int get() = listOf(maxUnitsPerDay.isNotEmpty(), minGapMinutes != null, firstDoseNotBefore != null).count { it }
+
     init {
-        require(maxUnitsPerDay == null || maxUnitsPerDay >= 1) { "At least 1 unit a day: $maxUnitsPerDay" }
+        require(maxUnitsPerDay.values.all { it >= 1 }) { "At least 1 unit a day: $maxUnitsPerDay" }
         require(minGapMinutes == null || minGapMinutes in 1..MINUTES_A_DAY) { "A gap is 1 to $MINUTES_A_DAY minutes: $minGapMinutes" }
         require(firstDoseNotBefore == null || firstDoseNotBefore.second == 0 && firstDoseNotBefore.nano == 0) {
             "The first dose waits for a whole minute: $firstDoseNotBefore"
@@ -290,7 +297,8 @@ data class Programme(
 
     /**
      * Moves week [number] to [step] on the ladder. Later weeks that would then be above it move
-     * down to it, so allowances never go up.
+     * down to it, so allowances never go up. A week that changes mix has its caps on units a day
+     * redone for the new one ([ExtraGoals.forMix]).
      */
     fun edit(number: Int, step: Int, today: LocalDate): Programme {
         val range = requireNotNull(editableSteps(number, today)) { "Week $number can't be edited on $today" }
@@ -299,7 +307,11 @@ data class Programme(
         return copy(
             weeks = weeks.map { week ->
                 val above = week.number > number && !week.isNrtFree && checkNotNull(week.target.step) < step
-                if (week.number == number || above) week.copy(target = target) else week
+                when {
+                    week.number != number && !above -> week
+                    week.target == target -> week
+                    else -> week.copy(target = target, goals = ExtraGoals.forMix(week.goals, target.mix))
+                }
             },
         )
     }

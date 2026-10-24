@@ -81,7 +81,7 @@ class BackupTest {
                             weeklyAllowanceMicrograms = 154_000, units = listOf(gum.copy(unitsPerDay = 11)),
                             result = WeekResult.MISSED, resultAt = "2026-11-01T04:00:00Z",
                             choice = MissedWeekChoice.CARRY_ON, choiceAt = "2026-11-01T09:00:00Z",
-                            maxUnitsPerDay = 11, minGapMinutes = 90, firstDoseNotBefore = "07:30",
+                            caps = listOf(Backup.Cap("nicorette-gum-uk-2mg", 11)), minGapMinutes = 90, firstDoseNotBefore = "07:30",
                         ),
                         Backup.Week(number = 12, startDate = "2027-01-09", kind = WeekKind.PLANNED, dailyGuideMicrograms = 0, weeklyAllowanceMicrograms = 0),
                     ),
@@ -96,6 +96,10 @@ class BackupTest {
         assertEquals(full, Backup.decode(full.encode()))
         assertTrue("\"weeklyAllowanceUg\": 154000" in full.encode())
         assertTrue("\"firstDoseNotBefore\": \"07:30\"" in full.encode())
+        assertTrue("\"maxUnitsPerDay\": 11" in full.encode())
+        // Before the cap was per product, a week had one number for it, which reads as no caps.
+        val oneCap = full.encode().replace(Regex("\"caps\": \\[[^\\]]*\\]"), "\"maxUnitsPerDay\": 11")
+        assertEquals(emptyList<Backup.Cap>(), Backup.decode(oneCap).programmes.single().weeks.first().caps)
     }
 
     @Test
@@ -104,7 +108,7 @@ class BackupTest {
             { "number": 1, "startDate": "2026-10-24", "step": 1, "dailyGuideUg": 22000, "weeklyAllowanceUg": 154000 }
         """.trimIndent()
         val week = Json.decodeFromString(Backup.Week.serializer(), text)
-        assertEquals(null, week.maxUnitsPerDay)
+        assertEquals(emptyList<Backup.Cap>(), week.caps)
         assertEquals(null, week.minGapMinutes)
         assertEquals(null, week.firstDoseNotBefore)
     }

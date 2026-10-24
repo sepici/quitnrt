@@ -8,9 +8,6 @@
     <string name="nav_plan">Plan</string>
     <string name="nav_lair">Lair</string>
 
-    <string name="placeholder_body">This screen arrives in a later update.</string>
-
-
     <string name="settings_title">Settings</string>
     <string name="action_undo">Undo</string>
     <string name="action_cancel">Cancel</string>
@@ -380,7 +377,6 @@
     <string name="restore_replace_detail">Deletes what\'s here now, then puts the backup in its place</string>
     <string name="restore_button">Add from backup</string>
     <string name="replace_title">Replace everything on this phone?</string>
-    <string name="replace_body">The %1$s, %2$s and tag changes on this phone will be deleted. The backup from %3$s takes their place, along with its day start.</string>
     <string name="replace_small">This can\'t be undone. If you might want what\'s here now, export a backup first.</string>
     <string name="replace_confirm">Replace everything</string>
     <plurals name="restored_merge">

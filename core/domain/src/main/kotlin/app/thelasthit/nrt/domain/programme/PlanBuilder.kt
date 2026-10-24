@@ -1,6 +1,7 @@
 package app.thelasthit.nrt.domain.programme
 
 import app.thelasthit.nrt.domain.dose.Dose
+import app.thelasthit.nrt.domain.product.UserProduct
 
 /** How long a programme runs. The last [NRT_FREE_WEEKS] of every length are at zero. */
 enum class ProgrammeLength(val weeks: Int) {
@@ -105,6 +106,13 @@ object PlanBuilder {
         val taper = taperSteps(ladder, length.taperWeeks).map { step -> WeekTarget.at(ladder, step) }
         return taper + List(ProgrammeLength.NRT_FREE_WEEKS) { WeekTarget.NRT_FREE }
     }
+
+    /** The products [after] brings in at a lower strength than [before] had of the same form. */
+    internal fun lowerStrengths(before: Mix, after: Mix): List<UserProduct> =
+        after.products.filter { product ->
+            before.unitsOf(product.id) == 0 &&
+                before.products.any { it.form == product.form && it.perUnit > product.perUnit }
+        }
 
     private fun ceilDiv(numerator: Int, denominator: Int): Int = (numerator + denominator - 1) / denominator
 }

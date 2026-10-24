@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The Plan tab (PLAN §6, §7.1, §7.2, §15) and the backup follow-ups of the programme's data.
+    PluralsCandidate is off for this file: every number here followed by a word is a week's
+    number ("Week 3 went over") or a count that's always more than one ("12 weeks", "the 6 days
+    with doses"). Counts that can be one are plurals.
+-->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="PluralsCandidate">
+    <string name="plan_back">Back</string>
+
+    <!-- Words the plan builds sentences from. -->
+    <string name="plan_list_and">%1$s and %2$s</string>
+    <string name="plan_list_or">%1$s or %2$s</string>
+    <string name="plan_range">%1$s to %2$s</string>
+    <string name="plan_range_to">%1$d to %2$d</string>
+    <string name="plan_week_ref_one">week\u00A0%1$d</string>
+    <string name="plan_week_ref_many">weeks %1$s</string>
+    <string name="plan_week_n">Week %1$d</string>
+    <string name="plan_mg">%1$s\u00A0mg</string>
+    <string name="plan_mg_a_day">mg a day</string>
+    <string name="plan_mg_a_day_value">%1$s\u00A0mg a day</string>
+    <string name="plan_a_day">%1$s a day</string>
+    <string name="plan_today">today</string>
+    <string name="plan_nrt_free">NRT-free</string>
+    <string name="plan_sentence">%1$s.</string>
+    <string name="plan_change_it">Change it</string>
+
+    <!-- A day's mix in words: "8 pieces of 4 mg gum and 3 sprays". -->
+    <plurals name="plan_mix_gum">
+        <item quantity="one">%1$d\u00A0piece of %2$s\u00A0mg gum</item>
+        <item quantity="other">%1$d\u00A0pieces of %2$s\u00A0mg gum</item>
+    </plurals>
+    <plurals name="plan_mix_lozenge">
+        <item quantity="one">%1$d\u00A0lozenge of %2$s\u00A0mg</item>
+        <item quantity="other">%1$d\u00A0lozenges of %2$s\u00A0mg</item>
+    </plurals>
+    <plurals name="plan_mix_mini_lozenge">
+        <item quantity="one">%1$d\u00A0mini lozenge of %2$s\u00A0mg</item>
+        <item quantity="other">%1$d\u00A0mini lozenges of %2$s\u00A0mg</item>
+    </plurals>
+    <plurals name="plan_mix_patch">
+        <item quantity="one">%1$d\u00A0patch of %2$s\u00A0mg</item>
+        <item quantity="other">%1$d\u00A0patches of %2$s\u00A0mg</item>
+    </plurals>
+    <!-- The mouth spray comes in one strength, so its sprays are counted on their own. -->
+    <plurals name="plan_mix_spray">
+        <item quantity="one">%1$d\u00A0spray</item>
+        <item quantity="other">%1$d\u00A0sprays</item>
+    </plurals>
+    <plurals name="plan_mix_nasal_spray">
+        <item quantity="one">%1$d\u00A0nasal spray</item>
+        <item quantity="other">%1$d\u00A0nasal sprays</item>
+    </plurals>
+    <string name="plan_mix_other">%1$s of %2$s</string>
+    <string name="plan_mix_none">None</string>
+    <string name="plan_mix_a_day">%1$s a day</string>
+
+    <!-- A lower strength the plan brings in: "2 mg gum from week 3". -->
+    <string name="plan_kind_gum">%1$s\u00A0mg gum</string>
+    <string name="plan_kind_lozenge">%1$s\u00A0mg lozenges</string>
+    <string name="plan_kind_mini_lozenge">%1$s\u00A0mg mini lozenges</string>
+    <string name="plan_kind_patch">%1$s\u00A0mg patches</string>
+    <string name="plan_kind_spray">%1$s\u00A0mg sprays</string>
+
+    <!-- A logging unit on its own: "One piece fewer". -->
+    <string name="plan_unit_piece">piece</string>
+    <string name="plan_unit_lozenge">lozenge</string>
+    <string name="plan_unit_patch">patch</string>
+    <string name="plan_unit_spray">spray</string>
+    <string name="plan_unit_session">session</string>
+    <string name="plan_unit_cartridge">cartridge</string>
+    <string name="plan_unit_puff">puff</string>
+    <string name="plan_unit_tablet">tablet</string>
+    <string name="plan_unit_strip">strip</string>
+    <string name="plan_unit_pouch">pouch</string>
+    <string name="plan_unit_custom">unit</string>
+
+    <!-- Columns as a screen reader hears them. -->
+    <string name="plan_col_day">%1$s %2$s\u00A0mg</string>
+    <string name="plan_col_at_or_under">%1$s %2$s\u00A0mg, at or under the guide</string>
+    <string name="plan_col_so_far">%1$s %2$s\u00A0mg so far</string>
+    <string name="plan_col_nothing">%1$s nothing logged</string>
+    <string name="plan_col_to_come">%1$s to come</string>
+    <string name="plan_col_guide">Guide %1$s\u00A0mg a day. %2$s.</string>
+
+    <!-- Keys under the charts. -->
+    <string name="plan_key_used">Used</string>
+    <string name="plan_key_nothing">Nothing logged</string>
+    <string name="plan_key_guide">%1$s\u00A0mg guide</string>
+    <string name="plan_key_at_or_under">At or under the guide</string>
+    <string name="plan_key_zero">At the 0\u00A0mg guide</string>
+    <string name="plan_key_met">Met</string>
+    <string name="plan_key_missed">Missed</string>
+    <string name="plan_key_caught_up">Missed, then caught up</string>
+    <string name="plan_key_waiting">Result to come</string>
+    <string name="plan_key_hit">A hit for %1$s</string>
+
+    <!-- The demon band on the Plan tab. -->
+    <plurals name="plan_hits_ready">
+        <item quantity="one">%1$d hit ready</item>
+        <item quantity="other">%1$d hits ready</item>
+    </plurals>
+    <string name="plan_hp_value">%1$d/%2$d</string>
+    <string name="plan_defeated">Defeated</string>
+    <string name="plan_band_description">%1$s, %2$d of %3$d HP. Opens the lair.</string>
+    <string name="plan_band_ready_description">%1$s, %2$d of %3$d HP, %4$s. Opens the lair.</string>
+    <string name="plan_band_defeated_description">%1$s, defeated, 0 of %2$d HP. Opens the lair.</string>
+
+    <!-- Before a programme. -->
+    <string name="plan_intro">A baseline is your usual day: how many of each product you use. Your plan starts there and steps down to zero.</string>
+    <string name="plan_last_seven">Your last 7 days</string>
+    <string name="plan_mg_usual_day">mg on a usual day</string>
+    <string name="plan_rounded">%1$s, rounded to whole %2$s.</string>
+    <string name="plan_days_with_doses">%1$d of the 7 days have doses, so they can be your baseline.</string>
+    <string name="plan_all_days_doses">All 7 days have doses, so they can be your baseline.</string>
+    <string name="plan_use_last_seven">Use your last 7 days</string>
+    <string name="plan_check_usual">Check your usual day</string>
+    <string name="plan_other_ways">Or start another way</string>
+    <string name="plan_two_ways">Two ways to start</string>
+    <string name="plan_start_baseline">Start a 7-day baseline</string>
+    <string name="plan_start_baseline_detail">Log as you normally would for a week, then build the plan</string>
+    <string name="plan_type_usual">Say what a usual day is</string>
+    <string name="plan_type_usual_detail">Product by product, then start straight away</string>
+
+    <!-- The baseline as it builds. -->
+    <string name="plan_baseline_day">Baseline, day %1$d of 7</string>
+    <string name="plan_baseline_running_on">Baseline, running on</string>
+    <string name="plan_usual_so_far">Your usual day so far</string>
+    <string name="plan_so_far_meta">From %1$s, rounded to whole %2$s. Today counts once it\'s over.</string>
+    <string name="plan_first_day">No full day yet. Today counts once it\'s over.</string>
+    <plurals name="plan_full_days">
+        <item quantity="one">%1$d full day</item>
+        <item quantity="other">%1$d full days</item>
+    </plurals>
+    <string name="plan_full_days_line">%1$s so far. A baseline needs at least 5 days with doses.</string>
+    <string name="plan_log_normally">Log as you normally would</string>
+    <string name="plan_log_normally_body">Cutting down this week would start your plan lower than you really use, and make the first weeks harder.</string>
+    <string name="plan_when_it_ends">When it ends</string>
+    <string name="plan_ends_body">The baseline runs to the end of %1$s. On %2$s you\'ll see your usual day, check it, then build your plan from it.</string>
+    <string name="plan_runs_on_body">A baseline needs 5 days with doses in the last 7, so it runs on a day at a time until it has them. Then you\'ll see your usual day, check it, and build your plan from it.</string>
+    <string name="plan_type_instead">Say what a usual day is instead</string>
+
+    <!-- A usual day kept, with the plan still to build. -->
+    <string name="plan_next_length">Next, pick the plan\'s length and start day.</string>
+    <string name="plan_build_button">Build your plan</string>
+    <string name="plan_change_usual">Change your usual day</string>
+    <string name="plan_change_usual_detail">Product by product</string>
+
+    <!-- Your usual day: confirmed from the logs, or typed in. -->
+    <string name="plan_usual_title">Your usual day</string>
+    <string name="plan_usual_intro">How many of each product you use on a normal day.</string>
+    <string name="plan_from_logs">From your logs, %1$s. Change a number if it isn\'t a normal day for you.</string>
+    <string name="plan_units_detail">%1$s, %2$s\u00A0mg a day</string>
+    <string name="plan_not_in_usual">Not in a usual day</string>
+    <string name="plan_units_a_day_description">%1$s: %2$s a day</string>
+    <string name="plan_one_fewer">One %1$s fewer</string>
+    <string name="plan_one_more">One %1$s more</string>
+    <string name="plan_add_product">Add a product</string>
+    <string name="plan_add_intro">Pick one of your own products.</string>
+    <string name="plan_add_none">Every one of your products is listed already.</string>
+    <string name="plan_add_catalogue">Find another in the catalogue</string>
+    <string name="plan_add_catalogue_detail">It joins your products</string>
+    <string name="plan_typical_hint">Go with a typical day, not your best or worst. If you\'re not sure, a 7-day baseline measures it for you.</string>
+    <string name="plan_logs_show">What your logs show</string>
+    <string name="plan_logs_average">Over the %1$d days with doses, that\'s %2$s on average, or %3$s once rounded.</string>
+    <string name="plan_why_one">Why %1$s doesn\'t count</string>
+    <string name="plan_why_many">Why days with nothing logged don\'t count</string>
+    <string name="plan_why_body">A day with nothing logged is usually a day you forgot to log, so counting it as 0\u00A0mg would start your plan too low.</string>
+    <string name="plan_use_usual">Use this usual day</string>
+    <string name="plan_next_length_after">Next, you pick the plan\'s length and start day.</string>
+
+    <!-- Building the plan. -->
+    <string name="plan_build_title">Build your plan</string>
+    <string name="plan_build_intro">From your usual day: %1$s, %2$s\u00A0mg.</string>
+    <string name="plan_length">Length</string>
+    <string name="plan_weeks_option">%1$d weeks</string>
+    <string name="plan_length_hint">The last 2 weeks are always NRT-free, so %1$d weeks is %2$d weeks of stepping down, then 2 at 0\u00A0mg.</string>
+    <string name="plan_hp_strip">%1$s steps out with %2$d\u00A0HP, 10 for each week.</string>
+    <string name="plan_start_day">Start day</string>
+    <string name="plan_runs_from_to">Each week runs %1$s to %2$s.</string>
+    <string name="plan_start_today">Today. %1$s</string>
+    <string name="plan_start_tomorrow">Tomorrow. %1$s</string>
+    <string name="plan_change">Change</string>
+    <string name="plan_change_start">Change the start day</string>
+    <string name="plan_use_start">Use this day</string>
+    <string name="plan_week_by_week">Week by week</string>
+    <string name="plan_steps_each">Each step is one %1$s fewer, or a lower strength.</string>
+    <string name="plan_steps_two_one">Week %1$d takes two steps, while you\'re still using more.</string>
+    <string name="plan_steps_two_many">Weeks %1$s take two steps, while you\'re still using more.</string>
+    <string name="plan_steps_n_one">Week %1$d takes %2$d steps, while you\'re still using more.</string>
+    <string name="plan_steps_n_many">Weeks %1$s take %2$d steps, while you\'re still using more.</string>
+    <string name="plan_steps_more_one">Week %1$d takes more than one step, while you\'re still using more.</string>
+    <string name="plan_steps_more_many">Weeks %1$s take more than one step, while you\'re still using more.</string>
+    <string name="plan_chart_usual">Usual day %1$s\u00A0mg</string>
+    <string name="plan_chart_from_here">%1$s from here</string>
+    <string name="plan_chart_week">Week</string>
+    <string name="plan_chart_description">Daily guide by week, in mg: %1$s. Your usual day is %2$s\u00A0mg.</string>
+    <string name="plan_guide_note">The daily guide is for pacing. The week\'s allowance is what counts.</string>
+    <string name="plan_table_week">Week and daily mix</string>
+    <string name="plan_table_guide">Daily guide</string>
+    <string name="plan_table_allowance">Allowance</string>
+    <string name="plan_from">From %1$s</string>
+    <string name="plan_week_row">Week %1$d, from %2$s: %3$s, %4$s\u00A0mg a day, %5$s\u00A0mg for the week</string>
+    <string name="plan_week_row_free">Week %1$d, from %2$s: NRT-free, 0\u00A0mg</string>
+    <string name="plan_switch_title">%1$s from week %2$d, %3$s.</string>
+    <string name="plan_switch_new">%1$s is added to your products, so get some before then.</string>
+    <string name="plan_tap_week">Tap a week to change it, any time before it starts. A week can\'t go above the one before.</string>
+    <string name="plan_build_summary">%1$d weeks, %2$s</string>
+    <string name="plan_start_plan">Start the plan</string>
+
+    <!-- Changing a week. -->
+    <string name="plan_daily_mix">Daily mix</string>
+    <string name="plan_daily_mix_for">Daily mix for week %1$d</string>
+    <string name="plan_as_planned">%1$s\u00A0mg a day, as planned</string>
+    <string name="plan_cap_week">As high as week %1$d can go, because week %2$d is %3$s.</string>
+    <string name="plan_cap_first">As high as week 1 can go: your usual day.</string>
+    <string name="plan_cap_first_label">As high as week 1 can go, since your usual day is over a pack\'s daily limit.</string>
+    <string name="plan_mg_for_week">%1$s\u00A0mg for the week</string>
+    <string name="plan_now_up">Now %1$s, up from %2$s\u00A0mg.</string>
+    <string name="plan_now_down">Now %1$s, down from %2$s\u00A0mg.</string>
+    <string name="plan_now_same">%1$s, as planned.</string>
+    <string name="plan_rest_one">Week %1$d stays as it is.</string>
+    <string name="plan_rest_many">Weeks %1$d to %2$d stay as they are.</string>
+    <string name="plan_knock_one">Week %1$d comes down to %2$s too.</string>
+    <string name="plan_knock_many">Weeks %1$s come down to %2$s too.</string>
+    <string name="plan_knock_row">%1$s to %2$s a day</string>
+    <string name="plan_save_week">Save week %1$d</string>
+    <string name="plan_save_weeks">Save weeks %1$d to %2$d</string>
+
+    <!-- This week. -->
+    <string name="plan_week_of">Week %1$d of %2$d</string>
+    <string name="plan_overtime">Overtime</string>
+    <string name="plan_starts_tomorrow">Starts tomorrow</string>
+    <string name="plan_starts_on">Starts %1$s</string>
+    <string name="plan_of_this_week">of %1$s\u00A0mg this week</string>
+    <string name="plan_left">%1$s\u00A0mg left this week</string>
+    <string name="plan_over">%1$s\u00A0mg over this week</string>
+    <string name="plan_allowance_mark">%1$s\u00A0mg allowance</string>
+    <string name="plan_meter_description">%1$s\u00A0mg used of the %2$s\u00A0mg allowance. %3$s.</string>
+    <string name="plan_mix_now">This week\'s mix is %1$s, %2$s\u00A0mg.</string>
+    <string name="plan_day_left">Day %1$d of 7, with %2$s left.</string>
+    <string name="plan_day_ending">Day %1$d of 7, ending %2$s.</string>
+    <string name="plan_day_last">Day 7 of 7, ending today.</string>
+    <string name="plan_result_after_today">Week %1$d\'s result comes in after today, so late logs still count.</string>
+    <string name="plan_back_too_one">Meet this week and you get week %1$d\'s hit back too.</string>
+    <string name="plan_back_too_many">Meet this week and you get the hits for weeks %1$s back too.</string>
+    <string name="plan_mg_this_week">mg this week</string>
+    <string name="plan_free_meta">An NRT-free week. %1$s</string>
+    <string name="plan_overtime_meta">An NRT-free week, like weeks %1$s. %2$s</string>
+    <string name="plan_overtime_title">Week %1$d went over, so the plan runs on</string>
+    <string name="plan_overtime_body">Each week stays NRT-free until one is met. Meet this one and it pays back %1$s.</string>
+    <string name="plan_overtime_safe">If a craving gets too much, NRT is far safer than going back to smoking.</string>
+    <string name="plan_for_week_one">mg for week 1</string>
+    <string name="plan_week_one_mix">Week 1\'s mix is %1$s, %2$s\u00A0mg.</string>
+    <string name="plan_runs_dates">Week 1 runs %1$s.</string>
+    <string name="plan_mg_in_week">mg in week %1$d</string>
+    <string name="plan_last_waiting">Week %1$d ended on %2$s. Its result comes in after today, so late logs still count.</string>
+    <string name="plan_carried_on">You carried on after week %1$d. You can still repeat it until the end of today.</string>
+    <string name="plan_repeat_instead">Repeat week %1$d instead</string>
+    <string name="plan_extra_goals">Extra goals</string>
+    <string name="plan_goals_all_off">All off</string>
+    <plurals name="plan_goals_on">
+        <item quantity="one">%1$d on</item>
+        <item quantity="other">%1$d on</item>
+    </plurals>
+
+    <!-- The schedule. -->
+    <string name="plan_schedule">Schedule</string>
+    <string name="plan_schedule_span">%1$d weeks, %2$s to %3$s.</string>
+    <string name="plan_schedule_overtime">%1$d weeks from %2$s, then overtime.</string>
+    <string name="plan_show_all">Show all %1$d weeks</string>
+    <string name="plan_overtime_nth">Overtime, week %1$d</string>
+    <string name="plan_repeating">%1$s, repeating week %2$d</string>
+    <string name="plan_amount_of">%1$s of %2$s\u00A0mg</string>
+    <string name="plan_status_paid_back">Met, paid back %1$s</string>
+    <string name="plan_status_met_free">Met, NRT-free</string>
+    <string name="plan_status_missed_back">Missed, back if week\u00A0%1$d is met</string>
+    <string name="plan_status_missed_free">Missed, NRT-free</string>
+    <string name="plan_status_caught_up">Caught up in week\u00A0%1$d</string>
+    <string name="plan_status_now">This week, so far</string>
+    <string name="plan_status_waiting">Result after today</string>
+    <plurals name="plan_hits_for">
+        <item quantity="one">%1$d hit for %2$s</item>
+        <item quantity="other">%1$d hits for %2$s</item>
+    </plurals>
+
+    <!-- After a missed week. Kind, and clear that nothing resets. -->
+    <string name="plan_missed_title">Missed this one</string>
+    <string name="plan_missed_detail">Week %1$d came to %2$s\u00A0mg, %3$s\u00A0mg over its %4$s\u00A0mg allowance.</string>
+    <string name="plan_close_carry_on">Close, and carry on</string>
+    <string name="plan_missed_back">Meet week %1$d and you get it back, whichever you pick.</string>
+    <string name="plan_how_week_goes">How week %1$d goes</string>
+    <string name="plan_carry_on">Carry on</string>
+    <string name="plan_carry_on_detail">Week %1$d stays at %2$s\u00A0mg for the week: %3$s.</string>
+    <string name="plan_carry_on_free_detail">Week %1$d stays NRT-free.</string>
+    <string name="plan_repeat">Repeat this week</string>
+    <string name="plan_repeat_detail">Week %1$d is %2$s\u00A0mg for the week again: %3$s. The plan runs to %4$d weeks, ending %5$s.</string>
+    <string name="plan_repeat_free_detail">Week %1$d is NRT-free again. The plan runs to %2$d weeks, ending %3$s.</string>
+    <string name="plan_repeat_hp">%1$s gets 10 more HP, so there\'s still a hit for every week.</string>
+    <string name="plan_hp_cost_description">%1$d of %2$d HP after a repeat</string>
+    <string name="plan_missed_small">Nothing resets either way. Taking longer is fine: NRT for longer is far safer than going back to smoking.</string>
+
+    <!-- The end of the programme. -->
+    <string name="plan_done_title">Programme done</string>
+    <string name="plan_sum_weeks">Weeks</string>
+    <string name="plan_sum_weeks_overtime">%1$d, plus %2$d of overtime</string>
+    <string name="plan_sum_daily">Daily amount</string>
+    <string name="plan_sum_daily_value">%1$s, down to none</string>
+    <string name="plan_sum_hits">Hits on %1$s</string>
+    <string name="plan_sum_hits_earned">%1$d earned</string>
+    <string name="plan_sum_hits_today">%1$d, the last one today</string>
+    <string name="plan_sum_hits_on">%1$d, the last one on %2$s</string>
+    <string name="plan_sum_triggers">Triggers you got on top of</string>
+    <string name="plan_done_prose">Logging still works, and Today and History carry on as before.</string>
+    <string name="plan_new_programme">Start a new programme</string>
+    <string name="plan_rematch_prose">If you\'re using NRT again, a rematch starts from what you use now, with a new baseline.</string>
+    <string name="plan_finish_first">%1$s still has %2$d\u00A0HP. Once the last hits land in the lair, a new programme can start.</string>
+    <string name="plan_open_lair">Go to the lair</string>
+    <string name="plan_round_two">%1$s, round two</string>
+    <string name="plan_round_two_detail">The same %1$s, back with full HP</string>
+    <string name="plan_new_demon">A new demon</string>
+    <string name="plan_new_demon_detail">Name it and pick a creature</string>
+    <string name="plan_carry_over">Badges and gear carry over.</string>
+    <string name="plan_new_demon_intro">It stands for the habit, and lurks until the new plan starts.</string>
+    <string name="plan_new_demon_note">Next, a new baseline starts from what you use now.</string>
+
+    <!-- Extra goals (PLAN §6.3), each off to start. -->
+    <string name="plan_goals_intro">Each one starts off. They show in Insights, and never change whether a week is met.</string>
+    <string name="plan_goal_caps">Most units a day</string>
+    <string name="plan_goal_caps_detail">A cap for each product, such as 5\u00A0pieces of gum a day</string>
+    <string name="plan_goal_caps_hint">This week\'s mix is %1$s.</string>
+    <string name="plan_goal_gap">Gap between doses</string>
+    <string name="plan_goal_gap_detail">At least a set time between doses, such as 90 minutes. The log sheet notes a dose that comes sooner.</string>
+    <string name="plan_goal_gap_shorter">15 minutes shorter</string>
+    <string name="plan_goal_gap_longer">15 minutes longer</string>
+    <string name="plan_goal_gap_average">Your gaps have averaged %1$s over the last 30 days.</string>
+    <string name="plan_goal_first">First dose not before</string>
+    <string name="plan_goal_first_detail">A time that moves 15 minutes later each week</string>
+    <string name="plan_goal_earlier">15 minutes earlier</string>
+    <string name="plan_goal_later">15 minutes later</string>
+    <string name="plan_goal_next_week">Next week %1$s.</string>
+    <string name="plan_goal_first_average">Your first dose has averaged %1$s over the last 30 days.</string>
+    <string name="plan_goal_dependence">How soon the first dose comes after waking is a strong sign of dependence.</string>
+    <string name="plan_goal_this_week">This week, week %1$d</string>
+    <string name="plan_goal_from_week">From week %1$d</string>
+    <string name="plan_minutes">%1$d\u00A0min</string>
+    <string name="plan_hours">%1$d\u00A0h</string>
+    <string name="plan_hours_minutes">%1$d\u00A0h %2$d\u00A0min</string>
+
+    <!-- Settings, backup: what replacing everything deletes, now with the programme and the game. -->
+    <string name="plan_replace_body">This deletes %1$s on this phone. The backup from %2$s takes their place, along with its day start.</string>
+    <string name="plan_replace_baseline">your baseline</string>
+    <string name="plan_replace_plan">your current plan</string>
+    <string name="plan_replace_done">your finished programme</string>
+    <string name="plan_replace_demon">%1$s at %2$d of %3$d\u00A0HP</string>
+    <plurals name="plan_replace_earlier">
+        <item quantity="one">%1$d earlier programme</item>
+        <item quantity="other">%1$d earlier programmes</item>
+    </plurals>
+    <plurals name="plan_replace_badges">
+        <item quantity="one">%1$d badge</item>
+        <item quantity="other">%1$d badges</item>
+    </plurals>
+    <plurals name="plan_replace_gear">
+        <item quantity="one">%1$d piece of gear</item>
+        <item quantity="other">%1$d pieces of gear</item>
+    </plurals>
+    <plurals name="plan_replace_breathing">
+        <item quantity="one">%1$d breathing session</item>
+        <item quantity="other">%1$d breathing sessions</item>
+    </plurals>
+    <string name="plan_replace_tags">your tag changes</string>
+    <!-- After a merge that left out the backup's running programme, since only one runs at a time. -->
+    <plurals name="plan_restored_merge_skipped">
+        <item quantity="one">Added %1$d\u00A0dose from the backup. Its programme wasn\'t added, since this phone has one of its own. Restore with Replace everything to bring it in.</item>
+        <item quantity="other">Added %1$d\u00A0doses from the backup. Its programme wasn\'t added, since this phone has one of its own. Restore with Replace everything to bring it in.</item>
+    </plurals>
+</resources>

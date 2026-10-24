@@ -54,11 +54,8 @@ internal fun Ladder.toEntities(programmeId: String) = steps.flatMapIndexed { ind
     step.items.map { LadderUnitEntity(programmeId, index + 1, it.toColumns()) }
 }
 
-/** A programme's weeks as rows, each with its mix and any choice made after it was missed. */
-internal fun Programme.toWeekEntities(
-    programmeId: String,
-    choices: Map<Int, WeekChoice>,
-): Pair<List<ProgrammeWeekEntity>, List<ProgrammeWeekUnitEntity>> {
+/** A programme's weeks as rows, each with its mix, its caps and any choice made after it was missed. */
+internal fun Programme.toWeekEntities(programmeId: String, choices: Map<Int, WeekChoice>): WeekRows {
     val weekRows = weeks.map { week ->
         val choice = choices[week.number]
         ProgrammeWeekEntity(
@@ -71,7 +68,7 @@ internal fun Programme.toWeekEntities(
             dailyGuideMicrograms = week.target.dailyGuide.micrograms,
             weeklyAllowanceMicrograms = week.target.weeklyAllowance.micrograms,
             isNrtFree = week.isNrtFree,
-            maxUnitsPerDay = week.goals.maxUnitsPerDay,
+            maxUnitsPerDay = null,
             minGapMinutes = week.goals.minGapMinutes,
             firstDoseNotBeforeMinuteOfDay = week.goals.firstDoseNotBefore?.let { it.hour * 60 + it.minute },
             result = week.result,
@@ -83,7 +80,10 @@ internal fun Programme.toWeekEntities(
     val unitRows = weeks.flatMap { week ->
         week.target.mix.items.map { ProgrammeWeekUnitEntity(programmeId, week.number, it.toColumns()) }
     }
-    return weekRows to unitRows
+    val capRows = weeks.flatMap { week ->
+        week.goals.maxUnitsPerDay.toSortedMap().map { (productId, units) -> ProgrammeWeekCapEntity(programmeId, week.number, productId, units) }
+    }
+    return WeekRows(weekRows, unitRows, capRows)
 }
 
 /** The ledger's sums as they are, held within what a balance can be if the ledger was ever out of step. */
@@ -127,6 +127,7 @@ internal fun ProgrammeWithParts.toRecord(products: Map<String, UserProduct>): Pr
         require(byStep.keys == (1..byStep.size).toSet()) { "Programme ${row.id}'s ladder skips a step: ${byStep.keys}" }
         val steps = (1..byStep.size).map { step -> byStep.getValue(step).map { it.units }.toMix(products) }
         val mixes = weekUnits.groupBy { it.weekNumber }
+        val caps = weekCaps.groupBy { it.weekNumber }
         val programmeWeeks = weeks.sortedBy { it.number }.map { week ->
             ProgrammeWeek(
                 number = week.number,
@@ -136,7 +137,7 @@ internal fun ProgrammeWithParts.toRecord(products: Map<String, UserProduct>): Pr
                 result = week.result,
                 resultAt = week.resultAt?.let(Instant::ofEpochMilli),
                 goals = WeekGoals(
-                    maxUnitsPerDay = week.maxUnitsPerDay,
+                    maxUnitsPerDay = caps[week.number].orEmpty().associate { it.productId to it.maxUnitsPerDay },
                     minGapMinutes = week.minGapMinutes,
                     firstDoseNotBefore = week.firstDoseNotBeforeMinuteOfDay?.let { LocalTime.ofSecondOfDay(it * 60L) },
                 ),

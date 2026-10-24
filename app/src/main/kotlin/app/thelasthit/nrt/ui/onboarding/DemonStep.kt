@@ -129,7 +129,7 @@ fun DemonStep(state: OnboardingState, viewModel: OnboardingViewModel) {
 
 /** The demon on the band backdrop, as Today will show it once the plan starts. */
 @Composable
-private fun Preview(name: String, variant: String) {
+internal fun Preview(name: String, variant: String) {
     val colors = LastHit.colors
     val kind = stringResource(
         R.string.onboarding_demon_kind,
@@ -156,7 +156,7 @@ private fun Preview(name: String, variant: String) {
 
 /** Items four to a row, each the same width. */
 @Composable
-private fun <T> Tiles(items: List<T>, modifier: Modifier = Modifier, tile: @Composable BoxScope.(T) -> Unit) {
+internal fun <T> Tiles(items: List<T>, modifier: Modifier = Modifier, tile: @Composable BoxScope.(T) -> Unit) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         items.chunked(4).forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -168,7 +168,7 @@ private fun <T> Tiles(items: List<T>, modifier: Modifier = Modifier, tile: @Comp
 }
 
 @Composable
-private fun BoxScope.CreatureTile(creature: Creature, selected: Boolean, variant: String) {
+internal fun BoxScope.CreatureTile(creature: Creature, selected: Boolean, variant: String) {
     val colors = LastHit.colors
     val shape = RoundedCornerShape(16.dp)
     val name = stringResource(creatureName(creature))
@@ -222,7 +222,7 @@ private fun BoxScope.CreatureTile(creature: Creature, selected: Boolean, variant
 }
 
 @Composable
-private fun BoxScope.VariantSwatch(variant: String, selected: Boolean, onPick: () -> Unit) {
+internal fun BoxScope.VariantSwatch(variant: String, selected: Boolean, onPick: () -> Unit) {
     val colors = LastHit.colors
     val shape = RoundedCornerShape(16.dp)
     Column(
