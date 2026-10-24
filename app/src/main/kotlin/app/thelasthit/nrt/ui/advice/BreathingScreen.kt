@@ -84,7 +84,8 @@ fun BreathingScreen(
     val now by viewModel.now.collectAsStateWithLifecycle()
     val sessions by viewModel.sessions.collectAsStateWithLifecycle()
     KeepScreenOnWhileTimersRun()
-    TimerTicks(running = stage is BreathingStage.Running, everyFrame = true, onTick = viewModel::tick)
+    val breathing = (stage as? BreathingStage.Running)?.run?.isPaused == false
+    TimerTicks(running = breathing, everyFrame = true, onTick = viewModel::tick)
     // Turning the screen off or leaving the app pauses the session. Pausing is fine.
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.pause() }
     when (val current = stage) {

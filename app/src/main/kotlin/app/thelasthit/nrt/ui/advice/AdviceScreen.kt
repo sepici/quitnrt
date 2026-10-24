@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.domain.advice.AdviceIndex
@@ -242,7 +243,7 @@ private fun FreeHelp(country: String?, quitlines: List<Quitline>) {
                     )
                     web != null -> AdviceLink(
                         stringResource(R.string.advice_help_open),
-                        onClick = { context.open(Intent(Intent.ACTION_VIEW, Uri.parse(web))) },
+                        onClick = { context.open(Intent(Intent.ACTION_VIEW, web.toUri())) },
                         description = stringResource(R.string.advice_help_open_description, line.name),
                     )
                 }

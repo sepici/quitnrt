@@ -51,8 +51,10 @@ fun NavController.openStrategy(key: String) = navigate(AdviceRoutes.strategy(key
 fun NavController.openBreathing(minutes: Int = 1, pattern: BreathingPattern = BreathingPattern.BOX, start: Boolean = false) =
     navigate(AdviceRoutes.breathing(pattern, minutes, start))
 
-/** Opens the delay timer. */
-fun NavController.openDelay() = navigate(AdviceRoutes.DELAY) { launchSingleTop = true }
+/** Opens the delay timer, or goes back to the one already open, which may be running under the breathing timer. */
+fun NavController.openDelay() {
+    if (!popBackStack(AdviceRoutes.DELAY, inclusive = false)) navigate(AdviceRoutes.DELAY)
+}
 
 /** Opens the timer an interactive strategy has. */
 fun NavController.openTimer(interactive: Interactive) = when (interactive) {
