@@ -1,6 +1,6 @@
 # Status and handover
 
-Last updated: 24 October 2026, while the build runs unattended towards a testing build (phases 2 to 7, then 9).
+Last updated: 24 October 2026, late. Phases 2 to 7 and 9 are built, reviewed and on `main`, and the app is ready for testing on a phone. Wear OS (phase 8) comes after release.
 
 ## Where things are
 
@@ -8,76 +8,116 @@ Last updated: 24 October 2026, while the build runs unattended towards a testing
 |---|---|
 | 0. Foundation and direction | Done. Gradle set-up, CI, copy lint, style guide, design direction chosen, first creature signed off |
 | 1. Logging | **Done.** Domain rules, catalogue, data layer, backup, theme, sprites, plus **onboarding, Today, the log sheet, History, Settings and the lair**, reviewed, with the owner's calls on the reviews applied. |
-| 2. Insights | **Done.** The stats, every Insights section and the History filter, reviewed by the copy agent and the fresh-eyes reviewer, with their findings fixed. Calls that touch signed-off designs wait for the owner. |
-| 3. Programme | **Built:** the mix-based taper (P3-6), the data, the Plan tab, Today, History and Insights with a plan, the extra goals in stats, the log sheet's spacing note, and the total each week was judged on. Final reviews are running. |
-| 4. Demon and achievements | **Built:** the seven other creatures (off until the owner's look), the game rules, unlocks with toasts and the trophy shelf, gear, and the lair's battle with animations, haptics and sound. |
-| 5. Advice | **Built:** the content, the rules, the full list, strategy pages, both timers (the delay with its own notice), and advice on Today, after logging and in Insights. |
-| 6. Quick-log | **Built:** the matcher, links and shortcuts, the widget, the tile, notifications, reminders, and a reminders step in onboarding. |
-| 7. AppFunctions | **Built** on `androidx.appfunctions` 1.0.0-beta01, waiting for a run on the owner's phone. |
-| 9. Polish | **Built:** the release build and estimated absorbed figures. Running: the copy, design and accessibility reviews of every new screen, the store documents, and an end-to-end journey test. Wear OS (8) comes after release. |
+| 2. Insights | **Done.** The stats, every Insights section and the History filter, reviewed, with the findings fixed. |
+| 3. Programme | **Built and reviewed.** The mix-based taper (P3-6), the Plan tab, Today, History and Insights with a plan, extra goals and their stats, and judged totals. |
+| 4. Demon and achievements | **Built and reviewed.** The game rules, unlocks with toasts and the trophy shelf, gear, and the lair's battle with animations, haptics and sound. The seven new creatures stay off until your look (P4-1). |
+| 5. Advice | **Built and reviewed.** The content, the rules, the list, strategy pages, both timers, and advice on Today, after logging and in Insights. |
+| 6. Quick-log | **Built and reviewed.** Links, shortcuts, the widget, the tile, notifications, reminders, and a reminders step in onboarding. |
+| 7. AppFunctions | **Built** on `androidx.appfunctions` 1.0.0-beta01, waiting for a run on your phone. |
+| 9. Polish | **Built.** The release build, estimated absorbed figures, the copy, design and accessibility reviews of every screen, the store documents, and an end-to-end journey test. |
+| 8. Wear OS | After release. |
 
-The full check passes locally on `main`.
+The full check passes locally on `main`. Its tests run the domain, data and app, including `JourneyTest` (onboarding to a rematch through the real screens) and `ProgrammeConsistencyTest` (seeded random runs that check HP, hits, results and allowances after every step).
 
 ## Waiting for the owner
 
-Nothing blocks the build. These are worth a look when you're next in:
+Nothing blocks the build. It's in four parts: what to try, what to decide, what's needed before release, and the calls taken while running, for reference.
 
-- **Calls made while running unattended (24 October).** The designers raised these with the mockups. Each recommendation was taken so building could go on; say if any should change.
-  - **Plan tab:**
-    - A baseline that ends with fewer than 5 days with doses runs on a day at a time until 5 of the last 7 have doses, and the screen says so.
-    - The missed-week choice is a sheet when the result comes in, with "Carry on" chosen. Closing it counts as Carry on, and the choice can be changed on the Plan tab until the end of that day.
-  - **Plan tab, for the mix:**
-    - A switch to a lower strength gets a week of its own (PLAN §6.2, example 3), so the "8 pieces of 2 mg" week you described is always there. The designer found that a week taking two steps could otherwise pass straight through it. The mockups' numbers from week 3 on predate this; the domain's numbers are the ones to build.
-    - Editing a week lists every step it can take, from the week before's down to the last, in a scrolling list, rather than a stepper.
-    - "Most units a day" becomes a cap per product (PLAN §6.3).
-    - Past weeks in the schedule keep their mix line, so you can see where 2 mg gum began.
-  - **Advice:**
-    - The tip after logging is a card under Today's hero until it's dismissed or the day ends. The snackbar keeps only the logged amount and Undo.
-    - Today's advice line gets two links under it: "How to do it" and "All advice". Insights uses the same pair.
-    - Advice uses the last 14 days everywhere, labelled "From your last 14 days", whatever range Insights shows.
-    - A breathing session counts towards the badges when it runs to the end, in whole rounds. Pausing is fine.
-    - The screen stays on while a timer runs. The delay timer keeps counting from its start if you leave, and buzzes at the end.
-    - The breathing animation sits on the hero green block, not the success green.
-  - **Reminders:**
-    - Tapping a weekly result opens the Plan tab, where a missed week's choice waits, and tapping a badge or gear notice opens the lair at its trophy shelf. Other notices open the app where it was left.
-    - The achievements notice is for badges and gear the weekly result's check finds while the app isn't on screen. On screen, the toast tells of them instead. Badges from logs made with the widget, the tile or an agent are found when the app is next opened, with a toast and no notice.
-- **Calls from wave D (24 October):**
-  - The onboarding reminders step (`onboarding-6b-reminders`, a new mockup made and critiqued while running): the four reminders that are on by default, each with a switch, then the notification question. Skip shows only where there's a question to skip (Android 13 and newer, notifications not yet allowed), and keeps the defaults. Day start's button now reads "Next: your reminders", and the done page has a Reminders row.
-  - The delay timer's notice, on its own channel, ignores quiet hours, since you start the timer yourself (being changed to a reminder rather than an alarm, so Do Not Disturb holds it).
-  - Absorbed figures: patches count as 80% of the labelled mg, from the Nicotinell leaflet's 77% bioavailability (open: 100% if you'd rather read the labelled mg as what's absorbed). Today's dose rows show the estimate too, as History's do. Thrive's lozenge figure rests on retailer ingredient lists, since Health Canada's monograph couldn't be reached.
-  - Goals count only days that are over; gaps are measured to the minute within a logical day; patches are left out of gaps and the first dose but can have a cap. "Your goals" in Insights, the Plan tab's goal lines and the spacing note had no mockups and follow B's tiles and lines.
-  - The tip after a slip comes with the dose that takes today over its guide. Tip titles read "Next time, <strategy>", and the slip lines read "Last week went over its allowance. One week over doesn't undo what you've done."
-- **Calls from building the phase 3 to 7 screens (24 October),** each taken so building could go on (recommendation in brackets where it's still open):
-  - "Start a 7-day baseline" does the same as "Use your last 7 days" when the last 7 days already qualify, so someone whose last week wasn't typical can't measure a fresh one (open: make "Start a 7-day baseline" always start today, and use the last 7 days only through their own button).
-  - Gary lurks on Today until the plan's first day, though the demon is written when the plan is confirmed.
-  - An NRT-free week's meter runs to the usual day, so a slip is a small fill. Its week columns show mg over each day, with no bars.
-  - Overtime weeks are named "Overtime", "Overtime 2" and so on in Insights. "Days within the guide" is a full-width Habits tile ("19 of 25 days").
-  - The calendar shades in quarters of the guide once a plan runs, with days before it against the usual day, and the guide shows only with all products chosen.
-  - In quiet hours (22:00 to 07:00 by default), nudges, the check-in and "Forgot to log" are dropped, while results and badges wait. Nudges stop for a week once it's past its allowance. Results more than 10 days old aren't told. Reminder settings stay on the phone and aren't backed up.
-  - The tile logs the first quick-log product with a 10-second Undo note, or opens the log sheet (Settings, "Widget and tile").
-  - At the smallest widget size (250 × 110) with large text, a pack-limit note is cut after 2 lines (accept it for the minimum size).
-  - Where to ask for notifications: Android 13+ asks only when a reminder is switched on, so a fresh install got none (being built: a reminders step in onboarding, from a new mockup).
-  - An agent's two logNrtUsage calls for the same product within a minute log two doses, since PLAN §4's duplicate check only covers logs from elsewhere (open: flag them too, for agent calls only).
-  - An agent asked on the day after the final week, while its result is due, reports the calendar week with no guide, where Today shows a guide of 0 (open: leave it; it's one day).
-  - The trophy shelf, toasts and "new gear" card had no mockups and follow B's tokens; they go to the reviewers with phase 4.
-- **To try on your phone:** the widget, the tile and the notifications; `scripts/appfunctions.sh` (and the Early Access sign-up, `docs/APPFUNCTIONS.md`); the delay timer's buzz with the screen locked; the lair's sounds and haptics.
-- **Phase 2 review calls** that would change signed-off designs, so they wait for you (recommendation in brackets):
-  - The green on selected states and primary buttons, which the reviewer read against "green only means at or under" (keep it: it's the hero's forest green, not the success green; look again once phase 3 puts both on screen).
-  - Heat-map shading, stretched from the lightest day to the heaviest, gives decimal step labels and makes 12 and 14 mg look like opposite ends (whole-mg steps of 1, 2 or 5 mg from the lowest day, and dose steps of 1 to 5+ on the hour map).
-  - The History filter sheet's product row scrolls and hides the last chips (wrap it, since it lists only products with doses).
-  - Body and Habit share a row in the filter sheet (give each its own).
-  - By group shows five tiles, most at 0% (show only groups with doses, and one line for the rest).
-  - Single-choice chips show a check mark that shifts the row (drop the check there; keep it on multi-select tags).
-  - Under about 20 doses, tag and group shares read as percentages (show counts, "3 of 16 doses").
-  - History rows read "13:40, After a meal" (a middle dot: "13:40 · After a meal").
-  - Left as they are: icons in tinted circles and centred empty states until there are pixel product icons, habit tiles, full day headers under a filter, full-bleed day rules, and the share bars' edges.
-- **Badge thresholds and gear (P4-4, tuned 24 October):** streaks are now 10, 21 and 40 days, the last weeks-met tier is 10, and "Logged on 30 days" is 28. The war hammer comes at half the programme's hits and the lightning bow when the final taper week is met, so gear keeps its order at every length. PLAN §8 has the new numbers. A week under its allowance needs every day logged, so a day with genuinely nothing can't be logged and that week won't count as under.
-- **The art (P4-1):** `art/previews/line-up.png` and the creature sheets, plus `icons-gear.png`, `icons-badges.png` and `icons-3x.png`. Once the creatures are signed off, `Creature.isDrawn` flips and onboarding offers all eight.
-- **Before release:**
-  - Review the advice content (P5-1), and the sounds and haptics on your phone.
-  - Make the upload key, add the four `LASTHIT_UPLOAD_*` secrets, and run `docs/RELEASE.md`'s phone checklist. Its API 37 emulator pass is still to do, since this machine has no API 37 image.
-  - Send a link while the app is open (from Tasker, or `adb shell am start -a android.intent.action.VIEW -d "lasthit://log?product=..."`), and check it reaches the open app without a second copy.
-- **Taken while running:** a pack with no lower strength from its brand or your products falls back to the catalogue's generic line of the same kind (PLAN §6.2), so no plan drops from 4 mg or 21 mg straight to nothing. Built: it keeps to the strictest daily limit of the packs on sale at that form and strength. It also means UK 2 mg lozenges whose brand has no 1 mg now go on to the generic 1 mg. Patch strength steps don't get a switch week of their own; the rule is about pieces.
+### 1. Try it on your phone
+
+Install with `./gradlew :app:installDebug`, or the APK from CI's latest run. A fresh install starts at onboarding. Things only a phone can show:
+
+- the widget, the tile and the notifications, including the delay timer's buzz with the screen locked
+- the lair's sounds and haptics, with the phone on silent too
+- a link sent while the app is open (from Tasker, or `adb shell am start -a android.intent.action.VIEW -d "lasthit://log?product=..."`), which should reach the open app without a second copy
+- AppFunctions: `scripts/appfunctions.sh`, and the Early Access sign-up in `docs/APPFUNCTIONS.md`
+- `docs/RELEASE.md`'s phone checklist, with a release build. Its API 37 emulator pass is still to do, since this machine has no API 37 image.
+
+### 2. Decisions, most important first
+
+Each has a recommendation in brackets. None blocks testing.
+
+- **The art (P4-1).** `art/previews/line-up.png` and the creature sheets, plus `icons-gear.png`, `icons-badges.png` and `icons-3x.png`. (Sign off the seven and flip `SEVEN_SIGNED_OFF` in `Creature.kt`: onboarding, the rematch and the lair then offer all eight, and the "only the dragon" placeholders go.)
+- **The HP bar is green** in the signed-off `lair.html` and `today.html`, which the final reviewer read against "green only means at or under". (A pixel-red ember for HP left, keeping the tan for HP lost.)
+- **Privacy wording.** Android's own backup to your Google account can copy the app's data, so three lines overclaim: onboarding's "Everything you log stays on this phone", About's "stays on this phone unless you export it" and backup's "nothing leaves the phone unless you send it". (Mention Android's backup and point to the hosted policy. Also make Android's backup encrypted-only: `disableIfNoEncryptionCapabilities` on Android 12 and newer, and client-side encryption rules for 9 to 11.)
+- **"Start a 7-day baseline"** does the same as "Use your last 7 days" when the last 7 days already qualify, so someone whose last week wasn't typical can't measure a fresh one. (Make it always start today.)
+- **"Honest ledger"** unlocks the first time the log sheet's "1 h ago" is used. (Make it more than an hour, so "2 h ago" or "This time yesterday" earn it.)
+- **Patch absorption** is 80% of the labelled mg, from the Nicotinell leaflet's 77% bioavailability. (Keep 80%; 100% if you'd rather read the labelled mg as what's absorbed.)
+- **An agent's two log calls for the same product within a minute** log two doses, since PLAN §4's duplicate check covers only logs from elsewhere. (Flag them too, for agent calls only.)
+- **Copy in signed-off mockups** that the copy agent would change (recommendation after the arrow):
+  - build screen "while you're still using more" → "while the daily guide is still high"
+  - Today's "this fortnight" → "over the last 14 days"
+  - tag names mid-sentence → in quotes: "You tagged that dose “Stressed”."
+  - confirm screen "if it isn't a normal day for you" → "if it doesn't match your usual day"
+  - goals intro "Each one starts off." → "Each is off until you switch it on."
+  - "Next, you pick" → "Next, pick"
+  - the morning routine and gum-and-drinks summaries in the advice list
+  - Overtime's "If a craving gets too much, NRT is far safer..." was changed already, because it tied NRT to a craving in an NRT-free week; it now uses the missed-week sheet's sentence.
+- **Smaller design calls** from the final review:
+  - plan dates in full ("From 24 October")
+  - the build table's "Week and daily mix" → "Week and mix", since it wraps at large font
+  - empty HP blocks and the lightest heat step under 3:1 → a 1 dp edge
+  - the widget's big figure in the app's font, as a bitmap
+  - keep "?? HP", the hero's green when over the guide in dark mode, and the spoken "mg left" line
+- **Phase 2 review calls** that would change signed-off designs:
+  - heat-map shading → whole-mg steps from the lowest day, and dose steps of 1 to 5+
+  - the History filter's product row → wrap
+  - Body and Habit in the filter sheet → a row each
+  - By group's five tiles, most at 0% → only groups with doses
+  - single-choice chips' check mark → drop it there
+  - shares under about 20 doses → counts ("3 of 16 doses")
+  - History rows "13:40, After a meal" → "13:40 · After a meal"
+  - the green on selected states and primary buttons → keep
+- **Two limits at 2× font:** the smallest widget (250 × 110) cuts its note to one line, and plan schedule rows break "September" mid-word.
+- **PLAN wording:** §8.1 says a day counts once its late-log window is over, but "Logged on N days" counts a day as soon as it has a dose, as "First entry" must. (Reword PLAN.)
+
+### 3. Before release
+
+- Review the advice content (P5-1): `core/domain/src/main/resources/advice/strategies.json`, with each strategy's sources.
+- Make the upload key and add the four `LASTHIT_UPLOAD_*` secrets (`docs/RELEASE.md`).
+- The store (`docs/store/`):
+  - fill in the developer name and contact email in the privacy policy and listing
+  - host the policy at thelasthit.app
+  - make the 512 × 512 store icon
+  - create the Play Console app
+- If you want certainty on the medical-device question, ask the MHRA's borderline products enquiry about the plan and the timing tips (`docs/store/health-apps.md`).
+
+### 4. Calls taken while running, for reference
+
+Each was taken so building could go on. Say if any should change.
+
+- **The taper:** a switch to a lower strength gets a week of its own (PLAN §6.2, example 3). A pack with nothing lower from its brand or your products falls back to the catalogue's generic line, keeping to the strictest limit of the packs on sale, so no plan drops from 4 mg or 21 mg straight to nothing. Patch strength steps don't get a switch week; the rule is about pieces. The Plan mockups' numbers from week 3 on predate the switch rule, and the app shows the domain's.
+- **The Plan tab:**
+  - A baseline short of 5 days with doses runs on a day at a time.
+  - The missed-week sheet has "Carry on" chosen, and closing it counts as Carry on.
+  - Editing a week lists every step it can take.
+  - "Most units a day" is a cap per product.
+  - Past weeks keep their mix line.
+  - Gary lurks on Today until the plan's first day.
+  - An NRT-free week's meter runs to the usual day.
+- **Insights with a plan:**
+  - Overtime weeks are named "Overtime", "Overtime 2" and so on.
+  - "Days within the guide" is a Habits tile.
+  - The calendar shades in quarters of the guide.
+  - The guide shows only with all products chosen.
+  - "Your goals" follows Habits.
+- **Badges and gear (P4-4, tuned by simulation):**
+  - Streaks are 10, 21 and 40 days, the last weeks-met tier is 10, and "Logged on 30 days" is 28.
+  - The war hammer comes at half the programme's hits, and the lightning bow when the final taper week is met.
+  - A week under its allowance needs every day logged.
+- **Advice:**
+  - The tip after logging is a card in the advice line's slot, at most one a day per tag.
+  - Advice uses the last 14 days everywhere.
+  - A breathing session counts when it runs to the end.
+  - The delay timer's notice is a reminder on its own channel, outside quiet hours.
+- **Reminders:**
+  - Quiet hours (22:00 to 07:00) drop nudges, the check-in and "Forgot to log", while results and badges wait.
+  - Results come in while the app stays open, once a minute.
+  - Tapping a result opens the Plan tab, and a badge opens the lair's shelf.
+  - Reminder settings aren't backed up.
+  - The onboarding step asks for notifications, with Skip only where there's a question to skip.
+- **Absorbed figures:** off by default. When on, they show on Today, History and the log sheet, never in Insights or any target.
+- **No mockups,** so built from B's language and reviewed: the trophy shelf, toasts, the "new gear" card, "Your goals", the Plan tab's goal lines, the spacing note and the onboarding reminders step (`onboarding-6b-reminders`).
 
 The roadmap's decisions were all approved on 23 October, with Wear OS moved to after release. On 24 October the owner gave the phase 3 and phase 5 mockups a green light, asked for the build to run on to a build ready for testing, and changed the taper to follow the mix of products (PLAN §6.2, ROADMAP P3-6).
 
@@ -341,6 +381,21 @@ Built in parallel worktrees, each reviewed through a code lens and a design lens
 - **Absorbed figures** (`domain/absorbed`, P9-1): each form's share with its range and sources, in whole micrograms, never used for a guide, allowance, result, achievement or Insights (a test reads the sources to check). Off by default, under Settings, Doses, "Absorbed amounts". When on, "about 1 mg absorbed" shows in the secondary colour on Today, History and the log sheet. Backups carry the setting.
 - **Onboarding** has 8 steps, with reminders between the day start and done. Notifications are asked once: there, or at the first reminder switched on in Settings.
 
+## Wave E: the final reviews (24 October)
+
+- **Copy:** the copy agent read every strings file and the advice text. Fixed: overtime no longer ties NRT to a craving, withdrawal no longer "can't hurt you", numbers are digits, "Badges and gear" replaces "Achievements", and after a slip the links say "What helps" (`advice_slip_how`). Wording in signed-off mockups waits for the owner (above).
+- **Design and accessibility** (phase 9 slice 1):
+  - Screen readers get labels that match the screen, sheet and step titles, headings, named fields, and live regions for notes, errors, steppers, timers and the lair. Unlock cards are read first, and figures are said as "used of the allowance".
+  - Dialog buttons and date pickers are in the link colour. `ColorContrastTest` holds the token pairs to their ratios.
+  - The 5× flashes only on its finisher, and breathing keeps still with animations off.
+  - Captures now include 2× font (`-x2`, `HUGE_FONT`) for the busiest screens. The unit-test heap is 2 GB, so the tallest captures don't run out of memory.
+  - New strings are in `strings_a11y.xml`.
+- **Store** (`docs/store/`, phase 9 slice 4): the privacy policy, Data safety and Health apps answers, the listing, and eight framed screenshots with a feature graphic (P9-2). `StoreScreenshotTest` renders the sources from one seed of generic products, and `docs/store/tools/store_art.py` (standard library only) frames them; re-run both after a look change.
+- **End to end:** `JourneyTest` runs MainActivity from onboarding to a rematch over an 8-week plan, checking the Plan tab, Today, Insights, the lair's HP and every badge as the app finds it. `ProgrammeConsistencyTest` plays 16 seeded random runs against the repositories, with writes landing just before results fall due.
+  - It found that a result falling due with the app open waited for the next dose. `SettleOnStart` now settles each minute in the foreground, on the same tick the screens move to a new day.
+  - Each test's app stops its background work when the test ends, so reminder tests can't see an earlier test's notices.
+  - Testing tip: a minute passing with the app open means idling the main looper (the screens' minute ticks) and advancing Compose's `mainClock` (the shell's settling).
+
 ## How design and copy are reviewed
 
 The owner asked for agents on UI/UX, colour, tone and copy, so nothing ends up looking or reading AI-made. They run at checkpoints, not constantly:
@@ -366,10 +421,10 @@ The owner asked for agents on UI/UX, colour, tone and copy, so nothing ends up l
 
 ## Loose ends
 
-- **Room schema.** `core/data/schemas/` holds the generated schemas; `1.json` is committed. Commit each new version alongside its migration.
+- **Room schema.** `core/data/schemas/` holds the generated schemas, versions 1 to 4. Commit each new version alongside its migration, and test it from every earlier version. Backups are format version 3, and read every earlier version.
 - **Mockup fonts aren't in the repo.** The mockups only show the real fonts in the screenshots; the app bundles its own copies.
-- **Sprites in dark mode.** The mockups add a 1 px light rim around sprites in dark mode. Do this in the sprite renderer (phase 4), and watch the seam where the feet meet the rock. For now the lurking silhouette gets a 1 dp rim, finer than its pixels, which the fresh-eyes reviewer read as a cut-out: draw it in whole sprite pixels instead.
+- **Sprites in dark mode.** The light rim is drawn in whole sprite pixels on a canvas padded by 1 px a side (`PixelRim`), and frames that break apart get none (`BreakingFrames`).
 - **Scratch tools.** The design tools that rebuild mockups and boards are in `docs/design/*/tools/`. `docs/design/tools/shot.mjs` reads Playwright's location from `PLAYWRIGHT_DIR`.
 - **Pixel art in the app.** The band and lair backdrops are pixel grids in `core/domain/src/main/resources/backdrops/`, written by `art/tools/backdrops.py` from the mockups' shapes. `GameArt` and `drawPixels` in `ui/game` draw them and the sprites with no smoothing.
 - **Icons** are the mockups' SVG symbols turned into vector drawables by `docs/design/tools/svg2vector.py`.
-- **Screenshots and UI tests.** `captureLooks` captures a screen in light and dark. Large font is a second test with `@Config(fontScale = LARGE_FONT)`, so sheets and dialogs scale too. `TestApp` stops the clock at Friday 23 October, 15:05 in London. In Compose tests, wait on what the screen shows. Reading semantics syncs with Compose, which runs the main thread's pending work; a wait that only checks the database or a plain flag never does, so the save it waits for never finishes. When there's nothing on screen to wait for, call `waitForIdle()` inside the condition.
+- **Screenshots and UI tests.** `captureLooks` captures a screen in light and dark. Large font is a second test with `@Config(fontScale = LARGE_FONT)`, so sheets and dialogs scale too. `TestApp` stops the clock at Friday 23 October, 15:05 in London. In Compose tests, wait on what the screen shows. Reading semantics syncs with Compose, which runs the main thread's pending work; a wait that only checks the database or a plain flag never does, so the save it waits for never finishes. When there's nothing on screen to wait for, call `waitForIdle()` inside the condition. Never block the main thread on a repository call (`runBlocking` on main can hang Room): run it on another thread and wait on the screen. Each feature's test seeds live in its own file (`PlanTestData.kt`, `GoalSeeds.kt` and so on).

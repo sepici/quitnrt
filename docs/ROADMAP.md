@@ -11,6 +11,8 @@ PLAN says what each phase delivers; this says how it's cut up and what each slic
 
 **24 October:** the owner gave the batched mockups (phase 3 and phase 5) a green light, and asked for the build to run on through phase 9 to a build ready for testing. They also changed the taper: it now follows the mix of products in a usual day, not whole units of one main product (PLAN §6.1 and §6.2). So **P3-5 is replaced by P3-6** below, and the Plan mockups are updated for the mix before they're built.
 
+**24 October, late:** phases 2 to 7 and 9 are built, reviewed and merged, and the app is ready for testing. What's left is the owner's: the phone checks, the decisions listed in STATUS's "Waiting for the owner", and the release steps. Then phase 8, Wear OS.
+
 **How the rest is built:** in waves of parallel slices, each in its own worktree, reviewed and fixed, then merged one at a time with the full check. One data slice adds every table phases 3 to 5 need in a single migration from version 1, so the screens of phases 3, 4 and 5 can then be built side by side.
 
 ## Running unattended

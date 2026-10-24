@@ -63,7 +63,7 @@ class StoreScreenshotTest {
     @Test @Config(qualifiers = FULL_PAGE)
     fun today() {
         seed()
-        compose.captureLooks("store-today", ready = hasContentDescription("mg used. Daily guide", substring = true)) { Today() }
+        compose.captureLooks("store-today", ready = hasContentDescription("Daily guide", substring = true)) { Today() }
     }
 
     /** Sunday 27 September, with the usual day typed: the plan Today runs, before it starts. */

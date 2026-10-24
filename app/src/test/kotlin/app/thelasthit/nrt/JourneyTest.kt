@@ -182,11 +182,11 @@ class JourneyTest {
     private fun weekOne() {
         nextVisit("2026-10-31T10:00")
         tab("Today")
-        waitForDescription("0\u00A0mg used. Daily guide 10\u00A0mg. 10\u00A0mg left today.")
+        waitForDescription("Daily guide 10\u00A0mg. 10\u00A0mg left today.")
         waitFor("Week 1 of 8, day 1. 70\u00A0mg left this week.")
         waitForDescription("Gary, 80 of 80 HP. Opens the lair.")
         for (mg in listOf(2, 4, 6, 8)) quickLog(expectTodayMg = mg)
-        waitForDescription("8\u00A0mg used. Daily guide 10\u00A0mg. 2\u00A0mg left today.")
+        waitForDescription("Daily guide 10\u00A0mg. 2\u00A0mg left today.")
         waitFor("Week 1 of 8, day 1. 62\u00A0mg left this week.")
 
         logDays("2026-11-01", days = 6, pieces = 4)
@@ -197,14 +197,14 @@ class JourneyTest {
         waitFor("Week 2 of 8, day 1. 56\u00A0mg left this week.")
         tab("Plan")
         waitFor("Week 1's result comes in after today, so late logs still count.")
-        compose.onNode(hasContentDescription("Week 1, 31\u00A0October to 6\u00A0November: 5\u00A0pieces of 2\u00A0mg gum. 56 of 70\u00A0mg, Result after today")).performScrollTo()
+        compose.onNode(hasContentDescription("Week 1, 31\u00A0October to 6\u00A0November: 5\u00A0pieces of 2\u00A0mg gum. 56\u00A0mg used of the 70\u00A0mg allowance, Result after today")).performScrollTo()
         logDays("2026-11-07", days = 1, pieces = 5)
 
         // Sunday: week 1 is met.
         nextVisit("2026-11-08T10:00")
         checkWeek(
             number = 1,
-            plan = "Week 1, 31\u00A0October to 6\u00A0November: 5\u00A0pieces of 2\u00A0mg gum. 56 of 70\u00A0mg, Met. 1 hit for Gary",
+            plan = "Week 1, 31\u00A0October to 6\u00A0November: 5\u00A0pieces of 2\u00A0mg gum. 56\u00A0mg used of the 70\u00A0mg allowance, Met. 1 hit for Gary",
             insights = "Week 1, 56 of 70\u00A0mg, met.",
             hp = 80,
             banked = 1,
@@ -235,7 +235,7 @@ class JourneyTest {
         compose.onAllNodes(hasText("Carry on") and hasClickAction())[1].performClick()
         waitFor("You carried on after week 2.")
         compose.onNode(
-            hasContentDescription("Week 2, 7 to 13\u00A0November: 4\u00A0pieces of 2\u00A0mg gum. 70 of 56\u00A0mg, Missed, back if week\u00A03 is met"),
+            hasContentDescription("Week 2, 7 to 13\u00A0November: 4\u00A0pieces of 2\u00A0mg gum. 70\u00A0mg used of the 56\u00A0mg allowance, Missed, back if week\u00A03 is met"),
         ).performScrollTo()
         assertEquals(WeekResult.MISSED, background { checkNotNull(app.graph.programmes.current()?.plan).week(2).result })
         // Nothing for the programme comes from a missed week.
@@ -267,18 +267,18 @@ class JourneyTest {
         // so the result comes in only because the app looks while it's open.
         app.clock.now = london("2026-11-22T10:00")
         aMinutePasses()
-        waitForDescription("42 of 42\u00A0mg, Met, paid back week\u00A02. 2 hits for Gary")
+        waitForDescription("42\u00A0mg used of the 42\u00A0mg allowance, Met, paid back week\u00A02. 2 hits for Gary")
         compose.onNode(hasText("Week 3's result comes in after today", substring = true)).assertDoesNotExist()
         checkWeek(
             number = 3,
-            plan = "Week 3, 14 to 20\u00A0November: 3\u00A0pieces of 2\u00A0mg gum. 42 of 42\u00A0mg, Met, paid back week\u00A02. 2 hits for Gary",
+            plan = "Week 3, 14 to 20\u00A0November: 3\u00A0pieces of 2\u00A0mg gum. 42\u00A0mg used of the 42\u00A0mg allowance, Met, paid back week\u00A02. 2 hits for Gary",
             insights = "Week 3, 42 of 42\u00A0mg, met, paid back week 2.",
             hp = 70,
             banked = 2,
             badges = listOf("3\u00A0weeks met", "Back in step", "Halfway", "Axe"),
         )
         tab("Plan")
-        compose.onNode(hasContentDescription("Week 2, 7 to 13\u00A0November: 4\u00A0pieces of 2\u00A0mg gum. 70 of 56\u00A0mg, Caught up in week\u00A03")).performScrollTo()
+        compose.onNode(hasContentDescription("Week 2, 7 to 13\u00A0November: 4\u00A0pieces of 2\u00A0mg gum. 70\u00A0mg used of the 56\u00A0mg allowance, Caught up in week\u00A03")).performScrollTo()
         tab("Insights")
         waitForDescription("Week 2, 70 of 56\u00A0mg, caught up in week 3.")
     }
@@ -290,7 +290,7 @@ class JourneyTest {
         nextVisit("2026-11-29T10:00")
         checkWeek(
             number = 4,
-            plan = "Week 4, 21 to 27\u00A0November: 2\u00A0pieces of 2\u00A0mg gum. 28 of 28\u00A0mg, Met. 1 hit for Gary",
+            plan = "Week 4, 21 to 27\u00A0November: 2\u00A0pieces of 2\u00A0mg gum. 28\u00A0mg used of the 28\u00A0mg allowance, Met. 1 hit for Gary",
             insights = "Week 4, 28 of 28\u00A0mg, met.",
             hp = 70,
             banked = 3,
@@ -303,7 +303,7 @@ class JourneyTest {
         nextVisit("2026-12-06T10:00")
         checkWeek(
             number = 5,
-            plan = "Week 5, 28\u00A0November to 4\u00A0December: 1\u00A0piece of 2\u00A0mg gum. 14 of 14\u00A0mg, Met. 1 hit for Gary",
+            plan = "Week 5, 28\u00A0November to 4\u00A0December: 1\u00A0piece of 2\u00A0mg gum. 14\u00A0mg used of the 14\u00A0mg allowance, Met. 1 hit for Gary",
             insights = "Week 5, 14 of 14\u00A0mg, met.",
             hp = 70,
             banked = 4,
@@ -315,7 +315,7 @@ class JourneyTest {
         nextVisit("2026-12-13T10:00")
         checkWeek(
             number = 6,
-            plan = "Week 6, 5 to 11\u00A0December: 1\u00A0piece of 2\u00A0mg gum. 14 of 14\u00A0mg, Met. 1 hit for Gary",
+            plan = "Week 6, 5 to 11\u00A0December: 1\u00A0piece of 2\u00A0mg gum. 14\u00A0mg used of the 14\u00A0mg allowance, Met. 1 hit for Gary",
             insights = "Week 6, 14 of 14\u00A0mg, met.",
             hp = 70,
             banked = 5,
@@ -325,7 +325,7 @@ class JourneyTest {
         tab("Lair")
         waitForDescription("5 hits banked")
         click("5× attack")
-        waitFor("Gary reels. It didn't see five coming.")
+        waitFor("Gary reels. It didn't see the 5× coming.")
         waitForHp(20)
         waitFor("No hits banked")
     }
@@ -334,13 +334,13 @@ class JourneyTest {
     private fun nrtFreeWeeks() {
         nextVisit("2026-12-14T10:00")
         tab("Today")
-        waitForDescription("0\u00A0mg used. Daily guide 0\u00A0mg. At the 0\u00A0mg guide.")
+        waitForDescription("Daily guide 0\u00A0mg. At the 0\u00A0mg guide.")
         waitFor("Week 7 of 8, day 3. An NRT-free week.")
 
         nextVisit("2026-12-20T10:00")
         checkWeek(
             number = 7,
-            plan = "Week 7, 12 to 18\u00A0December: 0 of 0\u00A0mg, Met, NRT-free. 1 hit for Gary",
+            plan = "Week 7, 12 to 18\u00A0December: 0\u00A0mg used of the 0\u00A0mg allowance, Met, NRT-free. 1 hit for Gary",
             insights = "Week 7, 0 of 0\u00A0mg, met.",
             hp = 20,
             banked = 1,
@@ -502,7 +502,8 @@ class JourneyTest {
 
     /** A tap on the quick-log pill, which logs a piece now, leaving [expectTodayMg] today. */
     private fun quickLog(expectTodayMg: Int) {
-        compose.onNode(hasContentDescription("Log Nicorette gum 2\u00A0mg")).performClick()
+        // The pill says its own label first, then the product: "Log Gum 2 mg, Nicorette gum".
+        compose.onNode(hasContentDescription("Log Gum 2\u00A0mg,", substring = true)).performClick()
         waitForTodayMg(expectTodayMg)
     }
 
@@ -616,9 +617,12 @@ class JourneyTest {
     private fun waitForDescription(text: String) =
         compose.waitUntilAtLeastOneExists(hasContentDescription(text, substring = true), timeoutMillis = 10_000)
 
-    /** The lair's HP, as its whole description, so 10 HP can't pass for 0. */
+    /** The lair's HP, as its whole description, so 10 HP can't pass for 0. At 0 it also says the defeat. */
     private fun waitForHp(hp: Int) =
-        compose.waitUntilAtLeastOneExists(hasContentDescription("$hp of 80 HP"), timeoutMillis = 10_000)
+        compose.waitUntilAtLeastOneExists(
+            hasContentDescription(if (hp == 0) "0 of 80 HP. Gary is defeated." else "$hp of 80 HP"),
+            timeoutMillis = 10_000,
+        )
 
     /** Today's total, as its whole description, so 12 mg can't pass for 2. */
     private fun waitForTodayMg(mg: Int) =
