@@ -71,8 +71,8 @@ data class WeekGoals(
 
 /**
  * One week of a programme: seven logical days from [startDate]. [number] is its place in the
- * run, counting repeats and overtime. A result, once in, has the time it came in. [goals] are its
- * extra goals, which a repeat takes from the week it repeats.
+ * run, counting repeats and overtime. A result, once in, has the time it came in and the total it
+ * was judged on. [goals] are its extra goals, which a repeat takes from the week it repeats.
  */
 data class ProgrammeWeek(
     val number: Int,
@@ -82,10 +82,17 @@ data class ProgrammeWeek(
     val result: WeekResult = WeekResult.PENDING,
     val resultAt: Instant? = null,
     val goals: WeekGoals = WeekGoals.NONE,
+    /**
+     * What was logged on its days when its result came in: the total the result was judged on.
+     * It's kept once, with the result, so a dose backdated into the week later never changes it.
+     * Null while the result is to come, and for results that came in before totals were kept.
+     */
+    val resultTotal: Dose? = null,
 ) {
     init {
         require(number >= 1) { "Weeks count from 1: $number" }
         require((result == WeekResult.PENDING) == (resultAt == null)) { "Week $number is $result at $resultAt" }
+        require(result != WeekResult.PENDING || resultTotal == null) { "Week $number has no result to be judged on $resultTotal" }
         require(kind != WeekKind.OVERTIME || target.isNrtFree) { "Overtime week $number has $target" }
     }
 
@@ -104,6 +111,12 @@ data class ProgrammeWeek(
 
     /** Everything logged on the week's logical days. */
     fun totalOf(entries: List<Entry>): Dose = entries.filter { it.logicalDate in this }.map { it.total }.sum()
+
+    /**
+     * The week's total as it's shown: the one its result was judged on, once that's in and kept,
+     * or else what [entries] log on its days now.
+     */
+    fun shownTotal(entries: List<Entry>): Dose = resultTotal ?: totalOf(entries)
 
     /** Met at or under the allowance, which for an NRT-free week means nothing at all. */
     fun isMetBy(total: Dose): Boolean = total <= target.weeklyAllowance
@@ -203,7 +216,8 @@ data class Programme(
      * an import or a sync), so nothing written after a result is due can reach it.
      *
      * A met week pays back every missed week since the last met one. A missed final week starts
-     * overtime: NRT-free weeks, one after another, until one is met.
+     * overtime: NRT-free weeks, one after another, until one is met. Each result keeps the total
+     * it was judged on ([ProgrammeWeek.resultTotal]).
      */
     fun settle(entries: List<Entry>, clock: ProgrammeClock): Settlement {
         val settled = weeks.toMutableList()
@@ -213,15 +227,16 @@ data class Programme(
             if (week.result == WeekResult.PENDING) {
                 val due = clock.resultDue(week)
                 if (clock.now < due) break
-                if (week.isMetBy(week.totalOf(entries))) {
+                val total = week.totalOf(entries)
+                if (week.isMetBy(total)) {
                     for (back in 0 until index) {
                         if (settled[back].result == WeekResult.MISSED) {
                             settled[back] = settled[back].copy(result = WeekResult.CAUGHT_UP)
                         }
                     }
-                    settled[index] = week.copy(result = WeekResult.MET, resultAt = due)
+                    settled[index] = week.copy(result = WeekResult.MET, resultAt = due, resultTotal = total)
                 } else {
-                    settled[index] = week.copy(result = WeekResult.MISSED, resultAt = due)
+                    settled[index] = week.copy(result = WeekResult.MISSED, resultAt = due, resultTotal = total)
                     if (index == settled.lastIndex) settled += overtimeAfter(week)
                 }
             }

@@ -18,6 +18,7 @@ import app.thelasthit.nrt.domain.insights.ProductType
 import app.thelasthit.nrt.domain.insights.Triggers
 import app.thelasthit.nrt.domain.insights.ofType
 import app.thelasthit.nrt.domain.log.Entry
+import app.thelasthit.nrt.domain.programme.GoalWeeks
 import app.thelasthit.nrt.domain.programme.Programme
 import app.thelasthit.nrt.domain.programme.WeekReport
 import app.thelasthit.nrt.domain.time.DayBoundary
@@ -88,6 +89,8 @@ data class InsightsState(
     val daysWithin: DaysWithin? = null,
     /** Each week of the plan so far against its allowance, oldest first. */
     val planWeeks: List<WeekReport> = emptyList(),
+    /** The extra goals of this programme week and last, when either had one on (PLAN §6.3). */
+    val goals: GoalWeeks? = null,
 ) {
     val isEmpty: Boolean get() = firstDay == null
 
@@ -167,6 +170,7 @@ class InsightsViewModel(
             guideLine = line.takeIf { values -> values.any { it != null } },
             daysWithin = guides.daysWithin(intake),
             planWeeks = WeekReport.of(part.plan, part.entries, today),
+            goals = GoalWeeks.of(part.plan, part.entries, today, dayStart),
         )
     }
 

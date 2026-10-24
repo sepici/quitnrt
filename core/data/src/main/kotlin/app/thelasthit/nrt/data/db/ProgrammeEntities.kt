@@ -118,6 +118,11 @@ data class ProgrammeWeekEntity(
     val resultAt: Long?,
     val choice: MissedWeekChoice?,
     val choiceAt: Long?,
+    /**
+     * The total the result was judged on, written once with the result, from version 4. Null
+     * while the result is to come, and for results that came in before version 4.
+     */
+    val resultTotalMicrograms: Long? = null,
 )
 
 /** A week's daily mix: a row for each product. */

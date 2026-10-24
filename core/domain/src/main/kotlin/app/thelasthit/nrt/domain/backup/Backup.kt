@@ -22,6 +22,9 @@ import kotlinx.serialization.json.Json
  *
  * Version 2 adds the programmes, demons, hit ledger, achievements, gear and breathing sessions.
  * A version 1 file has none of them, so it reads as a backup with those lists empty.
+ *
+ * Version 3 adds the total each week's result was judged on ([Week.resultTotalMicrograms]). A
+ * version 2 file has none, so its results read as ones that came in before totals were kept.
  */
 @Serializable
 data class Backup(
@@ -152,6 +155,8 @@ data class Backup(
         val units: List<Units> = emptyList(),
         val result: WeekResult = WeekResult.PENDING,
         val resultAt: String? = null,
+        /** What was logged on the week's days when its result came in, from version 3. */
+        @SerialName("resultTotalUg") val resultTotalMicrograms: Long? = null,
         val choice: MissedWeekChoice? = null,
         val choiceAt: String? = null,
         /** The extra goals, each absent while it's off. The cap on units a day is one for each product. */
@@ -209,7 +214,7 @@ data class Backup(
 
     companion object {
         const val FORMAT = "the-last-hit-backup"
-        const val VERSION = 2
+        const val VERSION = 3
 
         private val json = Json {
             prettyPrint = true

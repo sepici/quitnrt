@@ -45,20 +45,24 @@ internal fun RunningPage(state: PlanState.Running, viewModel: PlanViewModel, onG
         focus.kind == WeekKind.OVERTIME -> stringResource(R.string.plan_overtime)
         else -> stringResource(R.string.plan_week_of, focus.number, state.plan.plannedWeeks)
     }
+    // A week running against its allowance, which is the only kind with extra goals.
+    val taperWeek = focus?.takeIf { state.today <= it.endDate && !it.isNrtFree }
     TabPage(date = title) {
         Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp)) {
             when {
                 focus == null -> BeforeStart(state)
+                taperWeek != null -> TaperWeek(state, taperWeek)
                 state.today > focus.endDate -> AfterTheLast(state, focus)
-                focus.isNrtFree -> FreeWeek(state, focus)
-                else -> TaperWeek(state, focus)
+                else -> FreeWeek(state, focus)
             }
+            // The choice still open today stays with the week's figures, above the goals.
             state.canStillRepeat?.let { missed ->
                 if (state.awaiting == null) {
                     Meta(stringResource(R.string.plan_carried_on, missed.number), Modifier.padding(top = 18.dp))
                     TextLink(stringResource(R.string.plan_repeat_instead, missed.number), onClick = { repeatFor = missed.number })
                 }
             }
+            taperWeek?.let { WeekGoalLines(state, it, Modifier.padding(top = 24.dp)) }
         }
         PlanBand(state.band, onOpenLair, Modifier.padding(top = 28.dp))
         Schedule(state, onEdit = { editing = it })

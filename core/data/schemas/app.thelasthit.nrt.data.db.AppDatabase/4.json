@@ -1,0 +1,1088 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 4,
+    "identityHash": "944b159bbc087191bd8f983aea2dc10c",
+    "entities": [
+      {
+        "tableName": "products",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `catalogueId` TEXT, `name` TEXT NOT NULL, `shortName` TEXT NOT NULL, `form` TEXT NOT NULL, `unit` TEXT NOT NULL, `perUnitMicrograms` INTEGER NOT NULL, `cartridgeMicrograms` INTEGER, `puffsPerCartridge` INTEGER, `labelMaxPerDay` INTEGER, `labelWindowMax` INTEGER, `labelWindowMinutes` INTEGER, `quickLogPosition` INTEGER, `isHidden` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "catalogueId",
+            "columnName": "catalogueId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "shortName",
+            "columnName": "shortName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "form",
+            "columnName": "form",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "unit",
+            "columnName": "unit",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "perUnitMicrograms",
+            "columnName": "perUnitMicrograms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cartridgeMicrograms",
+            "columnName": "cartridgeMicrograms",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "puffsPerCartridge",
+            "columnName": "puffsPerCartridge",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "labelMaxPerDay",
+            "columnName": "labelMaxPerDay",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "labelWindowMax",
+            "columnName": "labelWindowMax",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "labelWindowMinutes",
+            "columnName": "labelWindowMinutes",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "quickLogPosition",
+            "columnName": "quickLogPosition",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "isHidden",
+            "columnName": "isHidden",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "entries",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `productId` TEXT NOT NULL, `productName` TEXT NOT NULL, `form` TEXT NOT NULL, `unit` TEXT NOT NULL, `perUnitMicrograms` INTEGER NOT NULL, `quantity` INTEGER NOT NULL, `totalMicrograms` INTEGER NOT NULL, `occurredAt` INTEGER NOT NULL, `zoneId` TEXT NOT NULL, `logicalEpochDay` INTEGER NOT NULL, `kind` TEXT NOT NULL, `cravingStrength` INTEGER, `note` TEXT, `source` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, `deletedAt` INTEGER, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "productId",
+            "columnName": "productId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "productName",
+            "columnName": "productName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "form",
+            "columnName": "form",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "unit",
+            "columnName": "unit",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "perUnitMicrograms",
+            "columnName": "perUnitMicrograms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "quantity",
+            "columnName": "quantity",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalMicrograms",
+            "columnName": "totalMicrograms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "occurredAt",
+            "columnName": "occurredAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneId",
+            "columnName": "zoneId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "logicalEpochDay",
+            "columnName": "logicalEpochDay",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cravingStrength",
+            "columnName": "cravingStrength",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "source",
+            "columnName": "source",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deletedAt",
+            "columnName": "deletedAt",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_entries_logicalEpochDay",
+            "unique": false,
+            "columnNames": [
+              "logicalEpochDay"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_entries_logicalEpochDay` ON `${TABLE_NAME}` (`logicalEpochDay`)"
+          },
+          {
+            "name": "index_entries_occurredAt",
+            "unique": false,
+            "columnNames": [
+              "occurredAt"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_entries_occurredAt` ON `${TABLE_NAME}` (`occurredAt`)"
+          },
+          {
+            "name": "index_entries_productId",
+            "unique": false,
+            "columnNames": [
+              "productId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_entries_productId` ON `${TABLE_NAME}` (`productId`)"
+          }
+        ]
+      },
+      {
+        "tableName": "entry_tags",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`entryId` TEXT NOT NULL, `tagKey` TEXT NOT NULL, PRIMARY KEY(`entryId`, `tagKey`), FOREIGN KEY(`entryId`) REFERENCES `entries`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "entryId",
+            "columnName": "entryId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tagKey",
+            "columnName": "tagKey",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "entryId",
+            "tagKey"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_entry_tags_tagKey",
+            "unique": false,
+            "columnNames": [
+              "tagKey"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_entry_tags_tagKey` ON `${TABLE_NAME}` (`tagKey`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "entries",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "entryId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "tags",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`key` TEXT NOT NULL, `group` TEXT NOT NULL, `customName` TEXT, `isBuiltIn` INTEGER NOT NULL, `isHidden` INTEGER NOT NULL, `sortOrder` INTEGER NOT NULL, PRIMARY KEY(`key`))",
+        "fields": [
+          {
+            "fieldPath": "key",
+            "columnName": "key",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "group",
+            "columnName": "group",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customName",
+            "columnName": "customName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "isBuiltIn",
+            "columnName": "isBuiltIn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isHidden",
+            "columnName": "isHidden",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sortOrder",
+            "columnName": "sortOrder",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "key"
+          ]
+        }
+      },
+      {
+        "tableName": "programmes",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `status` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `endedAt` INTEGER, `baselineStartedOn` INTEGER, `baselineStart` INTEGER, `baselineEnd` INTEGER, `baselineSource` TEXT, `baselineMeasuredMicrograms` INTEGER, `baselineDailyMicrograms` INTEGER, `lengthWeeks` INTEGER, `nrtFreeWeeks` INTEGER, `startDate` INTEGER, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endedAt",
+            "columnName": "endedAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "baselineStartedOn",
+            "columnName": "baselineStartedOn",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "baselineStart",
+            "columnName": "baselineStart",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "baselineEnd",
+            "columnName": "baselineEnd",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "baselineSource",
+            "columnName": "baselineSource",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "baselineMeasuredMicrograms",
+            "columnName": "baselineMeasuredMicrograms",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "baselineDailyMicrograms",
+            "columnName": "baselineDailyMicrograms",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lengthWeeks",
+            "columnName": "lengthWeeks",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "nrtFreeWeeks",
+            "columnName": "nrtFreeWeeks",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "startDate",
+            "columnName": "startDate",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_programmes_endedAt",
+            "unique": false,
+            "columnNames": [
+              "endedAt"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_programmes_endedAt` ON `${TABLE_NAME}` (`endedAt`)"
+          }
+        ]
+      },
+      {
+        "tableName": "baseline_units",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`programmeId` TEXT NOT NULL, `productId` TEXT NOT NULL, `productName` TEXT NOT NULL, `form` TEXT NOT NULL, `unit` TEXT NOT NULL, `perUnitMicrograms` INTEGER NOT NULL, `unitsPerDay` INTEGER NOT NULL, PRIMARY KEY(`programmeId`, `productId`), FOREIGN KEY(`programmeId`) REFERENCES `programmes`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "programmeId",
+            "columnName": "programmeId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "units.productId",
+            "columnName": "productId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "units.productName",
+            "columnName": "productName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "units.form",
+            "columnName": "form",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "units.unit",
+            "columnName": "unit",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "units.perUnitMicrograms",
+            "columnName": "perUnitMicrograms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "units.unitsPerDay",
+            "columnName": "unitsPerDay",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "programmeId",
+            "productId"
+          ]
+        },
+        "foreignKeys": [
+          {
+            "table": "programmes",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "programmeId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "ladder_units",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`programmeId` TEXT NOT NULL, `step` INTEGER NOT NULL, `productId` TEXT NOT NULL, `productName` TEXT NOT NULL, `form` TEXT NOT NULL, `unit` TEXT NOT NULL, `perUnitMicrograms` INTEGER NOT NULL, `unitsPerDay` INTEGER NOT NULL, PRIMARY KEY(`programmeId`, `step`, `productId`), FOREIGN KEY(`programmeId`) REFERENCES `programmes`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "programmeId",
+            "columnName": "programmeId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "step",
+            "columnName": "step",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "units.productId",
+            "columnName": "productId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "units.productName",
+            "columnName": "productName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "units.form",
+            "columnName": "form",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "units.unit",
+            "columnName": "unit",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "units.perUnitMicrograms",
+            "columnName": "perUnitMicrograms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "units.unitsPerDay",
+            "columnName": "unitsPerDay",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "programmeId",
+            "step",
+            "productId"
+          ]
+        },
+        "foreignKeys": [
+          {
+            "table": "programmes",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "programmeId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "programme_weeks",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`programmeId` TEXT NOT NULL, `number` INTEGER NOT NULL, `startDate` INTEGER NOT NULL, `endDate` INTEGER NOT NULL, `kind` TEXT NOT NULL, `ladderStep` INTEGER, `dailyGuideMicrograms` INTEGER NOT NULL, `weeklyAllowanceMicrograms` INTEGER NOT NULL, `isNrtFree` INTEGER NOT NULL, `maxUnitsPerDay` INTEGER, `minGapMinutes` INTEGER, `firstDoseNotBeforeMinuteOfDay` INTEGER, `result` TEXT NOT NULL, `resultAt` INTEGER, `choice` TEXT, `choiceAt` INTEGER, `resultTotalMicrograms` INTEGER, PRIMARY KEY(`programmeId`, `number`), FOREIGN KEY(`programmeId`) REFERENCES `programmes`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "programmeId",
+            "columnName": "programmeId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "number",
+            "columnName": "number",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startDate",
+            "columnName": "startDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endDate",
+            "columnName": "endDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ladderStep",
+            "columnName": "ladderStep",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "dailyGuideMicrograms",
+            "columnName": "dailyGuideMicrograms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "weeklyAllowanceMicrograms",
+            "columnName": "weeklyAllowanceMicrograms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isNrtFree",
+            "columnName": "isNrtFree",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maxUnitsPerDay",
+            "columnName": "maxUnitsPerDay",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "minGapMinutes",
+            "columnName": "minGapMinutes",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "firstDoseNotBeforeMinuteOfDay",
+            "columnName": "firstDoseNotBeforeMinuteOfDay",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "result",
+            "columnName": "result",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "resultAt",
+            "columnName": "resultAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "choice",
+            "columnName": "choice",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "choiceAt",
+            "columnName": "choiceAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "resultTotalMicrograms",
+            "columnName": "resultTotalMicrograms",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "programmeId",
+            "number"
+          ]
+        },
+        "foreignKeys": [
+          {
+            "table": "programmes",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "programmeId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "programme_week_units",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`programmeId` TEXT NOT NULL, `weekNumber` INTEGER NOT NULL, `productId` TEXT NOT NULL, `productName` TEXT NOT NULL, `form` TEXT NOT NULL, `unit` TEXT NOT NULL, `perUnitMicrograms` INTEGER NOT NULL, `unitsPerDay` INTEGER NOT NULL, PRIMARY KEY(`programmeId`, `weekNumber`, `productId`), FOREIGN KEY(`programmeId`, `weekNumber`) REFERENCES `programme_weeks`(`programmeId`, `number`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "programmeId",
+            "columnName": "programmeId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "weekNumber",
+            "columnName": "weekNumber",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "units.productId",
+            "columnName": "productId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "units.productName",
+            "columnName": "productName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "units.form",
+            "columnName": "form",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "units.unit",
+            "columnName": "unit",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "units.perUnitMicrograms",
+            "columnName": "perUnitMicrograms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "units.unitsPerDay",
+            "columnName": "unitsPerDay",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "programmeId",
+            "weekNumber",
+            "productId"
+          ]
+        },
+        "foreignKeys": [
+          {
+            "table": "programme_weeks",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "programmeId",
+              "weekNumber"
+            ],
+            "referencedColumns": [
+              "programmeId",
+              "number"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "programme_week_caps",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`programmeId` TEXT NOT NULL, `weekNumber` INTEGER NOT NULL, `productId` TEXT NOT NULL, `maxUnitsPerDay` INTEGER NOT NULL, PRIMARY KEY(`programmeId`, `weekNumber`, `productId`), FOREIGN KEY(`programmeId`, `weekNumber`) REFERENCES `programme_weeks`(`programmeId`, `number`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "programmeId",
+            "columnName": "programmeId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "weekNumber",
+            "columnName": "weekNumber",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "productId",
+            "columnName": "productId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maxUnitsPerDay",
+            "columnName": "maxUnitsPerDay",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "programmeId",
+            "weekNumber",
+            "productId"
+          ]
+        },
+        "foreignKeys": [
+          {
+            "table": "programme_weeks",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "programmeId",
+              "weekNumber"
+            ],
+            "referencedColumns": [
+              "programmeId",
+              "number"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "demons",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `programmeId` TEXT NOT NULL, `name` TEXT, `creature` TEXT NOT NULL, `variant` TEXT, `maxHp` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, `defeatedAt` INTEGER, PRIMARY KEY(`id`), FOREIGN KEY(`programmeId`) REFERENCES `programmes`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "programmeId",
+            "columnName": "programmeId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "creature",
+            "columnName": "creature",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "variant",
+            "columnName": "variant",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "maxHp",
+            "columnName": "maxHp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "defeatedAt",
+            "columnName": "defeatedAt",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_demons_programmeId",
+            "unique": true,
+            "columnNames": [
+              "programmeId"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_demons_programmeId` ON `${TABLE_NAME}` (`programmeId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "programmes",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "programmeId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "hit_ledger",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `programmeId` TEXT NOT NULL, `kind` TEXT NOT NULL, `hits` INTEGER NOT NULL, `week` INTEGER, `earnedBy` INTEGER, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`programmeId`) REFERENCES `programmes`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "programmeId",
+            "columnName": "programmeId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hits",
+            "columnName": "hits",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "week",
+            "columnName": "week",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "earnedBy",
+            "columnName": "earnedBy",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_hit_ledger_programmeId_week",
+            "unique": true,
+            "columnNames": [
+              "programmeId",
+              "week"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_hit_ledger_programmeId_week` ON `${TABLE_NAME}` (`programmeId`, `week`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "programmes",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "programmeId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "achievements",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`key` TEXT NOT NULL, `unlockedAt` INTEGER NOT NULL, PRIMARY KEY(`key`))",
+        "fields": [
+          {
+            "fieldPath": "key",
+            "columnName": "key",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "unlockedAt",
+            "columnName": "unlockedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "key"
+          ]
+        }
+      },
+      {
+        "tableName": "gear",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`key` TEXT NOT NULL, `unlockedAt` INTEGER NOT NULL, PRIMARY KEY(`key`))",
+        "fields": [
+          {
+            "fieldPath": "key",
+            "columnName": "key",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "unlockedAt",
+            "columnName": "unlockedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "key"
+          ]
+        }
+      },
+      {
+        "tableName": "breathing_sessions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `startedAt` INTEGER NOT NULL, `durationSeconds` INTEGER NOT NULL, `roundsCompleted` INTEGER NOT NULL, `ranToEnd` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startedAt",
+            "columnName": "startedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "durationSeconds",
+            "columnName": "durationSeconds",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "roundsCompleted",
+            "columnName": "roundsCompleted",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ranToEnd",
+            "columnName": "ranToEnd",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '944b159bbc087191bd8f983aea2dc10c')"
+    ]
+  }
+}

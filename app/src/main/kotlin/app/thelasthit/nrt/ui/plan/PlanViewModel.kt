@@ -84,7 +84,8 @@ sealed interface PlanState {
     ) : PlanState {
         val today: LocalDate get() = clock.today
 
-        fun totalOf(week: ProgrammeWeek): Dose = week.totalOf(entries)
+        /** What [week] has logged, or once its result is in, the total it was judged on. */
+        fun totalOf(week: ProgrammeWeek): Dose = week.shownTotal(entries)
 
         fun totalOn(date: LocalDate): Dose = entries.filter { it.logicalDate == date }.map { it.total }.sum()
     }

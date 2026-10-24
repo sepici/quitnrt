@@ -164,9 +164,10 @@ private fun weekDates(report: WeekReport): String {
  * How the week went, in the Plan tab's words, to follow a comma: "met, paid back week 1", "missed,
  * back if week 4 is met", "caught up in week 2". A tip starts with it, so gives it its capital.
  *
- * A result stays as it came in, so when a late log or a delete has since taken the total to the
- * other side of the allowance, it says the result is the one that came in: "met when its result
- * came in". Other weeks are named as [weekName] names them, from [weeks].
+ * A week shows the total its result was judged on, which always agrees with it. A result from
+ * before those totals were kept shows what's logged now, so when a late log or a delete has since
+ * taken that to the other side of the allowance, it says the result is the one that came in: "met
+ * when its result came in". Other weeks are named as [weekName] names them, from [weeks].
  */
 @Composable
 private fun weekState(report: WeekReport, weeks: List<WeekReport>): String {

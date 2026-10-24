@@ -59,7 +59,7 @@ class BackupTest {
             BackupException.Reason.NOT_A_BACKUP,
             assertThrows<BackupException> { Backup.decode(backup.copy(format = "something-else").encode()) }.reason,
         )
-        assertEquals(BackupException.Reason.NEWER_VERSION, assertThrows<BackupException> { Backup.decode(backup.copy(version = 3).encode()) }.reason)
+        assertEquals(BackupException.Reason.NEWER_VERSION, assertThrows<BackupException> { Backup.decode(backup.copy(version = 4).encode()) }.reason)
     }
 
     @Test
@@ -136,8 +136,48 @@ class BackupTest {
     }
 
     @Test
-    fun `new backups are version 2`() {
-        assertEquals(2, Backup.VERSION)
-        assertTrue("\"version\": 2" in backup.encode())
+    fun `new backups are version 3`() {
+        assertEquals(3, Backup.VERSION)
+        assertTrue("\"version\": 3" in backup.encode())
+    }
+
+    @Test
+    fun `a version 3 week carries the total its result was judged on`() {
+        val week = Backup.Week(
+            number = 1, startDate = "2026-10-24", step = 1, dailyGuideMicrograms = 22_000, weeklyAllowanceMicrograms = 154_000,
+            result = WeekResult.MET, resultAt = "2026-11-01T04:00:00Z", resultTotalMicrograms = 150_500,
+        )
+        val text = Json.encodeToString(Backup.Week.serializer(), week)
+        assertTrue("\"resultTotalUg\":150500" in text, text)
+        assertEquals(week, Json.decodeFromString(Backup.Week.serializer(), text))
+    }
+
+    @Test
+    fun `a version 2 file still reads, its results with no judged total`() {
+        val text = """
+            {
+              "format": "the-last-hit-backup",
+              "version": 2,
+              "exportedAt": "2026-11-02T14:05:00Z",
+              "settings": { "dayStart": "04:00", "country": "GB" },
+              "products": [],
+              "tags": [],
+              "entries": [],
+              "programmes": [
+                {
+                  "id": "p1", "status": "ACTIVE", "createdAt": "2026-10-16T09:00:00Z", "lengthWeeks": 12, "startDate": "2026-10-24",
+                  "weeks": [
+                    { "number": 1, "startDate": "2026-10-24", "step": 1, "dailyGuideUg": 22000, "weeklyAllowanceUg": 154000,
+                      "result": "MET", "resultAt": "2026-11-01T04:00:00Z" }
+                  ]
+                }
+              ]
+            }
+        """.trimIndent()
+        val read = Backup.decode(text)
+        assertEquals(2, read.version)
+        val week = read.programmes.single().weeks.single()
+        assertEquals(WeekResult.MET, week.result)
+        assertEquals(null, week.resultTotalMicrograms)
     }
 }

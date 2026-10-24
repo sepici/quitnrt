@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The extra goals in stats (PLAN §6.3): Insights' "Your goals", a line for each goal on the Plan
+    tab's week, and the spacing note on the log sheet. Goals never change whether a week is met.
+    PluralsCandidate is off for the lines that start with a week's number: "Week 3: kept on...".
+-->
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Insights: Your goals. -->
+    <string name="goals_title">Your goals</string>
+    <string name="goals_meta">This week so far and last week. A day counts once it\'s over, and goals never change whether a week is met.</string>
+    <!-- On the week's first day, with nothing of this week counted yet: each tile names its goal, with last week under it. -->
+    <string name="goals_meta_first_day">This week\'s goals count once today is over, and they never change whether a week is met.</string>
+
+    <!-- A goal by what it asks: "At most 5 pieces of 2 mg gum a day", "At least 1 h 30 min between doses". -->
+    <string name="goals_cap">At most %1$s a day</string>
+    <string name="goals_gap">At least %1$s between doses</string>
+    <string name="goals_first_dose">First dose from %1$s</string>
+
+    <!-- How a goal went, as a tile shows it: "Kept on 6 of 7 days", with "6 of 7 days" kept on one line. -->
+    <plurals name="goals_kept_days">
+        <item quantity="one">Kept on %1$d\u00A0of\u00A0%2$d\u00A0day</item>
+        <item quantity="other">Kept on %1$d\u00A0of\u00A0%2$d\u00A0days</item>
+    </plurals>
+    <plurals name="goals_kept_gaps">
+        <item quantity="one">Kept for %1$d\u00A0of\u00A0%2$d\u00A0gap</item>
+        <item quantity="other">Kept for %1$d\u00A0of\u00A0%2$d\u00A0gaps</item>
+    </plurals>
+    <!-- The same within a line: "Week 3: kept on 6 of 7 days". -->
+    <plurals name="goals_kept_days_in_line">
+        <item quantity="one">kept on %1$d\u00A0of\u00A0%2$d\u00A0day</item>
+        <item quantity="other">kept on %1$d\u00A0of\u00A0%2$d\u00A0days</item>
+    </plurals>
+    <plurals name="goals_kept_gaps_in_line">
+        <item quantity="one">kept for %1$d\u00A0of\u00A0%2$d\u00A0gap</item>
+        <item quantity="other">kept for %1$d\u00A0of\u00A0%2$d\u00A0gaps</item>
+    </plurals>
+    <string name="goals_no_gaps_yet">No gaps yet</string>
+    <string name="goals_no_gaps_in_line">no gaps</string>
+    <string name="goals_off_this_week">Off this week</string>
+
+    <!-- Last week under a goal, with its own setting when it was different: "Week 3, from 09:00: kept on 6 of 7 days". -->
+    <string name="goals_week" tools:ignore="PluralsCandidate">Week %1$d: %2$s</string>
+    <string name="goals_week_with" tools:ignore="PluralsCandidate">Week %1$d, %2$s: %3$s</string>
+    <string name="goals_at_most">at most %1$s</string>
+    <string name="goals_at_least">at least %1$s</string>
+    <string name="goals_from">from %1$s</string>
+
+    <!-- The Plan tab's week: a line for each goal on. -->
+    <string name="goals_plan_line">%1$s: %2$s so far</string>
+    <string name="goals_plan_no_gaps">%1$s: no gaps yet</string>
+    <string name="goals_plan_title">Extra goals this week</string>
+    <!-- On the week's first day, said once under the title, with each goal named alone below it. -->
+    <string name="goals_plan_first_day">They count once today is over.</string>
+
+    <!-- The log sheet's spacing note, when a dose comes sooner than the gap goal. It never stops a dose being logged. -->
+    <string name="goals_gap_note_now">Your gap goal is %1$s. The last dose was %2$s ago.</string>
+    <string name="goals_gap_note_after">Your gap goal is %1$s. This dose is %2$s after the one at %3$s.</string>
+    <string name="goals_gap_note_before">Your gap goal is %1$s. This dose is %2$s before the one at %3$s.</string>
+    <string name="goals_under_a_minute">under a minute</string>
+    <!-- "1 hour 30 minutes". -->
+    <string name="goals_hours_minutes">%1$s %2$s</string>
+</resources>
