@@ -19,15 +19,20 @@ val PLAN_START: LocalDate = LocalDate.parse("2026-09-28")
  * From [PLAN_START], today is in week 4, at a 14 mg guide and 98 mg a week, and Monday to
  * Thursday of [seedWeek] are all at or under it.
  */
-fun TestApp.seedPlan(start: LocalDate = PLAN_START, spend: Int = 0) = runBlocking {
-    val gum = checkNotNull(graph.products.get(GUM_2))
+fun TestApp.seedPlan(start: LocalDate = PLAN_START, spend: Int = 0, products: SeedProducts = SeedProducts.BRANDED) = runBlocking {
     clock.now = london("${start.minusDays(1)}T12:00")
-    graph.programmes.keepUsualDay(UsualDay.typed(gum to 12))
+    keepPlanUsualDay(products)
     val plan = checkNotNull(graph.programmes.buildPlan(ProgrammeLength.WEEKS_12, start))
     graph.programmes.startPlan(plan)
     clock.now = TestApp.NOW
     graph.programmes.settle()
     repeat(spend) { graph.game.spendHit() }
+}
+
+/** The usual day [seedPlan] builds from: 12 pieces of 2 mg gum, typed. */
+fun TestApp.keepPlanUsualDay(products: SeedProducts = SeedProducts.BRANDED) = runBlocking {
+    val gum = checkNotNull(graph.products.get(products.gum2))
+    graph.programmes.keepUsualDay(UsualDay.typed(gum to 12))
 }
 
 /**
@@ -36,13 +41,13 @@ fun TestApp.seedPlan(start: LocalDate = PLAN_START, spend: Int = 0) = runBlockin
  * back. Weeks 1 and 3 and the catch-up earn 3 hits, and 2 are spent: Gary is at 100 of 120 HP
  * with 1 hit ready.
  */
-fun TestApp.seedMockupPlan() {
-    seedHistory()
-    seedWeek()
+fun TestApp.seedMockupPlan(products: SeedProducts = SeedProducts.BRANDED) {
+    seedHistory(products = products)
+    seedWeek(products)
     runBlocking {
         for (day in 5..9) {
-            graph.entries.log(LogRequest(GUM_4, quantity = 2, at = london("2026-10-%02dT20:30".format(day)), tagKeys = setOf("stressed")))
+            graph.entries.log(LogRequest(products.gum4, quantity = 2, at = london("2026-10-%02dT20:30".format(day)), tagKeys = setOf("stressed")))
         }
     }
-    seedPlan(spend = 2)
+    seedPlan(spend = 2, products = products)
 }
