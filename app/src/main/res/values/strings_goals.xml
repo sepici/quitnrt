@@ -23,8 +23,8 @@
         <item quantity="other">Kept on %1$d\u00A0of\u00A0%2$d\u00A0days</item>
     </plurals>
     <plurals name="goals_kept_gaps">
-        <item quantity="one">Kept for %1$d\u00A0of\u00A0%2$d\u00A0gap</item>
-        <item quantity="other">Kept for %1$d\u00A0of\u00A0%2$d\u00A0gaps</item>
+        <item quantity="one">%1$d\u00A0of\u00A0%2$d\u00A0gap long enough</item>
+        <item quantity="other">%1$d\u00A0of\u00A0%2$d\u00A0gaps long enough</item>
     </plurals>
     <!-- The same within a line: "Week 3: kept on 6 of 7 days". -->
     <plurals name="goals_kept_days_in_line">
@@ -32,8 +32,8 @@
         <item quantity="other">kept on %1$d\u00A0of\u00A0%2$d\u00A0days</item>
     </plurals>
     <plurals name="goals_kept_gaps_in_line">
-        <item quantity="one">kept for %1$d\u00A0of\u00A0%2$d\u00A0gap</item>
-        <item quantity="other">kept for %1$d\u00A0of\u00A0%2$d\u00A0gaps</item>
+        <item quantity="one">%1$d\u00A0of\u00A0%2$d\u00A0gap long enough</item>
+        <item quantity="other">%1$d\u00A0of\u00A0%2$d\u00A0gaps long enough</item>
     </plurals>
     <string name="goals_no_gaps_yet">No gaps yet</string>
     <string name="goals_no_gaps_in_line">no gaps</string>

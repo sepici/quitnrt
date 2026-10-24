@@ -162,7 +162,7 @@ class OnboardingTest {
         next("Next: your reminders")
         compose.waitUntilExactlyOneExists(hasText("Which reminders do you want?"))
         compose.onNodeWithContentDescription("Step 7 of 8").assertExists()
-        listOf("Allowance nudges", "Evening check-in", "Weekly results", "Achievements").forEach {
+        listOf("Allowance nudges", "Evening check-in", "Weekly results", "Badges and gear").forEach {
             compose.onNode(hasText(it) and isToggleable()).assertIsOn()
         }
         compose.onNodeWithText("Today's total at 21:30, with a button to log anything missing").assertExists()
@@ -210,7 +210,7 @@ class OnboardingTest {
         app.allowNotifications(false)
         showReminders()
 
-        listOf("Allowance nudges", "Evening check-in", "Weekly results", "Achievements").forEach {
+        listOf("Allowance nudges", "Evening check-in", "Weekly results", "Badges and gear").forEach {
             compose.onNodeWithText(it).performClick()
             compose.waitUntilExactlyOneExists(hasText(it) and isToggleable() and isOff())
         }

@@ -125,7 +125,7 @@ class TriggerAdviceTest {
         // After a meal is under a quarter of the doses, so there's no timing tip: its best strategy.
         waitFor(
             "After a meal is your top trigger. Move the dose to before the meal. If a dose follows every meal, the meal becomes " +
-                "the cue. Having that dose before you eat breaks the link without adding one.",
+                "the cue. Moving it to before you eat breaks the link without adding a dose.",
         )
     }
 

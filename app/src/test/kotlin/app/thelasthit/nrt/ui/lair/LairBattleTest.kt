@@ -149,7 +149,7 @@ class LairBattleTest {
         compose.onNode(hasText("Uses 5 hits")).assertExists()
         compose.onNode(hasText("5× attack") and hasClickAction()).assertIsEnabled().performClick()
 
-        compose.waitUntilExactlyOneExists(hasText("Gary reels. It didn't see five coming."), timeoutMillis = 5_000)
+        compose.waitUntilExactlyOneExists(hasText("Gary reels. It didn't see the 5× coming."), timeoutMillis = 5_000)
         compose.onNode(hp(30)).assertExists()
         compose.onNodeWithContentDescription("Gary the dragon, barely standing on a rock").assertExists()
         assertEquals(30, demon().balance.hp)

@@ -137,7 +137,8 @@ class TodayAdviceViewModel(
 
 /**
  * The advice line under the last dose, from advice-today.html: a bulb, the reason and what to
- * try, then "How to do it" and "All advice".
+ * try, then "How to do it" and "All advice". After a slip there's nothing to try in the line, so
+ * its link says "What helps".
  */
 @Composable
 internal fun AdviceLine(advice: TodayAdvice, tags: Map<String, TagEntity>, links: AdviceLinks) {
@@ -160,6 +161,7 @@ internal fun AdviceLine(advice: TodayAdvice, tags: Map<String, TagEntity>, links
                 modifier = Modifier.padding(top = 4.dp).offset(x = (-4).dp),
                 how = { links.strategy(advice.strategy.key) },
                 all = links.all,
+                howText = stringResource(if (advice.reason is TodayAdvice.Reason.AfterSlip) R.string.advice_slip_how else R.string.advice_line_how),
             )
         }
     }
@@ -167,9 +169,14 @@ internal fun AdviceLine(advice: TodayAdvice, tags: Map<String, TagEntity>, links
 
 /** "How to do it" and "All advice", as the advice line and Insights have them. */
 @Composable
-internal fun AdviceActions(modifier: Modifier = Modifier, how: () -> Unit, all: () -> Unit) {
+internal fun AdviceActions(
+    modifier: Modifier = Modifier,
+    how: () -> Unit,
+    all: () -> Unit,
+    howText: String = stringResource(R.string.advice_line_how),
+) {
     FlowRow(modifier, horizontalArrangement = Arrangement.spacedBy(18.dp)) {
-        AdviceLink(stringResource(R.string.advice_line_how), how)
+        AdviceLink(howText, how)
         AdviceLink(stringResource(R.string.advice_all), all)
     }
 }
@@ -217,7 +224,10 @@ internal fun TipAfterLogging(shown: TipShown, tags: Map<String, TagEntity>, link
                     Interactive.DELAY_TIMER -> TipButton(R.drawable.ic_timer, stringResource(R.string.advice_open_timer)) {
                         links.timer(Interactive.DELAY_TIMER)
                     }
-                    null -> TipButton(R.drawable.ic_bulb, stringResource(R.string.advice_tip_how)) { links.strategy(strategy.key) }
+                    null -> TipButton(
+                        R.drawable.ic_bulb,
+                        stringResource(if (shown.tip.slip != null) R.string.advice_slip_how else R.string.advice_tip_how),
+                    ) { links.strategy(strategy.key) }
                 }
                 AdviceLink(stringResource(R.string.advice_tip_other), links.all)
             }

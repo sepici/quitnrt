@@ -7,7 +7,7 @@
 
     <!-- The reminders step. The switches' titles are the Reminders page's own. -->
     <string name="onboarding_reminders_title">Which reminders do you want?</string>
-    <string name="onboarding_reminders_body">Four are on to start with. None of them will ever say it\'s time for a dose.</string>
+    <string name="onboarding_reminders_body">To start with, 4 are on. None of them will ever say it\'s time for a dose.</string>
     <string name="onboarding_reminders_allowance_detail">When a dose takes the week near or past its allowance, or today past the guide</string>
     <string name="onboarding_reminders_check_in_detail">Today\'s total at %1$s, with a button to log anything missing</string>
     <string name="onboarding_reminders_results_detail">When each week of your plan ends, with any hits ready for %1$s</string>

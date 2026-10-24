@@ -31,6 +31,8 @@
     <string name="advice_tip_breathe">Breathe for 1\u00A0minute</string>
     <string name="advice_tip_how">How to do it</string>
     <string name="advice_tip_other">Other ideas</string>
+    <!-- After a slip, the line's link and the tip's button: the slip's page suggests nothing to do. -->
+    <string name="advice_slip_how">What helps</string>
 
     <!-- Insights: the advice under the top trigger's row, from the last 14 days. -->
     <!-- %1$s is the tag, set in bold, when the advice sits at the top of the list. -->

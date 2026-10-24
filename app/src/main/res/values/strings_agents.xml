@@ -14,7 +14,7 @@
     <string name="agents_unknown_product">None of your products in use matches “%1$s”.</string>
     <string name="agents_hidden_product">%1$s is hidden. To log it, bring it back in Settings, under Products.</string>
     <string name="agents_bad_quantity">The quantity needs to be a whole number from 1 to %1$d.</string>
-    <string name="agents_conflicting_quantity">The number in the product (%1$d) isn\'t the quantity (%2$d). Give the number once.</string>
+    <string name="agents_conflicting_quantity">The product says %1$d and the quantity says %2$d. Give the number once.</string>
     <string name="agents_too_many">That\'s %1$s, and the app logs up to %2$d at a time.</string>
     <string name="agents_time_in_future">%1$s at %2$s hasn\'t come yet.</string>
     <plurals name="agents_unknown_tags">

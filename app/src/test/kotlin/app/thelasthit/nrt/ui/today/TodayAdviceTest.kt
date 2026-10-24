@@ -212,7 +212,9 @@ class TodayAdviceTest {
             hasText("Yesterday went over its guide. One day over doesn't undo what you've done."),
             timeoutMillis = 5_000,
         )
-        compose.onNodeWithText("How to do it").performScrollTo().performClick()
+        // A slip's line suggests nothing to do, so its link says what the page has.
+        compose.onNodeWithText("How to do it").assertDoesNotExist()
+        compose.onNodeWithText("What helps").performScrollTo().performClick()
         assertEquals(listOf("strategy:after_a_slip"), opened)
     }
 
@@ -230,6 +232,9 @@ class TodayAdviceTest {
 
         compose.waitUntilExactlyOneExists(hasText("Today is over its guide"), timeoutMillis = 5_000)
         compose.onNodeWithText("That doesn't undo what you've done. It shows you where the hard moments are.").assertExists()
+        compose.onNodeWithText("How to do it").assertDoesNotExist()
+        compose.onNodeWithText("What helps").performScrollTo().performClick()
+        assertEquals(listOf("strategy:after_a_slip"), opened)
     }
 
     @Test
