@@ -24,6 +24,7 @@ import app.thelasthit.nrt.seedPlan
 import app.thelasthit.nrt.seedWeek
 import app.thelasthit.nrt.setUp
 import app.thelasthit.nrt.ui.PHONE
+import app.thelasthit.nrt.ui.format.mgText
 import app.thelasthit.nrt.ui.theme.LastHitTheme
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -110,17 +111,19 @@ class InsightsPlanTest {
     }
 
     @Test
-    fun `a dose backdated into a met week leaves it met, and says the result is the one that came in`() {
+    fun `a dose backdated into a met week leaves it met, at the total it was judged on`() {
         app.setUp()
         app.seedMockupPlan()
+        val judged = checkNotNull(checkNotNull(runBlocking { app.graph.programmes.current() }?.plan).week(3).resultTotal)
         // 40 mg forgotten on Tuesday 13 October, logged after week 3's result came in.
         runBlocking { app.graph.entries.log(LogRequest(GUM_4, quantity = 10, at = london("2026-10-13T21:00"))) }
         show()
 
         compose.waitUntilAtLeastOneExists(
-            hasContentDescription("of 112 mg, met when its result came in, paid back week 2.", substring = true),
+            hasContentDescription("Week 3, ${judged.mgText()} of 112\u00A0mg, met, paid back week 2.", substring = true),
             timeoutMillis = 5_000,
         )
+        compose.onNode(hasContentDescription("came in", substring = true)).assertDoesNotExist()
     }
 
     @Test

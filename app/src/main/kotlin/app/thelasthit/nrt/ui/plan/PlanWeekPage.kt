@@ -152,6 +152,7 @@ private fun TaperWeek(state: PlanState.Running, week: ProgrammeWeek) {
         ),
         Modifier.padding(top = 14.dp),
     )
+    WeekGoalLines(state, week, Modifier.padding(top = 24.dp))
 }
 
 /** An NRT-free week, planned or in overtime: each day's 0, and in overtime what meeting it pays back. */

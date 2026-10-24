@@ -148,6 +148,7 @@ fun InsightsScreen(
                 TriggersSection(current)
                 HabitsSection(current)
             }
+            GoalsSection(current)
             CalendarSection(current)
             ByProductSection(current)
             Spacer(Modifier.height(32.dp))

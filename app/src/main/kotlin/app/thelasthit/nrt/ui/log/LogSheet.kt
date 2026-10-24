@@ -372,6 +372,9 @@ private fun TimeField(state: LogSheetState, viewModel: LogSheetViewModel) {
                 modifier = Modifier.padding(top = 8.dp),
             )
         }
+        // With a gap goal on, a dose sooner than it gets a calm note, and logs all the same.
+        val gapNote by viewModel.gapNote.collectAsStateWithLifecycle()
+        gapNote?.let { SpacingNote(it, isNow = choice == TimeChoice.Quick(QuickTime.NOW), modifier = Modifier.padding(top = 12.dp)) }
     }
     if (picking) {
         DateTimePicker(

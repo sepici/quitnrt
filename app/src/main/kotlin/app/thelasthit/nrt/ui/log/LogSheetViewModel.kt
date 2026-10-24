@@ -18,18 +18,22 @@ import app.thelasthit.nrt.domain.log.TagOrder
 import app.thelasthit.nrt.domain.matcher.LogLinkParser
 import app.thelasthit.nrt.domain.matcher.LogLinkRequest
 import app.thelasthit.nrt.domain.product.UserProduct
+import app.thelasthit.nrt.domain.programme.GapNote
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 
 /** When the dose was taken: one of the quick choices, or a time from the picker. */
@@ -131,6 +135,30 @@ class LogSheetViewModel(
             todayTotal = total,
             now = now,
         )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** What the spacing note needs from the form: when the dose is, on which day, and whether it's a patch. */
+    private data class GapQuery(val at: Instant, val date: LocalDate, val isPatch: Boolean, val editing: String?)
+
+    /**
+     * The spacing note (PLAN §6.3): with a gap goal on in the dose's week, how close the dose is
+     * to the nearest one that day, when that's under the goal. It never stops the dose being logged.
+     */
+    val gapNote: StateFlow<GapNote?> = combine(state, graph.settings.settings) { current, settings ->
+        val product = current?.product ?: return@combine null
+        val at = when (val time = current.form.time) {
+            is TimeChoice.Quick -> time.time.resolve(current.now, zone())
+            is TimeChoice.At -> time.instant
+        }
+        GapQuery(at, settings.dayBoundary.logicalDate(at, zone()), product.form.isBackground, current.form.editing?.id)
+    }.distinctUntilChanged().flatMapLatest { query ->
+        if (query == null || query.isPatch) {
+            flowOf(null)
+        } else {
+            combine(graph.programmes.observeCurrent(), graph.entries.observeDay(query.date)) { record, day ->
+                GapNote.of(GapNote.goalOn(record?.plan, query.date), query.at, query.date, query.isPatch, day.entries, query.editing)
+            }
+        }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Starts a fresh dose, optionally with a product picked, such as from a long press on a pill. */
