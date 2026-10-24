@@ -107,6 +107,37 @@ class MigrationTest {
     }
 
     @Test
+    fun version2WeeksSurviveAndTheCapsStartEmpty() {
+        helper.createDatabase(2).closing { db ->
+            db.execSQL(
+                """
+                INSERT INTO programmes (id, status, createdAt, endedAt, baselineStartedOn, baselineStart, baselineEnd, baselineSource,
+                    baselineMeasuredMicrograms, baselineDailyMicrograms, lengthWeeks, nrtFreeWeeks, startDate)
+                VALUES ('p1', 'ACTIVE', 1761200000000, NULL, NULL, NULL, NULL, 'MANUAL', NULL, 32000, 12, 2, 20385)
+                """.trimIndent(),
+            )
+            db.execSQL(
+                """
+                INSERT INTO programme_weeks (programmeId, number, startDate, endDate, kind, ladderStep, dailyGuideMicrograms,
+                    weeklyAllowanceMicrograms, isNrtFree, maxUnitsPerDay, minGapMinutes, firstDoseNotBeforeMinuteOfDay, result,
+                    resultAt, choice, choiceAt)
+                VALUES ('p1', 1, 20385, 20391, 'PLANNED', 2, 24000, 168000, 0, NULL, 90, 540, 'PENDING', NULL, NULL, NULL)
+                """.trimIndent(),
+            )
+        }
+
+        helper.runMigrationsAndValidate(3, AppDatabase.MIGRATIONS.toList()).closing { db ->
+            assertEquals(1L, db.count("programme_weeks"))
+            assertEquals(0L, db.count("programme_week_caps"))
+            db.execSQL("INSERT INTO programme_week_caps (programmeId, weekNumber, productId, maxUnitsPerDay) VALUES ('p1', 1, 'gum', 5)")
+            // Caps go with their week.
+            db.execSQL("PRAGMA foreign_keys = ON")
+            db.execSQL("DELETE FROM programme_weeks")
+            assertEquals(0L, db.count("programme_week_caps"))
+        }
+    }
+
+    @Test
     fun theAppReadsAMigratedDatabase() {
         helper.createDatabase(1).closing { it.fillVersion1() }
 

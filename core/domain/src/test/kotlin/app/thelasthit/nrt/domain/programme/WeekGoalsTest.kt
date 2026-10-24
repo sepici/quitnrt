@@ -8,9 +8,9 @@ import java.time.LocalTime
 
 class WeekGoalsTest {
 
-    /** Week n's goals: at most 13 − n units, 60 + 10n minutes apart, the first dose at 07:00 plus 15n minutes. */
+    /** Week n's goals: at most 13 − n pieces of gum, 60 + 10n minutes apart, the first dose at 07:00 plus 15n minutes. */
     private fun goalsFor(number: Int) = WeekGoals(
-        maxUnitsPerDay = 13 - number,
+        maxUnitsPerDay = mapOf(GUM to 13 - number),
         minGapMinutes = 60 + 10 * number,
         firstDoseNotBefore = LocalTime.of(7, 0).plusMinutes(15L * number),
     )
@@ -46,8 +46,15 @@ class WeekGoalsTest {
     }
 
     @Test
+    fun `each goal on counts once, however many products are capped`() {
+        assertEquals(0, WeekGoals.NONE.onCount)
+        assertEquals(1, WeekGoals(maxUnitsPerDay = mapOf(GUM to 5, SPRAY.id to 3)).onCount)
+        assertEquals(3, goalsFor(1).onCount)
+    }
+
+    @Test
     fun `goals have to make sense`() {
-        assertThrows<IllegalArgumentException> { WeekGoals(maxUnitsPerDay = 0) }
+        assertThrows<IllegalArgumentException> { WeekGoals(maxUnitsPerDay = mapOf(GUM to 0)) }
         assertThrows<IllegalArgumentException> { WeekGoals(minGapMinutes = 0) }
         assertThrows<IllegalArgumentException> { WeekGoals(minGapMinutes = 24 * 60 + 1) }
         assertThrows<IllegalArgumentException> { WeekGoals(firstDoseNotBefore = LocalTime.of(7, 30, 15)) }

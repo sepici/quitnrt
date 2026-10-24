@@ -1,6 +1,7 @@
 package app.thelasthit.nrt.domain.programme
 
 import app.thelasthit.nrt.domain.dose.Dose
+import app.thelasthit.nrt.domain.product.UserProduct
 
 /** How long a programme runs. The last [NRT_FREE_WEEKS] of every length are at zero. */
 enum class ProgrammeLength(val weeks: Int) {
@@ -51,6 +52,10 @@ data class WeekTarget(val step: Int?, val mix: Mix) {
  *   the extra step is a smaller share of the dose.
  * - With k < T, week w is at step ⌈k × w ÷ T⌉, so a step lasts more than a week.
  * - With no steps, every taper week holds at the usual day.
+ * - **A switch to a lower strength gets a week of its own,** so there's a week to settle into it
+ *   before the count comes down: 4 pieces of 4 mg one week, 8 of 2 mg the next. A week that
+ *   would take a switch and then another step stops at the switch, and the steps left are spread
+ *   over the weeks after it by the same rule. The last taper week never stops short.
  *
  * So the last taper week is always at the bottom of the ladder, the first is below the usual day
  * whenever the ladder has steps, and allowances never go up. The NRT-free weeks follow.
@@ -71,11 +76,49 @@ object PlanBuilder {
 
     /** Every week's target: the taper weeks down [ladder], then the NRT-free weeks. */
     fun targets(ladder: Ladder, length: ProgrammeLength): List<WeekTarget> {
-        val taper = (1..length.taperWeeks).map { week ->
-            WeekTarget.at(ladder, stepFor(week, ladder.size, length.taperWeeks))
-        }
+        val taper = taperSteps(ladder.size, length.taperWeeks, switchSteps(ladder)).map { WeekTarget.at(ladder, it) }
         return taper + List(ProgrammeLength.NRT_FREE_WEEKS) { WeekTarget.NRT_FREE }
     }
+
+    /**
+     * The step each of [taperWeeks] weeks is at, on a ladder of [steps] steps whose [switches]
+     * bring in a lower strength: [stepFor]'s spread, with a week that would go past a switch
+     * stopping at it, and the steps left spread over the weeks after it.
+     */
+    fun taperSteps(steps: Int, taperWeeks: Int, switches: Set<Int> = emptySet()): List<Int> {
+        val weeks = mutableListOf<Int>()
+        var from = 0
+        while (weeks.size < taperWeeks) {
+            val done = weeks.size
+            val left = taperWeeks - done
+            var stopped = false
+            for (week in 1..left) {
+                val step = from + stepFor(week, steps - from, left)
+                val before = weeks.lastOrNull() ?: 0
+                val switch = switches.filter { it > before && it < step }.minOrNull()
+                if (switch != null && done + week < taperWeeks) {
+                    weeks += switch
+                    from = switch
+                    stopped = true
+                    break
+                }
+                weeks += step
+            }
+            if (!stopped) break
+        }
+        return weeks
+    }
+
+    /** The ladder's steps that bring in a lower strength than the step before had of the same form. */
+    fun switchSteps(ladder: Ladder): Set<Int> =
+        (1..ladder.size).filter { step -> lowerStrengths(ladder.mixAt(step - 1), ladder.mixAt(step)).isNotEmpty() }.toSet()
+
+    /** The products [after] brings in at a lower strength than [before] had of the same form. */
+    internal fun lowerStrengths(before: Mix, after: Mix): List<UserProduct> =
+        after.products.filter { product ->
+            before.unitsOf(product.id) == 0 &&
+                before.products.any { it.form == product.form && it.perUnit > product.perUnit }
+        }
 
     private fun ceilDiv(numerator: Int, denominator: Int): Int = (numerator + denominator - 1) / denominator
 }

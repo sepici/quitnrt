@@ -20,6 +20,7 @@ import app.thelasthit.nrt.domain.product.UserProduct
 import app.thelasthit.nrt.domain.programme.BaselineDays
 import app.thelasthit.nrt.domain.programme.BaselineSource
 import app.thelasthit.nrt.domain.programme.EarnedHit
+import app.thelasthit.nrt.domain.programme.ExtraGoals
 import app.thelasthit.nrt.domain.programme.Ladder
 import app.thelasthit.nrt.domain.programme.LedgerKind
 import app.thelasthit.nrt.domain.programme.MissedWeekChoice
@@ -33,6 +34,7 @@ import app.thelasthit.nrt.domain.programme.ProgrammeWeek
 import app.thelasthit.nrt.domain.programme.Settlement
 import app.thelasthit.nrt.domain.programme.UsualDay
 import app.thelasthit.nrt.domain.programme.WeekChoice
+import app.thelasthit.nrt.domain.programme.WeekGoals
 import app.thelasthit.nrt.domain.programme.WeekKind
 import app.thelasthit.nrt.domain.programme.WeekResult
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -307,6 +309,24 @@ class ProgrammeRepository(
         }
     }
 
+    /**
+     * Sets the extra goals (PLAN §6.3) for the week running now, or week 1 before the plan
+     * starts, and carries them into the weeks after it ([ExtraGoals.apply]). Past weeks keep
+     * theirs. False when there's no week to set them for: no plan, or an NRT-free week.
+     */
+    suspend fun setGoals(goals: WeekGoals): Boolean = mutex.withLock {
+        settleLocked()
+        val today = clock().today
+        database.withTransaction {
+            val record = loadCurrent() ?: return@withTransaction false
+            val plan = record.plan ?: return@withTransaction false
+            if (record.status != ProgrammeStatus.ACTIVE) return@withTransaction false
+            val week = ExtraGoals.weekToSet(plan, today) ?: return@withTransaction false
+            saveWeeks(record.id, ExtraGoals.apply(plan, week.number, goals), record.choices)
+            true
+        }
+    }
+
     /** The missed week still waiting for the user's choice, if there is one. */
     suspend fun awaitingChoice(): ProgrammeWeek? {
         val record = current() ?: return null
@@ -475,8 +495,7 @@ class ProgrammeRepository(
 
     /** Saves [programme]'s weeks, its status and the demon's max HP, which follow from them. */
     private suspend fun saveWeeks(programmeId: String, programme: Programme, choices: Map<Int, WeekChoice>) {
-        val (weeks, units) = programme.toWeekEntities(programmeId, choices)
-        dao.replaceWeeks(programmeId, weeks, units)
+        dao.replaceWeeks(programmeId, programme.toWeekEntities(programmeId, choices))
         dao.setStatus(programmeId, programme.status)
         game.setMaxHp(programmeId, programme.maxHp)
     }

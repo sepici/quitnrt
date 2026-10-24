@@ -13,11 +13,13 @@ import app.thelasthit.nrt.data.db.HitLedgerEntity
 import app.thelasthit.nrt.data.db.LadderUnitEntity
 import app.thelasthit.nrt.data.db.ProductEntity
 import app.thelasthit.nrt.data.db.ProgrammeEntity
+import app.thelasthit.nrt.data.db.ProgrammeWeekCapEntity
 import app.thelasthit.nrt.data.db.ProgrammeWeekEntity
 import app.thelasthit.nrt.data.db.ProgrammeWeekUnitEntity
 import app.thelasthit.nrt.data.db.ProgrammeWithParts
 import app.thelasthit.nrt.data.db.TagEntity
 import app.thelasthit.nrt.data.db.UnitsColumns
+import app.thelasthit.nrt.data.db.WeekRows
 import app.thelasthit.nrt.data.db.balance
 import app.thelasthit.nrt.data.db.toDomain
 import app.thelasthit.nrt.data.db.toEntities
@@ -342,6 +344,7 @@ private fun Backup.Units.toColumns() = UnitsColumns(productId, productName, form
 private fun ProgrammeWithParts.toBackup(): Backup.Programme {
     val row = programme
     val mixes = weekUnits.groupBy { it.weekNumber }
+    val caps = weekCaps.groupBy { it.weekNumber }
     return Backup.Programme(
         id = row.id,
         status = row.status,
@@ -372,7 +375,7 @@ private fun ProgrammeWithParts.toBackup(): Backup.Programme {
                 resultAt = week.resultAt?.instantText(),
                 choice = week.choice,
                 choiceAt = week.choiceAt?.instantText(),
-                maxUnitsPerDay = week.maxUnitsPerDay,
+                caps = caps[week.number].orEmpty().map { Backup.Cap(it.productId, it.maxUnitsPerDay) }.sortedBy { it.productId },
                 minGapMinutes = week.minGapMinutes,
                 firstDoseNotBefore = week.firstDoseNotBeforeMinuteOfDay?.let { LocalTime.ofSecondOfDay(it * 60L).toString() },
             )
@@ -412,7 +415,7 @@ private fun Backup.Programme.toParts(): ProgrammeWithParts? = runCatching {
                 programmeId = id, number = week.number, startDate = start, endDate = start + 6, kind = week.kind,
                 ladderStep = week.step, dailyGuideMicrograms = week.dailyGuideMicrograms,
                 weeklyAllowanceMicrograms = week.weeklyAllowanceMicrograms, isNrtFree = week.step == null,
-                maxUnitsPerDay = week.maxUnitsPerDay, minGapMinutes = week.minGapMinutes,
+                maxUnitsPerDay = null, minGapMinutes = week.minGapMinutes,
                 firstDoseNotBeforeMinuteOfDay = week.firstDoseNotBefore?.let { LocalTime.parse(it) }?.let { it.hour * 60 + it.minute },
                 result = week.result, resultAt = week.resultAt?.let(::epochMillis),
                 choice = week.choice, choiceAt = week.choiceAt?.let(::epochMillis),
@@ -420,6 +423,7 @@ private fun Backup.Programme.toParts(): ProgrammeWithParts? = runCatching {
         },
         weekUnits = weeks.flatMap { week -> week.units.map { ProgrammeWeekUnitEntity(id, week.number, it.toColumns()) } },
         demons = emptyList(),
+        weekCaps = weeks.flatMap { week -> week.caps.map { ProgrammeWeekCapEntity(id, week.number, it.productId, it.maxUnitsPerDay) } },
     )
     // Stand-ins from the rows themselves are enough to check the programme holds together.
     val record = raw.toRecord(emptyMap())
@@ -430,14 +434,15 @@ private fun Backup.Programme.toParts(): ProgrammeWithParts? = runCatching {
         else -> require(plan != null && plan.status == status)
     }
     val usual = record.usualDay
-    val (weekRows, unitRows) = plan?.toWeekEntities(id, record.choices) ?: (emptyList<ProgrammeWeekEntity>() to emptyList())
+    val rows = plan?.toWeekEntities(id, record.choices) ?: WeekRows(emptyList(), emptyList(), emptyList())
     ProgrammeWithParts(
         programme = row.copy(baselineDailyMicrograms = usual?.total?.micrograms),
         usualDay = usual?.toEntities(id).orEmpty(),
         ladder = plan?.ladder?.toEntities(id).orEmpty(),
-        weeks = weekRows,
-        weekUnits = unitRows,
+        weeks = rows.weeks,
+        weekUnits = rows.units,
         demons = emptyList(),
+        weekCaps = rows.caps,
     )
 }.getOrNull()
 

@@ -81,8 +81,15 @@ data class BaselineDays(
      * [products] are the user's own, hidden ones too. A product that's gone from the list is
      * taken from its latest entry.
      */
-    fun usualDay(products: List<UserProduct>): UsualDay? {
-        if (!isReady) return null
+    fun usualDay(products: List<UserProduct>): UsualDay? = if (isReady) rounded(products) else null
+
+    /**
+     * The usual day the days counted so far point to, worked out as [usualDay] is, for showing
+     * the baseline as it builds. Null until a day with doses is over.
+     */
+    fun usualDaySoFar(products: List<UserProduct>): UsualDay? = if (daysWithDoses > 0) rounded(products) else null
+
+    private fun rounded(products: List<UserProduct>): UsualDay {
         val byId = products.associateBy { it.id }
         val days = daysWithDoses.toLong()
         val items = uses.mapIndexedNotNull { index, use ->

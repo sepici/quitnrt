@@ -35,19 +35,26 @@ enum class WeekResult {
 }
 
 /**
- * A week's extra goals (PLAN §6.3), each off while it's null. They show in stats and advice, and
- * never change whether a week is met.
+ * A week's extra goals (PLAN §6.3), each off while it's null or empty. They show in stats and
+ * advice, and never change whether a week is met.
  */
 data class WeekGoals(
-    /** The most units a day. */
-    val maxUnitsPerDay: Int? = null,
+    /**
+     * The most units a day of each product, by product ID, such as 5 pieces of gum. A cap for
+     * each product, since one cap across them would count a 1 mg spray the same as a 4 mg piece.
+     * Empty while the goal is off.
+     */
+    val maxUnitsPerDay: Map<String, Int> = emptyMap(),
     /** The shortest gap between doses, in minutes. */
     val minGapMinutes: Int? = null,
     /** The time on the wall clock the day's first dose waits for. */
     val firstDoseNotBefore: LocalTime? = null,
 ) {
+    /** How many of the three goals are on. */
+    val onCount: Int get() = listOf(maxUnitsPerDay.isNotEmpty(), minGapMinutes != null, firstDoseNotBefore != null).count { it }
+
     init {
-        require(maxUnitsPerDay == null || maxUnitsPerDay >= 1) { "At least 1 unit a day: $maxUnitsPerDay" }
+        require(maxUnitsPerDay.values.all { it >= 1 }) { "At least 1 unit a day: $maxUnitsPerDay" }
         require(minGapMinutes == null || minGapMinutes in 1..MINUTES_A_DAY) { "A gap is 1 to $MINUTES_A_DAY minutes: $minGapMinutes" }
         require(firstDoseNotBefore == null || firstDoseNotBefore.second == 0 && firstDoseNotBefore.nano == 0) {
             "The first dose waits for a whole minute: $firstDoseNotBefore"

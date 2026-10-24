@@ -35,6 +35,34 @@ class PlanBuilderTest {
     }
 
     @Test
+    fun `PLAN's third example, gum and sprays, where the switch gets a week of its own`() {
+        // 15 steps for 10 weeks. Week 3 would take the switch and one more piece off, so it stops
+        // at the switch, and weeks 4 to 10 share the 10 steps left: weeks 4 to 6 take two each.
+        val programme = plan(usual(GUM_4 to 8, SPRAY to 3))
+        assertEquals(15, programme.ladder.size)
+        val gum = listOf(GUM_4 to 6, GUM_4 to 4, GUM_2 to 8, GUM_2 to 6, GUM_2 to 4, GUM_2 to 2, GUM_2 to 1, GUM_2 to 1, null, null)
+        val sprays = listOf(3, 3, 3, 3, 3, 3, 3, 2, 2, 1)
+        val expected = gum.zip(sprays) { pieces, spray -> Mix.of(listOfNotNull(pieces, SPRAY to spray).map { MixItem(it.first, it.second) }) }
+        assertEquals(expected + listOf(Mix.NONE, Mix.NONE), programme.mixes)
+        assertEquals(mg(27, 19, 19, 15, 11, 7, 5, 4, 2, 1, 0, 0), programme.guides)
+        assertEquals(setOf(5), PlanBuilder.switchSteps(programme.ladder))
+    }
+
+    @Test
+    fun `a week stops at a switch, and the steps left spread over the weeks after it`() {
+        // 15 steps over 10 weeks would be 2, 4, 6 and so on; a switch at 5 stops week 3 there.
+        assertEquals(listOf(2, 4, 5, 7, 9, 11, 12, 13, 14, 15), PlanBuilder.taperSteps(15, 10, setOf(5)))
+        // A week that lands on the switch takes it as usual.
+        assertEquals((1..10).map { PlanBuilder.stepFor(it, 15, 10) }, PlanBuilder.taperSteps(15, 10, setOf(4)))
+        // Two switches, each with a week of its own.
+        assertEquals(listOf(2, 3, 5, 6, 8, 10, 12, 13, 14, 15), PlanBuilder.taperSteps(15, 10, setOf(3, 6)))
+        // The last week always reaches the bottom, even past a switch.
+        assertEquals(listOf(2, 4), PlanBuilder.taperSteps(4, 2, setOf(3)))
+        // With no switches it's PLAN's formula.
+        assertEquals((1..10).map { PlanBuilder.stepFor(it, 12, 10) }, PlanBuilder.taperSteps(12, 10))
+    }
+
+    @Test
     fun `the steps spread over the taper weeks by PLAN's formula`() {
         // k ≥ T: k div T steps a week, and one more in the first k mod T weeks.
         assertEquals(listOf(2, 4) + (5..12), (1..10).map { PlanBuilder.stepFor(it, 12, 10) })
@@ -105,11 +133,13 @@ class PlanBuilderTest {
         assertEquals(mg(28, 24, 20, 16, 12, 10, 8, 6, 4, 2, 0, 0), programme.guides)
         assertTrue(programme.mixes.all { it.isWithinLabels })
         // 20 pieces of 4 mg: 15 of them at step 1, and the switch waits for 7, which make 14 of 2 mg.
-        // 23 steps for 10 weeks, so weeks 1 to 3 take three steps each.
+        // 23 steps for 10 weeks, so weeks 1 to 3 take three steps each. Week 4 stops at the
+        // switch, at the same mg, and weeks 5 to 10 take the 13 steps left.
         val strong = plan(usual(GUM_4 to 20))
-        assertEquals(mg(52, 40, 28, 26, 22, 18, 14, 10, 6, 2, 0, 0), strong.guides)
+        assertEquals(mg(52, 40, 28, 28, 22, 18, 14, 10, 6, 2, 0, 0), strong.guides)
         assertEquals(mix(GUM_4 to 7), strong.week(3).target.mix)
-        assertEquals(mix(GUM_2 to 13), strong.week(4).target.mix)
+        assertEquals(mix(GUM_2 to 14), strong.week(4).target.mix)
+        assertEquals(mix(GUM_2 to 11), strong.week(5).target.mix)
         assertTrue(strong.mixes.all { it.isWithinLabels })
     }
 

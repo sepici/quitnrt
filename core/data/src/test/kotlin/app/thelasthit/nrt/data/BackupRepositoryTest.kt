@@ -268,7 +268,7 @@ class BackupRepositoryTest {
         val gum = source.products.addFromCatalogue(GUM_4)
         source.programmes.keepUsualDay(UsualDay.typed(gum to 8))
         val built = checkNotNull(source.programmes.buildPlan())
-        val goals = WeekGoals(maxUnitsPerDay = 6, minGapMinutes = 90, firstDoseNotBefore = LocalTime.of(7, 30))
+        val goals = WeekGoals(maxUnitsPerDay = mapOf(GUM_4 to 6), minGapMinutes = 90, firstDoseNotBefore = LocalTime.of(7, 30))
         source.programmes.startPlan(built.copy(weeks = built.weeks.map { if (it.number == 1) it.copy(goals = goals) else it }))
 
         val file = source.backups.export().encode()

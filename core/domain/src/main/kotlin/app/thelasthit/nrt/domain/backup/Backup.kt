@@ -154,12 +154,16 @@ data class Backup(
         val resultAt: String? = null,
         val choice: MissedWeekChoice? = null,
         val choiceAt: String? = null,
-        /** The extra goals, each absent while it's off. */
-        val maxUnitsPerDay: Int? = null,
+        /** The extra goals, each absent while it's off. The cap on units a day is one for each product. */
+        val caps: List<Cap> = emptyList(),
         val minGapMinutes: Int? = null,
         /** A time on the wall clock, such as "07:30". */
         val firstDoseNotBefore: String? = null,
     )
+
+    /** The most units a day of one product, an extra goal. */
+    @Serializable
+    data class Cap(val productId: String, val maxUnitsPerDay: Int)
 
     @Serializable
     data class Demon(

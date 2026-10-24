@@ -215,7 +215,7 @@ class ProgrammeRepositoryTest {
         data.programmes.keepUsualDay(UsualDay.typed(gum to 8))
         val built = checkNotNull(data.programmes.buildPlan())
         // Week n: at most 13 − n pieces, 90 minutes apart, the first not before 07:00 plus 15n minutes.
-        fun goals(number: Int) = WeekGoals(13 - number, 90, LocalTime.of(7, 0).plusMinutes(15L * number))
+        fun goals(number: Int) = WeekGoals(mapOf(GUM_4 to 13 - number), 90, LocalTime.of(7, 0).plusMinutes(15L * number))
         val plan = built.copy(weeks = built.weeks.map { it.copy(goals = goals(it.number)) })
 
         data.programmes.startPlan(plan)
@@ -228,6 +228,33 @@ class ProgrammeRepositoryTest {
         // The repeat takes week 1's goals, and the weeks after keep their own.
         val weeks = checkNotNull(data.programmes.current()?.plan).weeks
         assertEquals(listOf(goals(1), goals(1)) + (2..12).map(::goals), weeks.map { it.goals })
+    }
+
+    @Test
+    fun goalsAreSetForTheWeekRunningAndCarryIntoTheWeeksAfter() = runTest {
+        data.startGumPlan()
+        val goals = WeekGoals(mapOf(GUM_4 to 5), minGapMinutes = 90, firstDoseNotBefore = LocalTime.of(9, 0))
+        // Before the plan starts, the goals are week 1's.
+        assertTrue(data.programmes.setGoals(goals))
+        var weeks = checkNotNull(data.programmes.current()?.plan).weeks
+        assertEquals(goals, weeks[0].goals)
+        assertEquals(LocalTime.of(9, 15), weeks[1].goals.firstDoseNotBefore)
+        // Week 3 switches to 2 mg gum, which starts at its own mix: 8 pieces.
+        assertEquals(mapOf(GUM_2 to 8), weeks[2].goals.maxUnitsPerDay)
+        assertEquals(WeekGoals.NONE, weeks[11].goals)
+
+        // In week 3, turning the caps off leaves weeks 1 and 2 as they were.
+        data.setTime("2026-11-10T12:00")
+        assertTrue(data.programmes.setGoals(goals.copy(maxUnitsPerDay = emptyMap(), firstDoseNotBefore = LocalTime.of(9, 30))))
+        weeks = checkNotNull(data.programmes.current()?.plan).weeks
+        assertEquals(goals, weeks[0].goals)
+        assertEquals(mapOf(GUM_4 to 5), weeks[1].goals.maxUnitsPerDay)
+        assertEquals(WeekGoals(minGapMinutes = 90, firstDoseNotBefore = LocalTime.of(9, 30)), weeks[2].goals)
+        assertEquals(LocalTime.of(9, 45), weeks[3].goals.firstDoseNotBefore)
+
+        // NRT-free weeks have nothing to pace.
+        data.setTime("2027-01-04T12:00")
+        assertFalse(data.programmes.setGoals(goals))
     }
 
     @Test

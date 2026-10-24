@@ -22,6 +22,24 @@ object Migrations {
         }
     }
 
+    /**
+     * Version 3: the cap on units a day became one for each product (PLAN §6.3), in a table of
+     * its own that starts empty. The weeks' old single cap was never set, and stays null.
+     */
+    val FROM_2_TO_3 = object : Migration(2, 3) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            FROM_2_TO_3_SQL.forEach(db::execSQL)
+        }
+
+        override fun migrate(connection: SQLiteConnection) {
+            FROM_2_TO_3_SQL.forEach(connection::execSQL)
+        }
+    }
+
+    internal val FROM_2_TO_3_SQL = listOf(
+        "CREATE TABLE IF NOT EXISTS `programme_week_caps` (`programmeId` TEXT NOT NULL, `weekNumber` INTEGER NOT NULL, `productId` TEXT NOT NULL, `maxUnitsPerDay` INTEGER NOT NULL, PRIMARY KEY(`programmeId`, `weekNumber`, `productId`), FOREIGN KEY(`programmeId`, `weekNumber`) REFERENCES `programme_weeks`(`programmeId`, `number`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+    )
+
     internal val FROM_1_TO_2_SQL = listOf(
         "CREATE TABLE IF NOT EXISTS `programmes` (`id` TEXT NOT NULL, `status` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `endedAt` INTEGER, `baselineStartedOn` INTEGER, `baselineStart` INTEGER, `baselineEnd` INTEGER, `baselineSource` TEXT, `baselineMeasuredMicrograms` INTEGER, `baselineDailyMicrograms` INTEGER, `lengthWeeks` INTEGER, `nrtFreeWeeks` INTEGER, `startDate` INTEGER, PRIMARY KEY(`id`))",
         "CREATE INDEX IF NOT EXISTS `index_programmes_endedAt` ON `programmes` (`endedAt`)",
