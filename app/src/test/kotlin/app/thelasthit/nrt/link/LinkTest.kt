@@ -12,6 +12,9 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.test.core.app.ApplicationProvider
 import app.thelasthit.nrt.GUM_2
 import app.thelasthit.nrt.GUM_4
@@ -209,6 +212,9 @@ class LinkTest {
         compose.onNodeWithText(OVER_DAILY).assertDoesNotExist()
         compose.mainClock.advanceTimeBy(10_000)
         waitFor(OVER_DAILY)
+        // A snackbar of its own, which a screen reader reads out after the first.
+        compose.onNode(hasAnyDescendant(hasText(OVER_DAILY)) and SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite))
+            .assertExists()
     }
 
     @Test

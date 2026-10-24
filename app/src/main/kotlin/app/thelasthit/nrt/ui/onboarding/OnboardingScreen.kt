@@ -424,7 +424,7 @@ private fun DoneStep(state: OnboardingState, onStart: () -> Unit) {
                 ),
             stringResource(R.string.onboarding_summary_demon) to stringResource(R.string.onboarding_summary_demon_value, name, kind.lowercase(Locale.UK)),
             stringResource(R.string.onboarding_summary_day) to timeFormat.format(draft.dayStart),
-            stringResource(R.string.onboarding_summary_reminders) to remindersSummary(state.reminders, state.marks),
+            stringResource(R.string.onboarding_summary_reminders) to remindersSummary(state.reminders, state.marks, ofAll = false),
         )
         Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp)) {
             rows.forEachIndexed { index, (label, value) -> SummaryRow(label, value, first = index == 0) }

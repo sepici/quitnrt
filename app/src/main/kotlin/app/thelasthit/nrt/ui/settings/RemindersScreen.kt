@@ -30,8 +30,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -63,6 +61,8 @@ import app.thelasthit.nrt.ui.components.NoteCard
 import app.thelasthit.nrt.ui.format.rememberTimeFormatter
 import app.thelasthit.nrt.ui.graphViewModel
 import app.thelasthit.nrt.ui.theme.LastHit
+import app.thelasthit.nrt.ui.components.DialogButton
+import app.thelasthit.nrt.ui.components.TimeChooser
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -363,11 +363,11 @@ private fun TimeDialog(title: String, initial: LocalTime, onDismiss: () -> Unit,
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
-        text = { TimePicker(state) },
+        text = { TimeChooser(state) },
         confirmButton = {
-            TextButton(onClick = { onPicked(LocalTime.of(state.hour, state.minute)) }) { Text(stringResource(R.string.reminders_set_time)) }
+            DialogButton(stringResource(R.string.reminders_set_time)) { onPicked(LocalTime.of(state.hour, state.minute)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+        dismissButton = { DialogButton(stringResource(R.string.action_cancel), onClick = onDismiss) },
     )
 }
 

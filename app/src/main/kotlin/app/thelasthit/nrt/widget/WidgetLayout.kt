@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.domain.dose.Dose
 import app.thelasthit.nrt.quicklog.WidgetMoment
+import app.thelasthit.nrt.ui.format.labelNoteShortText
 import app.thelasthit.nrt.ui.format.labelNoteText
 import app.thelasthit.nrt.ui.format.mgText
 import kotlin.math.ceil
@@ -30,6 +31,9 @@ internal object WidgetSizes {
 
     val METER = 22.dp
     val METER_GAP = 6.dp
+
+    /** Above the last dose, under the roomy hero. */
+    val LAST_DOSE_GAP = 12.dp
     val TICK = 16.dp
     val TICK_GAP = 5.dp
 
@@ -118,6 +122,11 @@ internal data class WidgetLayout(
     val momentLines: Int,
     val favourites: Int,
     val withIcons: Boolean,
+    /** What a screen reader says for the hero, in Today's words: "8 mg used. Daily guide 14 mg. 6 mg left today." */
+    val heroDescription: String = "",
+    /** The last dose under the roomy hero, where the widget is tall enough to leave a gap above the favourites. */
+    val lastDose: String? = null,
+    val lastDoseLines: Int = 1,
 ) {
     /** How the short layout's column beside the amount fits, at one size of the amount. */
     private data class Beside(val leftLines: Int, val guideLines: Int, val dosesLines: Int, val left: Dp, val guide: Dp, val doses: Dp)
@@ -133,6 +142,7 @@ internal data class WidgetLayout(
             val guide = model.guide
 
             // What's at the bottom, and so how much room the hero has.
+            val warning = (model.moment as? WidgetMoment.Logged)?.warning?.takeIf { model.setUp }
             val moment = model.moment.takeIf { model.setUp }?.let { moment ->
                 when (moment) {
                     is WidgetMoment.Logged -> moment.warning?.let { resources.labelNoteText(it) }
@@ -224,11 +234,44 @@ internal data class WidgetLayout(
             }
 
             // With the hero gone, the moment has the whole widget, and shows what fits of it.
-            val momentLines = if (hero == Hero.NONE) {
+            var shownMoment = moment
+            var momentLines = if (hero == Hero.NONE) {
                 val textRoom = content - spacing.momentGap - s.PILL_HEIGHT
                 (1..momentNeeds).lastOrNull { room.height(s.SMALL, bold = true, it) <= textRoom + s.TEXT_SLACK } ?: 1
             } else {
                 momentNeeds
+            }
+            // The pack's note is the one thing that must be read in full, so where the whole of it
+            // won't fit, the shorter one takes its place rather than being cut off.
+            if (warning != null && momentLines < momentNeeds) {
+                val short = resources.labelNoteShortText(warning)
+                shownMoment = short
+                momentLines = room.lines(short, s.SMALL, bold = true, width).coerceAtMost(momentLines)
+            }
+
+            // A tall widget's roomy hero leaves a gap above the favourites: the last dose fills it, as
+            // on Today, or just its time where the whole line won't fit.
+            val spare = heroRoom - roomy - s.LAST_DOSE_GAP
+            fun fits(text: String?): Int? = text?.let { room.lines(it, s.SMALL, bold = false, width) }
+                ?.takeIf { lines -> lines <= 2 && room.height(s.SMALL, bold = false, lines) <= spare + s.TEXT_SLACK }
+            val (lastDose, lastDoseLines) = when {
+                hero != Hero.ROOMY || moment != null -> null to 1
+                fits(model.lastDose) != null -> model.lastDose to fits(model.lastDose)!!
+                fits(model.lastDoseShort) != null -> model.lastDoseShort to fits(model.lastDoseShort)!!
+                else -> null to 1
+            }
+
+            val heroDescription = if (guide == null) {
+                resources.getString(R.string.widget_hero_description, model.today.mgText(), doses.orEmpty())
+            } else {
+                val status = when {
+                    guide == Dose.ZERO && within -> resources.getString(R.string.today_plan_free_at)
+                    guide == Dose.ZERO -> resources.getString(R.string.today_plan_free_over, model.today.mgText())
+                    model.today < guide -> resources.getString(R.string.today_plan_left, Dose(guide.micrograms - model.today.micrograms).mgText())
+                    within -> resources.getString(R.string.today_plan_at)
+                    else -> resources.getString(R.string.today_plan_over, Dose(model.today.micrograms - guide.micrograms).mgText())
+                }
+                resources.getString(R.string.today_plan_meter_description, model.today.mgText(), guide.mgText(), status)
             }
 
             // Larger text needs a wider widget for a third favourite.
@@ -248,11 +291,15 @@ internal data class WidgetLayout(
                 guideStart = guideStart,
                 doses = doses,
                 dosesLines = shown.dosesLines,
-                moment = moment,
+                moment = shownMoment,
                 momentLines = momentLines.coerceAtLeast(1),
                 favourites = favourites,
                 withIcons = (width - s.GAP * (favourites - 1)) / favourites >= s.ICON_PILL,
+                heroDescription = heroDescription,
+                lastDose = lastDose,
+                lastDoseLines = lastDoseLines,
             )
+
         }
     }
 }

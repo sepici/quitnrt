@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -19,6 +20,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.test.core.app.ApplicationProvider
@@ -107,7 +109,7 @@ class OnboardingTest {
         compose.onNodeWithText("Evening check-in").performClick()
         next("Allow notifications and finish")
         answerTheQuestion(allow = true)
-        compose.waitUntilExactlyOneExists(hasText("3 of 5 on, quiet from 22:00 to 07:00"), timeoutMillis = 5_000)
+        compose.waitUntilExactlyOneExists(hasText("3 reminders on, quiet from 22:00 to 07:00"), timeoutMillis = 5_000)
 
         compose.waitUntilExactlyOneExists(hasText("Mildred, forest dragon"), timeoutMillis = 5_000)
         compose.onNodeWithText("Gum\u00A02\u00A0mg, Gum\u00A04\u00A0mg, Mouth\u00A0spray\u00A01\u00A0mg").assertExists()
@@ -165,8 +167,9 @@ class OnboardingTest {
         listOf("Allowance nudges", "Evening check-in", "Weekly results", "Badges and gear").forEach {
             compose.onNode(hasText(it) and isToggleable()).assertIsOn()
         }
-        compose.onNodeWithText("Today's total at 21:30, with a button to log anything missing").assertExists()
-        compose.onNodeWithText("When each week of your plan ends, with any hits ready for Gary").assertExists()
+        // In the Reminders page's own words, so each reads the same in both places.
+        compose.onNodeWithText("Today's total against the guide, with buttons for Log and All good").assertExists()
+        compose.onNodeWithText("When a week's result comes in, with the hits it earned").assertExists()
         compose.onNodeWithText("Forgot to log").assertDoesNotExist()
         compose.onNodeWithText("Your phone asks next. Set-up finishes either way.").assertExists()
 
@@ -233,7 +236,7 @@ class OnboardingTest {
         compose.onNodeWithText("Allow notifications and finish").assertDoesNotExist()
         next("Finish set-up")
 
-        compose.waitUntilExactlyOneExists(hasText("4 of 5 on, quiet from 22:00 to 07:00"), timeoutMillis = 5_000)
+        compose.waitUntilExactlyOneExists(hasText("4 reminders on, quiet from 22:00 to 07:00"), timeoutMillis = 5_000)
         assertNull(shadowOf(compose.activity).lastRequestedPermission)
         assertFalse(permissionAsked())
     }
@@ -284,8 +287,11 @@ class OnboardingTest {
         showAt(OnboardingDraft(step = OnboardingStep.COUNTRY, country = "GB"))
 
         compose.waitUntilExactlyOneExists(hasText("Where do you buy your NRT?"))
+        compose.onNode(SemanticsMatcher.expectValue(SemanticsProperties.PaneTitle, "Where do you buy your NRT?")).assertExists()
         compose.onNodeWithContentDescription("Back").performClick()
         compose.waitUntilExactlyOneExists(hasText("When did you stop smoking or vaping?"))
+        // The step before is told as a new pane, so a screen reader isn't left on a button that's gone.
+        compose.onNode(SemanticsMatcher.expectValue(SemanticsProperties.PaneTitle, "When did you stop smoking or vaping?")).assertExists()
     }
 
     @Test

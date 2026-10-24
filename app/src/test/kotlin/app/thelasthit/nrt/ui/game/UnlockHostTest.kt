@@ -4,12 +4,16 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.AccessibilityManager
 import androidx.compose.ui.platform.LocalAccessibilityManager
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.test.core.app.ApplicationProvider
 import app.thelasthit.nrt.GUM_4
@@ -205,6 +209,13 @@ class UnlockHostTest {
         waitFor("Iron sword")
         compose.onNodeWithText("New gear").assertExists()
         compose.onNodeWithText("For the first week met.").assertExists()
+        // The card is read before the page under it, though it's composed after it.
+        compose.onNode(
+            hasAnyDescendant(hasText("Equip")) and
+                SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite) and
+                SemanticsMatcher.expectValue(SemanticsProperties.TraversalIndex, -1f) and
+                SemanticsMatcher.expectValue(SemanticsProperties.IsTraversalGroup, true),
+        ).assertExists()
         compose.onNodeWithText("Equip").performClick()
 
         compose.waitUntilDoesNotExist(hasText("Iron sword"), timeoutMillis = 5_000)

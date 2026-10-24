@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- What screen readers say where the screen's own words aren't enough. -->
+<resources>
+
+    <!-- Quick-log pills: the words on the pill first, so a voice command that reads them matches. -->
+    <string name="today_quick_log_named">Log %1$s, %2$s</string>
+    <string name="today_quick_log_long_press">Log with details</string>
+    <string name="entry_edit_label">Edit</string>
+
+    <!-- Spoken forms of figures, said as the meters say them, never as progress towards the allowance. -->
+    <string name="today_plan_meter_guide_description">Daily guide %1$s\u00A0mg. %2$s.</string>
+    <string name="today_plan_week_description">%1$s\u00A0mg used of the %2$s\u00A0mg allowance this week</string>
+    <string name="today_plan_week_free_description">%1$s\u00A0mg this week</string>
+    <string name="plan_amount_spoken">%1$s\u00A0mg used of the %2$s\u00A0mg allowance</string>
+    <string name="widget_hero_description">%1$s\u00A0mg today. %2$s.</string>
+
+    <!-- The pack's note in fewer words, for the smallest widget at a large font. -->
+    <string name="widget_over_daily">Over the pack\'s daily limit of %1$d. Ask a pharmacist.</string>
+    <plurals name="widget_over_window">
+        <item quantity="one">Over the pack\'s limit of %1$d in an hour. Ask a pharmacist.</item>
+        <item quantity="other">Over the pack\'s limit of %1$d in %2$d\u00A0hours. Ask a pharmacist.</item>
+    </plurals>
+
+    <!-- Fields named for screen readers, where the placeholder goes once something is typed. -->
+    <string name="catalogue_search_label">Search products</string>
+
+    <!-- A quick log row's place in the order, said with it and again after a move. -->
+    <string name="quick_log_position">Position %1$d of %2$d</string>
+
+    <!-- Said as things change on their own: the HP at the last hit, and the delay timer once a minute. -->
+    <string name="lair_hp_spoken_defeated">0 of %1$d HP. %2$s is defeated.</string>
+    <string name="delay_left_under_minute">Under a minute left</string>
+    <plurals name="delay_left_minutes">
+        <item quantity="one">%1$d\u00A0minute left</item>
+        <item quantity="other">%1$d\u00A0minutes left</item>
+    </plurals>
+</resources>

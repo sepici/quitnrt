@@ -6,6 +6,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import app.thelasthit.nrt.data.repo.ImportMode
 import androidx.test.core.app.ApplicationProvider
 import app.thelasthit.nrt.TestApp
 import app.thelasthit.nrt.domain.dose.Dose
@@ -133,6 +134,26 @@ class SettingsScreenshotTest {
             before = {
                 viewModel.openBackup("thelasthit-backup-2026-10-23.json", backup)
                 waitUntil(5_000) { onAllNodes(hasText("How to restore it")).fetchSemanticsNodes().isNotEmpty() }
+            },
+        ) { SettingsScreen(remember { SnackbarHostState() }, onBack = {}, links = links, viewModel = viewModel) }
+    }
+
+    /** The question before replacing, in light and dark: its Cancel is in the link colour, which reads on the dialog in both. */
+    @Test @Config(qualifiers = PHONE)
+    fun restoreReplace() {
+        setUpLikeTheMockups()
+        app.seedWeek()
+        val backup = runBlocking { app.graph.backups.export() }.encode()
+        val viewModel = SettingsViewModel(app.graph)
+        compose.captureLooks(
+            "settings-restore-replace",
+            ready = hasText("What you use"),
+            before = {
+                viewModel.openBackup("thelasthit-backup-2026-10-23.json", backup)
+                waitUntil(5_000) { onAllNodes(hasText("How to restore it")).fetchSemanticsNodes().isNotEmpty() }
+                viewModel.pickRestoreMode(ImportMode.REPLACE)
+                viewModel.startRestore()
+                waitUntil(5_000) { onAllNodes(hasText("Replace everything on this phone?")).fetchSemanticsNodes().isNotEmpty() }
             },
         ) { SettingsScreen(remember { SnackbarHostState() }, onBack = {}, links = links, viewModel = viewModel) }
     }

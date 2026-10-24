@@ -123,7 +123,12 @@ private fun TaperWeek(state: PlanState.Running, week: ProgrammeWeek) {
     } else {
         stringResource(R.string.plan_over, used.apartFrom(allowance).mgText())
     }
-    Fig(used.mgText(), stringResource(R.string.plan_of_this_week, allowance.mgText()))
+    Fig(
+        used.mgText(),
+        stringResource(R.string.plan_of_this_week, allowance.mgText()),
+        // As the meter says it, not "60 of 105", which sounds like progress towards a target.
+        description = stringResource(R.string.today_plan_week_description, used.mgText(), allowance.mgText()),
+    )
     Meter(
         used = used,
         allowance = allowance,

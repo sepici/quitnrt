@@ -25,6 +25,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
@@ -73,11 +74,12 @@ fun DemonHpBand(state: DemonState, onOpenLair: () -> Unit, modifier: Modifier = 
     ) {
         NameAndChip(
             name = {
+                // Two lines once the chip has dropped under it, balanced, before an ellipsis.
                 Text(
                     name,
-                    style = LastHit.type.headline.copy(fontSize = 22.sp, lineHeight = 28.sp, letterSpacing = (-0.02).em),
+                    style = LastHit.type.headline.copy(fontSize = 22.sp, lineHeight = 28.sp, letterSpacing = (-0.02).em, lineBreak = LineBreak.Heading),
                     color = colors.stageText,
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
             },
@@ -99,11 +101,11 @@ fun DemonHpBand(state: DemonState, onOpenLair: () -> Unit, modifier: Modifier = 
 /**
  * The demon's [name] with the [chip] for banked hits at the end of its line, as the mockups have
  * them. A long name (up to 24 letters) and the chip don't always fit side by side, so then the
- * chip drops to a line of its own under the name, and a name too long even for its own line ends
- * in an ellipsis rather than being cut through a letter.
+ * chip drops to a line of its own under the name, which can take two lines, and a name too long
+ * even for those ends in an ellipsis rather than being cut through a letter.
  */
 @Composable
-private fun NameAndChip(name: @Composable () -> Unit, chip: (@Composable () -> Unit)?) {
+internal fun NameAndChip(name: @Composable () -> Unit, chip: (@Composable () -> Unit)?) {
     Layout(
         content = {
             name()

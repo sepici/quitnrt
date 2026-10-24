@@ -101,13 +101,11 @@ internal fun RemindersStep(state: OnboardingState, viewModel: OnboardingViewMode
                     .background(colors.surface)
                     .border(1.dp, colors.line, shape),
             ) {
-                val checkIn = timeFormat.format(settings.checkInTime)
-                val demon = state.draft.demonName.trim()
                 SetUpReminders.offered.forEachIndexed { index, reminder ->
                     if (index > 0) HorizontalDivider(color = colors.line)
                     ReminderSwitch(
                         title = stringResource(titleOf(reminder)),
-                        detail = detailOf(reminder, checkIn, demon),
+                        detail = detailOf(reminder),
                         checked = reminder in chosen,
                         onChange = { viewModel.switchReminder(reminder, it) },
                     )
@@ -171,13 +169,13 @@ private fun titleOf(reminder: Reminder): Int = when (reminder) {
     Reminder.FORGOT_TO_LOG -> R.string.reminders_forgot
 }
 
-/** What [reminder] brings, in set-up's words, with the check-in's time and the demon's name. */
+/** What [reminder] brings, in the Reminders page's own words, so it reads the same in both places. */
 @Composable
-private fun detailOf(reminder: Reminder, checkIn: String, demon: String): String = when (reminder) {
-    Reminder.ALLOWANCE -> stringResource(R.string.onboarding_reminders_allowance_detail)
-    Reminder.CHECK_IN -> stringResource(R.string.onboarding_reminders_check_in_detail, checkIn)
-    Reminder.WEEKLY_RESULT -> stringResource(R.string.onboarding_reminders_results_detail, demon)
-    Reminder.ACHIEVEMENTS -> stringResource(R.string.onboarding_reminders_achievements_detail)
-    // Set-up doesn't offer it, since it goes by a usual first dose; the Reminders page's words if it ever does.
+private fun detailOf(reminder: Reminder): String = when (reminder) {
+    Reminder.ALLOWANCE -> stringResource(R.string.reminders_allowance_detail)
+    Reminder.CHECK_IN -> stringResource(R.string.reminders_check_in_detail)
+    Reminder.WEEKLY_RESULT -> stringResource(R.string.reminders_results_detail)
+    Reminder.ACHIEVEMENTS -> stringResource(R.string.reminders_achievements_detail)
+    // Set-up doesn't offer it, since it goes by a usual first dose.
     Reminder.FORGOT_TO_LOG -> stringResource(R.string.reminders_forgot_detail)
 }

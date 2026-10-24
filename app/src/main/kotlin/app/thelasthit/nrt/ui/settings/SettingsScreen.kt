@@ -37,6 +37,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.data.repo.ImportMode
@@ -52,6 +54,7 @@ import app.thelasthit.nrt.ui.format.pillLabelText
 import app.thelasthit.nrt.ui.format.rememberTimeFormatter
 import app.thelasthit.nrt.ui.graphViewModel
 import app.thelasthit.nrt.ui.theme.LastHit
+import app.thelasthit.nrt.ui.components.DialogButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -233,7 +236,7 @@ fun SettingsScreen(
                         Text(stringResource(R.string.replace_confirm), color = LastHit.colors.error, fontWeight = FontWeight.Bold)
                     }
                 },
-                dismissButton = { TextButton(onClick = viewModel::cancelReplace) { Text(stringResource(R.string.action_cancel)) } },
+                dismissButton = { DialogButton(stringResource(R.string.action_cancel), onClick = viewModel::cancelReplace) },
             )
         }
     }
@@ -244,17 +247,20 @@ fun SettingsScreen(
 private fun RestoreSheet(candidate: RestoreCandidate, viewModel: SettingsViewModel) {
     val colors = LastHit.colors
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val title = stringResource(R.string.restore_title)
     AppSheet(
         onDismissRequest = viewModel::closeRestore,
         sheetState = sheetState,
+        title = title,
     ) {
         Column(Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
             Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        stringResource(R.string.restore_title),
+                        title,
                         style = LastHit.type.headline.copy(fontSize = 28.sp, lineHeight = 34.sp),
                         color = colors.text,
+                        modifier = Modifier.semantics { heading() },
                     )
                     Text(stringResource(R.string.restore_from_file), style = LastHit.type.label, color = colors.text2)
                 }

@@ -94,6 +94,7 @@ import app.thelasthit.nrt.ui.graphViewModel
 import app.thelasthit.nrt.ui.onboarding.OnboardingDraft
 import app.thelasthit.nrt.ui.plan.mixText
 import app.thelasthit.nrt.ui.theme.LastHit
+import app.thelasthit.nrt.ui.components.rememberAnimatorScale
 import kotlinx.coroutines.delay
 import java.util.Locale
 
@@ -468,7 +469,8 @@ private fun HpUnit(modifier: Modifier = Modifier) {
 @Composable
 private fun BattleHud(name: String, hp: Int, maxHp: Int, line: String) {
     val colors = LastHit.colors
-    val spokenHp = stringResource(R.string.lair_hp_spoken, hp, maxHp)
+    // At 0 it says so, as the hit that does it lands, before the victory is drawn.
+    val spokenHp = if (hp == 0) stringResource(R.string.lair_hp_spoken_defeated, maxHp, name) else stringResource(R.string.lair_hp_spoken, hp, maxHp)
     Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 20.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             NameHeading(name, Modifier.weight(1f).alignByBaseline())
@@ -491,7 +493,15 @@ private fun BattleHud(name: String, hp: Int, maxHp: Int, line: String) {
                 HpUnit(Modifier.alignByBaseline())
             }
         }
-        Text(line, style = LastHit.type.flavour, color = colors.text2, modifier = Modifier.padding(top = 2.dp))
+        // Held through a strike, so it changes once, as the demon answers, and is read out then.
+        Text(
+            line,
+            style = LastHit.type.flavour,
+            color = colors.text2,
+            modifier = Modifier
+                .padding(top = 2.dp)
+                .semantics { liveRegion = LiveRegionMode.Polite },
+        )
         HpBar(hp, maxHp, Modifier.padding(top = 16.dp))
     }
 }
@@ -717,7 +727,11 @@ private fun VictorySection(victory: Victory, name: String, battle: LairState.Bat
             stringResource(R.string.lair_victory_title),
             style = LastHit.type.headline.copy(fontSize = 24.sp, lineHeight = 30.sp, letterSpacing = (-0.025).em),
             color = colors.text,
-            modifier = Modifier.semantics { heading() },
+            // It comes in as the demon falls, so it's read out then, as well as being a heading.
+            modifier = Modifier.semantics {
+                heading()
+                liveRegion = LiveRegionMode.Polite
+            },
         )
         Column(Modifier.padding(top = 4.dp)) {
             VictoryRow(stringResource(R.string.lair_victory_weeks), weeks, first = true)

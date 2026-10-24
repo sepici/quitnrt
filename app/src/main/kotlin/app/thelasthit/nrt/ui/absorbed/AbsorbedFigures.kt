@@ -62,13 +62,20 @@ fun DataGraph.absorbedFigures(): Flow<AbsorbedFigures?> = combine(
     }
 }
 
-/** "about 1.1 mg absorbed", under a History day's total, and what screen readers hear on a row. */
+/**
+ * An estimate's mg, to go after "about": whole mg, rounded half up, since a decimal beside "about"
+ * claims more than a rough average can. Under half a mg keeps its decimal, so a small dose doesn't
+ * read "about 0 mg".
+ */
+fun Dose.aboutMgText(): String = if (micrograms < 500) mgText() else ((micrograms + 500) / 1_000).toString()
+
+/** "about 11 mg absorbed", under a History day's total, and what screen readers hear on a row. */
 @Composable
-fun absorbedText(estimate: Dose): String = stringResource(R.string.absorbed_about, estimate.mgText())
+fun absorbedText(estimate: Dose): String = stringResource(R.string.absorbed_about, estimate.aboutMgText())
 
 /** "About 4 mg absorbed", a line of its own under Today's hero total. */
 @Composable
-fun absorbedLine(estimate: Dose): String = stringResource(R.string.absorbed_about_line, estimate.mgText())
+fun absorbedLine(estimate: Dose): String = stringResource(R.string.absorbed_about_line, estimate.aboutMgText())
 
 /**
  * A dose row's estimate under its mg: "about 1 mg", since the day's total in History, or the hero
@@ -78,7 +85,7 @@ fun absorbedLine(estimate: Dose): String = stringResource(R.string.absorbed_abou
 fun RowEstimate(estimate: Dose, modifier: Modifier = Modifier) {
     val heard = absorbedText(estimate)
     Text(
-        stringResource(R.string.absorbed_about_short, estimate.mgText()),
+        stringResource(R.string.absorbed_about_short, estimate.aboutMgText()),
         style = LastHit.type.caption,
         color = LastHit.colors.text2,
         textAlign = TextAlign.End,

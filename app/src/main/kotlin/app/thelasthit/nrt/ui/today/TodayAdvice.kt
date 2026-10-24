@@ -25,12 +25,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.delay
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.thelasthit.nrt.R
@@ -190,22 +198,32 @@ internal fun TipAfterLogging(shown: TipShown, tags: Map<String, TagEntity>, link
     val colors = LastHit.colors
     val shape = RoundedCornerShape(24.dp)
     val strategy = shown.strategy
-    val description = stringResource(R.string.advice_tip_description)
+    // Read out once, as it arrives after a dose. A pane title would be said again each time the
+    // card scrolled back into view, so the title is a live region only while the tip is new.
+    var fresh by rememberSaveable(shown.tip.entryId) { mutableStateOf(true) }
+    LaunchedEffect(shown.tip.entryId) {
+        delay(TIP_NEW_FOR_MS)
+        fresh = false
+    }
     Box(
         Modifier
             .padding(start = 8.dp, end = 8.dp, top = 4.dp)
             .fillMaxWidth()
             .clip(shape)
             .background(colors.surface)
-            .border(1.dp, if (colors.isDark) colors.lineStrong else colors.line, shape)
-            .semantics { paneTitle = description },
+            .border(1.dp, if (colors.isDark) colors.lineStrong else colors.line, shape),
     ) {
         Column(Modifier.padding(start = 16.dp, end = 8.dp, top = 14.dp, bottom = 10.dp)) {
             Text(
                 tipTitle(shown),
                 style = LastHit.type.headline.copy(fontSize = 19.sp, lineHeight = 24.sp, letterSpacing = (-0.3).sp, lineBreak = LineBreak.Heading),
                 color = colors.text,
-                modifier = Modifier.padding(end = 48.dp),
+                modifier = Modifier
+                    .padding(end = 48.dp)
+                    .semantics {
+                        heading()
+                        if (fresh) liveRegion = LiveRegionMode.Polite
+                    },
             )
             Text(
                 tipBody(shown, tags),
@@ -243,6 +261,9 @@ internal fun TipAfterLogging(shown: TipShown, tags: Map<String, TagEntity>, link
         }
     }
 }
+
+/** How long a tip counts as new, and so is read out as it arrives: long enough for the snackbar before it. */
+private const val TIP_NEW_FOR_MS = 10_000L
 
 /** "Try box breathing next time", or for most strategies "Next time, get up from the table". */
 @Composable

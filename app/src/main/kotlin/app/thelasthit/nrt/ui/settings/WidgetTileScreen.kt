@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -116,7 +117,7 @@ class PhoneRowsViewModel(graph: DataGraph) : ViewModel() {
  * rather than that they're off, since nobody turned them off.
  */
 @Composable
-fun remindersSummary(settings: ReminderSettings, marks: ReminderMarks): String {
+fun remindersSummary(settings: ReminderSettings, marks: ReminderMarks, ofAll: Boolean = true): String {
     val context = LocalContext.current
     var canPost by remember { mutableStateOf(NoticePoster(context).canPost()) }
     // Back from the phone's settings, the row follows what was chosen there.
@@ -132,6 +133,9 @@ fun remindersSummary(settings: ReminderSettings, marks: ReminderMarks): String {
         on > 0 && !canPost && !marks.permissionAsked && !NoticePoster.hasPermission(context) -> stringResource(R.string.settings_reminders_ask)
         on > 0 && !canPost -> stringResource(R.string.settings_reminders_blocked)
         on == 0 -> stringResource(R.string.settings_reminders_off)
+        // Set-up offers only some, so it counts what's on rather than out of every reminder there is.
+        !ofAll && quiet.enabled -> pluralStringResource(R.plurals.onboarding_summary_reminders_on_quiet, on, on, timeFormat.format(quiet.start), timeFormat.format(quiet.end))
+        !ofAll -> pluralStringResource(R.plurals.onboarding_summary_reminders_on, on, on)
         quiet.enabled -> stringResource(R.string.settings_reminders_quiet, on, all, timeFormat.format(quiet.start), timeFormat.format(quiet.end))
         else -> stringResource(R.string.settings_reminders_some, on, all)
     }

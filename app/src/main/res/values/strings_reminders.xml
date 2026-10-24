@@ -132,6 +132,8 @@
     <string name="widget_guide">%1$s\u00A0mg guide</string>
     <string name="widget_nrt_free">NRT-free so far today</string>
     <string name="widget_set_up">Finish setting up the app to log from here.</string>
+    <!-- Under a tall widget's hero, when today's full last-dose line won't fit -->
+    <string name="widget_last_dose_short">Last dose at %1$s</string>
     <string name="widget_no_favourites">Add products to your quick log to log them from here.</string>
     <string name="widget_tags">Tags</string>
     <string name="widget_tags_description">Add tags to this dose</string>

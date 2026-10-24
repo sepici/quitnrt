@@ -39,6 +39,8 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.domain.creature.Creature
 import app.thelasthit.nrt.ui.components.AppSheet
@@ -85,11 +87,13 @@ fun RestyleSheet(
         ) {
             Header(fighting, onClose = ::close)
             Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 20.dp)) {
-                FieldLabel(stringResource(R.string.onboarding_name))
+                val nameLabel = stringResource(R.string.onboarding_name)
+                // The field carries the name, which stays once the placeholder has gone, so the label isn't read twice.
+                FieldLabel(nameLabel, Modifier.clearAndSetSemantics {})
                 OutlinedTextField(
                     value = newName,
                     onValueChange = { newName = it.take(OnboardingDraft.MAX_NAME) },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().semantics { contentDescription = nameLabel },
                     placeholder = { Text(stringResource(R.string.onboarding_name_hint)) },
                     singleLine = true,
                     shape = RoundedCornerShape(16.dp),

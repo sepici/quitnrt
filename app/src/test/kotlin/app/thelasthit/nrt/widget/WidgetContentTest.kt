@@ -38,6 +38,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -56,13 +57,15 @@ class WidgetContentTest {
     }
 
     private val favourites = listOf(
-        Favourite(GUM_2, "Gum 2${nbsp}mg", R.drawable.ic_form_gum, "Log Nicorette gum 2${nbsp}mg"),
-        Favourite(GUM_4, "Gum 4${nbsp}mg", R.drawable.ic_form_gum, "Log Nicorette gum 4${nbsp}mg"),
-        Favourite(QUICKMIST, "Mouth spray 1${nbsp}mg", R.drawable.ic_form_spray, "Log Nicorette QuickMist 1${nbsp}mg"),
+        Favourite(GUM_2, "Gum 2${nbsp}mg", R.drawable.ic_form_gum, "Log Gum 2${nbsp}mg, Nicorette gum"),
+        Favourite(GUM_4, "Gum 4${nbsp}mg", R.drawable.ic_form_gum, "Log Gum 4${nbsp}mg, Nicorette gum"),
+        Favourite(QUICKMIST, "Mouth spray 1${nbsp}mg", R.drawable.ic_form_spray, "Log Mouth spray 1${nbsp}mg, QuickMist"),
     )
 
+    private val lastDose = "Last dose at 14:25, 2${nbsp}mg of Nicorette gum"
+
     private fun model(today: Int = 8, doses: Int = 3, guide: Int? = 14, moment: WidgetMoment? = null, asksForTags: Boolean = false, setUp: Boolean = true) =
-        WidgetModel(setUp, Dose.mg(today), doses, guide?.let(Dose::mg), favourites, moment, asksForTags)
+        WidgetModel(setUp, Dose.mg(today), doses, guide?.let(Dose::mg), favourites, moment, asksForTags, lastDose, "Last dose at 14:25")
 
     private fun show(model: WidgetModel, size: DpSize = DpSize(320.dp, 180.dp), checks: GlanceAppWidgetUnitTest.() -> Unit) =
         runGlanceAppWidgetUnitTest {
@@ -74,6 +77,9 @@ class WidgetContentTest {
 
     @Test
     fun todayAgainstTheGuide() = show(model()) {
+        // Read as one, in Today's words.
+        onNode(hasContentDescriptionEqualTo("8${nbsp}mg used. Daily guide 14${nbsp}mg. 6${nbsp}mg left today."))
+            .assertHasStartActivityClickAction<app.thelasthit.nrt.MainActivity>()
         onNode(hasTextEqualTo("8")).assertExists()
         onNode(hasTextEqualTo("6${nbsp}mg left today")).assertExists()
         onNode(hasTextEqualTo("14${nbsp}mg guide")).assertExists()
@@ -102,7 +108,8 @@ class WidgetContentTest {
 
     @Test
     fun aTapOnAFavouriteLogsIt() = show(model()) {
-        onNode(hasContentDescriptionEqualTo("Log Nicorette gum 2${nbsp}mg"))
+        // The description starts with the words on the pill, so "Gum 2 mg" said aloud finds it.
+        onNode(hasContentDescriptionEqualTo("Log Gum 2${nbsp}mg, Nicorette gum"))
             .assertHasRunCallbackClickAction<LogFavourite>(actionParametersOf(WidgetKeys.PRODUCT to GUM_2))
         onNode(hasTextEqualTo("Mouth spray 1${nbsp}mg")).assertExists()
     }
@@ -115,7 +122,7 @@ class WidgetContentTest {
 
     @Test
     fun setToAskForTagsAFavouriteOpensThePicker() = show(model(asksForTags = true)) {
-        onNode(hasContentDescriptionEqualTo("Log Nicorette gum 2${nbsp}mg"))
+        onNode(hasContentDescriptionEqualTo("Log Gum 2${nbsp}mg, Nicorette gum"))
             .assertHasStartActivityClickAction<QuickTagsActivity>(actionParametersOf(WidgetKeys.PRODUCT to GUM_2))
     }
 
@@ -186,6 +193,25 @@ class WidgetContentTest {
         assertEquals(TextRoom(app).lines(text, WidgetSizes.SMALL, bold = true, 302.dp), shown.momentLines)
     }
 
+    // Measured with the phone's own font, as the widget is drawn, rather than an average letter.
+    @Test @Config(fontScale = 1.3f) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    fun onTheSmallestWidgetWithLargeTextTheLabelsNoteIsShortenedNotCut() {
+        val note = WidgetMoment.Logged(gumEntry(), "Nicorette gum", warning = LabelWarning.OverDaily(units = 16, limit = 15))
+        val shown = layout(model(moment = note), DpSize(250.dp, 110.dp))
+        val short = "Over the pack's daily limit of 15. Ask a pharmacist."
+        assertEquals(Hero.NONE, shown.hero)
+        assertEquals(short, shown.moment)
+        assertEquals(TextRoom(app).lines(short, WidgetSizes.SMALL, bold = true, 222.dp), shown.momentLines)
+    }
+
+    @Test
+    fun aTallWidgetFillsTheGapAboveTheFavouritesWithTheLastDose() {
+        assertEquals(lastDose, layout(model(), DpSize(330.dp, 230.dp)).lastDose)
+        // Without the height to spare, it's left out rather than squeezing the hero.
+        assertNull(layout(model(), DpSize(330.dp, 150.dp)).lastDose)
+        assertNull(layout(model(), DpSize(250.dp, 110.dp)).lastDose)
+    }
+
     @Test
     fun theGuidesLabelSitsUnderItsMarkerBesideWhatsLeft() {
         val shown = layout(model(), DpSize(330.dp, 230.dp))
@@ -219,6 +245,12 @@ class WidgetContentTest {
         assertEquals(Dose.mg(24), model.guide)
         assertEquals(listOf(GUM_2, GUM_4, QUICKMIST), model.favourites.map { it.productId })
         assertEquals("Gum 2${nbsp}mg", model.favourites.first().label)
+        // Each pill's spoken name starts with the words on it.
+        model.favourites.forEach { assertTrue(it.description.startsWith("Log ${it.label}")) }
+        assertEquals("Log Gum 2${nbsp}mg, Nicorette gum", model.favourites.first().description)
+        // The last dose, in Today's words, for a tall widget's spare room.
+        val last = model.lastDose.orEmpty()
+        assertTrue(last, last.startsWith("Last dose at ") && last.endsWith(", 8${nbsp}mg of Nicorette gum"))
         assertNull(model.moment)
     }
 

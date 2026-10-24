@@ -20,8 +20,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -90,6 +90,8 @@ import app.thelasthit.nrt.ui.log.LogSheet
 import app.thelasthit.nrt.ui.log.LogSheetViewModel
 import app.thelasthit.nrt.ui.log.SavedDose
 import app.thelasthit.nrt.ui.theme.LastHit
+import app.thelasthit.nrt.ui.components.trackInset
+import app.thelasthit.nrt.ui.components.trackOption
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -224,12 +226,21 @@ private fun RangeButtons(state: InsightsState, onPick: (InsightRange) -> Unit) {
                 .heightIn(min = 52.dp)
                 .clip(RoundedCornerShape(26.dp))
                 .background(colors.sunk)
-                .padding(4.dp)
                 .selectableGroup(),
         ) {
-            state.ranges.chunked(perRow).forEach { row ->
+            val rows = state.ranges.chunked(perRow)
+            rows.forEachIndexed { rowIndex, row ->
                 Row(Modifier.fillMaxWidth()) {
-                    row.forEach { option -> RangeButton(option, rangeName(option.range), option.range == state.range, state.today, onPick) }
+                    row.forEachIndexed { index, option ->
+                        RangeButton(
+                            option,
+                            rangeName(option.range),
+                            option.range == state.range,
+                            state.today,
+                            onPick,
+                            inset = trackInset(index, row.size, row = rowIndex, rows = rows.size),
+                        )
+                    }
                 }
             }
         }
@@ -239,18 +250,42 @@ private fun RangeButtons(state: InsightsState, onPick: (InsightRange) -> Unit) {
 private val RangePadding = 12.dp
 
 @Composable
-private fun RowScope.RangeButton(option: RangeOption, name: String, selected: Boolean, today: LocalDate, onPick: (InsightRange) -> Unit) {
+private fun RowScope.RangeButton(
+    option: RangeOption,
+    name: String,
+    selected: Boolean,
+    today: LocalDate,
+    onPick: (InsightRange) -> Unit,
+    inset: PaddingValues,
+) {
     val colors = LastHit.colors
     val locked = if (option.unlocked) null else stringResource(R.string.insights_range_locked, name, opensText(option.opensOn, today))
+    // The pill is 44 dp, and its share of the track, which takes the tap, at least 48.
+    val tall = 44.dp + inset.calculateTopPadding() + inset.calculateBottomPadding()
     Box(
         Modifier
             .weight(1f)
-            .heightIn(min = 44.dp)
-            .clip(RoundedCornerShape(22.dp))
-            .background(if (selected) colors.chipSelected else colors.sunk)
+            .heightIn(min = maxOf(tall, 48.dp))
+            // Before the inset, so a locked range is found over its whole share of the track too.
             .then(
                 if (locked == null) {
-                    Modifier.selectable(selected, role = Role.RadioButton, onClick = { onPick(option.range) })
+                    Modifier
+                } else {
+                    Modifier.semantics {
+                        contentDescription = locked
+                        disabled()
+                    }
+                },
+            )
+            .trackOption(
+                selected = selected,
+                onClick = if (locked == null) ({ onPick(option.range) }) else null,
+                inset = inset,
+                fill = if (selected) colors.chipSelected else colors.sunk,
+            )
+            .then(
+                if (locked == null) {
+                    Modifier
                 } else {
                     Modifier
                         .drawBehind {
@@ -262,10 +297,6 @@ private fun RowScope.RangeButton(option: RangeOption, name: String, selected: Bo
                                 cornerRadius = CornerRadius(18.dp.toPx()),
                                 style = Stroke(1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx()))),
                             )
-                        }
-                        .semantics {
-                            contentDescription = locked
-                            disabled()
                         }
                 },
             )
@@ -507,7 +538,8 @@ private fun Headline(state: InsightsState, intake: DailyIntake) {
     val colors = LastHit.colors
     val average = intake.averagePerDay
     val today = intake.days.lastOrNull { it.date == state.today }
-    Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    // One node, "12.5 mg a day", as every other big figure is read.
+    Row(Modifier.padding(top = 8.dp).semantics(mergeDescendants = true) {}, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             average?.averageText() ?: (today?.total ?: Dose.ZERO).mgText(),
             style = LastHit.type.display.copy(lineHeight = 48.sp),

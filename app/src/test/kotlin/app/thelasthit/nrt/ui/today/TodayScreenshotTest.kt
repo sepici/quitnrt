@@ -16,6 +16,7 @@ import app.thelasthit.nrt.ui.FULL_PAGE
 import app.thelasthit.nrt.ui.LARGE_FONT
 import app.thelasthit.nrt.ui.PHONE
 import app.thelasthit.nrt.ui.captureLooks
+import app.thelasthit.nrt.ui.HUGE_FONT
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -55,6 +56,15 @@ class TodayScreenshotTest {
     @Test
     @Config(qualifiers = PHONE, fontScale = LARGE_FONT)
     fun logSheetLarge() = captureLogSheet()
+
+    /** At the largest font, where fixed heights around text would clip first. */
+    @Test
+    @Config(qualifiers = FULL_PAGE, fontScale = HUGE_FONT)
+    fun todayX2() = captureToday()
+
+    @Test
+    @Config(qualifiers = PHONE, fontScale = HUGE_FONT)
+    fun logSheetX2() = captureLogSheet()
 
     private fun captureToday() {
         app.setUp()

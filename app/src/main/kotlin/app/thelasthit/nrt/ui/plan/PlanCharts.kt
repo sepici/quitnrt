@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -42,9 +44,12 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.Density
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.domain.dose.Dose
 import app.thelasthit.nrt.ui.format.mgText
@@ -168,7 +173,8 @@ internal fun ZeroColumns(days: List<ColumnDay>, description: String, modifier: M
                     if (shown) day.total.mgText() else "",
                     style = LastHit.type.caption.copy(fontWeight = if (isToday) FontWeight.ExtraBold else FontWeight.Bold),
                     color = if (isToday) colors.text else colors.text2,
-                    modifier = Modifier.height(18.dp),
+                    // At least the line it had; a large font's taller line keeps all of it.
+                    modifier = Modifier.heightIn(min = 18.dp),
                 )
                 DayLetter(
                     day.date,
@@ -472,6 +478,9 @@ internal data class GuideStep(val week: Int, val guide: Dose, val isNrtFree: Boo
  * The daily guide across every week of the plan, as a stepped line over the usual day's dashed
  * line: never a fill. Each step down has its mg over it, the week a lower strength takes over
  * has a thin dashed rule, and the NRT-free weeks are named under the axis.
+ *
+ * The rule's label sits in the chart beside it, as the mockup has it. Where it would hide a step's
+ * mg there, as at a large font, it goes under the week numbers instead, with the rule run down to it.
  */
 @Composable
 internal fun GuideChart(
@@ -494,110 +503,184 @@ internal fun GuideChart(
     val line = with(density) { measurer.measure("0", small).size.height.toDp() }
     val plotTop = line / 2 + 8.dp
     val plotHeight = 106.dp
-    val height = plotTop + plotHeight + 10.dp + line * 2 + 6.dp
-    Canvas(modifier.fillMaxWidth().height(height).clearAndSetSemantics { contentDescription = description }) {
-        if (steps.isEmpty()) return@Canvas
-        val maxMg = usual.micrograms / 1000.0
-        val gridStep = when {
-            maxMg <= 8 -> 2.0
-            maxMg <= 20 -> 5.0
-            maxMg <= 50 -> 10.0
-            maxMg <= 100 -> 20.0
-            else -> 50.0
-        }
-        var yMax = ceil(maxMg / gridStep) * gridStep
-        if (yMax - maxMg < gridStep * 0.2) yMax += gridStep
-        val labelWidth = (0..(yMax / gridStep).toInt()).maxOf { index ->
-            val text = gridText(index * gridStep, if (index == (yMax / gridStep).toInt()) unit else null)
-            measurer.measure(text, small).size.width
-        }
-        val left = maxOf(30.dp.toPx(), labelWidth + 8.dp.toPx())
-        val right = size.width - 4.dp.toPx()
-        val top = plotTop.toPx()
-        val bottom = top + plotHeight.toPx()
-        fun y(mg: Double) = (bottom - (mg / yMax) * (bottom - top)).toFloat()
-        val column = (right - left) / steps.size
+    val baseHeight = plotTop + plotHeight + 10.dp + line * 2 + 6.dp
+    BoxWithConstraints(modifier.fillMaxWidth()) {
+        val frame = with(density) { chartFrame(constraints.maxWidth.toFloat(), steps, usual, unit, measurer, small, plotTop.toPx(), plotHeight.toPx()) }
+        val switchText = switchLabel?.let { measurer.measure(it, small) }
+        val inPlot = if (switchWeek != null && switchText != null) with(density) { switchInPlot(frame, switchWeek, switchText) } else null
+        val withSwitch = with(density) { stepLabels(frame, steps, measurer, value, inPlot?.second) }
+        // Under the axis when, in the chart, it would hide a step's mg.
+        val below = inPlot != null && withSwitch.hidden
+        val labels = if (below) with(density) { stepLabels(frame, steps, measurer, value, null) } else withSwitch
+        val height = baseHeight + if (below) line + 8.dp else 0.dp
+        Canvas(Modifier.fillMaxWidth().height(height).clearAndSetSemantics { contentDescription = description }) {
+            if (steps.isEmpty()) return@Canvas
+            val left = frame.left
+            val right = frame.right
+            val bottom = frame.bottom
+            val column = frame.column
 
-        // The grid and its labels.
-        val count = (yMax / gridStep).toInt()
-        for (index in 0..count) {
-            val mg = index * gridStep
-            val at = y(mg)
-            drawLine(if (index == 0) colors.lineStrong else colors.line, Offset(left, at), Offset(right, at), strokeWidth = 1.dp.toPx())
-            val text = measurer.measure(gridText(mg, if (index == count) unit else null), small.copy(color = colors.text3))
-            drawText(text, topLeft = Offset(left - 8.dp.toPx() - text.size.width, at - text.size.height / 2f))
-        }
+            // The grid and its labels.
+            val count = (frame.yMax / frame.gridStep).toInt()
+            for (index in 0..count) {
+                val mg = index * frame.gridStep
+                val at = frame.y(mg)
+                drawLine(if (index == 0) colors.lineStrong else colors.line, Offset(left, at), Offset(right, at), strokeWidth = 1.dp.toPx())
+                val text = measurer.measure(gridText(mg, if (index == count) unit else null), small.copy(color = colors.text3))
+                drawText(text, topLeft = Offset(left - 8.dp.toPx() - text.size.width, at - text.size.height / 2f))
+            }
 
-        // The usual day, dashed, labelled at the right on the page's colour.
-        val usualY = y(maxMg)
-        drawLine(colors.lineStrong, Offset(left, usualY), Offset(right, usualY), strokeWidth = 1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 4.dp.toPx())))
-        val usualText = measurer.measure(usualLabel, small.copy(color = colors.text2))
-        val usualBox = Offset(right - usualText.size.width - 4.dp.toPx(), usualY - usualText.size.height - 4.dp.toPx())
-        drawRoundRect(colors.bg, usualBox, Size(usualText.size.width + 4.dp.toPx(), usualText.size.height.toFloat()), CornerRadius(3.dp.toPx()))
-        drawText(usualText, topLeft = Offset(right - usualText.size.width.toFloat(), usualBox.y))
+            // The usual day, dashed, labelled at the right on the page's colour.
+            val usualY = frame.usualY
+            drawLine(colors.lineStrong, Offset(left, usualY), Offset(right, usualY), strokeWidth = 1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 4.dp.toPx())))
+            val usualText = measurer.measure(usualLabel, small.copy(color = colors.text2))
+            val usualBox = Offset(right - usualText.size.width - 4.dp.toPx(), usualY - usualText.size.height - 4.dp.toPx())
+            drawRoundRect(colors.bg, usualBox, Size(usualText.size.width + 4.dp.toPx(), usualText.size.height.toFloat()), CornerRadius(3.dp.toPx()))
+            drawText(usualText, topLeft = Offset(right - usualText.size.width.toFloat(), usualBox.y))
 
-        // Where a lower strength takes over. Its label keeps its place, and step labels give way to it.
-        var switchBox: Rect? = null
-        if (switchWeek != null && switchLabel != null) {
-            val x = left + column * (switchWeek - 1)
-            drawLine(colors.text3, Offset(x, usualY + 10.dp.toPx()), Offset(x, bottom), strokeWidth = 1.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(2.dp.toPx(), 3.dp.toPx())))
-            val text = measurer.measure(switchLabel, small.copy(color = colors.text2))
-            val textX = if (x + 5.dp.toPx() + text.size.width <= right) x + 5.dp.toPx() else x - 5.dp.toPx() - text.size.width
-            val at = Offset(textX, usualY + 10.dp.toPx())
-            drawText(text, topLeft = at)
-            switchBox = Rect(at, Size(text.size.width.toFloat(), text.size.height.toFloat())).inflate(2.dp.toPx())
-        }
+            // Where a lower strength takes over: in the chart beside its rule, or under the axis
+            // with the rule run down to it.
+            val numberY = bottom + 8.dp.toPx()
+            val captionY = numberY + line.toPx() + 2.dp.toPx()
+            if (switchWeek != null && switchText != null) {
+                val x = left + column * (switchWeek - 1)
+                val belowY = captionY + line.toPx() + 6.dp.toPx()
+                drawLine(
+                    colors.text3,
+                    Offset(x, usualY + 10.dp.toPx()),
+                    Offset(x, if (below) belowY + switchText.size.height / 2f else bottom),
+                    strokeWidth = 1.dp.toPx(),
+                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(2.dp.toPx(), 3.dp.toPx())),
+                )
+                if (below) {
+                    val textX = (x + 5.dp.toPx()).coerceAtMost(right - switchText.size.width)
+                    // On the page's colour, so the week numbers' row the rule crosses stays clear around it.
+                    drawRect(colors.bg, Offset(textX - 2.dp.toPx(), belowY), Size(switchText.size.width + 4.dp.toPx(), switchText.size.height.toFloat()))
+                    drawText(switchText, color = colors.text2, topLeft = Offset(textX, belowY))
+                } else {
+                    inPlot?.let { (at, _) -> drawText(switchText, color = colors.text2, topLeft = at) }
+                }
+            }
 
-        // The stepped line, on a halo of the page so it reads over the grid.
-        val path = Path()
-        steps.forEachIndexed { index, step ->
-            val at = y(step.guide.micrograms / 1000.0)
-            val x0 = left + column * index
-            if (index == 0) path.moveTo(x0, at) else path.lineTo(x0, at)
-            path.lineTo(x0 + column, at)
-        }
-        drawPath(path, colors.bg, style = Stroke(width = 7.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
-        drawPath(path, colors.guide, style = Stroke(width = 2.5.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
+            // The stepped line, on a halo of the page so it reads over the grid.
+            val path = Path()
+            steps.forEachIndexed { index, step ->
+                val at = frame.y(step.guide.micrograms / 1000.0)
+                val x0 = left + column * index
+                if (index == 0) path.moveTo(x0, at) else path.lineTo(x0, at)
+                path.lineTo(x0 + column, at)
+            }
+            drawPath(path, colors.bg, style = Stroke(width = 7.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
+            drawPath(path, colors.guide, style = Stroke(width = 2.5.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
 
-        // Each week's guide over its step, where there's room.
-        var lastRight = Float.NEGATIVE_INFINITY
-        steps.forEachIndexed { index, step ->
-            if (step.isNrtFree) return@forEachIndexed
-            val text = measurer.measure(step.guide.mgText(), value.copy(color = colors.text))
-            val centre = left + column * index + column / 2
-            val x = centre - text.size.width / 2f
-            if (x < lastRight + 2.dp.toPx()) return@forEachIndexed
-            val at = Offset(x, y(step.guide.micrograms / 1000.0) - 4.dp.toPx() - text.size.height)
-            if (switchBox?.overlaps(Rect(at, Size(text.size.width.toFloat(), text.size.height.toFloat()))) == true) return@forEachIndexed
-            drawText(text, topLeft = at)
-            lastRight = x + text.size.width
-        }
+            // Each week's guide over its step, where there's room.
+            labels.shown.forEach { (text, at) -> drawText(text, color = colors.text, topLeft = at) }
 
-        // Week numbers, as many as fit, then "Week" and "NRT-free" under them.
-        val numberY = bottom + 8.dp.toPx()
-        val widest = measurer.measure(steps.size.toString(), small).size.width
-        val every = ceil((widest + 4.dp.toPx()) / column).toInt().coerceAtLeast(1)
-        // Every so many weeks from the first, and the last too when it has room.
-        val numbered = steps.indices.filter { it % every == 0 }.toMutableList()
-        if (steps.lastIndex !in numbered) {
-            if (steps.lastIndex - numbered.last() < every) numbered.removeAt(numbered.lastIndex)
-            numbered += steps.lastIndex
-        }
-        steps.forEachIndexed { index, step ->
-            if (index !in numbered) return@forEachIndexed
-            val text = measurer.measure(step.week.toString(), small.copy(color = colors.text3))
-            drawText(text, topLeft = Offset(left + column * index + column / 2 - text.size.width / 2f, numberY))
-        }
-        val captionY = numberY + line.toPx() + 2.dp.toPx()
-        drawText(measurer.measure(weekLabel, small.copy(color = colors.text2)), topLeft = Offset(left, captionY))
-        val free = steps.indices.filter { steps[it].isNrtFree }
-        if (free.isNotEmpty()) {
-            val text = measurer.measure(freeLabel, small.copy(color = colors.text2))
-            val centre = left + column * (free.first() + free.last() + 1) / 2f
-            val x = (centre - text.size.width / 2f).coerceAtMost(right - text.size.width)
-            drawText(text, topLeft = Offset(x, captionY))
+            // Week numbers, as many as fit, then "Week" and "NRT-free" under them.
+            val widest = measurer.measure(steps.size.toString(), small).size.width
+            val every = ceil((widest + 4.dp.toPx()) / column).toInt().coerceAtLeast(1)
+            // Every so many weeks from the first, and the last too when it has room.
+            val numbered = steps.indices.filter { it % every == 0 }.toMutableList()
+            if (steps.lastIndex !in numbered) {
+                if (steps.lastIndex - numbered.last() < every) numbered.removeAt(numbered.lastIndex)
+                numbered += steps.lastIndex
+            }
+            steps.forEachIndexed { index, step ->
+                if (index !in numbered) return@forEachIndexed
+                val text = measurer.measure(step.week.toString(), small.copy(color = colors.text3))
+                drawText(text, topLeft = Offset(left + column * index + column / 2 - text.size.width / 2f, numberY))
+            }
+            drawText(measurer.measure(weekLabel, small.copy(color = colors.text2)), topLeft = Offset(left, captionY))
+            val free = steps.indices.filter { steps[it].isNrtFree }
+            if (free.isNotEmpty()) {
+                val text = measurer.measure(freeLabel, small.copy(color = colors.text2))
+                val centre = left + column * (free.first() + free.last() + 1) / 2f
+                val x = (centre - text.size.width / 2f).coerceAtMost(right - text.size.width)
+                drawText(text, topLeft = Offset(x, captionY))
+            }
         }
     }
+}
+
+/** Where the guide chart's plot sits at a given width, and its scale. */
+private class ChartFrame(
+    val left: Float,
+    val right: Float,
+    val top: Float,
+    val bottom: Float,
+    val yMax: Double,
+    val gridStep: Double,
+    val column: Float,
+    val usualMg: Double,
+) {
+    fun y(mg: Double): Float = (bottom - (mg / yMax) * (bottom - top)).toFloat()
+
+    val usualY: Float get() = y(usualMg)
+}
+
+private fun Density.chartFrame(
+    width: Float,
+    steps: List<GuideStep>,
+    usual: Dose,
+    unit: String,
+    measurer: TextMeasurer,
+    small: TextStyle,
+    top: Float,
+    plotHeight: Float,
+): ChartFrame {
+    val maxMg = usual.micrograms / 1000.0
+    val gridStep = when {
+        maxMg <= 8 -> 2.0
+        maxMg <= 20 -> 5.0
+        maxMg <= 50 -> 10.0
+        maxMg <= 100 -> 20.0
+        else -> 50.0
+    }
+    var yMax = ceil(maxMg / gridStep) * gridStep
+    if (yMax - maxMg < gridStep * 0.2) yMax += gridStep
+    val labelWidth = (0..(yMax / gridStep).toInt()).maxOf { index ->
+        val text = gridText(index * gridStep, if (index == (yMax / gridStep).toInt()) unit else null)
+        measurer.measure(text, small).size.width
+    }
+    val left = maxOf(30.dp.toPx(), labelWidth + 8.dp.toPx())
+    val right = width - 4.dp.toPx()
+    return ChartFrame(left, right, top, top + plotHeight, yMax, gridStep, (right - left) / steps.size.coerceAtLeast(1), maxMg)
+}
+
+/** The rule's label in the chart, beside the rule, and the room it takes, with a margin. */
+private fun Density.switchInPlot(frame: ChartFrame, switchWeek: Int, text: TextLayoutResult): Pair<Offset, Rect> {
+    val x = frame.left + frame.column * (switchWeek - 1)
+    val textX = if (x + 5.dp.toPx() + text.size.width <= frame.right) x + 5.dp.toPx() else x - 5.dp.toPx() - text.size.width
+    val at = Offset(textX, frame.usualY + 10.dp.toPx())
+    return at to Rect(at, Size(text.size.width.toFloat(), text.size.height.toFloat())).inflate(2.dp.toPx())
+}
+
+/**
+ * The steps' mg labels that fit, and whether [avoid] hid one for a step down that would otherwise
+ * have shown. A week at the same guide as the one before isn't a step down, so hiding its label
+ * loses nothing.
+ */
+private class StepLabels(val shown: List<Pair<TextLayoutResult, Offset>>, val hidden: Boolean)
+
+private fun Density.stepLabels(frame: ChartFrame, steps: List<GuideStep>, measurer: TextMeasurer, value: TextStyle, avoid: Rect?): StepLabels {
+    val shown = mutableListOf<Pair<TextLayoutResult, Offset>>()
+    var hidden = false
+    var lastRight = Float.NEGATIVE_INFINITY
+    steps.forEachIndexed { index, step ->
+        if (step.isNrtFree) return@forEachIndexed
+        val text = measurer.measure(step.guide.mgText(), value)
+        val centre = frame.left + frame.column * index + frame.column / 2
+        val x = centre - text.size.width / 2f
+        if (x < lastRight + 2.dp.toPx()) return@forEachIndexed
+        val at = Offset(x, frame.y(step.guide.micrograms / 1000.0) - 4.dp.toPx() - text.size.height)
+        if (avoid?.overlaps(Rect(at, Size(text.size.width.toFloat(), text.size.height.toFloat()))) == true) {
+            if (index == 0 || steps[index - 1].guide != step.guide) hidden = true
+            return@forEachIndexed
+        }
+        shown += text to at
+        lastRight = x + text.size.width
+    }
+    return StepLabels(shown, hidden)
 }
 
 private fun gridText(mg: Double, unit: String?): String {

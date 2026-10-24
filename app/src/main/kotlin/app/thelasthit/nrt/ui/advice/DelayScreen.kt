@@ -27,6 +27,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -116,7 +120,8 @@ private fun DelaySetUp(minutes: Int, viewModel: DelayViewModel, onBack: () -> Un
                     .padding(start = 18.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column(Modifier.weight(1f).semantics(mergeDescendants = true) {}) {
+                // Read out again after each step, so the new length is heard without leaving the button.
+                Column(Modifier.weight(1f).semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }) {
                     Text(
                         stringResource(R.string.timer_min, minutes),
                         style = LastHit.type.title.copy(fontSize = 24.sp, lineHeight = 28.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.02).em),
@@ -177,13 +182,19 @@ private fun DelayRunning(
                 }
             }
             // The track fills with the time gone, in the neutral ink: waiting isn't a dose, and it isn't the guide.
+            // A screen reader hears it once a minute, "4 minutes left", since the clock changes too often to read out.
+            val roughly = roughlyLeft(left)
             Box(
                 Modifier
                     .padding(top = 26.dp)
                     .fillMaxWidth()
                     .height(14.dp)
                     .clip(RoundedCornerShape(7.dp))
-                    .background(colors.track),
+                    .background(colors.track)
+                    .clearAndSetSemantics {
+                        contentDescription = roughly
+                        liveRegion = LiveRegionMode.Polite
+                    },
             ) {
                 Box(
                     Modifier
@@ -206,6 +217,18 @@ private fun DelayRunning(
             )
         }
         WhileYouWait(onBreathe)
+    }
+}
+
+/** The time left in whole minutes, rounded up, or "under a minute": it changes once a minute. */
+@Composable
+private fun roughlyLeft(left: java.time.Duration): String {
+    val seconds = left.seconds
+    return if (seconds < 60) {
+        stringResource(R.string.delay_left_under_minute)
+    } else {
+        val minutes = ((seconds + 59) / 60).toInt()
+        pluralStringResource(R.plurals.delay_left_minutes, minutes, minutes)
     }
 }
 
@@ -244,6 +267,8 @@ private fun WhileYouWait(onBreathe: () -> Unit) {
 private fun DelayDone(run: DelayRun, time: DateTimeFormatter, onClose: () -> Unit, onAgain: () -> Unit) {
     val colors = LastHit.colors
     val minutes = run.minutes
+    // The page changes in place as the time runs out, so a screen reader is told, as for a new pane.
+    val title = pluralStringResource(R.plurals.delay_done_title, minutes, minutes)
     TimerPage(
         top = { TimerTopBar(stringResource(R.string.delay_title), stringResource(R.string.timer_close), onClose) },
         foot = {
@@ -253,18 +278,24 @@ private fun DelayDone(run: DelayRun, time: DateTimeFormatter, onClose: () -> Uni
         centred = true,
     ) {
         Column(
-            Modifier.fillMaxWidth().padding(start = 32.dp, end = 32.dp, top = 12.dp, bottom = 8.dp),
+            Modifier
+                .fillMaxWidth()
+                .padding(start = 32.dp, end = 32.dp, top = 12.dp, bottom = 8.dp)
+                .semantics { paneTitle = title },
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Box(Modifier.size(96.dp).clip(CircleShape).background(colors.sunk), contentAlignment = Alignment.Center) {
                 Icon(painterResource(R.drawable.ic_check), contentDescription = null, tint = colors.text, modifier = Modifier.size(44.dp))
             }
             Text(
-                pluralStringResource(R.plurals.delay_done_title, minutes, minutes),
+                title,
                 style = LastHit.type.headline.copy(fontSize = 34.sp, lineHeight = 38.sp, letterSpacing = (-0.035).em),
                 color = colors.text,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 28.dp).cssLineHeight(38.sp),
+                modifier = Modifier
+                    .padding(top = 28.dp)
+                    .cssLineHeight(38.sp)
+                    .semantics { heading() },
             )
             Text(
                 stringResource(R.string.delay_done_when, time.formatAt(run.startedAt), time.formatAt(run.endsAt)),

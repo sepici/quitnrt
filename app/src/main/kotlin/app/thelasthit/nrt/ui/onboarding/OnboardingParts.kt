@@ -1,6 +1,7 @@
 package app.thelasthit.nrt.ui.onboarding
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -42,6 +43,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -64,12 +66,15 @@ fun StepScaffold(
     onSkip: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    // Each step replaces the last in the same window, so a screen reader is told its title, as for a new pane.
+    val title = stringResource(step.title)
     Column(
         Modifier
             .fillMaxSize()
             .background(LastHit.colors.bg)
             .safeDrawingPadding()
-            .imePadding(),
+            .imePadding()
+            .semantics { paneTitle = title },
     ) {
         StepsBar(step, onBack, onSkip)
         Column(
@@ -91,6 +96,20 @@ fun StepScaffold(
         }
     }
 }
+
+/** The step's title, as its header shows it. */
+@get:StringRes
+private val OnboardingStep.title: Int
+    get() = when (this) {
+        OnboardingStep.WELCOME -> R.string.onboarding_before_title
+        OnboardingStep.STOPPED -> R.string.onboarding_stopped_title
+        OnboardingStep.COUNTRY -> R.string.onboarding_country_title
+        OnboardingStep.PRODUCTS -> R.string.onboarding_products_title
+        OnboardingStep.DEMON -> R.string.onboarding_demon_title
+        OnboardingStep.DAY_START -> R.string.onboarding_day_title
+        OnboardingStep.REMINDERS -> R.string.onboarding_reminders_title
+        OnboardingStep.DONE -> R.string.onboarding_done_title
+    }
 
 @Composable
 private fun StepsBar(step: OnboardingStep, onBack: (() -> Unit)?, onSkip: (() -> Unit)?) {

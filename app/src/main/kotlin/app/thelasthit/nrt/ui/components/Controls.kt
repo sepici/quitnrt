@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
@@ -22,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -29,6 +31,11 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.Dp
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.material3.ripple
+import androidx.compose.runtime.remember
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.ui.theme.LastHit
 
@@ -101,20 +108,21 @@ fun <T> Segmented(
             .heightIn(min = 52.dp)
             .clip(RoundedCornerShape(26.dp))
             .background(colors.sunk)
-            .padding(4.dp)
             .selectableGroup(),
-        horizontalArrangement = Arrangement.spacedBy(gap.dp),
     ) {
-        options.forEach { option ->
+        options.forEachIndexed { index, option ->
             val isSelected = option == selected
             val description = describe?.invoke(option)
             Box(
                 Modifier
                     .weight(1f)
-                    .heightIn(min = 44.dp)
-                    .clip(RoundedCornerShape(22.dp))
-                    .background(if (isSelected) colors.chipSelected else colors.sunk)
-                    .selectable(isSelected, role = Role.RadioButton, onClick = { onPick(option) })
+                    .heightIn(min = 52.dp)
+                    .trackOption(
+                        selected = isSelected,
+                        onClick = { onPick(option) },
+                        inset = trackInset(index, options.size, gap = gap.dp),
+                        fill = if (isSelected) colors.chipSelected else colors.sunk,
+                    )
                     .then(if (description != null) Modifier.semantics { contentDescription = description } else Modifier)
                     .padding(horizontal = 8.dp),
                 contentAlignment = Alignment.Center,
@@ -130,6 +138,48 @@ fun <T> Segmented(
             }
         }
     }
+}
+
+/** How far a track's options are drawn in from its edge. */
+val TRACK_INSET = 4.dp
+
+/**
+ * Where an option's pill is drawn inside its share of a sunk track: in from the track's outer
+ * edges by [TRACK_INSET], and half of [gap] from the options either side.
+ */
+fun trackInset(index: Int, count: Int, gap: Dp = 0.dp, row: Int = 0, rows: Int = 1): PaddingValues = PaddingValues(
+    start = if (index == 0) TRACK_INSET else gap / 2,
+    end = if (index == count - 1) TRACK_INSET else gap / 2,
+    top = if (row == 0) TRACK_INSET else 0.dp,
+    bottom = if (row == rows - 1) TRACK_INSET else 0.dp,
+)
+
+/**
+ * One option of a sunk track. The whole of its share of the track takes the tap, so it's at
+ * least 48 dp tall, while its pill, and the ripple, are drawn [inset] as the mockups have them.
+ * [onClick] null leaves it unpickable, as a locked range is.
+ */
+@Composable
+fun Modifier.trackOption(
+    selected: Boolean,
+    onClick: (() -> Unit)?,
+    inset: PaddingValues,
+    fill: Color,
+    shape: Shape = RoundedCornerShape(22.dp),
+): Modifier {
+    val interaction = remember { MutableInteractionSource() }
+    return this
+        .then(
+            if (onClick != null) {
+                Modifier.selectable(selected, interactionSource = interaction, indication = null, role = Role.RadioButton, onClick = onClick)
+            } else {
+                Modifier
+            },
+        )
+        .padding(inset)
+        .clip(shape)
+        .background(fill)
+        .indication(interaction, ripple())
 }
 
 /** The one main action on a sheet or screen: a full-width pill with a pressed lower edge. */

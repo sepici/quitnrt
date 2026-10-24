@@ -6,7 +6,6 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,6 +29,7 @@ import app.thelasthit.nrt.ui.format.rememberTimeFormatter
 import app.thelasthit.nrt.ui.graphViewModel
 import app.thelasthit.nrt.ui.log.LogSheet
 import app.thelasthit.nrt.ui.log.LogSheetViewModel
+import app.thelasthit.nrt.ui.components.DialogButton
 import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 
@@ -99,8 +99,8 @@ fun LinkHost(
             onDismissRequest = viewModel::discardDuplicate,
             title = { Text(stringResource(R.string.log_duplicate_title)) },
             text = { Text(stringResource(R.string.log_duplicate_body, time)) },
-            confirmButton = { TextButton(onClick = viewModel::keepBoth) { Text(stringResource(R.string.log_duplicate_keep)) } },
-            dismissButton = { TextButton(onClick = viewModel::discardDuplicate) { Text(stringResource(R.string.log_duplicate_discard)) } },
+            confirmButton = { DialogButton(stringResource(R.string.log_duplicate_keep), onClick = viewModel::keepBoth) },
+            dismissButton = { DialogButton(stringResource(R.string.log_duplicate_discard), onClick = viewModel::discardDuplicate) },
         )
     }
 }

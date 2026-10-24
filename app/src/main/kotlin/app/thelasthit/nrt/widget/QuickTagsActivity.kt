@@ -23,7 +23,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,6 +39,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -68,6 +69,7 @@ import app.thelasthit.nrt.ui.log.TagChips
 import app.thelasthit.nrt.ui.settings.TextLink
 import app.thelasthit.nrt.ui.theme.LastHit
 import app.thelasthit.nrt.ui.theme.LastHitTheme
+import app.thelasthit.nrt.ui.components.DialogButton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -229,21 +231,23 @@ fun QuickTagsSheet(viewModel: QuickTagsViewModel, onDone: () -> Unit) {
             onDismissRequest = viewModel::discard,
             title = { Text(stringResource(R.string.log_duplicate_title)) },
             text = { Text(stringResource(R.string.log_duplicate_body, time)) },
-            confirmButton = { TextButton(onClick = viewModel::keepBoth) { Text(stringResource(R.string.log_duplicate_keep)) } },
-            dismissButton = { TextButton(onClick = viewModel::discard) { Text(stringResource(R.string.log_duplicate_discard)) } },
+            confirmButton = { DialogButton(stringResource(R.string.log_duplicate_keep), onClick = viewModel::keepBoth) },
+            dismissButton = { DialogButton(stringResource(R.string.log_duplicate_discard), onClick = viewModel::discard) },
         )
     }
 
     val entry = form.entry ?: return
-    AppSheet(onDismissRequest = onDone, sheetState = sheetState) {
+    val title = stringResource(R.string.quick_tags_title)
+    AppSheet(onDismissRequest = onDone, sheetState = sheetState, title = title) {
         var expanded by rememberSaveable { mutableStateOf(setOf<String>()) }
         Column(Modifier.fillMaxWidth().navigationBarsPadding()) {
             Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        stringResource(R.string.quick_tags_title),
+                        title,
                         style = LastHit.type.headline.copy(fontSize = 28.sp, lineHeight = 34.sp, letterSpacing = (-0.03).em),
                         color = colors.text,
+                        modifier = Modifier.semantics { heading() },
                     )
                     Text(
                         stringResource(R.string.quick_tags_logged, entry.total.mgText(), form.name, rememberTimeFormatter().formatAt(entry.occurredAt, entry.zone)),

@@ -17,7 +17,6 @@
     <string name="advice_line_how">How to do it</string>
 
     <!-- The tip straight after logging, in the advice line's place until it's closed or the day ends. -->
-    <string name="advice_tip_description">Tip after logging</string>
     <string name="advice_tip_close">Close tip</string>
     <!-- %1$s is a strategy's title, starting in lower case: "Next time, get up from the table". -->
     <string name="advice_tip_title">Next time, %1$s</string>

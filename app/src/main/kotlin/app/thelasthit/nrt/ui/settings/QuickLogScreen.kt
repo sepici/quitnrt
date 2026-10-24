@@ -39,6 +39,7 @@ import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -234,11 +235,14 @@ private fun ReorderableList(state: QuickLogState, viewModel: QuickLogViewModel) 
                         .background(if (isDragged) colors.surface else colors.bg, RoundedCornerShape(if (isDragged) 16.dp else 0.dp)),
                 ) {
                     if (index > 0 && !isDragged) HorizontalDivider(color = colors.line)
+                    // Its place in the order, said with the row and again after a move.
+                    val position = stringResource(R.string.quick_log_position, index + 1, products.size)
                     Row(
                         Modifier
                             .fillMaxWidth()
                             .heightIn(min = 72.dp)
                             .semantics(mergeDescendants = true) {
+                                stateDescription = position
                                 customActions = buildList {
                                     if (index > 0) add(CustomAccessibilityAction(moveUp) { viewModel.move(index, index - 1); true })
                                     if (index < products.lastIndex) add(CustomAccessibilityAction(moveDown) { viewModel.move(index, index + 1); true })

@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -35,10 +36,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTimePickerState
@@ -53,11 +52,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -71,8 +74,11 @@ import app.thelasthit.nrt.domain.product.UserProduct
 import app.thelasthit.nrt.ui.components.AppSheet
 import app.thelasthit.nrt.ui.components.Chip
 import app.thelasthit.nrt.ui.components.ChipKind
+import app.thelasthit.nrt.ui.components.DialogButton
 import app.thelasthit.nrt.ui.components.PrimaryButton
 import app.thelasthit.nrt.ui.components.Segmented
+import app.thelasthit.nrt.ui.components.TimeChooser
+import app.thelasthit.nrt.ui.components.lastHitDatePickerColors
 import app.thelasthit.nrt.ui.format.ShortDateFormatter
 import app.thelasthit.nrt.ui.format.formatAt
 import app.thelasthit.nrt.ui.format.icon
@@ -82,6 +88,7 @@ import app.thelasthit.nrt.ui.format.rememberTimeFormatter
 import app.thelasthit.nrt.ui.format.tagText
 import app.thelasthit.nrt.ui.format.text
 import app.thelasthit.nrt.ui.theme.LastHit
+import app.thelasthit.nrt.ui.absorbed.aboutMgText
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
@@ -91,6 +98,9 @@ import java.time.ZoneOffset
 
 /** How many tags each group shows before "More". Selected tags always show. */
 private const val FOLDED_TAGS = 4
+
+/** Above this font scale, the product tiles widen with the text. */
+private const val WIDE_TILE_FONT_SCALE = 1.3f
 
 /**
  * The log sheet: product, amount, time, planned or craving, strength, tags and a note, with Save
@@ -113,9 +123,11 @@ fun LogSheet(
         scope.launch { sheetState.hide() }.invokeOnCompletion { then() }
     }
 
+    val title = stringResource(if (state?.form?.editing != null) R.string.log_title_edit else R.string.log_title)
     AppSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
+        title = title,
     ) {
         val current = state ?: return@AppSheet
         val save = {
@@ -147,14 +159,12 @@ fun LogSheet(
                 title = { Text(stringResource(R.string.log_duplicate_title)) },
                 text = { Text(stringResource(R.string.log_duplicate_body, time)) },
                 confirmButton = {
-                    TextButton(onClick = { viewModel.save(allowDuplicate = true) { saved -> close { onSaved(saved) } } }) {
-                        Text(stringResource(R.string.log_duplicate_keep))
+                    DialogButton(stringResource(R.string.log_duplicate_keep)) {
+                        viewModel.save(allowDuplicate = true) { saved -> close { onSaved(saved) } }
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { viewModel.dismissDuplicate(); close(onDismiss) }) {
-                        Text(stringResource(R.string.log_duplicate_discard))
-                    }
+                    DialogButton(stringResource(R.string.log_duplicate_discard)) { viewModel.dismissDuplicate(); close(onDismiss) }
                 },
             )
         }
@@ -169,6 +179,7 @@ private fun Header(state: LogSheetState, onClose: () -> Unit) {
                 stringResource(if (state.form.editing != null) R.string.log_title_edit else R.string.log_title),
                 style = LastHit.type.headline.copy(fontSize = 28.sp, lineHeight = 34.sp, letterSpacing = (-0.03).em),
                 color = LastHit.colors.text,
+                modifier = Modifier.semantics { heading() },
             )
             if (state.form.editing == null) {
                 Text(
@@ -192,7 +203,9 @@ private fun Field(title: String, bleed: Boolean = false, content: @Composable ()
             title,
             style = LastHit.type.label.copy(fontWeight = FontWeight.Bold),
             color = LastHit.colors.text2,
-            modifier = Modifier.padding(start = if (bleed) 20.dp else 0.dp, bottom = 10.dp),
+            modifier = Modifier
+                .padding(start = if (bleed) 20.dp else 0.dp, bottom = 10.dp)
+                .semantics { heading() },
         )
         content()
     }
@@ -226,7 +239,8 @@ private fun ProductField(state: LogSheetState, viewModel: LogSheetViewModel) {
             Modifier
                 .horizontalScroll(rememberScrollState())
                 .height(IntrinsicSize.Max)
-                .padding(horizontal = 20.dp),
+                .padding(horizontal = 20.dp)
+                .selectableGroup(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             shown.forEach { product ->
@@ -262,9 +276,11 @@ private fun ProductTile(product: UserProduct, selected: Boolean, onClick: () -> 
 private fun Tile(icon: Int, big: String, small: String, selected: Boolean, role: Role, onClick: () -> Unit) {
     val colors = LastHit.colors
     val content = if (selected) colors.onChipSelected else colors.text
+    // Wider past the large font, so a name like "Nicorette" isn't broken mid-word. The row scrolls.
+    val scale = LocalDensity.current.fontScale
     Column(
         Modifier
-            .width(112.dp)
+            .width(if (scale > WIDE_TILE_FONT_SCALE) 112.dp * (scale / WIDE_TILE_FONT_SCALE) else 112.dp)
             .fillMaxHeight()
             .heightIn(min = 96.dp)
             .clip(RoundedCornerShape(16.dp))
@@ -283,7 +299,8 @@ private fun Tile(icon: Int, big: String, small: String, selected: Boolean, role:
         Spacer(Modifier.height(10.dp))
         Column {
             Text(big, style = LastHit.type.title.copy(fontSize = 20.sp, lineHeight = 22.sp, fontWeight = FontWeight.ExtraBold), color = content)
-            Text(small, style = LastHit.type.caption.copy(fontSize = 12.sp, lineHeight = 16.sp), color = content.copy(alpha = 0.85f), maxLines = 2)
+            // In the full colour: a tint of it falls under 4.5:1 on the dark selected green.
+            Text(small, style = LastHit.type.caption.copy(fontSize = 12.sp, lineHeight = 16.sp), color = content, maxLines = 2)
         }
     }
 }
@@ -302,7 +319,12 @@ private fun AmountField(state: LogSheetState, viewModel: LogSheetViewModel) {
                 .padding(start = 18.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(Modifier.weight(1f)) {
+            // Spoken again after each step, so the new amount is heard without leaving the button.
+            Column(
+                Modifier
+                    .weight(1f)
+                    .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
+            ) {
                 Text(
                     pluralStringResource(product.unit.plural, state.form.quantity, state.form.quantity),
                     style = LastHit.type.title.copy(fontSize = 24.sp, lineHeight = 28.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.02).em),
@@ -312,7 +334,7 @@ private fun AmountField(state: LogSheetState, viewModel: LogSheetViewModel) {
                     if (absorbed == null) {
                         stringResource(R.string.log_amount_dose, state.dose.mgText())
                     } else {
-                        stringResource(R.string.absorbed_log_amount, state.dose.mgText(), absorbed.mgText())
+                        stringResource(R.string.absorbed_log_amount, state.dose.mgText(), absorbed.aboutMgText())
                     },
                     style = LastHit.type.caption,
                     color = colors.text2,
@@ -350,7 +372,11 @@ private fun TimeField(state: LogSheetState, viewModel: LogSheetViewModel) {
     var picking by rememberSaveable { mutableStateOf(false) }
     val choice = state.form.time
     Field(stringResource(R.string.log_time)) {
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(
+            Modifier.selectableGroup(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             val quick = listOf(
                 QuickTime.NOW to stringResource(R.string.log_time_now, timeFormat.formatAt(state.now)),
                 QuickTime.MINUTES_15_AGO to stringResource(R.string.log_time_15),
@@ -378,7 +404,10 @@ private fun TimeField(state: LogSheetState, viewModel: LogSheetViewModel) {
                 stringResource(R.string.log_future),
                 style = LastHit.type.label,
                 color = LastHit.colors.error,
-                modifier = Modifier.padding(top = 8.dp),
+                // Said at once, since it's why Save has stopped working.
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .semantics { liveRegion = LiveRegionMode.Assertive },
             )
         }
         // With a gap goal on, a dose sooner than it gets a calm note, and logs all the same.
@@ -415,16 +444,18 @@ private fun DateTimePicker(initial: Instant, onPicked: (Instant) -> Unit, onDism
                 }
             },
         )
+        val pickerColors = lastHitDatePickerColors()
         DatePickerDialog(
             onDismissRequest = onDismiss,
             confirmButton = {
-                TextButton(onClick = {
+                DialogButton(stringResource(R.string.log_time_next)) {
                     date = dateState.selectedDateMillis?.let { Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate() }
-                }) { Text(stringResource(R.string.log_time_next)) }
+                }
             },
-            dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+            dismissButton = { DialogButton(stringResource(R.string.action_cancel), onClick = onDismiss) },
+            colors = pickerColors,
         ) {
-            DatePicker(dateState)
+            DatePicker(dateState, colors = pickerColors)
         }
     } else {
         val timeState = rememberTimePickerState(
@@ -435,12 +466,12 @@ private fun DateTimePicker(initial: Instant, onPicked: (Instant) -> Unit, onDism
         AlertDialog(
             onDismissRequest = onDismiss,
             confirmButton = {
-                TextButton(onClick = {
+                DialogButton(stringResource(R.string.log_time_set)) {
                     onPicked(pickedDate.atTime(LocalTime.of(timeState.hour, timeState.minute)).atZone(zone).toInstant())
-                }) { Text(stringResource(R.string.log_time_set)) }
+                }
             },
-            dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
-            text = { TimePicker(timeState) },
+            dismissButton = { DialogButton(stringResource(R.string.action_cancel), onClick = onDismiss) },
+            text = { TimeChooser(timeState) },
         )
     }
 }
@@ -522,12 +553,16 @@ private fun TagsField(state: LogSheetState, viewModel: LogSheetViewModel) {
 @Composable
 private fun NoteField(state: LogSheetState, viewModel: LogSheetViewModel) {
     val colors = LastHit.colors
-    Field(stringResource(R.string.log_note)) {
+    val title = stringResource(R.string.log_note)
+    Field(title) {
         TextField(
             value = state.form.note,
             onValueChange = viewModel::changeNote,
             placeholder = { Text(stringResource(R.string.log_note_hint)) },
-            modifier = Modifier.fillMaxWidth(),
+            // Named after its title, which stays once the placeholder has gone.
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics { contentDescription = title },
             shape = RoundedCornerShape(16.dp),
             textStyle = LastHit.type.body,
             colors = TextFieldDefaults.colors(
@@ -559,9 +594,11 @@ private fun SaveBar(state: LogSheetState, viewModel: LogSheetViewModel, onSave: 
             if (!editing && state.product != null) {
                 Text(
                     stringResource(R.string.log_save_detail, state.dose.mgText(), time),
+                    // In the full colour: a tint of it falls under 4.5:1 on the dark-mode button.
                     style = LastHit.type.label.copy(fontSize = 15.sp),
-                    color = content.copy(alpha = 0.82f),
+                    color = content,
                 )
+
             }
         }
     }

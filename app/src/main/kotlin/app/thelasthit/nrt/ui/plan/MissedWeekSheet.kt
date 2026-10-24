@@ -83,6 +83,9 @@ internal fun MissedWeekSheet(
     AppSheet(
         onDismissRequest = { onChoose(MissedWeekChoice.CARRY_ON) },
         sheetState = sheetState,
+        title = stringResource(R.string.plan_missed_title),
+        // Closing it chooses Carry on, so the handle says so, as the cross does.
+        dismissLabel = stringResource(R.string.plan_close_carry_on),
     ) {
         Column(Modifier.fillMaxWidth()) {
             Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState())) {

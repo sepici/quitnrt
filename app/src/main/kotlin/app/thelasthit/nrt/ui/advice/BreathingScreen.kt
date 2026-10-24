@@ -47,6 +47,8 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -62,10 +64,13 @@ import app.thelasthit.nrt.domain.advice.BreathingBadges
 import app.thelasthit.nrt.domain.advice.BreathingPattern
 import app.thelasthit.nrt.domain.advice.BreathingPlan
 import app.thelasthit.nrt.domain.advice.BreathingRun
+import app.thelasthit.nrt.domain.advice.phases
+import app.thelasthit.nrt.domain.advice.roundSeconds
 import app.thelasthit.nrt.ui.components.PrimaryButton
 import app.thelasthit.nrt.ui.components.Segmented
 import app.thelasthit.nrt.ui.components.SwitchRow
 import app.thelasthit.nrt.ui.theme.LastHit
+import app.thelasthit.nrt.ui.components.rememberAnimatorScale
 import java.time.Duration
 import java.time.Instant
 
@@ -271,6 +276,9 @@ private fun BreathingRunning(run: BreathingRun, now: Instant, onStop: () -> Unit
     val colors = LastHit.colors
     val moment = run.moment(now)
     val left = moment.remaining
+    // With the phone's animations off, the square holds its size and the dot moves only at each
+    // step. The step's name, the count, the spoken step and the buzz still keep the pace.
+    val still = rememberAnimatorScale() <= 0f
     TimerPage(
         top = {
             TimerTopBar(
@@ -309,14 +317,15 @@ private fun BreathingRunning(run: BreathingRun, now: Instant, onStop: () -> Unit
                     drawPath(path, colors.track, style = Stroke(LINE.toPx(), cap = StrokeCap.Round))
                     val measure = PathMeasure().apply { setPath(path, false) }
                     val done = Path()
-                    val distance = measure.length * moment.roundProgress.toFloat()
+                    val progress = if (still) stepStart(run.plan, moment.step) else moment.roundProgress
+                    val distance = measure.length * progress.toFloat()
                     if (distance > 0f) {
                         measure.getSegment(0f, distance, done, true)
                         drawPath(done, colors.text, style = Stroke(LINE.toPx(), cap = StrokeCap.Round))
                     }
                     drawDot(measure.getPosition(distance), colors.text, colors.bg)
                 }
-                val fullness = FastOutSlowInEasing.transform(moment.fullness.toFloat())
+                val fullness = if (still) 1f else FastOutSlowInEasing.transform(moment.fullness.toFloat())
                 val size = LUNG_SMALL + (LUNG_LARGE - LUNG_SMALL) * fullness
                 Lung(size) {
                     Text(
@@ -349,6 +358,8 @@ private fun BreathingRunning(run: BreathingRun, now: Instant, onStop: () -> Unit
 private fun BreathingDone(done: BreathingStage.Done, onClose: () -> Unit, onAnother: () -> Unit) {
     val colors = LastHit.colors
     val plan = done.plan
+    // The page changes in place as the last round ends, so a screen reader is told, as for a new pane.
+    val doneTitle = done.session?.let { stringResource(R.string.breathing_done_title, it) } ?: stringResource(R.string.timer_done)
     TimerPage(
         top = { TimerTopBar(patternName(plan.pattern), stringResource(R.string.timer_close), onClose) },
         foot = {
@@ -358,7 +369,10 @@ private fun BreathingDone(done: BreathingStage.Done, onClose: () -> Unit, onAnot
         centred = true,
     ) {
         Column(
-            Modifier.fillMaxWidth().padding(top = 12.dp, bottom = 8.dp),
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 12.dp, bottom = 8.dp)
+                .semantics { paneTitle = doneTitle },
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Box(Modifier.size(DONE_STAGE), contentAlignment = Alignment.Center) {
@@ -381,7 +395,10 @@ private fun BreathingDone(done: BreathingStage.Done, onClose: () -> Unit, onAnot
                     style = LastHit.type.headline.copy(fontSize = 34.sp, lineHeight = 38.sp, letterSpacing = (-0.035).em),
                     color = colors.text,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 28.dp).cssLineHeight(38.sp),
+                    modifier = Modifier
+                        .padding(start = 20.dp, end = 20.dp, top = 28.dp)
+                        .cssLineHeight(38.sp)
+                        .semantics { heading() },
                 )
                 Text(
                     stringResource(
@@ -412,6 +429,12 @@ private fun BreathingDone(done: BreathingStage.Done, onClose: () -> Unit, onAnot
             }
         }
     }
+}
+
+/** Where the dot stands at the start of [step], as a share of the way round: with animations off, it waits there. */
+private fun stepStart(plan: BreathingPlan, step: BreathStep): Double {
+    val phases = plan.pattern.phases
+    return phases.takeWhile { it.step != step }.sumOf { it.seconds }.toDouble() / plan.pattern.roundSeconds
 }
 
 /** The hero green square in the middle of the stage, at [size]. */

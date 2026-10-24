@@ -35,6 +35,14 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.error
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -226,18 +234,21 @@ private fun ProductSheet(
         scope.launch { sheetState.hide() }.invokeOnCompletion { onDismiss() }
     }
 
+    val title = stringResource(if (editing == null) R.string.hand_title else R.string.hand_edit_title)
     AppSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
+        title = title,
     ) {
         Column(Modifier.fillMaxWidth().imePadding()) {
             Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState())) {
                 Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
                         Text(
-                            stringResource(if (editing == null) R.string.hand_title else R.string.hand_edit_title),
+                            title,
                             style = LastHit.type.headline.copy(fontSize = 28.sp, lineHeight = 34.sp),
                             color = colors.text,
+                            modifier = Modifier.semantics { heading() },
                         )
                         Text(
                             if (editing == null) stringResource(R.string.hand_detail) else stringResource(R.string.dose_named, formName(editing.form), editing.perUnit.mgText()),
@@ -249,8 +260,9 @@ private fun ProductSheet(
                         Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.action_close), tint = colors.text)
                     }
                 }
-                SheetField(stringResource(R.string.hand_name)) {
+                SheetField(stringResource(R.string.hand_name), forTextField = true) { label ->
                     SheetTextField(
+                        label = label,
                         value = name,
                         onChange = { name = it.take(40) },
                         keyboard = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
@@ -258,14 +270,19 @@ private fun ProductSheet(
                 }
                 if (editing == null) {
                     SheetField(stringResource(R.string.hand_type)) {
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FlowRow(
+                            Modifier.selectableGroup(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
                             HandForms.forEach { each ->
                                 Chip(formName(each), selected = each == form, kind = ChipKind.Choice, onClick = { form = each })
                             }
                         }
                     }
-                    SheetField(stringResource(R.string.hand_strength)) {
+                    SheetField(stringResource(R.string.hand_strength), forTextField = true) { label ->
                         SheetTextField(
+                            label = label,
                             value = strength,
                             onChange = { strength = it.take(8) },
                             suffix = stringResource(perUnitLabel(form.defaultUnit)),
@@ -274,8 +291,9 @@ private fun ProductSheet(
                         )
                     }
                 }
-                SheetField(stringResource(R.string.hand_limit)) {
+                SheetField(stringResource(R.string.hand_limit), forTextField = true) { label ->
                     SheetTextField(
+                        label = label,
                         value = limit,
                         onChange = { limit = it.take(4) },
                         placeholder = stringResource(R.string.hand_limit_hint),
@@ -310,8 +328,9 @@ private fun ProductSheet(
                     if (editing == null && dose != null) {
                         Text(
                             stringResource(R.string.dose_named, formName(form), dose.mgText()),
+                            // In the full colour: a tint of it falls under 4.5:1 on the dark-mode button.
                             style = LastHit.type.label.copy(fontSize = 15.sp),
-                            color = content.copy(alpha = 0.82f),
+                            color = content,
                         )
                     }
                 }
@@ -320,17 +339,26 @@ private fun ProductSheet(
     }
 }
 
+/**
+ * A titled part of a sheet. [forTextField] when it holds a text field named after the title
+ * ([SheetTextField]'s label), so a screen reader doesn't hear the title twice. [content] gets the title.
+ */
 @Composable
-internal fun SheetField(title: String, content: @Composable () -> Unit) {
+internal fun SheetField(title: String, forTextField: Boolean = false, content: @Composable (title: String) -> Unit) {
     Column(Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 20.dp)) {
-        FieldLabel(title)
-        content()
+        FieldLabel(title, if (forTextField) Modifier.clearAndSetSemantics {} else Modifier)
+        content(title)
     }
 }
 
-/** A text field in the sheets' style, with an optional unit after the value and an error under it. */
+/**
+ * A text field in the sheets' style, with an optional unit after the value and an error under it.
+ * [label] names it for a screen reader, as the title above it does on screen, and an error is
+ * read out as it appears.
+ */
 @Composable
 internal fun SheetTextField(
+    label: String,
     value: String,
     onChange: (String) -> Unit,
     keyboard: KeyboardOptions = KeyboardOptions.Default,
@@ -343,7 +371,12 @@ internal fun SheetTextField(
     OutlinedTextField(
         value = value,
         onValueChange = onChange,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics {
+                contentDescription = label
+                if (error != null) this.error(error)
+            },
         singleLine = true,
         shape = RoundedCornerShape(16.dp),
         textStyle = LastHit.type.body.copy(fontSize = 18.sp, fontWeight = FontWeight.SemiBold),
@@ -351,7 +384,8 @@ internal fun SheetTextField(
         suffix = suffix?.let { { Text(it, style = LastHit.type.label.copy(fontSize = 15.sp), color = colors.text2) } },
         trailingIcon = trailing,
         isError = error != null,
-        supportingText = error?.let { { Text(it, color = colors.error) } },
+        supportingText = error?.let { { Text(it, color = colors.error, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Assertive }) } },
+
         keyboardOptions = keyboard,
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = colors.surface,

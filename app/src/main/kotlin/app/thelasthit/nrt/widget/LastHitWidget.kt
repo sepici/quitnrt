@@ -7,6 +7,9 @@ import androidx.annotation.DrawableRes
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import java.util.Locale
+import java.time.format.DateTimeFormatter
+import android.text.format.DateFormat
 import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
@@ -22,8 +25,9 @@ import app.thelasthit.nrt.domain.reminders.TodayGuide
 import app.thelasthit.nrt.quicklog.QuickLog
 import app.thelasthit.nrt.quicklog.WidgetMoment
 import app.thelasthit.nrt.ui.format.icon
-import app.thelasthit.nrt.ui.format.mgText
+import app.thelasthit.nrt.ui.format.pillDescription
 import app.thelasthit.nrt.ui.format.pillLabelText
+import app.thelasthit.nrt.ui.format.mgText
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -53,6 +57,10 @@ data class WidgetModel(
     val moment: WidgetMoment?,
     /** A tap on a favourite opens the tag picker after logging. */
     val asksForTags: Boolean,
+    /** "Last dose at 14:25, 2 mg of Nicorette gum", as Today has it, for a widget with room to spare. */
+    val lastDose: String? = null,
+    /** "Last dose at 14:25", for one with less. */
+    val lastDoseShort: String? = null,
 )
 
 /**
@@ -105,24 +113,34 @@ class LastHitWidget : GlanceAppWidget() {
             val favourites = combine(graph.products.quickLog, graph.products.shortNames) { products, names ->
                 val labels = PillLabel.of(products)
                 products.take(MAX_FAVOURITES).map { product ->
-                    val named = resources.getString(R.string.dose_named, names[product.id] ?: product.shortName, product.perUnit.mgText())
+                    val label = labels.getValue(product.id)
                     Favourite(
                         productId = product.id,
-                        label = resources.pillLabelText(labels.getValue(product.id)),
+                        label = resources.pillLabelText(label),
                         icon = product.form.icon,
-                        description = resources.getString(R.string.today_quick_log_description, named),
+                        // The words on the pill first, as on Today, then the product.
+                        description = resources.pillDescription(label, names[product.id] ?: product.shortName),
                     )
                 }
             }
             return today(graph).flatMapLatest { date ->
                 combine(
-                    graph.entries.observeDay(date),
+                    combine(graph.entries.observeDay(date), graph.products.shortNames, ::Pair),
                     graph.programmes.observeCurrent().map { record -> TodayGuide.on(record?.plan, record?.status, date) },
                     combine(favourites, graph.settings.settings.map { it.onboardingComplete }, ::Pair),
                     graph.reminders.quickLog.map { it.widgetAsksForTags },
                     quickLog.moment,
-                ) { day, guide, (favourites, setUp), asksForTags, moment ->
-                    WidgetModel(setUp, day.total, day.entries.size, guide, favourites, moment, asksForTags)
+                ) { (day, names), guide, (favourites, setUp), asksForTags, moment ->
+                    val lastEntry = day.entries.maxByOrNull { it.occurredAt }
+                    val at = lastEntry?.let { entry ->
+                        DateTimeFormatter.ofPattern(if (DateFormat.is24HourFormat(context)) "HH:mm" else "h:mm a", Locale.UK)
+                            .format(entry.occurredAt.atZone(entry.zone))
+                    }
+                    val last = lastEntry?.let { entry ->
+                        resources.getString(R.string.today_last_dose, at, entry.total.mgText(), names[entry.productId] ?: entry.productName)
+                    }
+                    val lastShort = at?.let { resources.getString(R.string.widget_last_dose_short, it) }
+                    WidgetModel(setUp, day.total, day.entries.size, guide, favourites, moment, asksForTags, last, lastShort)
                 }
             }
         }

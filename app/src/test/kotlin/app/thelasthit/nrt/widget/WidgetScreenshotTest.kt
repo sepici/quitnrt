@@ -35,6 +35,8 @@ import app.thelasthit.nrt.domain.product.ProductForm
 import app.thelasthit.nrt.quicklog.WidgetMoment
 import app.thelasthit.nrt.ui.FULL_PAGE
 import app.thelasthit.nrt.ui.LARGE_FONT
+import app.thelasthit.nrt.ui.HUGE_FONT
+import app.thelasthit.nrt.ui.fontSuffix
 import com.github.takahirom.roborazzi.captureRoboImage
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
@@ -69,13 +71,13 @@ class WidgetScreenshotTest {
     private val nbsp = Char(0xA0)
 
     private val favourites = listOf(
-        Favourite(GUM_2, "Gum 2${nbsp}mg", R.drawable.ic_form_gum, "Log Nicorette gum 2${nbsp}mg"),
-        Favourite(GUM_4, "Gum 4${nbsp}mg", R.drawable.ic_form_gum, "Log Nicorette gum 4${nbsp}mg"),
-        Favourite(QUICKMIST, "Mouth spray 1${nbsp}mg", R.drawable.ic_form_spray, "Log Nicorette QuickMist 1${nbsp}mg"),
+        Favourite(GUM_2, "Gum 2${nbsp}mg", R.drawable.ic_form_gum, "Log Gum 2${nbsp}mg, Nicorette gum"),
+        Favourite(GUM_4, "Gum 4${nbsp}mg", R.drawable.ic_form_gum, "Log Gum 4${nbsp}mg, Nicorette gum"),
+        Favourite(QUICKMIST, "Mouth spray 1${nbsp}mg", R.drawable.ic_form_spray, "Log Mouth spray 1${nbsp}mg, QuickMist"),
     )
 
     private fun model(today: Int = 8, doses: Int = 3, guide: Int? = 14, moment: WidgetMoment? = null) =
-        WidgetModel(true, Dose.mg(today), doses, guide?.let(Dose::mg), favourites, moment, asksForTags = false)
+        WidgetModel(true, Dose.mg(today), doses, guide?.let(Dose::mg), favourites, moment, asksForTags = false, lastDose = "Last dose at 14:25, 2${nbsp}mg of Nicorette gum", lastDoseShort = "Last dose at 14:25")
 
     private val entry = Entry(
         id = "e1",
@@ -119,7 +121,7 @@ class WidgetScreenshotTest {
     @OptIn(ExperimentalGlanceRemoteViewsApi::class)
     private fun capture(name: String, shown: List<Pair<DpSize, WidgetModel>>) {
         val dark = app.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
-        val large = app.resources.configuration.fontScale > 1f
+        val scale = app.resources.configuration.fontScale
         val views = shown.map { (size, model) -> size to runBlocking { GlanceRemoteViews().compose(app, size) { WidgetContent(model) } }.remoteViews }
         compose.setContent {
             Column(
@@ -131,7 +133,7 @@ class WidgetScreenshotTest {
                 }
             }
         }
-        compose.onNodeWithTag(WIDGETS).captureRoboImage("build/outputs/roborazzi/$name-${if (dark) "dark" else "light"}${if (large) "-large" else ""}.png")
+        compose.onNodeWithTag(WIDGETS).captureRoboImage("build/outputs/roborazzi/$name-${if (dark) "dark" else "light"}${fontSuffix(scale)}.png")
     }
 
     @Test
@@ -151,6 +153,13 @@ class WidgetScreenshotTest {
 
     @Test @Config(fontScale = LARGE_FONT)
     fun momentsLightLarge() = capture("widget-moments", moments)
+
+    /** At the largest font, where a pill's label on two lines has the least room. */
+    @Test @Config(fontScale = HUGE_FONT)
+    fun lightX2() = capture("widget", states)
+
+    @Test @Config(fontScale = HUGE_FONT)
+    fun momentsLightX2() = capture("widget-moments", moments)
 
     /** The 4 by 2 widget on its own, with its rounded corners clear, for the widget picker. */
     @OptIn(ExperimentalGlanceRemoteViewsApi::class)

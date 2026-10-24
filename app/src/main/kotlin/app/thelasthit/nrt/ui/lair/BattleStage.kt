@@ -1,6 +1,5 @@
 package app.thelasthit.nrt.ui.lair
 
-import android.provider.Settings
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -11,7 +10,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.scale as zoomed
 import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -136,16 +134,6 @@ fun impactPoint(sheet: SpriteSheet): Px {
     val size = sheet.size
     val front = (IMPACT_ROW - 2..IMPACT_ROW + 2).minOf { y -> (0 until size).firstOrNull { x -> pixels[y * size + x] != 0 } ?: size / 2 }
     return Px(front + 1, IMPACT_ROW)
-}
-
-/**
- * The phone's animation speed, from its developer or accessibility settings: 1 is normal, and 0
- * means animations are off ("remove animations"), so the lair keeps still.
- */
-@Composable
-fun rememberAnimatorScale(): Float {
-    val resolver = LocalContext.current.contentResolver
-    return remember(resolver) { Settings.Global.getFloat(resolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) }
 }
 
 /** The flash a hit makes: the sprite lit up in its highlight colour, inside its outline. */

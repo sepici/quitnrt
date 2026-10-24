@@ -33,6 +33,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
@@ -215,7 +217,8 @@ private fun GoalStepper(
             .padding(start = 18.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(Modifier.weight(1f).semantics(mergeDescendants = true) {}) {
+        // Read out again after each step, so the new value is heard without leaving the button.
+        Column(Modifier.weight(1f).semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }) {
             Text(value, style = LastHit.type.title.copy(fontSize = 24.sp, lineHeight = 28.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.02).em), color = colors.text)
             Text(caption, style = LastHit.type.caption, color = colors.text2)
         }
@@ -235,7 +238,12 @@ private fun CapRow(title: String, value: String, unit: String, canFewer: Boolean
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Column(Modifier.weight(1f).clearAndSetSemantics { contentDescription = description }) {
+        Column(
+            Modifier.weight(1f).clearAndSetSemantics {
+                contentDescription = description
+                liveRegion = LiveRegionMode.Polite
+            },
+        ) {
             Text(title, style = LastHit.type.title.copy(fontWeight = FontWeight.Bold), color = colors.text)
             Text(stringResource(R.string.plan_a_day, value), style = LastHit.type.label.copy(fontWeight = FontWeight.Normal), color = colors.text2)
         }

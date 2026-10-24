@@ -83,6 +83,7 @@ import app.thelasthit.nrt.ui.log.LogSheet
 import app.thelasthit.nrt.ui.log.LogSheetViewModel
 import app.thelasthit.nrt.ui.log.SavedDose
 import app.thelasthit.nrt.ui.theme.LastHit
+import app.thelasthit.nrt.ui.absorbed.aboutMgText
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.TextStyle
@@ -360,7 +361,7 @@ private fun DayHeader(day: LoggedDay, today: LocalDate, filtered: Boolean, ticke
         ticked -> stringResource(R.string.history_day_within_description, "$title $date", total)
         else -> stringResource(R.string.history_day_description, "$title $date", total)
     }
-    val description = if (absorbed == null) labelled else stringResource(R.string.absorbed_with_description, labelled, absorbed.mgText())
+    val description = if (absorbed == null) labelled else stringResource(R.string.absorbed_with_description, labelled, absorbed.aboutMgText())
     Column {
         Row(
             Modifier
@@ -379,14 +380,20 @@ private fun DayHeader(day: LoggedDay, today: LocalDate, filtered: Boolean, ticke
                         style = LastHit.type.headline.copy(fontSize = 24.sp, lineHeight = 30.sp, letterSpacing = (-0.025).em),
                         color = colors.text,
                     )
+                    val meta = if (filtered) {
+                        pluralStringResource(R.plurals.history_day_meta_filtered, day.doses, date, count, day.doses)
+                    } else {
+                        pluralStringResource(R.plurals.history_day_meta, count, date, count)
+                    }
+                    // "23 October, 5 doses" on one line. Where it won't fit, as beside an estimate at a
+                    // large font, the date and the count take a line each, rather than the comma
+                    // hanging at the end of the first.
+                    var split by remember(meta) { mutableStateOf(false) }
                     Text(
-                        if (filtered) {
-                            pluralStringResource(R.plurals.history_day_meta_filtered, day.doses, date, count, day.doses)
-                        } else {
-                            pluralStringResource(R.plurals.history_day_meta, count, date, count)
-                        },
+                        if (split) meta.replaceFirst(", ", "\n") else meta,
                         style = LastHit.type.label,
                         color = colors.text2,
+                        onTextLayout = { if (it.lineCount > 1 && !split) split = true },
                     )
                 }
             }

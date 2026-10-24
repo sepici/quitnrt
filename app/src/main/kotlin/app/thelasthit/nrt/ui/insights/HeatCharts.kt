@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -60,6 +59,8 @@ import app.thelasthit.nrt.ui.theme.LastHit
 import app.thelasthit.nrt.ui.theme.LastHitColors
 import app.thelasthit.nrt.ui.theme.heatFill
 import app.thelasthit.nrt.ui.theme.heatInk
+import app.thelasthit.nrt.ui.components.trackInset
+import app.thelasthit.nrt.ui.components.trackOption
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
@@ -421,18 +422,22 @@ fun ShadeToggle(shade: Shade, label: @Composable (Shade) -> String, onPick: (Sha
             .heightIn(min = 48.dp)
             .clip(RoundedCornerShape(24.dp))
             .background(colors.sunk)
-            .padding(4.dp)
             .selectableGroup(),
     ) {
-        Shade.entries.forEach { option ->
+        Shade.entries.forEachIndexed { index, option ->
             val isSelected = option == shade
+            // The whole of its half of the track takes the tap, 48 dp tall, around the 40 dp pill.
             Box(
                 Modifier
-                    .widthIn(min = 80.dp)
-                    .heightIn(min = 40.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(if (isSelected) colors.chipSelected else colors.sunk)
-                    .selectable(isSelected, role = Role.RadioButton, onClick = { onPick(option) })
+                    .widthIn(min = 84.dp)
+                    .heightIn(min = 48.dp)
+                    .trackOption(
+                        selected = isSelected,
+                        onClick = { onPick(option) },
+                        inset = trackInset(index, Shade.entries.size),
+                        fill = if (isSelected) colors.chipSelected else colors.sunk,
+                        shape = RoundedCornerShape(20.dp),
+                    )
                     .padding(horizontal = 14.dp),
                 contentAlignment = Alignment.Center,
             ) {

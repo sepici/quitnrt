@@ -51,7 +51,7 @@ import org.robolectric.annotation.Config
  * Estimated absorbed amounts (ROADMAP P9-1): off by default, then beside the labelled mg on
  * Today's hero and rows, History's rows and day totals and the log sheet, and nowhere else. The week in
  * [seedWeek] has 8 mg of gum today (one 4 mg piece and two 2 mg ones), so about 4 mg absorbed,
- * and a 14 mg patch on Thursday, so about 11.2 mg.
+ * and a 14 mg patch on Thursday, so 11.2 mg, about 11.
  */
 @OptIn(ExperimentalTestApi::class)
 @RunWith(RobolectricTestRunner::class)
@@ -163,10 +163,10 @@ class AbsorbedTest {
 
         waitForDescription("8${NB}mg today, about 4${NB}mg absorbed")
         compose.waitUntilAtLeastOneExists(
-            hasContentDescription("8${NB}mg used. Daily guide 14${NB}mg. 6${NB}mg left today.", substring = true),
+            hasContentDescription("Daily guide 14${NB}mg. 6${NB}mg left today.", substring = true),
             timeoutMillis = 5_000,
         )
-        compose.onNodeWithText("of 98${NB}mg this week").assertExists()
+        compose.onNode(hasContentDescription("61${NB}mg used of the 98${NB}mg allowance this week")).assertExists()
         compose.onNodeWithText("Week 4 of 12, day 5. 37${NB}mg left this week.").assertExists()
         // Thursday's 14 mg patch is at the 14 mg guide in labelled mg, whatever its estimate.
         compose.onNode(hasContentDescription("Thursday 14${NB}mg, at or under the guide", substring = true)).assertExists()
@@ -181,9 +181,10 @@ class AbsorbedTest {
 
         waitForDescription("Today, 8${NB}mg so far, about 4${NB}mg absorbed")
         assertEquals("about 1${NB}mg", app.getString(R.string.absorbed_about_short, "1"))
-        // The 4 mg piece and the two 2 mg ones, which screen readers hear in full.
+        // The 4 mg piece, the two 2 mg ones and a spray further down (under 1 mg, said in whole mg),
+        // which screen readers hear in full.
         compose.onAllNodes(hasText("about 2${NB}mg absorbed")).fetchSemanticsNodes().let { assertTrue(it.isNotEmpty()) }
-        compose.onAllNodes(hasText("about 1${NB}mg absorbed")).fetchSemanticsNodes().let { assertEquals(2, it.size) }
+        compose.onAllNodes(hasText("about 1${NB}mg absorbed")).fetchSemanticsNodes().let { assertEquals(3, it.size) }
         // Beside the labelled mg, never in place of it.
         compose.onAllNodes(hasText("2${NB}mg") and hasText("about 1${NB}mg absorbed")).fetchSemanticsNodes().let { assertEquals(2, it.size) }
     }
@@ -195,7 +196,7 @@ class AbsorbedTest {
         app.showAbsorbed()
         show { HistoryScreen(snackbars = it) }
 
-        waitForDescription("Thursday 22 October, 14${NB}mg, about 11.2${NB}mg absorbed")
+        waitForDescription("Thursday 22 October, 14${NB}mg, about 11${NB}mg absorbed")
     }
 
     @Test

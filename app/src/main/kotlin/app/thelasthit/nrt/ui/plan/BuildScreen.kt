@@ -27,7 +27,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -65,6 +64,8 @@ import app.thelasthit.nrt.ui.format.mgText
 import app.thelasthit.nrt.ui.graphViewModel
 import app.thelasthit.nrt.ui.settings.TextLink
 import app.thelasthit.nrt.ui.theme.LastHit
+import app.thelasthit.nrt.ui.components.DialogButton
+import app.thelasthit.nrt.ui.components.lastHitDatePickerColors
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -258,16 +259,18 @@ private fun StartPicker(start: LocalDate, today: LocalDate, onPick: (LocalDate) 
             override fun isSelectableYear(year: Int): Boolean = year >= today.year
         },
     )
+    val pickerColors = lastHitDatePickerColors()
     DatePickerDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(onClick = {
+            DialogButton(stringResource(R.string.plan_use_start)) {
                 picker.selectedDateMillis?.let { onPick(Instant.ofEpochMilli(it).atOffset(ZoneOffset.UTC).toLocalDate()) } ?: onDismiss()
-            }) { Text(stringResource(R.string.plan_use_start)) }
+            }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+        dismissButton = { DialogButton(stringResource(R.string.action_cancel), onClick = onDismiss) },
+        colors = pickerColors,
     ) {
-        DatePicker(state = picker, showModeToggle = false)
+        DatePicker(state = picker, showModeToggle = false, colors = pickerColors)
     }
 }
 

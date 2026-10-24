@@ -30,7 +30,6 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,10 +43,12 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -62,6 +63,7 @@ import app.thelasthit.nrt.domain.log.LabelWarning
 import app.thelasthit.nrt.ui.advice.AdviceLinks
 import app.thelasthit.nrt.ui.absorbed.HERO_ESTIMATE_TAG
 import app.thelasthit.nrt.ui.absorbed.absorbedLine
+import app.thelasthit.nrt.ui.components.DialogButton
 import app.thelasthit.nrt.ui.components.EntryRow
 import app.thelasthit.nrt.ui.components.IconTile
 import app.thelasthit.nrt.ui.components.pressable
@@ -72,6 +74,7 @@ import app.thelasthit.nrt.ui.format.formatAt
 import app.thelasthit.nrt.ui.format.icon
 import app.thelasthit.nrt.ui.format.labelNoteText
 import app.thelasthit.nrt.ui.format.mgText
+import app.thelasthit.nrt.ui.format.pillDescription
 import app.thelasthit.nrt.ui.format.pillLabelText
 import app.thelasthit.nrt.ui.format.rememberTimeFormatter
 import app.thelasthit.nrt.ui.game.DemonBand
@@ -80,6 +83,7 @@ import app.thelasthit.nrt.ui.graphViewModel
 import app.thelasthit.nrt.ui.log.LogSheet
 import app.thelasthit.nrt.ui.log.LogSheetViewModel
 import app.thelasthit.nrt.ui.theme.LastHit
+import app.thelasthit.nrt.ui.absorbed.aboutMgText
 import kotlinx.coroutines.launch
 import java.time.Duration
 
@@ -222,8 +226,8 @@ fun TodayScreen(
             onDismissRequest = viewModel::discardDuplicate,
             title = { Text(stringResource(R.string.log_duplicate_title)) },
             text = { Text(stringResource(R.string.log_duplicate_body, time)) },
-            confirmButton = { TextButton(onClick = viewModel::keepBoth) { Text(stringResource(R.string.log_duplicate_keep)) } },
-            dismissButton = { TextButton(onClick = viewModel::discardDuplicate) { Text(stringResource(R.string.log_duplicate_discard)) } },
+            confirmButton = { DialogButton(stringResource(R.string.log_duplicate_keep), onClick = viewModel::keepBoth) },
+            dismissButton = { DialogButton(stringResource(R.string.log_duplicate_discard), onClick = viewModel::discardDuplicate) },
         )
     }
 }
@@ -296,7 +300,7 @@ private fun Hero(
             val amountDescription = if (absorbed == null) {
                 stringResource(R.string.today_amount_description, total)
             } else {
-                stringResource(R.string.absorbed_today_description, total, absorbed.mgText())
+                stringResource(R.string.absorbed_today_description, total, absorbed.aboutMgText())
             }
             Row(
                 Modifier
@@ -323,7 +327,8 @@ private fun Hero(
             }
             val plan = state.plan
             if (plan != null) {
-                GuideMeter(plan, state.day.total, Modifier.padding(top = 22.dp))
+                // The amount above already says the total, so the meter starts at the guide.
+                GuideMeter(plan, state.day.total, Modifier.padding(top = 22.dp), sayTotal = false)
             } else {
                 Text(
                     if (doses == 0) stringResource(R.string.today_nothing_yet) else pluralStringResource(R.plurals.today_doses_so_far, doses, doses),
@@ -341,7 +346,7 @@ private fun Hero(
             val logDescription = stringResource(R.string.today_log_description)
             Row(
                 Modifier
-                    .height(48.dp)
+                    .heightIn(min = 48.dp)
                     .pressable(colors.onHero, RoundedCornerShape(24.dp), depth = 4.dp)
                     .combinedClickable(role = Role.Button, onClick = onLog)
                     .clearAndSetSemantics {
@@ -355,19 +360,19 @@ private fun Hero(
                 Icon(painterResource(R.drawable.ic_plus), contentDescription = null, tint = colors.hero, modifier = Modifier.size(22.dp))
                 Text(stringResource(R.string.today_log), style = LastHit.type.title.copy(fontSize = 17.sp, fontWeight = FontWeight.ExtraBold), color = colors.hero)
             }
+            val longPressLabel = stringResource(R.string.today_quick_log_long_press)
             state.pills.forEach { pill ->
                 val label = pillLabelText(pill.label)
-                val description = stringResource(
-                    R.string.today_quick_log_description,
-                    stringResource(R.string.dose_named, pill.product.shortName, pill.product.perUnit.mgText()),
-                )
+                // Starts with the words on the pill, so "Mouth spray 1 mg" can be asked for by voice.
+                val description = pillDescription(pill.label, pill.product.shortName)
                 Row(
                     Modifier
-                        .height(48.dp)
+                        .heightIn(min = 48.dp)
                         .pressable(colors.heroChip, RoundedCornerShape(24.dp))
                         .combinedClickable(
                             role = Role.Button,
                             onClick = { onQuickLog(pill) },
+                            onLongClickLabel = longPressLabel,
                             onLongClick = { onLongPress(pill) },
                         )
                         .clearAndSetSemantics {
@@ -409,7 +414,10 @@ private fun LabelNote(note: LabelWarning, onDismiss: () -> Unit) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(colors.sunk)
+            // It arrives with the snackbar after a dose, and is said after it, so it isn't missed.
+            .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }
             .padding(start = 16.dp, top = 6.dp, bottom = 6.dp),
+
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {

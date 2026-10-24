@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -63,10 +64,18 @@ fun EntryRow(
     }
     val tagNames = entry.tagKeys.map { key -> tags[key]?.let { tagText(it) } ?: tagText(key) }.sorted()
     val detail = (listOf(time) + tagNames).joinToString(", ")
+    val editLabel = stringResource(R.string.entry_edit_label)
     Row(
         modifier
             .fillMaxWidth()
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            // Read as one dose either way: "double-tap to edit" where it opens, or as plain text on Today.
+            .then(
+                if (onClick != null) {
+                    Modifier.clickable(onClickLabel = editLabel, onClick = onClick)
+                } else {
+                    Modifier.semantics(mergeDescendants = true) {}
+                },
+            )
             .heightIn(min = 72.dp)
             .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,

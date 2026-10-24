@@ -17,6 +17,11 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.test.core.app.ApplicationProvider
 import app.thelasthit.nrt.GUM_2
 import app.thelasthit.nrt.GUM_4
@@ -278,6 +283,9 @@ class PlanTest {
         waitFor("6\u00A0pieces of 2\u00A0mg gum and 3\u00A0sprays")
         compose.pickStep("1\u00A0piece of 2\u00A0mg gum and 3\u00A0sprays")
         waitFor("Weeks 5 and 6 come down to 1\u00A0piece of 2\u00A0mg gum and 3\u00A0sprays too.")
+        // What the pick does to the week is read out as it changes.
+        compose.onNode(hasText("Now ", substring = true) and SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite))
+            .assertExists()
         click("Save weeks 4 to 6")
 
         compose.waitUntilAtLeastOneExists(hasContentDescription("Week 6, from Saturday 28\u00A0November: 1\u00A0piece of 2\u00A0mg gum", substring = true), timeoutMillis = 5_000)
@@ -291,6 +299,11 @@ class PlanTest {
         openPlanTab()
         waitFor("Week 4 of 12")
         waitForDescription("45\u00A0mg left this week")
+        // The week's figure and each schedule row are said as the meter says it, not "60 of 105".
+        compose.onNode(hasContentDescription("60\u00A0mg used of the 105\u00A0mg allowance this week")).assertExists()
+        compose.onNode(
+            hasContentDescription("Week 1, 24 to 30\u00A0October", substring = true) and hasContentDescription("\u00A0mg used of the ", substring = true),
+        ).assertExists()
         waitFor("Meet this week and you get week 3's hit back too.")
         compose.onNodeWithContentDescription("Gary, 110 of 120 HP, 1 hit ready. Opens the lair.").performScrollTo().assertExists()
         compose.onNode(hasContentDescription("Week 1, 24 to 30\u00A0October", substring = true)).performScrollTo()
@@ -342,6 +355,9 @@ class PlanTest {
         app.seedWeekSixMissed()
         openPlanTab()
         waitFor("Missed this one")
+        // The sheet's handle says what closing it does, as the cross does.
+        compose.onNode(SemanticsMatcher("dismissed as carrying on") { it.config.getOrNull(SemanticsActions.Dismiss)?.label == "Close, and carry on" })
+            .assertExists()
         compose.onNodeWithContentDescription("Close, and carry on").performClick()
 
         waitFor("You carried on after week 6.")
@@ -401,6 +417,8 @@ class PlanTest {
             click()
         }
         compose.waitUntilAtLeastOneExists(hasText("2\u00A0h"), timeoutMillis = 10_000)
+        // The value is read out again after each step, so it's heard without leaving the button.
+        compose.onNode(hasText("2\u00A0h") and SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite)).assertExists()
         assertEquals(120, current()?.plan?.week(4)?.goals?.minGapMinutes)
     }
 

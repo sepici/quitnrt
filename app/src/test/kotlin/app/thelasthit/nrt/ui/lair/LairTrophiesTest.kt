@@ -1,13 +1,14 @@
 package app.thelasthit.nrt.ui.lair
 
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -98,7 +99,10 @@ class LairTrophiesTest {
         compose.waitUntilExactlyOneExists(first, timeoutMillis = 5_000)
         compose.onNode(first).performScrollTo().performClick()
         compose.waitUntilExactlyOneExists(hasText("Your first dose logged."), timeoutMillis = 5_000)
-        compose.onNode(first).assert(isSelected())
+        // The tile reads as expanded, and the detail under the grid is read out as it opens.
+        compose.onNode(first).assert(SemanticsMatcher.keyIsDefined(SemanticsActions.Collapse))
+        compose.onNode(hasText("Your first dose logged."))
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite))
         compose.onNodeWithText("Earned 23 October").assertExists()
 
         // A badge still to come says what it takes.
