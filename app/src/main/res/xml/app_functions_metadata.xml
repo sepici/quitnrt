@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    What the app's AppFunctions are for, for Gemini and other on-device agents (app/agents). The
+    instructions are for the agent and follow docs/STYLE.md like any app text. The display
+    description is shown to the user, so it lives in strings_agents.xml.
+-->
+<AppFunctionAppMetadata xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:displayDescription="@string/agents_display_description"
+    app:instructions="The Last Hit logs doses of nicotine replacement therapy (NRT), such as gum, lozenges, sprays, inhalators and patches, for someone tapering off it. Log a dose with logNrtUsage in the words the user used. If it returns candidates, ask the user which product they meant and log again with the id of that product. If it flags a possible duplicate, ask whether it is a second dose before logging again with keepDuplicate set to true. getNrtSummary gives the total for today against the daily guide and the week against its allowance. These are ceilings to stay at or under, so never suggest taking more nicotine to reach them. Call undoLastNrtEntry only when the user asks to undo or remove their last entry. getNrtAdvice gives general information, not medical advice." />

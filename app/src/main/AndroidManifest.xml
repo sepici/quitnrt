@@ -47,6 +47,31 @@
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
         </activity>
+
+        <!--
+            The AppFunctions for Gemini and other on-device agents (app/agents, docs/APPFUNCTIONS.md).
+            The AppFunctions compiler writes the service and the function list. Only the system binds
+            it, and the library's flag switches it on from Android 16, where AppFunctions start.
+        -->
+        <property
+            android:name="android.app.appfunctions.app_metadata"
+            android:resource="@xml/app_functions_metadata" />
+        <service xmlns:tools="http://schemas.android.com/tools"
+            android:name=".agents.NrtAppFunctionService"
+            android:enabled="@bool/enablePlatformAppFunctionService"
+            android:exported="true"
+            android:permission="android.permission.BIND_APP_FUNCTION_SERVICE"
+            tools:targetApi="36">
+            <property
+                android:name="android.app.appfunctions.schema"
+                android:value="app_functions_schema.xsd" />
+            <property
+                android:name="android.app.appfunctions.v2"
+                android:value="nrt_app_functions.xml" />
+            <intent-filter>
+                <action android:name="android.app.appfunctions.AppFunctionService" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
