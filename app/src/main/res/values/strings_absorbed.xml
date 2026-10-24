@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Estimated absorbed amounts (PLAN 3, ROADMAP P9-1): off by default, shown beside the labelled
+     mg and never in place of it. The figures are rough averages, so the wording says "about". -->
+<resources>
+
+    <!-- Settings -->
+    <string name="absorbed_settings_heading">Doses</string>
+    <string name="absorbed_settings_row">Estimated absorbed</string>
+    <string name="absorbed_settings_row_detail">A rough guide to how much reaches your blood</string>
+    <string name="absorbed_on">On</string>
+    <string name="absorbed_off">Off</string>
+
+    <!-- The page that explains it -->
+    <string name="absorbed_title">Estimated absorbed</string>
+    <string name="absorbed_intro">The mg on a pack is the nicotine each piece or spray holds, or a patch releases. Not all of it reaches your blood. Some is swallowed and broken down first, and some stays in the gum or the cartridge.</string>
+    <string name="absorbed_switch">Show estimated absorbed amounts</string>
+    <string name="absorbed_switch_detail">Beside the labelled mg on Today, in History and on the log sheet</string>
+    <string name="absorbed_how_heading">How it\'s worked out</string>
+    <string name="absorbed_how">Each kind of product has one rough share, from product leaflets and published studies. A 4\u00A0mg piece of gum shows as about 2\u00A0mg absorbed.</string>
+    <string name="absorbed_varies">These are rough averages. How much you absorb depends on how you chew, suck, spray or puff, and it varies a lot from person to person.</string>
+    <string name="absorbed_labelled">Your plan, its guide and allowances, weekly results, achievements and Insights always use the labelled mg.</string>
+    <string name="absorbed_not_advice">This isn\'t medical advice. A pharmacist can tell you more about the products you use.</string>
+    <string name="absorbed_shares_heading">Rough share absorbed</string>
+    <string name="absorbed_form_gum">Gum</string>
+    <string name="absorbed_form_lozenge">Lozenge and mini lozenge</string>
+    <string name="absorbed_form_mouth_spray">Mouth spray</string>
+    <string name="absorbed_form_nasal_spray">Nasal spray</string>
+    <string name="absorbed_form_inhalator">Inhalator</string>
+    <string name="absorbed_form_microtab">Microtab</string>
+    <string name="absorbed_form_strip">Strip</string>
+    <string name="absorbed_form_pouch">Pouch</string>
+    <string name="absorbed_form_patch">Patch</string>
+    <string name="absorbed_form_other">Other products don\'t get an estimate, since they could be anything.</string>
+    <string name="absorbed_percent">%1$d%%</string>
+    <string name="absorbed_sources_heading">Sources</string>
+    <string name="absorbed_source">%1$s: %2$s (%3$d).</string>
+    <string name="absorbed_source_no_year">%1$s: %2$s.</string>
+    <string name="absorbed_checked">Checked %1$s.</string>
+
+    <!-- Beside the labelled mg, when the setting is on -->
+    <string name="absorbed_about">about %1$s\u00A0mg absorbed</string>
+    <string name="absorbed_today_description">%1$s\u00A0mg today, about %2$s\u00A0mg absorbed</string>
+    <string name="absorbed_with_description">%1$s, about %2$s\u00A0mg absorbed</string>
+    <string name="absorbed_log_amount">%1$s\u00A0mg this dose, about %2$s\u00A0mg absorbed</string>
+</resources>

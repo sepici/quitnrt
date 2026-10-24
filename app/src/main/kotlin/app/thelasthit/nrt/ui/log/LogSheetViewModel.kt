@@ -18,6 +18,8 @@ import app.thelasthit.nrt.domain.log.TagOrder
 import app.thelasthit.nrt.domain.matcher.LogLinkParser
 import app.thelasthit.nrt.domain.matcher.LogLinkRequest
 import app.thelasthit.nrt.domain.product.UserProduct
+import app.thelasthit.nrt.ui.absorbed.AbsorbedFigures
+import app.thelasthit.nrt.ui.absorbed.absorbedFigures
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -71,11 +73,16 @@ data class LogSheetState(
     val tagGroups: List<TagChips>,
     val todayTotal: Dose,
     val now: Instant,
+    /** Estimated absorbed amounts, while the setting is on (ROADMAP P9-1). Only for showing. */
+    val absorbed: AbsorbedFigures? = null,
 ) {
     val product: UserProduct? get() = products.firstOrNull { it.id == form.productId }
     val dose: Dose get() = product?.perUnit?.times(form.quantity) ?: Dose.ZERO
     val canSave: Boolean get() = product != null
     val isChoosing: Boolean get() = form.choices.isNotEmpty()
+
+    /** About how much of [dose] reaches the blood, while the setting is on. */
+    val absorbedDose: Dose? get() = product?.let { absorbed?.of(it, dose) }
 }
 
 /** A finished save, for Today's snackbar and label note. */
@@ -110,13 +117,13 @@ class LogSheetViewModel(
 
     val state: StateFlow<LogSheetState?> = combine(
         form,
-        combine(graph.products.quickLog, graph.products.all, editingProduct) { quick, all, editing ->
-            quick to (all + listOfNotNull(editing)).distinctBy { it.id }
+        combine(graph.products.quickLog, graph.products.all, editingProduct, graph.absorbedFigures()) { quick, all, editing, absorbed ->
+            Triple(quick, (all + listOfNotNull(editing)).distinctBy { it.id }, absorbed)
         },
         tagGroups,
         todayTotal,
         openedAt,
-    ) { form, (quick, all), groups, total, now ->
+    ) { form, (quick, all, absorbed), groups, total, now ->
         val quickIds = quick.map { it.id }.toSet()
         val usual = quick + all.filter { it.id !in quickIds }
         val chosen = form.choices.keys.mapNotNull { id -> usual.firstOrNull { it.id == id } }
@@ -130,6 +137,7 @@ class LogSheetViewModel(
             tagGroups = groups,
             todayTotal = total,
             now = now,
+            absorbed = absorbed,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 

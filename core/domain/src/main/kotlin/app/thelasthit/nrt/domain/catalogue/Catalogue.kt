@@ -1,5 +1,6 @@
 package app.thelasthit.nrt.domain.catalogue
 
+import app.thelasthit.nrt.domain.absorbed.AbsorptionFactor
 import app.thelasthit.nrt.domain.dose.Dose
 import app.thelasthit.nrt.domain.dose.DoseMath
 import app.thelasthit.nrt.domain.dose.InhalatorUnit
@@ -111,6 +112,8 @@ data class CatalogueProduct(
     val markets: Set<String>,
     val status: ProductStatus,
     val flavours: List<String>,
+    /** Its own absorption factor, which wins over its form's for the estimated absorbed figure. Usually null. */
+    val absorption: AbsorptionFactor? = null,
 ) {
     /** For example "Nicorette gum 2 mg" or "NiQuitin Minis 1.5 mg". */
     val displayName: String get() = "$shortName ${formatMg(strength)} mg"
@@ -170,6 +173,7 @@ data class CatalogueProduct(
                 markets = line.markets.toSet(),
                 status = line.status,
                 flavours = line.flavours,
+                absorption = line.absorptionPerMille?.let(::AbsorptionFactor),
             )
         }
 

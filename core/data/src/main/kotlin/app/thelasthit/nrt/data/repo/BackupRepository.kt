@@ -107,6 +107,7 @@ class BackupRepository(
                     demonVariant = current.demonVariant,
                     soundOn = current.soundOn,
                     equippedGear = current.equippedGear,
+                    showAbsorbed = current.showAbsorbed,
                 ),
                 products = database.products().allIncludingHidden().map { it.toBackup() },
                 tags = database.tags().all().map { it.toBackup() },
@@ -239,6 +240,7 @@ class BackupRepository(
                 settings.setDemon(restored.demonName, Creature.fromKey(restored.demonCreature), restored.demonVariant)
             }
             restored.soundOn?.let { settings.setSoundOn(it) }
+            restored.showAbsorbed?.let { settings.setShowAbsorbed(it) }
             // Only gear the backup unlocked can stay equipped, since the phone's own is gone.
             settings.setEquippedGear(restored.equippedGear?.takeIf { key -> gear.any { it.key == key } })
         }

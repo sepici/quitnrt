@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -14,13 +15,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.data.db.TagEntity
+import app.thelasthit.nrt.domain.dose.Dose
 import app.thelasthit.nrt.domain.log.Entry
+import app.thelasthit.nrt.ui.absorbed.ABSORBED_WIDTH
+import app.thelasthit.nrt.ui.absorbed.absorbedText
 import app.thelasthit.nrt.ui.format.formatAt
 import app.thelasthit.nrt.ui.format.icon
 import app.thelasthit.nrt.ui.format.mgText
@@ -34,7 +39,8 @@ import java.util.Locale
 /**
  * One logged dose: the product (with the amount when it's more than one), the time with its
  * tags, and the mg. A dose after midnight that counts toward the evening before names its day:
- * "01:20 Friday".
+ * "01:20 Friday". With [absorbed], the estimated absorbed amount sits under the mg, in the
+ * secondary colour, while that setting is on.
  */
 @Composable
 fun EntryRow(
@@ -43,6 +49,7 @@ fun EntryRow(
     tags: Map<String, TagEntity>,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
+    absorbed: Dose? = null,
 ) {
     val clock = rememberTimeFormatter().formatAt(entry.occurredAt, entry.zone)
     val time = if (entry.countsTowardEveningBefore) {
@@ -77,11 +84,17 @@ fun EntryRow(
             )
             Text(detail, style = LastHit.type.label.copy(fontWeight = FontWeight.Normal), color = LastHit.colors.text2)
         }
-        Text(
-            stringResource(R.string.dose_mg, entry.total.mgText()),
-            style = LastHit.type.title.copy(fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, lineHeight = 24.sp, letterSpacing = (-0.015).em),
-            color = LastHit.colors.text,
-            maxLines = 1,
-        )
+        // Narrow enough that the product keeps its line at a large font, where the estimate wraps instead.
+        Column(Modifier.widthIn(max = ABSORBED_WIDTH), horizontalAlignment = Alignment.End) {
+            Text(
+                stringResource(R.string.dose_mg, entry.total.mgText()),
+                style = LastHit.type.title.copy(fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, lineHeight = 24.sp, letterSpacing = (-0.015).em),
+                color = LastHit.colors.text,
+                maxLines = 1,
+            )
+            if (absorbed != null) {
+                Text(absorbedText(absorbed), style = LastHit.type.caption, color = LastHit.colors.text2, textAlign = TextAlign.End)
+            }
+        }
     }
 }
