@@ -20,6 +20,7 @@ import app.thelasthit.nrt.domain.creature.Creature
 import app.thelasthit.nrt.domain.creature.SpriteFrame
 import app.thelasthit.nrt.domain.creature.SpriteSheet
 import app.thelasthit.nrt.domain.game.Gear
+import app.thelasthit.nrt.ui.game.BreakingFrames
 import app.thelasthit.nrt.ui.game.GameArt
 import app.thelasthit.nrt.ui.game.GameIcons
 import app.thelasthit.nrt.ui.game.drawBackdrop
@@ -52,7 +53,7 @@ fun BattleScene(
     val colours = variant ?: sheet.defaultVariant
     val sprite = GameArt.sprite(sheet, frame, colours)
     // Once it's breaking up, the loose pixels go without a rim, as the mockups' empty rock has them.
-    val rim = backdrop.rim(dark)?.takeIf { frame !in BREAKING }?.let { GameArt.rim(sheet, frame, Color(it)) }
+    val rim = backdrop.rim(dark)?.takeIf { frame !in BreakingFrames }?.let { GameArt.rim(sheet, frame, Color(it)) }
     val flash = if (pose?.flash == true) GameArt.flash(sheet, frame, colours, FLASH) else null
     val weapon = GameIcons.gear(equipped)
     val sparkColours = GameIcons.gearColours(equipped, colors.stageSky)
@@ -149,9 +150,6 @@ fun rememberAnimatorScale(): Float {
 
 /** The flash a hit makes: the sprite lit up in its highlight colour, inside its outline. */
 private val FLASH = Color(0xFFFBF8E8)
-
-/** The defeat's frames after the knockout, when the demon is coming apart. */
-private val BREAKING = SpriteFrame.DEFEAT - SpriteFrame.DEFEAT_1
 
 private const val DAMAGE_EM = 8f
 private const val BIG_DAMAGE_EM = 12f

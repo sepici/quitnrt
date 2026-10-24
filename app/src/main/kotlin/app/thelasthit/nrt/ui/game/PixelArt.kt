@@ -87,6 +87,12 @@ fun DrawScope.drawBackdrop(backdrop: Backdrop, image: ImageBitmap): Pair<Float, 
     return scale to origin
 }
 
+/**
+ * The defeat's frames after the knockout, when the creature is coming apart. Its loose pixels go
+ * without a dark-mode rim, as the mockups' empty rock has them, or each would wear a ring of its own.
+ */
+val BreakingFrames: Set<SpriteFrame> = (SpriteFrame.DEFEAT - SpriteFrame.DEFEAT_1).toSet()
+
 /** Draws a rim from [GameArt.rim] for a sprite drawn at [at], one sprite pixel up and to the left. */
 fun DrawScope.drawRim(rim: ImageBitmap, at: Offset, scale: Float) {
     drawPixels(rim, at - Offset(PixelRim.PAD * scale, PixelRim.PAD * scale), scale)

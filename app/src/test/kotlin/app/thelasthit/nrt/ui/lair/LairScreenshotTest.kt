@@ -42,6 +42,8 @@ class LairScreenshotTest {
             before = {
                 onNodeWithText("Lair").performClick()
                 waitUntil(5_000) { onAllNodes(hasText("No hits yet")).fetchSemanticsNodes().isNotEmpty() }
+                // The gear row and the shelf come in after the demon, and take the stage's spare sky.
+                waitUntil(5_000) { onAllNodes(hasText("Trophy shelf")).fetchSemanticsNodes().isNotEmpty() }
             },
         ) { AppShell() }
     }

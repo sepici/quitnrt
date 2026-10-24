@@ -199,11 +199,14 @@ private fun rememberCreature(creature: Creature, variant: String?, frame: Sprite
     }
 }
 
-/** The [frame]'s rim, in whole sprite pixels, or null where the backdrop needs none. */
+/**
+ * The [frame]'s rim, in whole sprite pixels, or null where the backdrop needs none or the creature
+ * has broken up into loose pixels ([BreakingFrames]).
+ */
 @Composable
 private fun rememberRim(creature: Creature, rim: Int?, frame: SpriteFrame = SpriteFrame.IDLE_1): ImageBitmap? {
     val sheet = remember(creature) { GameArt.sheet(creature) }
-    return remember(sheet, rim, frame) { rim?.let { GameArt.rim(sheet, frame, Color(it)) } }
+    return remember(sheet, rim, frame) { rim?.takeIf { frame !in BreakingFrames }?.let { GameArt.rim(sheet, frame, Color(it)) } }
 }
 
 // The stage's own browns, as in the onboarding mockups.

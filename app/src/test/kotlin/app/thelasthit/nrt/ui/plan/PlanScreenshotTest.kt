@@ -152,6 +152,13 @@ class PlanScreenshotTest {
     @Test @Config(qualifiers = TALL, fontScale = LARGE_FONT)
     fun doneLarge() = done()
 
+    /** The rematch's new demon: its name, creature and colours, from the picker onboarding uses. */
+    @Test @Config(qualifiers = TALL)
+    fun newDemon() {
+        app.seedDone()
+        compose.captureLooks("plan-new-demon", ready = hasText("Start a new programme")) { NewDemonScreen(onBack = {}, onStarted = {}) }
+    }
+
     @Test @Config(qualifiers = PHONE)
     fun goals() {
         app.seedGoals()
