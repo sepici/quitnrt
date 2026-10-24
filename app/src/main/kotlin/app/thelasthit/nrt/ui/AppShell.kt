@@ -18,6 +18,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,6 +37,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -46,6 +49,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import app.thelasthit.nrt.LastHitApp
 import app.thelasthit.nrt.R
+import app.thelasthit.nrt.reminders.NoticeTarget
 import app.thelasthit.nrt.ui.advice.AdviceRoutes
 import app.thelasthit.nrt.ui.advice.KeepScreenOnWhileTimersRun
 import app.thelasthit.nrt.ui.advice.advice
@@ -106,7 +110,7 @@ private object SettingsRoutes {
 }
 
 @Composable
-fun AppShell() {
+fun AppShell(notices: NoticeTargetViewModel = viewModel()) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
@@ -176,6 +180,20 @@ fun AppShell() {
             composable(TopLevelDestination.Lair.route) { LairScreen(toShelf = toShelf, onShelfShown = { toShelf = false }) }
             settings(navController, snackbars, showMessage)
             advice(navController)
+        }
+        // A tapped notice opens its page: a weekly result the Plan tab, where a missed week's
+        // choice waits, and a badge the lair's shelf. After the NavHost, so its graph is set.
+        val noticeTarget by notices.target.collectAsStateWithLifecycle()
+        LaunchedEffect(noticeTarget) {
+            val target = noticeTarget ?: return@LaunchedEffect
+            when (target) {
+                NoticeTarget.PLAN -> navController.navigateTo(TopLevelDestination.Plan)
+                NoticeTarget.SHELF -> {
+                    toShelf = true
+                    navController.navigateTo(TopLevelDestination.Lair)
+                }
+            }
+            notices.opened(target)
         }
         // A running timer keeps the screen on, whichever page is showing.
         KeepScreenOnWhileTimersRun()

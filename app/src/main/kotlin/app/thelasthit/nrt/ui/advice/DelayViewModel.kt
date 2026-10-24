@@ -29,7 +29,8 @@ sealed interface DelayStage {
  * While it runs it keeps the screen on, and [awake] keeps the processor running until just after
  * the end, so it buzzes on time under the breathing timer, behind another app or with the phone
  * locked. If Android closes or freezes the app in the meantime, there's no buzz, and the timer
- * shows as done when it's opened again. A notification comes with reminders in phase 6.
+ * shows as done when it's opened again. There's no notification for it: whether to add one is
+ * open in docs/STATUS.md.
  */
 class DelayViewModel(
     private val clock: Clock,

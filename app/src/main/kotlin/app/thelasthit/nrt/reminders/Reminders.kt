@@ -17,7 +17,10 @@ import app.thelasthit.nrt.domain.reminders.Reminder
 import app.thelasthit.nrt.domain.reminders.ResultNotices
 import app.thelasthit.nrt.domain.reminders.TodayGuide
 import app.thelasthit.nrt.domain.time.DayBoundary
+import app.thelasthit.nrt.ui.game.badgeName
+import app.thelasthit.nrt.ui.game.gearName
 import app.thelasthit.nrt.widget.LastHitWidget
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -40,7 +43,8 @@ import java.time.ZoneId
  * respects its switch and quiet hours ([app.thelasthit.nrt.domain.reminders.ReminderSettings.delivery]).
  * Nothing goes out before set-up is finished.
  *
- * The game layer tells of badges and gear through [achievementsUnlocked].
+ * Badges and gear are told of through [achievementsUnlocked] when the weekly result's check brings
+ * them while the app isn't on screen. On screen, the app shows its own toast instead.
  */
 class Reminders(
     private val context: Context,
@@ -143,9 +147,9 @@ class Reminders(
     }
 
     /**
-     * Brings in the results that are due, tells of each one not told of yet, then books the next.
-     * Results that come in while the reminder is off are noted all the same, so switching it on
-     * later doesn't bring old news.
+     * Brings in the results that are due, tells of each one not told of yet, then of the badges
+     * and gear they brought, then books the next. Results that come in while the reminder is off
+     * are noted all the same, so switching it on later doesn't bring old news.
      */
     suspend fun results() {
         telling.withLock {
@@ -159,14 +163,36 @@ class Reminders(
                 ResultNotices.notifiedUpTo(notices, marks.resultsNotifiedUpTo)?.let { store.markResultsNotified(it) }
             }
         }
+        if (isSetUp()) unlocksSinceResults()
         scheduleResults()
     }
 
-    // For the game layer.
+    /**
+     * Stores the badges and gear that came in, as the app does when it looks, and tells of them.
+     * The app only looks while it's on screen, so without this a week met overnight would wait
+     * for the app to be opened. While it is on screen, its own toast tells of them instead.
+     */
+    private suspend fun unlocksSinceResults() {
+        val found = try {
+            graph.unlocks.check()
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (broken: IllegalStateException) {
+            // As in the app's own checks: a row the rules can't read waits for the next look.
+            return
+        } catch (broken: IllegalArgumentException) {
+            return
+        }
+        if (found.isEmpty || graph.unlocks.isFollowing) return
+        val resources = context.resources
+        achievementsUnlocked(found, { resources.getString(badgeName(it)) }, { resources.getString(gearName(it)) })
+    }
+
+    // Badges and gear.
 
     /**
-     * Tells of badges and gear that just unlocked, by their names. The game layer calls this once
-     * it has stored them. More than [NewUnlocks.MAX_TOASTS] badges at once go out as one summary.
+     * Tells of badges and gear that just unlocked, by their names, once they're stored. More
+     * than [NewUnlocks.MAX_TOASTS] badges at once go out as one summary.
      */
     suspend fun achievementsUnlocked(badges: List<String>, gear: List<String>) {
         if (!isSetUp()) return

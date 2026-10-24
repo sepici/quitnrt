@@ -49,6 +49,36 @@ enum class NoticeChannel(
     }
 }
 
+/** Where tapping a notice opens the app, for the notices that have a page of their own. */
+enum class NoticeTarget {
+    /** The Plan tab: a week's result, and after a missed week, the choice to carry on or repeat it. */
+    PLAN,
+
+    /** The lair, at its trophy shelf. */
+    SHELF,
+    ;
+
+    companion object {
+        const val EXTRA = "app.thelasthit.nrt.extra.OPEN"
+
+        fun of(reminder: Reminder?): NoticeTarget? = when (reminder) {
+            Reminder.WEEKLY_RESULT -> PLAN
+            Reminder.ACHIEVEMENTS -> SHELF
+            else -> null
+        }
+
+        /**
+         * Where [intent] asks the app to open, if anywhere. Opening the app from Recents repeats
+         * the intent it came with, whose page was opened then, so that one is skipped.
+         */
+        fun from(intent: Intent?): NoticeTarget? {
+            if (intent == null || intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0) return null
+            val name = intent.getStringExtra(EXTRA) ?: return null
+            return NoticeTarget.entries.firstOrNull { it.name == name }
+        }
+    }
+}
+
 /** A button on a notice. */
 enum class NoticeAction {
     /** Opens the log sheet, recorded as from a notification. */
@@ -172,7 +202,7 @@ class NoticePoster(private val context: Context) {
         .setColor(ContextCompat.getColor(context, if (notice.channel == NoticeChannel.ACHIEVEMENTS) R.color.notice_game else R.color.notice_accent))
         .setContentTitle(notice.title)
         .apply { if (notice.text != null) setContentText(notice.text).setStyle(NotificationCompat.BigTextStyle().bigText(notice.text)) }
-        .setContentIntent(openApp(notice.id))
+        .setContentIntent(openApp(notice))
         .setAutoCancel(true)
         // A reminder alerts each time, even over yesterday's still in the shade. The tile's note
         // is quiet on a low channel already.
@@ -219,13 +249,18 @@ class NoticePoster(private val context: Context) {
         )
     }
 
-    private fun openApp(id: Int): PendingIntent = PendingIntent.getActivity(
+    /**
+     * Opens the app where it was left, or for a weekly result or a badge, at the page it's about.
+     * The screen is singleTop, so an app already open gets the page through onNewIntent.
+     */
+    private fun openApp(notice: Notice): PendingIntent = PendingIntent.getActivity(
         context,
-        id * 10 + OPEN_REQUEST,
+        notice.id * 10 + OPEN_REQUEST,
         Intent(context, MainActivity::class.java)
             .setAction(Intent.ACTION_MAIN)
             .addCategory(Intent.CATEGORY_LAUNCHER)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            .apply { NoticeTarget.of(notice.reminder)?.let { putExtra(NoticeTarget.EXTRA, it.name) } },
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
     )
 

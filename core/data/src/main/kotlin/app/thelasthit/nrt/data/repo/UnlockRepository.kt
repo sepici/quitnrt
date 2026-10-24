@@ -31,6 +31,7 @@ import kotlinx.coroutines.withContext
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Achievements and gear (PLAN §8): checking for new unlocks, storing them with the time they came,
@@ -53,6 +54,9 @@ class UnlockRepository(
 
     /** One check at a time, so two can't both find the same badge new. */
     private val mutex = Mutex()
+
+    /** How many [follow]s are running. */
+    private val followers = AtomicInteger()
 
     private val waiting = MutableStateFlow<List<UnlockNews>>(emptyList())
 
@@ -111,20 +115,32 @@ class UnlockRepository(
      * that fell due or a dose logged from the widget meanwhile is found then.
      */
     suspend fun follow() {
-        database.invalidationTracker.createFlow(*WATCHED).conflate().collect {
-            // Rows the rules can't read are skipped where they can be. Anything else waits for
-            // the next write rather than stopping the app.
-            try {
-                check()
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (broken: IllegalStateException) {
-                Unit
-            } catch (broken: IllegalArgumentException) {
-                Unit
+        followers.incrementAndGet()
+        try {
+            database.invalidationTracker.createFlow(*WATCHED).conflate().collect {
+                // Rows the rules can't read are skipped where they can be. Anything else waits for
+                // the next write rather than stopping the app.
+                try {
+                    check()
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (broken: IllegalStateException) {
+                    Unit
+                } catch (broken: IllegalArgumentException) {
+                    Unit
+                }
             }
+        } finally {
+            followers.decrementAndGet()
         }
     }
+
+    /**
+     * True while [follow] runs, as it does while the app is on screen, where [news] shows what
+     * comes in. A check made meanwhile from elsewhere, such as the weekly result's, leaves the
+     * telling to the app.
+     */
+    val isFollowing: Boolean get() = followers.get() > 0
 
     // The shelf and the gear.
 

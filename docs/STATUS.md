@@ -36,8 +36,12 @@ Nothing blocks the build. These are worth a look when you're next in:
     - Today's advice line gets two links under it: "How to do it" and "All advice". Insights uses the same pair.
     - Advice uses the last 14 days everywhere, labelled "From your last 14 days", whatever range Insights shows.
     - A breathing session counts towards the badges when it runs to the end, in whole rounds. Pausing is fine.
-    - The screen stays on while a timer runs. The delay timer keeps counting from its start if you leave, and buzzes at the end. There's no ongoing notification until phase 6.
+    - The screen stays on while a timer runs. The delay timer keeps counting from its start if you leave, and buzzes at the end.
     - The breathing animation sits on the hero green block, not the success green.
+  - **Reminders:**
+    - Tapping a weekly result opens the Plan tab, where a missed week's choice waits, and tapping a badge or gear notice opens the lair at its trophy shelf. Other notices open the app where it was left.
+    - The achievements notice is for badges and gear the weekly result's check finds while the app isn't on screen. On screen, the toast tells of them instead. Badges from logs made with the widget, the tile or an agent are found when the app is next opened, with a toast and no notice.
+- **The delay timer's notification (open).** Phase 5 left it for phase 6, but phase 6's reminders didn't add one, and PLAN doesn't ask for one. If Android closes the app while the timer runs, there's no buzz and nothing in the shade, and the timer shows as done when the app is opened (recommendation: a quiet notice at the end, on a channel of its own, booked when the timer starts and cancelled when it's stopped or ends in the app).
 - **Phase 2 review calls** that would change signed-off designs, so they wait for you (recommendation in brackets):
   - The green on selected states and primary buttons, which the reviewer read against "green only means at or under" (keep it: it's the hero's forest green, not the success green; look again once phase 3 puts both on screen).
   - Heat-map shading, stretched from the lightest day to the heaviest, gives decimal step labels and makes 12 and 14 mg look like opposite ends (whole-mg steps of 1, 2 or 5 mg from the lowest day, and dose steps of 1 to 5+ on the hour map).

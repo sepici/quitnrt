@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Notification
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import androidx.work.Configuration
 import androidx.work.WorkInfo
@@ -101,6 +102,16 @@ fun TestApp.told(count: Int, block: () -> Unit): List<NewDose> = runBlocking {
 /** The achievements notices in the shade. */
 fun TestApp.achievementNotices(): List<Notification> =
     notifications.allNotifications.filter { it.channelId == NoticeChannel.ACHIEVEMENTS.id }
+
+/** Waits up to [timeoutMs] for [count] achievements notices, for ones told on another thread. */
+fun TestApp.awaitAchievementNotices(count: Int = 1, timeoutMs: Long = 5_000): List<Notification> {
+    val end = System.currentTimeMillis() + timeoutMs
+    while (achievementNotices().size < count && System.currentTimeMillis() < end) Thread.sleep(20)
+    return achievementNotices()
+}
+
+/** What tapping the notification opens. */
+fun Notification.tapIntent(): Intent = shadowOf(contentIntent).savedIntent
 
 /** The state of the job booked under [name], if there is one. */
 fun TestApp.work(name: String): WorkInfo? = WorkManager.getInstance(this).getWorkInfosForUniqueWork(name).get().lastOrNull()

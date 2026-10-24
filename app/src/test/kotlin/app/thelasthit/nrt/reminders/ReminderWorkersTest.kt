@@ -1,6 +1,7 @@
 package app.thelasthit.nrt.reminders
 
 import android.app.Notification
+import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
 import androidx.work.CoroutineWorker
 import androidx.work.ListenableWorker
@@ -8,10 +9,16 @@ import androidx.work.WorkInfo
 import androidx.work.testing.TestListenableWorkerBuilder
 import androidx.work.testing.WorkManagerTestInitHelper
 import app.thelasthit.nrt.TestApp
+import app.thelasthit.nrt.domain.game.Achievement
+import app.thelasthit.nrt.domain.game.Gear
+import app.thelasthit.nrt.domain.game.NewUnlocks
+import app.thelasthit.nrt.domain.game.UnlockNews
 import app.thelasthit.nrt.domain.reminders.QuietHours
 import app.thelasthit.nrt.domain.reminders.Reminder
 import app.thelasthit.nrt.setUp
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -61,6 +68,8 @@ class ReminderWorkersTest {
         assertEquals("Evening check-in", notice.title)
         assertEquals(nbsp("Today 8 mg. Anything missing?"), notice.text)
         assertEquals(listOf("Log", "All good"), notice.actionLabels)
+        // Tapped, it opens the app where it was left.
+        assertNull(NoticeTarget.from(notice.tapIntent()))
         // Tomorrow's is booked.
         assertEquals(WorkInfo.State.ENQUEUED, app.work(ReminderScheduler.CHECK_IN)?.state)
     }
@@ -264,6 +273,65 @@ class ReminderWorkersTest {
         assertEquals("Week ${last.number} met", app.awaitNotification(Notice.ID_RESULTS + last.number)?.title)
     }
 
+    @Test
+    fun aResultOpensThePlanTabAndABadgeTheShelf() {
+        app.startGumPlan()
+        app.setTime("2026-11-01T09:00")
+        run<ResultWorker>()
+        val result = present(app.notification(Notice.ID_RESULTS + 1)).tapIntent()
+        assertEquals(NoticeTarget.PLAN, NoticeTarget.from(result))
+        assertEquals(NoticeTarget.SHELF, NoticeTarget.from(app.awaitAchievementNotices().single().tapIntent()))
+        // Opened again from Recents, which repeats the intent, the app stays where it was left.
+        assertNull(NoticeTarget.from(Intent(result).addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY)))
+    }
+
+    // Achievements a result brings.
+
+    @Test
+    fun aWeekMetOvernightTellsOfItsBadgeAndGear() {
+        app.startGumPlan()
+        app.setTime("2026-11-01T09:00")
+        run<ResultWorker>()
+        assertEquals("Week 1 met", app.notification(Notice.ID_RESULTS + 1)?.title)
+        // The booking the result brings can look first, on another thread, so this waits.
+        val notice = app.awaitAchievementNotices().single()
+        assertEquals("First week met", notice.title)
+        assertEquals("New badge. It's on the trophy shelf in the lair. New gear too: Iron sword.", notice.text)
+        // They're stored, so the app doesn't find them new again, and its toast waits for it.
+        assertEquals(NewUnlocks.NONE, runBlocking { app.graph.unlocks.check() })
+        assertEquals(listOf(UnlockNews.Badge(Achievement.FIRST_WEEK_MET), UnlockNews.NewGear(Gear.IRON_SWORD)), app.graph.unlocks.news.value)
+    }
+
+    @Test
+    fun withTheSwitchOffABadgeIsStoredButNotTold() {
+        // Only the worker below looks, so nothing can tell of the badge after it's done.
+        app.appScope.cancel()
+        runBlocking { store().setOn(Reminder.ACHIEVEMENTS, false) }
+        app.startGumPlan()
+        app.setTime("2026-11-01T09:00")
+        run<ResultWorker>()
+        assertNotNull(app.notification(Notice.ID_RESULTS + 1))
+        assertEquals(listOf(UnlockNews.Badge(Achievement.FIRST_WEEK_MET), UnlockNews.NewGear(Gear.IRON_SWORD)), app.graph.unlocks.news.value)
+        assertEquals(emptyList<Notification>(), app.achievementNotices())
+    }
+
+    @Test
+    fun whileTheAppIsOnScreenItsToastTellsInstead() {
+        app.startGumPlan()
+        app.setTime("2026-11-01T09:00")
+        // The app follows the unlocks while it's on screen, as MainActivity does.
+        val onScreen = app.appScope.launch(start = CoroutineStart.UNDISPATCHED) { app.graph.unlocks.follow() }
+        try {
+            run<ResultWorker>()
+            assertNotNull(app.notification(Notice.ID_RESULTS + 1))
+            // Stored by whichever check came first, for the toast.
+            assertEquals(listOf(UnlockNews.Badge(Achievement.FIRST_WEEK_MET), UnlockNews.NewGear(Gear.IRON_SWORD)), app.graph.unlocks.news.value)
+            assertEquals(emptyList<Notification>(), app.achievementNotices())
+        } finally {
+            onScreen.cancel()
+        }
+    }
+
     // Booking.
 
     @Test
@@ -337,9 +405,7 @@ class ReminderWorkersTest {
 
         app.setTime("2026-10-24T07:00")
         held.forEach { WorkManagerTestInitHelper.getTestDriver(app)!!.setInitialDelayMet(it.id) }
-        val end = System.currentTimeMillis() + 5_000
-        while (app.achievementNotices().size < 2 && System.currentTimeMillis() < end) Thread.sleep(20)
-        assertEquals(listOf("First week met", "Logged on 7 days"), app.achievementNotices().mapNotNull { it.title }.sorted())
+        assertEquals(listOf("First week met", "Logged on 7 days"), app.awaitAchievementNotices(2).mapNotNull { it.title }.sorted())
     }
 
     private fun <T> present(value: T?): T {

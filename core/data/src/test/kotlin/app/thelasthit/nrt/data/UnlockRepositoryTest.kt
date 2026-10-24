@@ -9,6 +9,7 @@ import app.thelasthit.nrt.domain.game.Gear
 import app.thelasthit.nrt.domain.game.NewUnlocks
 import app.thelasthit.nrt.domain.game.UnlockNews
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -132,9 +133,12 @@ class UnlockRepositoryTest {
     fun followingChecksOnStartAndAfterEachWrite() = runBlocking {
         // Logged two days late, so it's backdated too.
         data.chew("2026-10-21T12:00")
+        assertFalse(unlocks.isFollowing)
         val following = launch(Dispatchers.Default) { unlocks.follow() }
         try {
             withTimeout(10_000) { unlocks.news.first { UnlockNews.Badge(Achievement.FIRST_ENTRY) in it } }
+            // While the app follows, it tells of what comes in itself, so the reminders don't.
+            assertTrue(unlocks.isFollowing)
 
             // The next writes are checked as they land.
             data.chew("2026-10-22T12:00")
@@ -143,8 +147,9 @@ class UnlockRepositoryTest {
             data.breathing.record(BreathingPattern.FOUR_SEVEN_EIGHT, london("2026-10-23T13:00"), Duration.ofSeconds(60), rounds = 3, ranToEnd = true)
             withTimeout(10_000) { unlocks.news.first { UnlockNews.Badge(Achievement.BREATHING_1) in it } }
         } finally {
-            following.cancel()
+            following.cancelAndJoin()
         }
+        assertFalse(unlocks.isFollowing)
         assertEquals(setOf("first_entry", "honest_ledger", "logged_days_3", "breathing_1"), storedBadges().keys)
     }
 
