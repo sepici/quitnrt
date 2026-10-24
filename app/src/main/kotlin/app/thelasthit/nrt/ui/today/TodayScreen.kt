@@ -71,6 +71,7 @@ import app.thelasthit.nrt.ui.format.mgText
 import app.thelasthit.nrt.ui.format.pillLabelText
 import app.thelasthit.nrt.ui.format.rememberTimeFormatter
 import app.thelasthit.nrt.ui.game.DemonBand
+import app.thelasthit.nrt.ui.game.DemonHpBand
 import app.thelasthit.nrt.ui.graphViewModel
 import app.thelasthit.nrt.ui.log.LogSheet
 import app.thelasthit.nrt.ui.log.LogSheetViewModel
@@ -142,14 +143,22 @@ fun TodayScreen(
                 )
             }
         }
-        item { WeekSection(current) }
         item {
-            DemonBand(
-                name = current.demonName,
-                creature = current.creature,
-                onOpenLair = onOpenLair,
-                modifier = Modifier.padding(top = 28.dp),
-            )
+            val plan = current.plan
+            if (plan != null) PlanWeekSection(plan, current.week) else WeekSection(current)
+        }
+        item {
+            val demon = current.demon
+            if (demon != null) {
+                DemonHpBand(demon, onOpenLair = onOpenLair, modifier = Modifier.padding(top = 28.dp))
+            } else {
+                DemonBand(
+                    name = current.demonName,
+                    creature = current.creature,
+                    onOpenLair = onOpenLair,
+                    modifier = Modifier.padding(top = 28.dp),
+                )
+            }
         }
         item { EntriesHeader(current) }
         if (current.day.entries.isEmpty()) {
@@ -273,12 +282,17 @@ private fun Hero(
                     modifier = Modifier.padding(start = 10.dp).alignByBaseline(),
                 )
             }
-            Text(
-                if (doses == 0) stringResource(R.string.today_nothing_yet) else pluralStringResource(R.plurals.today_doses_so_far, doses, doses),
-                style = LastHit.type.label.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold),
-                color = colors.onHero2,
-                modifier = Modifier.padding(top = 14.dp),
-            )
+            val plan = state.plan
+            if (plan != null) {
+                GuideMeter(plan, state.day.total, Modifier.padding(top = 22.dp))
+            } else {
+                Text(
+                    if (doses == 0) stringResource(R.string.today_nothing_yet) else pluralStringResource(R.plurals.today_doses_so_far, doses, doses),
+                    style = LastHit.type.label.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold),
+                    color = colors.onHero2,
+                    modifier = Modifier.padding(top = 14.dp),
+                )
+            }
         }
         FlowRow(
             Modifier.padding(top = 14.dp),
@@ -410,6 +424,7 @@ private fun WeekSection(state: TodayState) {
                 modifier = Modifier.padding(start = 8.dp).alignByBaseline(),
             )
         }
+        state.planStartsOn?.let { PlanStartsLine(it, state.date) }
         Spacer(Modifier.height(12.dp))
         WeekColumns(state.week)
     }

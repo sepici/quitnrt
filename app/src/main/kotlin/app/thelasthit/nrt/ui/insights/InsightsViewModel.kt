@@ -8,14 +8,18 @@ import app.thelasthit.nrt.domain.dose.Dose
 import app.thelasthit.nrt.domain.insights.ByProduct
 import app.thelasthit.nrt.domain.insights.CalendarHeat
 import app.thelasthit.nrt.domain.insights.DailyIntake
+import app.thelasthit.nrt.domain.insights.DaysWithin
 import app.thelasthit.nrt.domain.insights.Habits
 import app.thelasthit.nrt.domain.insights.HourHeatMap
 import app.thelasthit.nrt.domain.insights.InsightRange
 import app.thelasthit.nrt.domain.insights.InsightWindow
+import app.thelasthit.nrt.domain.insights.PlanGuides
 import app.thelasthit.nrt.domain.insights.ProductType
 import app.thelasthit.nrt.domain.insights.Triggers
 import app.thelasthit.nrt.domain.insights.ofType
 import app.thelasthit.nrt.domain.log.Entry
+import app.thelasthit.nrt.domain.programme.Programme
+import app.thelasthit.nrt.domain.programme.WeekReport
 import app.thelasthit.nrt.domain.time.DayBoundary
 import app.thelasthit.nrt.ui.minuteTicks
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -73,6 +77,17 @@ data class InsightsState(
     val productDays: Int = 0,
     /** While the period before isn't all logged, the day changes against it start. */
     val comparesFrom: LocalDate? = null,
+    /**
+     * The running plan's guides, once its first day has come, for every product together: a
+     * kind of product on its own has no guide, since the guide counts them all.
+     */
+    val guides: PlanGuides? = null,
+    /** The guide under each of the chart's columns, or a gap for one outside the plan. */
+    val guideLine: List<Dose?>? = null,
+    /** How many of the window's finished days in the plan stayed within their guide. */
+    val daysWithin: DaysWithin? = null,
+    /** Each week of the plan so far against its allowance, oldest first. */
+    val planWeeks: List<WeekReport> = emptyList(),
 ) {
     val isEmpty: Boolean get() = firstDay == null
 
@@ -101,6 +116,16 @@ class InsightsViewModel(
 
     private val dayStart: Flow<LocalTime> = graph.settings.settings.map { it.dayStart }.distinctUntilChanged()
 
+    /** The running plan once its first day has come, with everything logged since it started. */
+    private data class PlanPart(val plan: Programme, val entries: List<Entry>)
+
+    private fun planPart(today: LocalDate): Flow<PlanPart?> =
+        graph.programmes.observeCurrent().map { record -> record?.plan?.takeIf { it.startDate <= today } }
+            .distinctUntilChanged()
+            .flatMapLatest { plan ->
+                if (plan == null) flowOf(null) else graph.entries.observeRange(plan.startDate, today).map { PlanPart(plan, it) }
+            }
+
     val state: StateFlow<InsightsState?> =
         combine(today, graph.entries.observeFirstDay(), chosenRange, chosenType, dayStart) { today, firstDay, chosen, type, dayStart ->
             Choice(today, firstDay, chosen, type, dayStart)
@@ -128,7 +153,24 @@ class InsightsViewModel(
         val dayStart: LocalTime,
     )
 
-    private fun stateFor(choice: Choice): Flow<InsightsState> {
+    private fun stateFor(choice: Choice): Flow<InsightsState> =
+        combine(baseStateFor(choice), planPart(choice.today)) { state, part -> state.withPlan(part) }
+
+    /** [this] with the running plan's guide line, weeks and days within it, for every product together. */
+    private fun InsightsState.withPlan(part: PlanPart?): InsightsState {
+        val intake = intake ?: return this
+        if (part == null || type != null) return this
+        val guides = PlanGuides.of(part.plan)
+        val line = if (weekly) guides.weeklyLine(intake) else guides.dailyLine(intake)
+        return copy(
+            guides = guides,
+            guideLine = line.takeIf { values -> values.any { it != null } },
+            daysWithin = guides.daysWithin(intake),
+            planWeeks = WeekReport.of(part.plan, part.entries, today),
+        )
+    }
+
+    private fun baseStateFor(choice: Choice): Flow<InsightsState> {
         val (today, firstDay) = choice
         val history = InsightRange.historyDays(today, firstDay)
         val ranges = InsightRange.entries.map { range ->

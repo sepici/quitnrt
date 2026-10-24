@@ -10,6 +10,7 @@ import app.thelasthit.nrt.domain.log.LoggedDay
 import app.thelasthit.nrt.domain.log.TagGroup
 import app.thelasthit.nrt.domain.product.PillLabel
 import app.thelasthit.nrt.domain.product.UserProduct
+import app.thelasthit.nrt.domain.programme.isWithinGuide
 import app.thelasthit.nrt.ui.minuteTicks
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -41,6 +42,13 @@ data class HistoryState(
     val dayStart: LocalTime,
     val filter: HistoryFilter? = null,
     val options: FilterOptions = FilterOptions.NONE,
+    /**
+     * The days shown that are over and stayed at or under the running plan's guide, for their
+     * ticks. None under a filter, since a day's total then counts only its matches.
+     */
+    val ticked: Set<LocalDate> = emptySet(),
+    /** Whether the plan has a day that's over, so the line at the top says what a tick means. */
+    val explainsTicks: Boolean = false,
 ) {
     fun nameOf(entry: Entry): String = productNames[entry.productId] ?: entry.productName
 
@@ -155,10 +163,13 @@ class HistoryViewModel(
     val state: StateFlow<HistoryState?> = combine(
         today,
         page,
-        combine(graph.products.shortNames, graph.tags.all) { names, tags -> names to tags.associateBy { it.key } },
+        combine(graph.products.shortNames, graph.tags.all, graph.programmes.observeCurrent()) { names, tags, programme ->
+            Triple(names, tags.associateBy { it.key }, programme?.plan)
+        },
         graph.settings.settings,
         options,
-    ) { today, page, (names, tags), settings, options ->
+    ) { today, page, (names, tags, plan), settings, options ->
+        val ticks = plan != null && page.filter == null
         HistoryState(
             today = today,
             days = page.days,
@@ -168,6 +179,8 @@ class HistoryViewModel(
             dayStart = settings.dayStart,
             filter = page.filter,
             options = options,
+            ticked = if (ticks && plan != null) page.days.filter { plan.isWithinGuide(it.date, it.total, today) }.map { it.date }.toSet() else emptySet(),
+            explainsTicks = ticks && plan != null && plan.startDate < today,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 

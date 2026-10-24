@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Today, History and Insights once a plan runs (phase 3, slices 5 and 6). -->
+<resources>
+
+    <!-- Today with a plan: the meter against the daily guide (B's today.html) -->
+    <string name="today_plan_left">%1$s\u00A0mg left today</string>
+    <string name="today_plan_at">At today\'s guide</string>
+    <string name="today_plan_over">%1$s\u00A0mg over today\'s guide</string>
+    <string name="today_plan_free_at">At the 0\u00A0mg guide</string>
+    <string name="today_plan_free_over">%1$s\u00A0mg over the 0\u00A0mg guide</string>
+    <string name="today_plan_guide_mark">%1$s\u00A0mg guide</string>
+    <string name="today_plan_meter_description">%1$s\u00A0mg used. Daily guide %2$s\u00A0mg. %3$s.</string>
+
+    <!-- The week, which follows programme weeks once a plan runs -->
+    <string name="today_plan_week_of">of %1$s\u00A0mg this week</string>
+    <string name="today_plan_week_meta">Week %1$d of %2$d, day %3$d.</string>
+    <string name="today_plan_overtime_meta">Overtime, day %1$d.</string>
+    <string name="today_plan_week_left">%1$s\u00A0mg left this week.</string>
+    <string name="today_plan_week_at">At this week\'s allowance.</string>
+    <string name="today_plan_week_over">%1$s\u00A0mg over this week\'s allowance.</string>
+    <string name="today_plan_week_free">An NRT-free week.</string>
+    <string name="today_plan_awaiting">Week %1$d\'s result comes in after today, so late logs still count.</string>
+    <string name="today_plan_starts_tomorrow">Your plan starts tomorrow.</string>
+    <string name="today_plan_starts_on">Your plan starts on %1$s.</string>
+    <string name="today_plan_key_used">Used</string>
+    <string name="today_plan_key_guide">%1$s\u00A0mg guide</string>
+    <string name="today_plan_key_within">At or under the guide</string>
+    <string name="today_plan_key_free">At the 0\u00A0mg guide</string>
+    <string name="today_plan_columns_guide">Daily guide %1$s\u00A0mg.</string>
+    <string name="today_plan_day_within">%1$s %2$s\u00A0mg, at or under the guide</string>
+    <string name="today_plan_day_over">%1$s %2$s\u00A0mg, over the guide</string>
+
+    <!-- The demon band once the plan has started -->
+    <string name="demon_band_hp_value">%1$d/%2$d</string>
+    <plurals name="demon_band_hits_ready">
+        <item quantity="one">%1$d hit ready</item>
+        <item quantity="other">%1$d hits ready</item>
+    </plurals>
+    <string name="demon_band_hp_description">%1$s, %2$d of %3$d HP. Opens the lair.</string>
+    <string name="demon_band_hp_ready_description">%1$s, %2$d of %3$d HP, %4$s. Opens the lair.</string>
+
+    <!-- History's guide ticks -->
+    <string name="history_day_start_ticks">Each day runs from %1$s. A tick means the day stayed at or under the guide.</string>
+    <string name="history_day_within_description">%1$s, %2$s\u00A0mg, at or under the guide</string>
+
+    <!-- Insights with a plan: the guide line on the daily chart -->
+    <string name="insights_key_guide">Daily guide</string>
+    <string name="insights_tip_guide">Guide %1$s\u00A0mg</string>
+    <plurals name="insights_days_within">
+        <item quantity="one">At or under the guide on %1$d of %2$d\u00A0day.</item>
+        <item quantity="other">At or under the guide on %1$d of %2$d\u00A0days.</item>
+    </plurals>
+    <string name="insights_row_mg_guide">%1$s\u00A0mg, guide %2$s\u00A0mg</string>
+    <string name="insights_row_mg_so_far_guide">%1$s\u00A0mg so far, guide %2$s\u00A0mg</string>
+    <string name="insights_row_mg_a_day_guide">%1$s\u00A0mg a day, guide %2$s\u00A0mg</string>
+    <string name="insights_row_mg_usual">%1$s\u00A0mg, usual day %2$s\u00A0mg</string>
+
+    <!-- Week by week: each programme week against its allowance. The states follow a comma. -->
+    <string name="insights_weeks_title">Week by week</string>
+    <string name="insights_weeks_table">Show week by week as a table</string>
+    <string name="insights_weeks_chart">Show week by week as a chart</string>
+    <string name="insights_weeks_meta">Each week of your plan against its allowance.</string>
+    <string name="insights_weeks_name">Week %1$d</string>
+    <string name="insights_weeks_overtime">Overtime</string>
+    <string name="insights_weeks_value">%1$s of %2$s\u00A0mg</string>
+    <string name="insights_weeks_dates">%1$s, %2$s to %3$s</string>
+    <string name="insights_weeks_row">%1$s, %2$s</string>
+    <string name="insights_weeks_summary_week">%1$s, %2$s, %3$s.</string>
+    <string name="insights_weeks_met">met</string>
+    <string name="insights_weeks_met_paid_back">met, paid back week %1$d</string>
+    <string name="insights_weeks_met_paid_back_weeks">met, paid back weeks %1$d to %2$d</string>
+    <string name="insights_weeks_missed">missed</string>
+    <string name="insights_weeks_caught_up_in">caught up in week %1$d</string>
+    <string name="insights_weeks_caught_up">caught up later</string>
+    <string name="insights_weeks_running">this week, so far</string>
+    <string name="insights_weeks_waiting">its result comes in after today</string>
+    <string name="insights_weeks_key_used">Used</string>
+    <string name="insights_weeks_key_allowance">Allowance</string>
+    <string name="insights_weeks_key_met">Met</string>
+    <string name="insights_weeks_key_missed">Missed</string>
+    <string name="insights_weeks_key_caught_up">Missed, then caught up</string>
+
+    <!-- The calendar against the guide -->
+    <string name="insights_calendar_meta_guide">Each day shaded by mg against its daily guide.</string>
+    <string name="insights_calendar_meta_guide_table">Total mg each day, against its daily guide.</string>
+    <string name="insights_calendar_meta_guide_before">Days before your plan are against your usual day of %1$s\u00A0mg.</string>
+    <string name="insights_calendar_unit_guide">of the guide</string>
+    <string name="insights_calendar_summary_guide">Calendar of mg each day, shaded against its daily guide.</string>
+</resources>

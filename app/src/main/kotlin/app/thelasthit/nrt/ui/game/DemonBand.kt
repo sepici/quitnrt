@@ -103,6 +103,7 @@ fun BandScene(
     textStart: Dp,
     textTop: Dp,
     modifier: Modifier = Modifier,
+    frame: SpriteFrame = SpriteFrame.IDLE_1,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val band = GameArt.band
@@ -124,6 +125,7 @@ fun BandScene(
                     .align(Alignment.BottomStart)
                     .fillMaxWidth()
                     .height(height),
+                frame,
             )
             Column(Modifier.padding(start = textStart, top = textTop, end = 16.dp, bottom = land + 4.dp), content = content)
         }
@@ -136,11 +138,11 @@ fun BandScene(
  * light rim, or it would vanish into the night sky.
  */
 @Composable
-fun CreatureScene(backdrop: Backdrop, creature: Creature, variant: String?, modifier: Modifier = Modifier) {
+fun CreatureScene(backdrop: Backdrop, creature: Creature, variant: String?, modifier: Modifier = Modifier, frame: SpriteFrame = SpriteFrame.IDLE_1) {
     val dark = LastHit.colors.isDark
     val image = remember(backdrop, dark) { GameArt.backdrop(backdrop, dark) }
-    val sprite = rememberCreature(creature, variant)
-    val rim = rememberRim(creature, backdrop.rim(dark))
+    val sprite = rememberCreature(creature, variant, frame)
+    val rim = rememberRim(creature, backdrop.rim(dark), frame)
     Canvas(modifier) {
         val (scale, origin) = drawBackdrop(backdrop, image)
         val at = origin + Offset(backdrop.spriteX * scale, backdrop.spriteY * scale)
@@ -175,25 +177,25 @@ fun CreatureSilhouette(creature: Creature, colour: Color, modifier: Modifier = M
     }
 }
 
-/** The creature's idle frame in [variant], or lurking when there's no variant. */
+/** The creature's [frame], idle unless said, in [variant], or lurking when there's no variant. */
 @Composable
-private fun rememberCreature(creature: Creature, variant: String?): ImageBitmap {
+private fun rememberCreature(creature: Creature, variant: String?, frame: SpriteFrame = SpriteFrame.IDLE_1): ImageBitmap {
     val colors = LastHit.colors
     val dark = colors.isDark
     val sheet = remember(creature) { GameArt.sheet(creature) }
-    return remember(sheet, variant, dark) {
+    return remember(sheet, variant, dark, frame) {
         if (variant == null) {
-            GameArt.silhouette(sheet, SpriteFrame.IDLE_1, if (dark) LurkDark else LurkLight, eyes = colors.marigold)
+            GameArt.silhouette(sheet, frame, if (dark) LurkDark else LurkLight, eyes = colors.marigold)
         } else {
-            GameArt.sprite(sheet, SpriteFrame.IDLE_1, variant)
+            GameArt.sprite(sheet, frame, variant)
         }
     }
 }
 
 @Composable
-private fun rememberRim(creature: Creature, rim: Int?): ImageBitmap? {
+private fun rememberRim(creature: Creature, rim: Int?, frame: SpriteFrame = SpriteFrame.IDLE_1): ImageBitmap? {
     val sheet = remember(creature) { GameArt.sheet(creature) }
-    return remember(sheet, rim) { rim?.let { GameArt.silhouette(sheet, SpriteFrame.IDLE_1, Color(it)) } }
+    return remember(sheet, rim, frame) { rim?.let { GameArt.silhouette(sheet, frame, Color(it)) } }
 }
 
 private fun DrawScope.drawRim(rim: ImageBitmap, at: Offset, scale: Float, width: Float) {

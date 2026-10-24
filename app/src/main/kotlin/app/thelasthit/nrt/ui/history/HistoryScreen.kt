@@ -66,6 +66,7 @@ import app.thelasthit.nrt.ui.components.ChipKind
 import app.thelasthit.nrt.ui.components.EntryRow
 import app.thelasthit.nrt.ui.components.IconTile
 import app.thelasthit.nrt.ui.components.PrimaryButton
+import app.thelasthit.nrt.ui.components.TickDot
 import app.thelasthit.nrt.ui.format.DayMonthFormatter
 import app.thelasthit.nrt.ui.format.DayMonthYearFormatter
 import app.thelasthit.nrt.ui.format.DayTitleFormatter
@@ -160,7 +161,10 @@ fun HistoryScreen(
             item { TopBar(filterOn = filtered, onFilter = { filterOpen = true }) }
             item {
                 Text(
-                    stringResource(R.string.history_day_start, timeFormat.format(current.dayStart)),
+                    stringResource(
+                        if (current.explainsTicks) R.string.history_day_start_ticks else R.string.history_day_start,
+                        timeFormat.format(current.dayStart),
+                    ),
                     style = LastHit.type.label,
                     color = LastHit.colors.text2,
                     modifier = Modifier.padding(horizontal = 20.dp),
@@ -170,7 +174,7 @@ fun HistoryScreen(
                 item(key = "filter") { FilterBar(current, onClear = { applyFilter(null) }) }
             }
             current.days.forEach { day ->
-                item(key = "day-${day.date}") { DayHeader(day, today = current.today, filtered = filtered) }
+                item(key = "day-${day.date}") { DayHeader(day, today = current.today, filtered = filtered, ticked = day.date in current.ticked) }
                 items(day.entries, key = { it.id }) { entry ->
                     Column {
                         if (entry != day.entries.first()) {
@@ -314,9 +318,12 @@ private fun ClearChip(name: String, onClear: () -> Unit, modifier: Modifier = Mo
     }
 }
 
-/** Under a filter, the day's line counts its matches against every dose it had: "1 of 5 doses". */
+/**
+ * Under a filter, the day's line counts its matches against every dose it had: "1 of 5 doses". A
+ * [ticked] day stayed at or under the plan's guide, and has a green tick by its total.
+ */
 @Composable
-private fun DayHeader(day: LoggedDay, today: LocalDate, filtered: Boolean) {
+private fun DayHeader(day: LoggedDay, today: LocalDate, filtered: Boolean, ticked: Boolean = false) {
     val colors = LastHit.colors
     val isToday = day.date == today
     val title = if (isToday) {
@@ -336,6 +343,7 @@ private fun DayHeader(day: LoggedDay, today: LocalDate, filtered: Boolean) {
         filtered && isToday -> pluralStringResource(R.plurals.history_today_description_filtered, day.doses, total, count, day.doses)
         filtered -> pluralStringResource(R.plurals.history_day_description_filtered, day.doses, "$title $date", total, count, day.doses)
         isToday -> stringResource(R.string.history_today_description, total)
+        ticked -> stringResource(R.string.history_day_within_description, "$title $date", total)
         else -> stringResource(R.string.history_day_description, "$title $date", total)
     }
     Column {
@@ -372,6 +380,17 @@ private fun DayHeader(day: LoggedDay, today: LocalDate, filtered: Boolean) {
                         style = LastHit.type.caption,
                         color = colors.text2,
                         modifier = Modifier.padding(end = 6.dp, bottom = 2.dp),
+                    )
+                }
+                if (ticked) {
+                    // Centred on the total's 26 sp line, which sits on the row's bottom.
+                    TickDot(
+                        16.dp,
+                        fill = colors.success,
+                        ink = colors.bg,
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(end = 6.dp),
                     )
                 }
                 Text(
