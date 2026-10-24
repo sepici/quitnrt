@@ -1,5 +1,6 @@
 package app.thelasthit.nrt.ui.plan
 
+import android.os.Looper
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasContentDescription
@@ -22,7 +23,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import java.time.Duration
 
 /**
  * Results arrive when the app looks (ROADMAP P3-3): the shell settles each time the app comes
@@ -90,5 +93,42 @@ class SettleOnStartTest {
         val met = hasContentDescription("Week 1, 24 to 30\u00A0October", substring = true) and hasContentDescription("Met", substring = true)
         compose.waitUntilAtLeastOneExists(met, timeoutMillis = 10_000)
         compose.onNode(met).performScrollTo()
+    }
+
+    /**
+     * Found by the journey test: with the app left open as a result fell due, nothing looked
+     * until the next dose, so the Plan tab went on saying late logs still counted.
+     */
+    @Test
+    fun `a result that falls due while the app is open comes in within the minute`() {
+        app.setUp()
+        app.startMockupPlan()
+        compose.setContent { LastHitTheme { AppShell() } }
+        compose.waitUntilAtLeastOneExists(planTab, timeoutMillis = 5_000)
+        compose.onNode(planTab).performClick()
+        compose.waitUntilAtLeastOneExists(hasText("Schedule"), timeoutMillis = 5_000)
+
+        // Saturday evening, the day after week 1 ended: its result comes in at 04:00 tomorrow.
+        val waiting = hasText("Week 1's result comes in after today, so late logs still count.")
+        app.setTime("2026-10-31T21:00")
+        aMinutePasses()
+        compose.waitUntilAtLeastOneExists(waiting, timeoutMillis = 10_000)
+
+        // Still open on Sunday morning, as the minute ticks over.
+        app.setTime("2026-11-01T09:00")
+        aMinutePasses()
+        val met = hasContentDescription("Week 1, 24 to 30\u00A0October", substring = true) and hasContentDescription("Met", substring = true)
+        compose.waitUntilAtLeastOneExists(met, timeoutMillis = 10_000)
+        compose.onNode(waiting).assertDoesNotExist()
+    }
+
+    /**
+     * A minute on with the app open: the main looper's clock, which the screens' minute ticks
+     * wait on, and Compose's, which the settling waits on.
+     */
+    private fun aMinutePasses() {
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(61))
+        compose.mainClock.advanceTimeBy(61_000)
+        compose.waitForIdle()
     }
 }
