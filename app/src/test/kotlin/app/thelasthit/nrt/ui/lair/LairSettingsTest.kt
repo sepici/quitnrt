@@ -75,7 +75,8 @@ class LairSettingsTest {
         app.battleAsMockup()
         compose.setContent { LastHitTheme { AppShell() } }
 
-        val badge = hasContentDescription("1 hit ready", substring = true)
+        // The tab's own words: Today's band behind it says "1 hit ready" too.
+        val badge = hasContentDescription("Lair, 1 hit ready")
         compose.waitUntilExactlyOneExists(badge, timeoutMillis = 5_000)
         runBlocking { app.graph.game.spendHit() }
         compose.waitUntilDoesNotExist(badge, timeoutMillis = 5_000)
@@ -86,7 +87,7 @@ class LairSettingsTest {
         app.battleWithCombo()
         compose.setContent { LastHitTheme { AppShell() } }
 
-        compose.waitUntilExactlyOneExists(hasContentDescription("5 hits ready", substring = true), timeoutMillis = 5_000)
+        compose.waitUntilExactlyOneExists(hasContentDescription("Lair, 5 hits ready"), timeoutMillis = 5_000)
     }
 
     @Test

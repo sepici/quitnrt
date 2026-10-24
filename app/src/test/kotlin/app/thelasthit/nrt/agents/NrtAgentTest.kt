@@ -282,7 +282,7 @@ class NrtAgentTest {
         app.clock.now = app.clock.now.plus(Duration.ofDays(2))
         for (mode in ImportMode.entries) {
             runBlocking { app.graph.backups.import(backup, mode) }
-            // A restore writes every entry at once, but none of them was just logged.
+            // A restore brings every entry back at once, but none of them was just logged.
             assertEquals(AgentUndoOutcome.Refused(AgentRefusal.NothingToUndo), runBlocking { agent.undoLast() })
         }
 

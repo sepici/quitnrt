@@ -73,8 +73,8 @@ class LastWrittenTest {
             data.backups.import(restoring, mode)
             val restoredAt = data.settings.restoredAt()
             assertEquals(data.clock.now, restoredAt)
-            // Everything the restore wrote looks just written, the dose from 1 October first.
-            assertEquals(london("2026-10-01T09:00"), data.entries.lastWritten(since = dayAgo)?.occurredAt)
+            // A backup doesn't say when its entries were written, so none of them looks just written.
+            assertNull(data.entries.lastWritten(since = dayAgo))
             assertNull(data.entries.lastWritten(since = AgentUndo.since(data.clock.now, restoredAt)))
             data.clock.advance(Duration.ofMinutes(1))
         }

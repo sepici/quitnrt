@@ -11,10 +11,9 @@ import java.time.Instant
  * The window keeps a misheard "undo" from deleting a dose from days ago without anyone seeing,
  * since nothing on screen offers it back. Older entries are deleted from History.
  *
- * A restore from backup writes every entry it brings in at the moment it runs, so those would
- * all look just written, newest first by when they were taken. Nothing written at or before the
- * last restore is undone: the restore is where undo stops, and a dose logged after it can still
- * be undone.
+ * A restore from backup brings entries in with no time of writing, so none of them looks just
+ * written. Nothing written at or before the last restore is undone either: the restore is where
+ * undo stops, and a dose logged after it can still be undone.
  */
 object AgentUndo {
     val WINDOW: Duration = Duration.ofHours(24)
