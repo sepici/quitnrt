@@ -50,17 +50,18 @@ import kotlinx.coroutines.flow.stateIn
 import java.time.ZoneId
 
 /**
- * The advice Insights' triggers show: Today's advice for the top trigger, from the last 14 days
- * whatever range or kind of product Insights shows. A slip's advice stays on Today.
+ * The advice Insights' triggers show, for the top trigger of the last 14 days whatever range or
+ * kind of product Insights shows: its timing tip whenever there's one, or its best strategy. It
+ * doesn't turn by the day as Today's line does, and a slip's advice stays on Today.
  */
 class TriggerAdviceViewModel(graph: DataGraph, zone: () -> ZoneId = { ZoneId.systemDefault() }) : ViewModel() {
     val advice: StateFlow<AdviceNow?> = graph.adviceNow(zone, slips = false)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 }
 
-/** The tag [now]'s advice is for, or null when there's none. */
+/** The tag Insights' advice is for, or null when there's none. */
 internal val AdviceNow.triggerKey: String?
-    get() = (advice?.reason as? TodayAdvice.Reason.Trigger)?.trigger?.key
+    get() = (insights?.reason as? TodayAdvice.Reason.Trigger)?.trigger?.key
 
 /**
  * The advice under the top trigger's row, from advice-insights.html: "From your last 14 days", the
@@ -69,7 +70,7 @@ internal val AdviceNow.triggerKey: String?
  */
 @Composable
 internal fun TriggerAdviceCard(now: AdviceNow, atTop: Boolean, links: AdviceLinks, modifier: Modifier = Modifier) {
-    val advice = now.advice ?: return
+    val advice = now.insights ?: return
     val key = now.triggerKey ?: return
     val colors = LastHit.colors
     Row(

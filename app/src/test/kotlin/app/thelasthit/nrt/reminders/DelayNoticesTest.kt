@@ -123,6 +123,43 @@ class DelayNoticesTest {
     }
 
     @Test
+    fun `with notifications off, the app buzzes the end itself`() {
+        app.allowNotifications(false)
+        val run = run("17:00:00")
+        notices.book(run)
+
+        assertTrue(notices.ended(run, run.endsAt.plusMillis(300)))
+        assertNull(delayNotice())
+        assertNull(alarms.nextScheduledAlarm)
+        // Told once, even so.
+        assertFalse(notices.ended(run, run.endsAt.plusSeconds(1)))
+
+        val late = run("17:10:00")
+        assertFalse(notices.ended(late, late.endsAt + Duration.ofMinutes(30)))
+    }
+
+    @Test
+    fun `with the delay timer's channel blocked, the app buzzes the end itself`() {
+        val manager = app.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.getNotificationChannel(NoticeChannel.DELAY.id).importance = NotificationManager.IMPORTANCE_NONE
+        val run = run("17:20:00")
+
+        assertTrue(notices.ended(run, run.endsAt))
+        assertNull(delayNotice())
+    }
+
+    @Test
+    fun `a booking that can't put up its notice leaves the end for the app to buzz`() {
+        app.allowNotifications(false)
+        val run = run("17:30:00")
+        notices.book(run)
+        notices.bookingCame(run)
+        assertNull(delayNotice())
+
+        assertTrue(notices.ended(run, run.endsAt.plusSeconds(2)))
+    }
+
+    @Test
     fun `the channel buzzes as the timer does, without a sound`() {
         val channel = (app.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).getNotificationChannel(NoticeChannel.DELAY.id)
         assertNull(channel.sound)

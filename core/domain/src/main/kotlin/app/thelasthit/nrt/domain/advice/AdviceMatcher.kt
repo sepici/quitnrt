@@ -141,17 +141,35 @@ class AdviceMatcher(
     }
 
     /**
+     * The advice under Insights' top trigger, which is about patterns, so it doesn't turn by the
+     * day as Today's does: the trigger's timing tip whenever there is one, with its strategy, or
+     * else the trigger's best strategy. Null when there's too little data.
+     */
+    fun insights(triggers: TopTriggers, tips: List<TimingTip>, forms: Set<ProductForm>): TodayAdvice? {
+        val trigger = triggers.top.firstOrNull() ?: return null
+        val reason = TodayAdvice.Reason.Trigger(trigger, triggers.window)
+        val tip = tips.firstOrNull { it.tag == trigger.key }
+        tip?.let { library.find(it.strategy) }?.let { return TodayAdvice(it, reason, tip) }
+        val best = forTriggers(listOf(trigger), forms).single().strategies.firstOrNull() ?: return null
+        return TodayAdvice(best.strategy, reason, timing = null)
+    }
+
+    /**
      * The tip straight after logging [dose]: the best match across its tags, with an interactive
      * strategy first when it names the tag, such as breathing for Stressed. After a slip, it's the
-     * advice for that. Null for a patch, or a dose with no tag that has a group.
+     * advice for that, for a patch too.
+     *
+     * [shown] is what has had a tip today ([TipCard.shown]): those tags are left out, so the tip
+     * is the best among the rest, and once [TipCard.SLIP] is there a slip brings no second one.
+     * Null for a patch with no slip, or a dose with no tag left that has a group.
      */
-    fun afterLogging(dose: Entry, groupOf: (String) -> TagGroup?, slip: Slip? = null): LoggedTip? {
-        if (dose.isBackground) return null
-        if (slip != null) {
+    fun afterLogging(dose: Entry, groupOf: (String) -> TagGroup?, slip: Slip? = null, shown: Set<String> = emptySet()): LoggedTip? {
+        if (slip != null && TipCard.SLIP !in shown) {
             library.find(AFTER_A_SLIP)?.let { return LoggedTip(it, tag = null, slip = slip) }
         }
+        if (dose.isBackground) return null
         val forms = setOf(dose.form)
-        val candidates = dose.tagKeys.sorted().flatMap { key ->
+        val candidates = dose.tagKeys.filterNot { it in shown }.sorted().flatMap { key ->
             val group = groupOf(key) ?: return@flatMap emptyList()
             matches(key, group, forms).map { key to it }
         }
@@ -166,8 +184,9 @@ class AdviceMatcher(
 
     /**
      * Everything advice needs from [entries]: the top triggers over the advice window ending
-     * before [today], their strategies, the timing tips and Today's advice. [forms] are the forms
-     * of the products someone uses. With too little data, only a slip's advice comes through.
+     * before [today], their strategies, the timing tips, Today's advice and Insights'. [forms] are
+     * the forms of the products someone uses. With too little data, only a slip's advice comes
+     * through.
      */
     fun personal(
         entries: List<Entry>,
@@ -184,6 +203,7 @@ class AdviceMatcher(
             forTriggers = forTriggers(triggers.top, forms, slip),
             tips = tips,
             today = today(triggers, tips, forms, today, slip),
+            insights = insights(triggers, tips, forms),
         )
     }
 
@@ -230,4 +250,6 @@ data class PersonalAdvice(
     val forTriggers: List<TriggerAdvice>,
     val tips: List<TimingTip>,
     val today: TodayAdvice?,
+    /** The advice under Insights' top trigger, which never answers a slip. */
+    val insights: TodayAdvice?,
 )

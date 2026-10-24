@@ -116,7 +116,9 @@ fun TodayScreen(
     }
 
     val current = state
-    if (current == null) {
+    val adviceNow = advice
+    // The advice line is part of the first layout, so it never pushes the page down as it arrives.
+    if (current == null || adviceNow == null) {
         Box(Modifier.fillMaxSize())
         return
     }
@@ -138,7 +140,7 @@ fun TodayScreen(
             )
         }
         current.labelNote?.let { note -> item { LabelNote(note, onDismiss = viewModel::dismissLabelNote) } }
-        val tip = advice?.tip
+        val tip = adviceNow.tip
         current.day.lastDose?.let { last ->
             item {
                 SinceRow(
@@ -155,12 +157,10 @@ fun TodayScreen(
                 )
             }
         }
-        advice?.let { now ->
-            val line = now.line
-            when {
-                tip != null -> item(key = "advice") { TipAfterLogging(tip, now.tags, adviceLinks, onClose = adviceViewModel::closeTip) }
-                line != null -> item(key = "advice") { AdviceLine(line, now.tags, adviceLinks) }
-            }
+        val line = adviceNow.line
+        when {
+            tip != null -> item(key = "advice") { TipAfterLogging(tip, adviceNow.tags, adviceLinks, onClose = adviceViewModel::closeTip) }
+            line != null -> item(key = "advice") { AdviceLine(line, adviceNow.tags, adviceLinks) }
         }
         item {
             val plan = current.plan

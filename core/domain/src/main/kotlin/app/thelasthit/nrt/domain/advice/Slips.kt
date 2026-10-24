@@ -38,15 +38,16 @@ object Slips {
     }
 
     /**
-     * The slip [dose] brings straight after it's logged: it's today's, and today is now over its
-     * daily guide. [day] is today's doses, with [dose] among them. Patches count towards the
-     * guide like any dose, so a patch can bring it too.
+     * The slip [dose] brings straight after it's logged: it's today's, and it takes today over its
+     * daily guide, from at or under it before. A dose on a day that's already over brings none,
+     * so the doses after it get their own tips. [day] is today's doses, with or without [dose]
+     * among them. Patches count towards the guide like any dose, so a patch can bring it too.
      */
     fun afterLog(plan: Programme?, dose: Entry, day: List<Entry>, today: LocalDate): Slip? {
         if (plan == null || plan.status == ProgrammeStatus.COMPLETE || dose.logicalDate != today) return null
         val guide = plan.guideOn(today) ?: return null
-        val doses = if (day.any { it.id == dose.id }) day else day + dose
-        val total = doses.filter { it.logicalDate == today }.map { it.total }.sum()
-        return if (total > guide) Slip.OVER_GUIDE else null
+        val before = day.filter { it.logicalDate == today && it.id != dose.id }.map { it.total }.sum()
+        val after = before + dose.total
+        return if (before <= guide && after > guide) Slip.OVER_GUIDE else null
     }
 }

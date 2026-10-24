@@ -1,6 +1,7 @@
 package app.thelasthit.nrt.domain.advice
 
 import app.thelasthit.nrt.domain.dose.Dose
+import app.thelasthit.nrt.domain.programme.PATCH
 import app.thelasthit.nrt.domain.programme.WeekResult
 import app.thelasthit.nrt.domain.programme.date
 import app.thelasthit.nrt.domain.programme.dose
@@ -80,6 +81,30 @@ class SlipsTest {
 
         val within = dose("2026-10-27T15:00", Dose.mg(4))
         assertNull(Slips.afterLog(plan, within, listOf(morning, within), today))
+    }
+
+    @Test
+    fun `only the dose that takes today over brings the slip, not the ones after it`() {
+        val today = date("2026-10-27")
+        val morning = dose("2026-10-27T09:00", Dose.mg(16))
+        val crossing = dose("2026-10-27T15:00", Dose.mg(6))
+        val evening = dose("2026-10-27T20:00", Dose.mg(2))
+        assertEquals(Slip.OVER_GUIDE, Slips.afterLog(plan, crossing, listOf(morning, crossing), today))
+        assertNull(Slips.afterLog(plan, evening, listOf(morning, crossing, evening), today))
+        assertNull(Slips.afterLog(plan, evening, listOf(morning, crossing), today))
+
+        // A dose that lands exactly on the guide doesn't cross it, so the next one over does.
+        val toGuide = dose("2026-10-27T15:00", Dose.mg(4))
+        assertNull(Slips.afterLog(plan, toGuide, listOf(morning, toGuide), today))
+        assertEquals(Slip.OVER_GUIDE, Slips.afterLog(plan, evening, listOf(morning, toGuide, evening), today))
+    }
+
+    @Test
+    fun `a patch that takes today over brings the slip too`() {
+        val today = date("2026-10-27")
+        val morning = dose("2026-10-27T09:00", Dose.mg(10))
+        val patch = dose("2026-10-27T07:00", Dose.mg(14), productId = PATCH)
+        assertEquals(Slip.OVER_GUIDE, Slips.afterLog(plan, patch, listOf(morning, patch), today))
     }
 
     @Test

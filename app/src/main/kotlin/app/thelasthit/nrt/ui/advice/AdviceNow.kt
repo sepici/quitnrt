@@ -45,7 +45,10 @@ import java.time.format.DateTimeFormatter
  */
 data class AdviceNow(
     val date: LocalDate,
+    /** Today's line, which turns daily through the top trigger's strategies. */
     val advice: TodayAdvice?,
+    /** Under Insights' top trigger: its timing tip whenever there's one, or its best strategy. */
+    val insights: TodayAdvice?,
     /** Tag key to the tag, for the user's own names. */
     val tags: Map<String, TagEntity>,
 )
@@ -75,7 +78,7 @@ fun DataGraph.adviceNow(zone: () -> ZoneId, slips: Boolean): Flow<AdviceNow> {
             val groupOf: (String) -> TagGroup? = { key -> tagMap[key]?.group ?: BuiltInTags.find(key)?.group }
             val slip = Slips.onToday(running, date, entries)
             val personal = matcher.personal(entries, date, settings.dayStart, groupOf, products.map { it.form }.toSet(), slip)
-            AdviceNow(date, personal.today, tagMap)
+            AdviceNow(date, personal.today, personal.insights, tagMap)
         }
     }.flowOn(Dispatchers.Default)
 }

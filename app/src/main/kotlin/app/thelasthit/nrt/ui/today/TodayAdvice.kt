@@ -56,6 +56,7 @@ import app.thelasthit.nrt.ui.advice.todayLineText
 import app.thelasthit.nrt.ui.components.IconTile
 import app.thelasthit.nrt.ui.format.rememberTimeFormatter
 import app.thelasthit.nrt.ui.theme.LastHit
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -99,18 +100,22 @@ class TodayAdviceViewModel(
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    /** A dose was logged on Today, from the log sheet or a quick-log pill: its tip, if it brings one. */
-    fun afterLogging(entry: Entry) {
-        viewModelScope.launch {
-            val today = today()
-            val record = graph.programmes.current()
-            val plan = record?.plan?.takeIf { record.status == ProgrammeStatus.ACTIVE || record.status == ProgrammeStatus.OVERTIME }
-            val day = graph.entries.observeDay(today).first().entries
-            val slip = Slips.afterLog(plan, entry, day, today)
-            val tags = graph.tags.all.first().associateBy { it.key }
-            val groupOf: (String) -> TagGroup? = { key -> tags[key]?.group ?: BuiltInTags.find(key)?.group }
-            val tip = matcher.afterLogging(entry, groupOf, slip)
-            graph.reminders.updateAdviceTip { TipCard.afterLog(it, today, tip, entry.id) }
+    /**
+     * A dose was logged on Today, from the log sheet or a quick-log pill: its tip, if it brings
+     * one. The tip is the best among the tags that haven't had one today, picked in the same edit
+     * that keeps it, so two doses close together can't both have a tag's tip.
+     */
+    fun afterLogging(entry: Entry): Job = viewModelScope.launch {
+        val today = today()
+        val record = graph.programmes.current()
+        val plan = record?.plan?.takeIf { record.status == ProgrammeStatus.ACTIVE || record.status == ProgrammeStatus.OVERTIME }
+        val day = graph.entries.observeDay(today).first().entries
+        val slip = Slips.afterLog(plan, entry, day, today)
+        val tags = graph.tags.all.first().associateBy { it.key }
+        val groupOf: (String) -> TagGroup? = { key -> tags[key]?.group ?: BuiltInTags.find(key)?.group }
+        graph.reminders.updateAdviceTip { card ->
+            val shown = card?.takeIf { it.date == today }?.shown.orEmpty()
+            TipCard.afterLog(card, today, matcher.afterLogging(entry, groupOf, slip, shown), entry.id)
         }
     }
 

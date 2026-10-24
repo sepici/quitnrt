@@ -21,6 +21,7 @@ import app.thelasthit.nrt.TestApp
 import app.thelasthit.nrt.TestApp.Companion.london
 import app.thelasthit.nrt.data.repo.LogRequest
 import app.thelasthit.nrt.domain.advice.Interactive
+import app.thelasthit.nrt.domain.advice.TipCard
 import app.thelasthit.nrt.seedPlan
 import app.thelasthit.nrt.setUp
 import app.thelasthit.nrt.ui.PHONE
@@ -59,6 +60,9 @@ class TodayAdviceTest {
     /** The sheet's "Log" button, told apart from the Log pill behind the sheet by its "2 mg at 15:05". */
     private val logButton = hasText("Log") and hasText(" at ", substring = true)
 
+    /** Today's advice, made here so a test can wait on what it has settled. */
+    private val advice by lazy { TodayAdviceViewModel(app.graph) }
+
     @Before
     fun setUpApp() = app.setUp()
 
@@ -67,7 +71,7 @@ class TodayAdviceTest {
             LastHitTheme {
                 val snackbars = remember { SnackbarHostState() }
                 Box(Modifier.fillMaxSize()) {
-                    TodayScreen(snackbars = snackbars, onOpenSettings = {}, onOpenLair = {}, adviceLinks = links)
+                    TodayScreen(snackbars = snackbars, onOpenSettings = {}, onOpenLair = {}, adviceLinks = links, adviceViewModel = advice)
                     SnackbarHost(snackbars, Modifier.align(Alignment.BottomCenter))
                 }
             }
@@ -75,11 +79,20 @@ class TodayAdviceTest {
         compose.waitUntilExactlyOneExists(hasContentDescription("Log a dose"), timeoutMillis = 5_000)
     }
 
-    private fun logWithTag(tag: String) {
+    private fun logWithTag(vararg tags: String) {
         compose.onNodeWithContentDescription("Log a dose").performClick()
         compose.waitUntilExactlyOneExists(hasText("Log a dose"), timeoutMillis = 5_000)
-        compose.onNodeWithText(tag).performScrollTo().performClick()
+        tags.forEach { compose.onNodeWithText(it).performScrollTo().performClick() }
         compose.onNode(logButton).performClick()
+    }
+
+    /** Today's tip card as kept on the phone. */
+    private fun card(): TipCard? = runBlocking { app.graph.reminders.adviceTip.first() }
+
+    /** Waits until the kept card is as [settled] wants it. */
+    private fun waitForCard(settled: (TipCard?) -> Boolean) = compose.waitUntil(5_000) {
+        compose.waitForIdle()
+        settled(card())
     }
 
     @Test
@@ -112,8 +125,12 @@ class TodayAdviceTest {
         show()
 
         compose.waitUntilExactlyOneExists(hasText("Logged today"), timeoutMillis = 5_000)
+        // Today waits for its advice before it draws, but wait on the advice itself to be sure.
+        compose.waitUntil(5_000) { advice.state.value != null }
+        assertNull(advice.state.value?.line)
         compose.waitForIdle()
         compose.onNodeWithText("How to do it").assertDoesNotExist()
+        compose.onNodeWithText("All advice").assertDoesNotExist()
     }
 
     @Test
@@ -137,12 +154,16 @@ class TodayAdviceTest {
         compose.waitUntilExactlyOneExists(hasText("All advice"), timeoutMillis = 5_000)
         compose.onNodeWithText("Try box breathing next time").assertDoesNotExist()
 
-        // Stressed has had today's tip, closed or not.
+        // Stressed has had today's tip, closed or not. A dose tagged Stressed and On autopilot gets
+        // On autopilot's, which it couldn't if the dose before had brought Stressed's back.
         logWithTag("Stressed")
         compose.waitUntilExactlyOneExists(hasText("2\u00A0doses, 4\u00A0mg"), timeoutMillis = 5_000)
-        compose.waitForIdle()
+        logWithTag("Stressed", "On autopilot")
+        compose.waitUntilExactlyOneExists(hasText("Try the delay timer next time"), timeoutMillis = 5_000)
+        compose.onNodeWithText("You tagged that dose On autopilot.", substring = true).assertExists()
+        waitForCard { it?.showing?.strategy == "delay_timer" }
+        assertEquals(setOf("stressed", "autopilot"), card()?.shown)
         compose.onNodeWithText("Try box breathing next time").assertDoesNotExist()
-        compose.onNodeWithText("All advice").assertExists()
     }
 
     @Test
@@ -209,5 +230,25 @@ class TodayAdviceTest {
 
         compose.waitUntilExactlyOneExists(hasText("Today is over its guide"), timeoutMillis = 5_000)
         compose.onNodeWithText("That doesn't undo what you've done. It shows you where the hard moments are.").assertExists()
+    }
+
+    @Test
+    fun `after the slip's tip is closed, a dose gets its own tag's tip`() {
+        app.seedPlan()
+        runBlocking { app.graph.entries.log(LogRequest(GUM_2, quantity = 6, at = london("2026-10-23T09:00"))) }
+        show()
+        compose.onNodeWithContentDescription("Log a dose").performClick()
+        compose.waitUntilExactlyOneExists(hasText("Log a dose"), timeoutMillis = 5_000)
+        compose.onNodeWithContentDescription("One more").performClick()
+        compose.onNode(logButton).performClick()
+        compose.waitUntilExactlyOneExists(hasText("Today is over its guide"), timeoutMillis = 5_000)
+        compose.onNodeWithContentDescription("Close tip").performScrollTo().performClick()
+        waitForCard { it != null && it.showing == null }
+
+        // Today is still over its guide, but this dose didn't take it over, so it gets Stressed's tip.
+        logWithTag("Stressed")
+        waitForCard { it?.showing?.strategy == "breathing_timer" }
+        assertEquals(setOf(TipCard.SLIP, "stressed"), card()?.shown)
+        compose.waitUntilExactlyOneExists(hasText("Try box breathing next time"), timeoutMillis = 5_000)
     }
 }

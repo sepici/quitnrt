@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import androidx.core.app.NotificationManagerCompat
 import app.thelasthit.nrt.R
 import app.thelasthit.nrt.domain.advice.DelayRun
 import app.thelasthit.nrt.ui.advice.DelayEnding
@@ -23,6 +24,9 @@ import java.time.Instant
  * the tile's note. An exact time needs a permission the app doesn't ask for on Android 12 and
  * newer, so there the booking can come a little late. While the app runs, the timer's own wake
  * lock ends it on time and sends the notice then (see DelayViewModel).
+ *
+ * When the notice can't go up, because notifications are off, never permitted, or the delay
+ * timer's channel is blocked, the app buzzes itself as it did before there was a notice.
  */
 class DelayNotices(
     private val context: Context,
@@ -65,22 +69,28 @@ class DelayNotices(
             poster.cancel(Notice.ID_DELAY)
             return first && run.buzzesAt(now)
         }
-        if (first && run.buzzesAt(now)) {
-            createChannels()
-            poster.post(notice(run))
-        }
-        return false
+        if (!first || !run.buzzesAt(now)) return false
+        // Without the notice, the app's own buzz is all there is.
+        return !postNotice(run)
     }
 
     /**
      * The booking came for [run]. With the app on screen, its page tells of the end. Otherwise the
-     * notice goes up, unless the app has told of this end already.
+     * notice goes up, unless the app has told of this end already. When it can't go up, the end
+     * is left for the app to buzz, if it's still running.
      */
     fun bookingCame(run: DelayRun) {
         if (onScreen() || !DelayEnds.claim(run)) return
+        if (!postNotice(run)) DelayEnds.release(run)
+    }
+
+    /** Puts up [run]'s notice. False when it can't show: notifications are off, or the channel is blocked. */
+    private fun postNotice(run: DelayRun): Boolean {
         // After a restart the app may not have made its channels yet.
         createChannels()
-        poster.post(notice(run))
+        val channel = NotificationManagerCompat.from(context).getNotificationChannelCompat(NoticeChannel.DELAY.id)
+        if (channel != null && channel.importance == NotificationManagerCompat.IMPORTANCE_NONE) return false
+        return poster.post(notice(run))
     }
 
     /** "5 minutes done", with what the end frame says. Tapping it opens the app where it was left. */
@@ -139,6 +149,11 @@ internal object DelayEnds {
 
     /** True the first time [run]'s end is claimed. */
     fun claim(run: DelayRun): Boolean = synchronized(told) { told.add(run.startedAt.toEpochMilli()) }
+
+    /** [run]'s end wasn't told of after all, so whoever sees it next can. */
+    fun release(run: DelayRun) {
+        synchronized(told) { told.remove(run.startedAt.toEpochMilli()) }
+    }
 }
 
 /** The booked end of a delay timer, from the alarm manager. */

@@ -20,6 +20,7 @@ import app.thelasthit.nrt.ui.advice.seedAdviceWeeks
 import app.thelasthit.nrt.ui.theme.LastHitTheme
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -46,40 +47,62 @@ class TriggerAdviceTest {
         breatheNow = { opened += "breathe" },
     )
 
+    /** Insights' advice, made here so a test can wait on what it has settled. */
+    private val advice by lazy { TriggerAdviceViewModel(app.graph) }
+
     @Before
     fun setUpApp() = app.setUp()
 
     private fun show() {
         compose.setContent {
-            LastHitTheme { InsightsScreen(remember { SnackbarHostState() }, adviceLinks = links) }
+            LastHitTheme { InsightsScreen(remember { SnackbarHostState() }, adviceLinks = links, adviceViewModel = advice) }
         }
     }
 
     private fun waitFor(text: String) = compose.waitUntilExactlyOneExists(hasText(text), timeoutMillis = 5_000)
 
     @Test
-    fun `under the top trigger, the strategy and why it helps, with the two links`() {
+    fun `under the top trigger, when these doses come and the time to try, with the two links`() {
+        // Friday 23 October, as the mockup has it. Today's line turns to getting up from the table
+        // that day, but Insights has the timing tip whatever the day.
         app.seedAdviceWeeks()
         show()
 
         waitFor("From your last 14\u00A0days")
-        waitFor(
-            "Get up from the table. The end of a meal, or of a coffee or tea, is a common cue. " +
-                "Doing something different straight away breaks it.",
-        )
+        waitFor("These doses come mostly around 13:00 and 19:00. Try having your dose at 12:30, before lunch.")
         compose.onNodeWithText("After a meal is your top trigger.", substring = true).assertDoesNotExist()
         compose.onNodeWithText("How to do it").performScrollTo().performClick()
         compose.onNodeWithText("All advice").performScrollTo().performClick()
-        assertEquals(listOf("strategy:leave_the_table", "all"), opened)
+        assertEquals(listOf("strategy:dose_before_meal", "all"), opened)
     }
 
     @Test
-    fun `with a timing tip, when these doses come and the time to try`() {
+    fun `the timing tip is there on the other days too`() {
         app.clock.now = london("2026-10-22T15:05")
         app.seedAdviceWeeks()
         show()
 
         waitFor("These doses come mostly around 13:00. Try having your dose at 12:30, before lunch.")
+    }
+
+    @Test
+    fun `without a timing tip, the trigger's best strategy and why it helps`() {
+        val first = LocalDate.parse("2026-10-09")
+        runBlocking {
+            for (day in 0L..13L) {
+                app.graph.entries.log(LogRequest(GUM_2, at = london("${first.plusDays(day)}T21:00"), tagKeys = setOf("stressed")))
+                app.graph.entries.log(LogRequest(GUM_2, at = london("${first.plusDays(day)}T10:00")))
+            }
+        }
+        show()
+
+        waitFor("From your last 14\u00A0days")
+        compose.waitUntilExactlyOneExists(
+            hasText("Try a minute of box breathing. Slow, counted breathing can calm you", substring = true),
+            timeoutMillis = 5_000,
+        )
+        compose.onNodeWithText("How to do it").performScrollTo().performClick()
+        assertEquals(listOf("strategy:breathing_timer"), opened)
     }
 
     @Test
@@ -99,9 +122,10 @@ class TriggerAdviceTest {
         waitFor("From your last 14\u00A0days")
         compose.onNodeWithText("7\u00A0days").performClick()
 
+        // After a meal is under a quarter of the doses, so there's no timing tip: its best strategy.
         waitFor(
-            "After a meal is your top trigger. Get up from the table. The end of a meal, or of a coffee or tea, is a common cue. " +
-                "Doing something different straight away breaks it.",
+            "After a meal is your top trigger. Move the dose to before the meal. If a dose follows every meal, the meal becomes " +
+                "the cue. Having that dose before you eat breaks the link without adding one.",
         )
     }
 
@@ -111,7 +135,10 @@ class TriggerAdviceTest {
         show()
 
         waitFor("Triggers")
+        compose.waitUntil(5_000) { advice.advice.value != null }
+        assertNull(advice.advice.value?.insights)
         compose.waitForIdle()
         compose.onNodeWithText("From your last 14\u00A0days").assertDoesNotExist()
+        compose.onNodeWithText("How to do it").assertDoesNotExist()
     }
 }

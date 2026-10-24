@@ -15,9 +15,10 @@ interface DelayEnding {
     fun clear()
 
     /**
-     * The app saw [run] end at [now]. True when the app is on screen and buzzes itself. Otherwise
-     * the notice goes up straight away, without waiting for its booking. Either way an end is told
-     * of once, by whichever sees it first, and only close to the end ([DelayRun.buzzesAt]).
+     * The app saw [run] end at [now]. True when the app buzzes itself: it's on screen, or the
+     * notice can't go up, as when notifications are off. Otherwise the notice goes up straight
+     * away, without waiting for its booking. Either way an end is told of once, by whichever sees
+     * it first, and only close to the end ([DelayRun.buzzesAt]).
      */
     fun ended(run: DelayRun, now: Instant): Boolean
 
