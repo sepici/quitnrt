@@ -22,8 +22,12 @@ class LadderTest {
     private fun byHand(id: String, form: ProductForm, mg: Int) =
         UserProduct(id, null, "My $id", "My $id", form, form.defaultUnit, Dose.mg(mg))
 
-    private val GENERIC_GUM_2 = product("generic-gum-2mg")
-    private val GENERIC_LOZENGE_1 = product("generic-lozenge-1mg")
+    /** A generic product the ladder falls back to, with the strictest daily limit of the packs it stands for. */
+    private fun standIn(id: String, limit: Int) = product(id).copy(label = LabelLimit(maxUnitsPerDay = limit))
+
+    // In the UK, the strictest 2 mg gum pack allows 15 a day, and both 1 mg lozenge packs 24.
+    private val GENERIC_GUM_2 = standIn("generic-gum-2mg", 15)
+    private val GENERIC_LOZENGE_1 = standIn("generic-lozenge-1mg", 24)
     private val GENERIC_PATCH_14 = product("generic-patch-24h-14mg")
     private val GENERIC_PATCH_7 = product("generic-patch-24h-7mg")
 
@@ -44,12 +48,44 @@ class LadderTest {
         assertEquals(listOf(mix(GENERIC_PATCH_7 to 1)), ladder(usual(product("life-brand-patch-ca-14mg") to 1), market = "CA").steps)
         // The CVS and Walgreens minis are 4 mg only. The generic mini lozenge comes in 1.5 mg
         // too, but no mini lozenge in the US is, so 2 mg is the bottom.
-        val genericMini2 = product("generic-mini-lozenge-2mg")
+        val genericMini2 = standIn("generic-mini-lozenge-2mg", 20)
         for (mini in listOf("cvs-mini-lozenge-us-4mg", "walgreens-mini-lozenge-us-4mg")) {
             val minis = ladder(usual(product(mini) to 4), market = "US")
             assertEquals(listOf(mix(product(mini) to 3), mix(product(mini) to 2), mix(genericMini2 to 4)) + (3 downTo 1).map { mix(genericMini2 to it) }, minis.steps)
             assertEquals(listOf(genericMini2), minis.newProducts)
         }
+    }
+
+    @Test
+    fun `a generic stand-in keeps to the strictest daily limit of the packs it stands for`() {
+        // Every US 2 mg mini lozenge says 20 a day, so the generic one standing in for the CVS
+        // 4 mg mini does too. 24 a day comes down to 20 at step 1, and the switch waits until 10
+        // pieces of 4 mg become 20 of 2 mg, as Nicorette's own minis do.
+        val cvs4 = product("cvs-mini-lozenge-us-4mg")
+        val genericMini2 = standIn("generic-mini-lozenge-2mg", 20)
+        val cvs = ladder(usual(cvs4 to 24), market = "US")
+        assertEquals((20 downTo 10).map { mix(cvs4 to it) } + (20 downTo 1).map { mix(genericMini2 to it) }, cvs.steps)
+        assertEquals(listOf(genericMini2), cvs.newProducts)
+        val nicorette4 = product("nicorette-mini-lozenge-us-4mg")
+        val nicorette2 = product("nicorette-mini-lozenge-us-2mg")
+        val nicorette = ladder(usual(nicorette4 to 24), market = "US")
+        assertEquals((20 downTo 10).map { mix(nicorette4 to it) } + (20 downTo 1).map { mix(nicorette2 to it) }, nicorette.steps)
+        // NiQuitin's discontinued 4 mg gum: UK 2 mg gum packs allow 15 a day at the strictest, so
+        // 20 a day switches at 7 pieces to 14, as Nicorette's gum does.
+        val oldStock = product("niquitin-gum-uk-4mg")
+        assertEquals((15 downTo 7).map { mix(oldStock to it) } + (14 downTo 1).map { mix(GENERIC_GUM_2 to it) }, ladder(usual(oldStock to 20)).steps)
+        // The stand-in joins the user's list from the catalogue, with no limit of its own. A
+        // plan built later still keeps it to 20.
+        val joined = ladder(usual(cvs4 to 24), own = listOf(cvs4, product("generic-mini-lozenge-2mg")), market = "US")
+        assertEquals(cvs.steps, joined.steps)
+        assertEquals(emptyList<Any>(), joined.newProducts)
+        // A limit the user's own generic product has stays: 8 a day here.
+        val own8 = product("generic-mini-lozenge-2mg").copy(label = LabelLimit(maxUnitsPerDay = 8))
+        val small = ladder(usual(cvs4 to 24), own = listOf(cvs4, own8), market = "US")
+        assertEquals((20 downTo 4).map { mix(cvs4 to it) } + (8 downTo 1).map { mix(own8 to it) }, small.steps)
+        // Somewhere else no pack is sold, so the generic line has no limit to keep to.
+        val own4 = byHand("gum-4", ProductForm.GUM, 4)
+        assertTrue(mix(product("generic-gum-2mg") to 24) in ladder(usual(own4 to 24), market = "ZZ").steps)
     }
 
     @Test
@@ -76,19 +112,18 @@ class LadderTest {
         // The generic lozenge comes in 4, 2, 1.5 and 1 mg. In the UK no lozenge is 1.5 mg, so a
         // generic 4 mg lozenge goes to 2 mg, then 1 mg.
         val generic4 = product("generic-lozenge-4mg")
-        val generic2 = product("generic-lozenge-2mg")
-        val generic15 = product("generic-lozenge-1-5mg")
+        val generic2 = standIn("generic-lozenge-2mg", 15)
         val uk = ladder(usual(generic4 to 4))
         val ukExpected = listOf(mix(generic4 to 3), mix(generic4 to 2)) +
             (4 downTo 2).map { mix(generic2 to it) } +
             (4 downTo 1).map { mix(GENERIC_LOZENGE_1 to it) }
         assertEquals(ukExpected, uk.steps)
-        // Somewhere else, nothing is sold, so 1.5 mg comes between them.
+        // Somewhere else, nothing is sold, so 1.5 mg comes between them, and there are no limits.
         val elsewhere = ladder(usual(generic4 to 4), market = "ZZ")
         val elsewhereExpected = listOf(mix(generic4 to 3), mix(generic4 to 2)) +
-            (4 downTo 3).map { mix(generic2 to it) } +
-            (4 downTo 2).map { mix(generic15 to it) } +
-            (3 downTo 1).map { mix(GENERIC_LOZENGE_1 to it) }
+            (4 downTo 3).map { mix(product("generic-lozenge-2mg") to it) } +
+            (4 downTo 2).map { mix(product("generic-lozenge-1-5mg") to it) } +
+            (3 downTo 1).map { mix(product("generic-lozenge-1mg") to it) }
         assertEquals(elsewhereExpected, elsewhere.steps)
         assertEquals(listOf(3, 5, 8), elsewhere.switches)
         // US lozenges are 2 and 4 mg, so a US 2 mg lozenge has nothing lower, generic or not.

@@ -16,10 +16,11 @@ import java.util.Locale
  * product (gum, lozenges, sprays, patches and so on) with the most mg in the mix:
  * - **One fewer** piece, lozenge, spray or session a day, the strongest first.
  * - **A lower strength,** once the kind's mg comes to no more pieces a day at that strength than
- *   the usual day had of the kind, and no more than the lower strength's pack allows: 4 pieces
- *   of 4 mg gum become 8 pieces of 2 mg. The switch is a step of its own, even when the mg stays
- *   the same, and it's floor(mg ÷ lower strength) pieces. A kind down to one piece that the
- *   switch doesn't cover moves to one piece of the lower strength.
+ *   the usual day had of the kind, and no more than the lower strength's pack allows (for a
+ *   generic product, the strictest pack it stands for): 4 pieces of 4 mg gum become 8 pieces
+ *   of 2 mg. The switch is a step of its own, even when the mg stays the same, and it's
+ *   floor(mg ÷ lower strength) pieces. A kind down to one piece that the switch doesn't cover
+ *   moves to one piece of the lower strength.
  * - **Patches** step down one strength at a time (21, 14, then 7 mg), then come off. With more
  *   than one patch, the strongest steps down that has room under its pack's limit at the lower
  *   strength. When none has, the weakest comes off.
@@ -90,6 +91,7 @@ data class Ladder(
          * sold. A user's product is used before a catalogue one of the same strength. When none
          * of those has a lower strength, the catalogue's generic line of the form has the next
          * one on sale in [market], so no pack drops from its strong unit straight to nothing.
+         * A generic product keeps to the strictest daily limit of the packs it stands for.
          */
         fun build(usual: UsualDay, own: List<UserProduct>, catalogue: Catalogue, market: String): Ladder {
             val steps = Walk(usual, Strengths(own, catalogue, market)).steps()
@@ -207,8 +209,12 @@ private class Walk(private val usual: UsualDay, private val strengths: Strengths
  *
  * A generic product stands for any pack at its strength, so the generic line is only ever the
  * fallback, even when a generic product is in use: that keeps a 2 mg generic mini lozenge from
- * stepping on to a 1.5 mg one that no shop in the market sells. Discontinued packs are never
- * offered, and they don't count as on sale.
+ * stepping on to a 1.5 mg one that no shop in the market sells. For the same reason, a generic
+ * product it returns with no daily limit of its own keeps to the strictest of those packs':
+ * every US 2 mg mini lozenge says 20 a day, so a CVS 4 mg mini switches to no more than 20
+ * generic 2 mg ones, whichever pack the user then buys. A generic product already in the user's
+ * list gets it too, as a stand-in an earlier plan added does. Where none of those packs is sold,
+ * there's no limit. Discontinued packs are never offered, and they don't count as on sale.
  */
 internal class Strengths(own: List<UserProduct>, private val catalogue: Catalogue, market: String) {
 
@@ -237,14 +243,29 @@ internal class Strengths(own: List<UserProduct>, private val catalogue: Catalogu
         val sameForm = branded.filter { it.form == product.form }
         val sameLine = lineIds.flatMap { line -> sameForm.filter { it.lineId == line } }
         val sameBrand = sameForm.filter { it.lineId !in lineIds && it.brand in brands && it.isSoldIn(markets) }
-        return nextBelow(product, own + (sameLine + sameBrand).map { it.toUserProduct() })
+        val lower = nextBelow(product, own + (sameLine + sameBrand).map { it.toUserProduct() })
             ?: nextBelow(product, genericLine(product.form, markets))
+        return lower?.withPackLimit(markets)
     }
 
     /** The generic line of [form] at the strengths a pack of that form is sold at in [markets], or all of it where none is. */
     private fun genericLine(form: ProductForm, markets: Set<String>): List<UserProduct> {
         val sold = branded.filter { it.form == form && it.isSoldIn(markets) }.map { it.strength }.toSet()
         return generic.filter { it.form == form && (sold.isEmpty() || it.strength in sold) }.map { it.toUserProduct() }
+    }
+
+    /**
+     * [this], when it's a generic product with no daily limit of its own, with the lowest daily
+     * limit of the packs of its form and strength on sale in [markets]. Anything else as it is.
+     */
+    private fun UserProduct.withPackLimit(markets: Set<String>): UserProduct {
+        if (label.maxUnitsPerDay != null) return this
+        val generic = catalogueId?.let(catalogue::find)?.takeIf { it.kind == LineKind.GENERIC } ?: return this
+        val strictest = branded
+            .filter { it.form == generic.form && it.strength == generic.strength && it.isSoldIn(markets) }
+            .mapNotNull { it.toUserProduct().label.maxUnitsPerDay }
+            .minOrNull() ?: return this
+        return copy(label = label.copy(maxUnitsPerDay = strictest))
     }
 
     private fun CatalogueProduct.isSoldIn(markets: Set<String>): Boolean =

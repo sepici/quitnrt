@@ -1,6 +1,8 @@
 package app.thelasthit.nrt.domain.programme
 
+import app.thelasthit.nrt.domain.catalogue.LineKind
 import app.thelasthit.nrt.domain.dose.Dose
+import app.thelasthit.nrt.domain.product.LabelLimit
 import app.thelasthit.nrt.domain.product.ProductForm
 import app.thelasthit.nrt.domain.product.UserProduct
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -78,7 +80,7 @@ class PlanBuilderTest {
         // NiQuitin 4 mg lozenges switch to its 2 mg at step 4, then to the generic 1 mg at step 8.
         // Over 8 weeks that's 13 steps for 6 weeks: week 2 stops at the first switch and week 4
         // at the second, and each time the steps left spread over the weeks left.
-        val generic1 = product("generic-lozenge-1mg")
+        val generic1 = product("generic-lozenge-1mg").copy(label = LabelLimit(maxUnitsPerDay = 24))
         val programme = plan(usual(LOZENGE_4 to 6), ProgrammeLength.WEEKS_8)
         assertEquals(listOf(4, 8), (1..programme.ladder.size).filter(programme.ladder::isSwitch))
         assertEquals(listOf(3, 4, 7, 8, 11, 13, null, null), programme.steps)
@@ -98,7 +100,8 @@ class PlanBuilderTest {
         assertEquals(listOf(7, 11), (1..programme.ladder.size).filter(programme.ladder::isSwitch))
         assertEquals(listOf(2, 4, 6, 7, 10, 12, null, null), programme.steps)
         assertEquals(mix(LOZENGE_2 to 1), programme.week(5).target.mix)
-        assertEquals(mix(product("generic-lozenge-1mg") to 1), programme.week(6).target.mix)
+        // UK 1 mg lozenge packs allow 24 a day, so the generic one stands in with that limit.
+        assertEquals(mix(product("generic-lozenge-1mg").copy(label = LabelLimit(maxUnitsPerDay = 24)) to 1), programme.week(6).target.mix)
     }
 
     @Test
@@ -258,19 +261,20 @@ class PlanBuilderTest {
             val pack = product(id)
             val most = if (pack.form.defaultUnit == PATCH_21.form.defaultUnit) 2 else 24
             for (units in 1..most) {
-                played = checkPlans(ladder(usual(pack to units), market = market), played)
+                played = checkPlans(ladder(usual(pack to units), market = market), played, market)
                 for (other in listOf(GUM_2, GUM_4, SPRAY, LOZENGE_4)) {
-                    for (extra in listOf(1, 3, 8)) played = checkPlans(ladder(usual(pack to units, other to extra), market = market), played)
+                    for (extra in listOf(1, 3, 8)) played = checkPlans(ladder(usual(pack to units, other to extra), market = market), played, market)
                 }
             }
         }
     }
 
     /**
-     * Checks every length of plan down [ladder] keeps PLAN §6.2's rules, and plays one in every 97
-     * through to the end. Returns how many plans have been checked, [played] included.
+     * Checks every length of plan down [ladder], built in [market], keeps PLAN §6.2's rules, and
+     * plays one in every 97 through to the end. Returns how many plans have been checked,
+     * [played] included.
      */
-    private fun checkPlans(ladder: Ladder, played: Int): Int {
+    private fun checkPlans(ladder: Ladder, played: Int, market: String = MARKET): Int {
         var count = played
         val usual = ladder.usual
         assertEquals(1, ladder.mixAt(ladder.size).units, "$usual ends at one unit")
@@ -280,6 +284,15 @@ class PlanBuilderTest {
             val before = ladder.mixAt(step)
             val drop = before.total.micrograms - ladder.mixAt(step + 1).total.micrograms
             assertTrue(drop <= before.items.maxOf { it.product.perUnit.micrograms }, "$usual, step ${step + 1}: ${ladder.steps}")
+        }
+        // No step has more of a generic product it switched to than the strictest pack on sale
+        // at that form and strength allows, though the generic line itself has no limits.
+        val usualIds = usual.mix.products.map { it.id }.toSet()
+        for (step in 1..ladder.size) {
+            for (item in ladder.mixAt(step).items.filter { it.product.id !in usualIds }) {
+                val most = strictestPack(item.product, market) ?: continue
+                assertTrue(item.units <= most, "$usual in $market, step $step: ${ladder.steps}")
+            }
         }
         for (length in ProgrammeLength.entries) {
             val programme = Programme.create(ladder, length, START)
@@ -311,6 +324,15 @@ class PlanBuilderTest {
             }
         }
         return count
+    }
+
+    /** The lowest daily limit of the packs on sale in [market] that the generic [product] stands for, or null when it isn't generic or none has one. */
+    private fun strictestPack(product: UserProduct, market: String): Int? {
+        val generic = product.catalogueId?.let(CATALOGUE::find)?.takeIf { it.kind == LineKind.GENERIC } ?: return null
+        return CATALOGUE.forMarket(market)
+            .filter { it.kind != LineKind.GENERIC && it.form == generic.form && it.strength == generic.strength }
+            .mapNotNull { it.toUserProduct().label.maxUnitsPerDay }
+            .minOrNull()
     }
 
     @Test
