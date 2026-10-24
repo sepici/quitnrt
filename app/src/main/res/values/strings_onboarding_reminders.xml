@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Phase 6 follow-up: the reminders step in onboarding (onboarding-6b-reminders), between the day start and done. -->
+<resources>
+
+    <!-- The day start's button, naming the step after it -->
+    <string name="onboarding_next_reminders">Next: your reminders</string>
+
+    <!-- The reminders step. The switches' titles are the Reminders page's own. -->
+    <string name="onboarding_reminders_title">Which reminders do you want?</string>
+    <string name="onboarding_reminders_body">Four are on to start with. None of them will ever say it\'s time for a dose.</string>
+    <string name="onboarding_reminders_allowance_detail">When a dose takes the week near or past its allowance, or today past the guide</string>
+    <string name="onboarding_reminders_check_in_detail">Today\'s total at %1$s, with a button to log anything missing</string>
+    <string name="onboarding_reminders_results_detail">When each week of your plan ends, with any hits ready for %1$s</string>
+    <string name="onboarding_reminders_achievements_detail">When you earn a badge or new gear</string>
+    <string name="onboarding_reminders_hint_quiet">Nothing shows from %1$s to %2$s. You can change all of this later in Settings, under Reminders.</string>
+    <string name="onboarding_reminders_hint">You can change all of this later in Settings, under Reminders.</string>
+    <string name="onboarding_reminders_allow">Allow notifications and finish</string>
+    <string name="onboarding_reminders_allow_note">Your phone asks next. Set-up finishes either way.</string>
+
+    <!-- The done step's summary row, beside the Settings row's own summary -->
+    <string name="onboarding_summary_reminders">Reminders</string>
+</resources>

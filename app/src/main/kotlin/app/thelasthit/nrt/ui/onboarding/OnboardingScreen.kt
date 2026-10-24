@@ -75,6 +75,7 @@ import app.thelasthit.nrt.ui.format.rememberTimeFormatter
 import app.thelasthit.nrt.ui.game.BandScene
 import app.thelasthit.nrt.ui.game.CreatureSilhouette
 import app.thelasthit.nrt.ui.graphViewModel
+import app.thelasthit.nrt.ui.settings.remindersSummary
 import app.thelasthit.nrt.ui.theme.LastHit
 import java.time.Instant
 import java.time.LocalDate
@@ -83,7 +84,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.roundToInt
 
-/** The seven set-up steps. Nothing but the disclaimer is stored until "Finish set-up". */
+/** The eight set-up steps. Nothing but the disclaimer is stored until "Finish set-up". */
 @Composable
 fun OnboardingScreen(
     viewModel: OnboardingViewModel = graphViewModel {
@@ -105,6 +106,7 @@ fun OnboardingScreen(
         OnboardingStep.PRODUCTS -> ProductsStep(current, viewModel)
         OnboardingStep.DEMON -> DemonStep(current, viewModel)
         OnboardingStep.DAY_START -> DayStartStep(current, viewModel)
+        OnboardingStep.REMINDERS -> RemindersStep(current, viewModel)
         OnboardingStep.DONE -> DoneStep(current, onStart = viewModel::start)
     }
 }
@@ -334,7 +336,7 @@ private fun DayStartStep(state: OnboardingState, viewModel: OnboardingViewModel)
     StepScaffold(
         step = OnboardingStep.DAY_START,
         onBack = viewModel::back,
-        footer = { NextButton(stringResource(R.string.onboarding_finish), viewModel::finish) },
+        footer = { NextButton(stringResource(R.string.onboarding_next_reminders), viewModel::next) },
     ) {
         StepHeader(
             stringResource(R.string.onboarding_day_title),
@@ -422,6 +424,7 @@ private fun DoneStep(state: OnboardingState, onStart: () -> Unit) {
                 ),
             stringResource(R.string.onboarding_summary_demon) to stringResource(R.string.onboarding_summary_demon_value, name, kind.lowercase(Locale.UK)),
             stringResource(R.string.onboarding_summary_day) to timeFormat.format(draft.dayStart),
+            stringResource(R.string.onboarding_summary_reminders) to remindersSummary(state.reminders, state.marks),
         )
         Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp)) {
             rows.forEachIndexed { index, (label, value) -> SummaryRow(label, value, first = index == 0) }

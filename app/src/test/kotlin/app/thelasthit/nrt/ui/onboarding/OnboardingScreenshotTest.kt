@@ -7,6 +7,7 @@ import app.thelasthit.nrt.GUM_2
 import app.thelasthit.nrt.GUM_4
 import app.thelasthit.nrt.QUICKMIST
 import app.thelasthit.nrt.TestApp
+import app.thelasthit.nrt.reminders.allowNotifications
 import app.thelasthit.nrt.ui.FULL_PAGE
 import app.thelasthit.nrt.ui.LARGE_FONT
 import app.thelasthit.nrt.ui.captureLooks
@@ -60,7 +61,29 @@ class OnboardingScreenshotTest {
     @Test @Config(fontScale = LARGE_FONT)
     fun demonLarge() = capture("onboarding-5-demon", OnboardingStep.DEMON, "Next: when your day starts")
 
-    @Test fun dayStart() = capture("onboarding-6-day-start", OnboardingStep.DAY_START, "Finish set-up")
+    @Test fun dayStart() = capture("onboarding-6-day-start", OnboardingStep.DAY_START, "Next: your reminders")
 
-    @Test fun done() = capture("onboarding-7-done", OnboardingStep.DONE, "Start logging")
+    // A fresh install on Android 13 or newer, which hasn't been asked for notifications yet.
+    @Test fun reminders() = capture("onboarding-6b-reminders", OnboardingStep.REMINDERS, "Allow notifications and finish")
+
+    @Test @Config(fontScale = LARGE_FONT)
+    fun remindersLarge() = capture("onboarding-6b-reminders", OnboardingStep.REMINDERS, "Allow notifications and finish")
+
+    // Every switch off, which the mockup describes but doesn't draw: nothing to ask, so the button only finishes.
+    @Test fun remindersAllOff() {
+        val viewModel = OnboardingViewModel(app.graph, region = "GB", initial = chosen.copy(step = OnboardingStep.REMINDERS, reminders = emptySet()))
+        compose.captureLooks("onboarding-6b-reminders-off", ready = hasText("Finish set-up")) { OnboardingScreen(viewModel) }
+    }
+
+    // Once notifications are allowed, so the reminders row reads as it does by default.
+    @Test fun done() {
+        app.allowNotifications()
+        capture("onboarding-7-done", OnboardingStep.DONE, "4 of 5 on, quiet from 22:00 to 07:00")
+    }
+
+    @Test @Config(fontScale = LARGE_FONT)
+    fun doneLarge() {
+        app.allowNotifications()
+        capture("onboarding-7-done", OnboardingStep.DONE, "4 of 5 on, quiet from 22:00 to 07:00")
+    }
 }
