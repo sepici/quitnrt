@@ -159,6 +159,13 @@ class EntryRepository(
         dao.softDelete(id, clock.millis())
     }
 
+    /**
+     * The live entry written most recently, from anywhere, if it was written at [since] or after.
+     * It goes by when an entry was written, not when the dose was taken, so a backdated dose
+     * logged a moment ago is the one found. For an agent's undo.
+     */
+    suspend fun lastWritten(since: Instant): Entry? = dao.lastWrittenSince(since.toEpochMilli())?.toDomain()
+
     suspend fun undoDelete(id: String) {
         results.settleDue()
         dao.restore(id, clock.millis())

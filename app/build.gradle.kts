@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.roborazzi)
+    // For the AppFunctions compiler, which writes the agents' service and its function list.
+    alias(libs.plugins.ksp)
 }
 
 // Release signing with the upload key comes from Gradle properties (for example in
@@ -72,6 +74,8 @@ android {
     testOptions {
         // Robolectric needs the merged resources to render Compose screens and their fonts.
         unitTests.isIncludeAndroidResources = true
+        // Robolectric's Android 16, which the AppFunctions tests run on, reads a JDK internal.
+        unitTests.all { it.jvmArgs("--add-exports=java.base/jdk.internal.access=ALL-UNNAMED") }
     }
 }
 
@@ -151,6 +155,9 @@ dependencies {
     // Reminders run on WorkManager; the home-screen widget is Glance.
     implementation(libs.androidx.work.runtime)
     implementation(libs.androidx.glance.appwidget)
+    // AppFunctions (Android 16 and newer), all in the app's agents package.
+    implementation(libs.androidx.appfunctions)
+    ksp(libs.androidx.appfunctions.compiler)
 
     // Compose UI tests and Roborazzi screenshots run on the JVM under Robolectric, so CI needs no emulator.
     testImplementation(platform(libs.androidx.compose.bom))
@@ -164,4 +171,5 @@ dependencies {
     testImplementation(libs.roborazzi.compose)
     testImplementation(libs.androidx.work.testing)
     testImplementation(libs.androidx.glance.appwidget.testing)
+    testImplementation(libs.androidx.appfunctions.testing)
 }

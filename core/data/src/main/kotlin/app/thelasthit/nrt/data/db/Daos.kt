@@ -171,6 +171,11 @@ abstract class EntryDao {
 
     @Query("UPDATE entries SET logicalEpochDay = :day WHERE id = :id")
     abstract suspend fun setLogicalDay(id: String, day: Long)
+
+    /** The live entry written last, if it was written at [sinceMs] or after, for an agent's undo. */
+    @Transaction
+    @Query("SELECT * FROM entries WHERE deletedAt IS NULL AND createdAt >= :sinceMs ORDER BY createdAt DESC, occurredAt DESC LIMIT 1")
+    abstract suspend fun lastWrittenSince(sinceMs: Long): EntryWithTags?
 }
 
 /** How many live entries carry a tag. */

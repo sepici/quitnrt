@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    What the AppFunctions (app/agents) tell an agent such as Gemini. The agent may read these out,
+    so they follow docs/STYLE.md like any screen.
+-->
+<resources>
+    <!-- What the agents can do here, shown to the user by the system (res/xml/app_functions_metadata.xml). -->
+    <string name="agents_display_description">Log NRT doses, check today against your guide, undo the last entry and get advice for cravings.</string>
+
+    <!-- Why a call was refused. A refused log adds agents_nothing_logged. -->
+    <string name="agents_nothing_logged">Nothing was logged.</string>
+    <string name="agents_not_set_up">The Last Hit isn\'t set up yet. Open the app to finish set-up first.</string>
+    <string name="agents_missing_product">Say which product to log, such as “2\u00A0mg gum”.</string>
+    <string name="agents_unknown_product">None of your products in use matches “%1$s”.</string>
+    <string name="agents_hidden_product">%1$s is hidden. To log it, bring it back in Settings, under Products.</string>
+    <string name="agents_bad_quantity">The quantity needs to be a whole number from 1 to %1$d.</string>
+    <string name="agents_conflicting_quantity">The number in the product (%1$d) isn\'t the quantity (%2$d). Give the number once.</string>
+    <string name="agents_too_many">That\'s %1$s, and the app logs up to %2$d at a time.</string>
+    <string name="agents_time_in_future">%1$s at %2$s hasn\'t come yet.</string>
+    <plurals name="agents_unknown_tags">
+        <item quantity="one">None of your tags matches “%1$s”.</item>
+        <item quantity="other">None of your tags matches these: %1$s.</item>
+    </plurals>
+    <string name="agents_ambiguous_tag">More than one of your tags is called “%1$s”. Rename one in Settings.</string>
+    <string name="agents_bad_craving_strength">Craving strength runs from 1 to 5.</string>
+    <string name="agents_nothing_to_undo">Nothing\'s been logged in the last 24\u00A0hours, so there\'s nothing to undo.</string>
+
+    <!-- After logging, or a question before anything is saved. -->
+    <string name="agents_logged">Logged %1$s\u00A0mg of %2$s at %3$s.</string>
+    <string name="agents_logged_on">Logged %1$s\u00A0mg of %2$s on %3$s at %4$s.</string>
+    <!-- A dose after midnight that counts towards the day before, such as 01:20 on Friday counting towards Thursday. -->
+    <string name="agents_logged_counts_towards">Logged %1$s\u00A0mg of %2$s at %3$s, which counts towards %4$s.</string>
+    <string name="agents_logged_on_counts_towards">Logged %1$s\u00A0mg of %2$s on %3$s at %4$s, which counts towards %5$s.</string>
+    <string name="agents_possible_duplicate">%1$s was logged at %2$s, within a minute of this one. Nothing\'s saved yet. Keep both?</string>
+    <string name="agents_ambiguous_product">“%1$s” could be %2$s. Nothing\'s saved yet. Which one?</string>
+    <string name="agents_list_or">%1$s or %2$s</string>
+    <string name="agents_undone">Deleted %1$s\u00A0mg of %2$s, logged at %3$s.</string>
+    <string name="agents_undone_on">Deleted %1$s\u00A0mg of %2$s, logged on %3$s at %4$s.</string>
+    <string name="agents_undone_counts_towards">Deleted %1$s\u00A0mg of %2$s, logged at %3$s, which counted towards %4$s.</string>
+    <string name="agents_undone_on_counts_towards">Deleted %1$s\u00A0mg of %2$s, logged on %3$s at %4$s, which counted towards %5$s.</string>
+
+    <!-- The summary: today, the week, the last dose and the demon, a sentence each. -->
+    <string name="agents_today_none">Nothing logged today so far.</string>
+    <plurals name="agents_today">
+        <item quantity="one">%1$s\u00A0mg today so far, from %2$d dose.</item>
+        <item quantity="other">%1$s\u00A0mg today so far, from %2$d doses.</item>
+    </plurals>
+    <string name="agents_today_within_guide">%1$s\u00A0mg today so far, within the daily guide of %2$s\u00A0mg.</string>
+    <string name="agents_today_over_guide">%1$s\u00A0mg today so far, over the daily guide of %2$s\u00A0mg.</string>
+    <string name="agents_today_nrt_free_none">Nothing logged today, in an NRT-free week.</string>
+    <string name="agents_today_nrt_free">%1$s\u00A0mg today so far, in an NRT-free week.</string>
+    <string name="agents_week_calendar">This week so far: %1$s\u00A0mg.</string>
+    <string name="agents_week_within">Week %1$d so far: %2$s\u00A0mg of its %3$s\u00A0mg allowance.</string>
+    <string name="agents_week_over">Week %1$d so far: %2$s\u00A0mg, over its %3$s\u00A0mg allowance.</string>
+    <string name="agents_week_nrt_free_none">Week %1$d is NRT-free, with nothing logged so far.</string>
+    <string name="agents_week_nrt_free">Week %1$d is NRT-free, with %2$s\u00A0mg logged so far.</string>
+    <string name="agents_last_dose">Last dose at %1$s.</string>
+    <string name="agents_last_dose_on">Last dose on %1$s at %2$s.</string>
+    <string name="agents_last_dose_counts_towards">Last dose at %1$s, which counts towards %2$s.</string>
+    <string name="agents_last_dose_on_counts_towards">Last dose on %1$s at %2$s, which counts towards %3$s.</string>
+    <string name="agents_stage_baseline">The baseline is still being measured, so there\'s no daily guide yet.</string>
+    <string name="agents_stage_complete">The programme is complete.</string>
+    <string name="agents_demon">%1$s has %2$d of %3$d\u00A0HP.</string>
+    <plurals name="agents_demon_hits">
+        <item quantity="one">%1$s has %2$d of %3$d\u00A0HP, with %4$d hit ready.</item>
+        <item quantity="other">%1$s has %2$d of %3$d\u00A0HP, with %4$d hits ready.</item>
+    </plurals>
+
+    <!-- Advice, and the reason it was picked. -->
+    <string name="agents_advice_asked">For doses tagged “%1$s”.</string>
+    <string name="agents_advice_top_trigger">Your top trigger in the last 14\u00A0days is “%1$s”, on %2$d%% of doses.</string>
+    <string name="agents_advice_any_time">There\'s too little logged in the last 14\u00A0days to know your triggers, so this is for any time.</string>
+    <string name="agents_advice_timer">The app has a timer for this.</string>
+    <string name="agents_advice_note">This is general information, not medical advice.</string>
+    <string name="agents_advice_note_quitlines">This is general information, not medical advice. For more help, call a free quitline.</string>
+</resources>
