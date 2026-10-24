@@ -19,8 +19,10 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -29,6 +31,8 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,9 +46,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import app.thelasthit.nrt.LastHitApp
 import app.thelasthit.nrt.R
+import app.thelasthit.nrt.ui.game.UnlockHost
 import app.thelasthit.nrt.ui.history.HistoryScreen
 import app.thelasthit.nrt.ui.insights.InsightsScreen
 import app.thelasthit.nrt.ui.lair.LairScreen
+import app.thelasthit.nrt.ui.lair.LairTabIcon
+import app.thelasthit.nrt.ui.lair.lairTabSpoken
+import app.thelasthit.nrt.ui.lair.rememberLairHitsReady
 import app.thelasthit.nrt.ui.link.LinkHost
 import app.thelasthit.nrt.ui.plan.PlanRoutes
 import app.thelasthit.nrt.ui.plan.PlanScreen
@@ -106,6 +114,8 @@ fun AppShell() {
     val graph = (LocalContext.current.applicationContext as LastHitApp).graph
     // Results that fell due while the app was away arrive when it comes back (ROADMAP P3-3).
     SettleOnStart { graph.programmes.settle() }
+    // True while the lair is to open at its trophy shelf, as an unlock's toast or card asks.
+    var toShelf by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = colors.bg,
@@ -153,11 +163,18 @@ fun AppShell() {
                 )
             }
             planPages(navController, onOpenCatalogue = { navController.navigate(SettingsRoutes.CATALOGUE) })
-            composable(TopLevelDestination.Lair.route) { LairScreen() }
+            composable(TopLevelDestination.Lair.route) { LairScreen(toShelf = toShelf, onShelfShown = { toShelf = false }) }
             settings(navController, snackbars, showMessage)
         }
         // Links and shortcuts show their snackbar, question or sheet over whichever page is open.
         LinkHost(snackbars)
+        // New badges and gear slide in over whichever page is open.
+        UnlockHost(
+            onOpenShelf = {
+                toShelf = true
+                navController.navigateTo(TopLevelDestination.Lair)
+            },
+        )
     }
 }
 
@@ -207,6 +224,8 @@ private fun NavGraphBuilder.settings(navController: NavController, snackbars: Sn
 @Composable
 private fun BottomBar(currentRoute: String?, navController: NavController) {
     val colors = LastHit.colors
+    val lairReady = rememberLairHitsReady()
+    val lairSpoken = lairTabSpoken(lairReady)
     NavigationBar(
         containerColor = colors.bg,
         tonalElevation = 0.dp,
@@ -219,10 +238,19 @@ private fun BottomBar(currentRoute: String?, navController: NavController) {
             NavigationBarItem(
                 selected = selected,
                 onClick = { navController.navigateTo(destination) },
-                icon = { Icon(painterResource(destination.icon), contentDescription = null) },
+                icon = {
+                    // The Lair tab carries a badge for the hits ready to spend.
+                    if (destination == TopLevelDestination.Lair) {
+                        LairTabIcon(painterResource(destination.icon), lairReady)
+                    } else {
+                        Icon(painterResource(destination.icon), contentDescription = null)
+                    }
+                },
                 label = {
+                    val spoken = if (destination == TopLevelDestination.Lair) lairSpoken else null
                     Text(
                         stringResource(destination.label),
+                        modifier = if (spoken != null) Modifier.semantics { contentDescription = spoken } else Modifier,
                         style = LastHit.type.caption.copy(
                             fontSize = 12.sp,
                             fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.SemiBold,

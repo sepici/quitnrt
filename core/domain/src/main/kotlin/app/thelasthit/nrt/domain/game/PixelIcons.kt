@@ -24,6 +24,20 @@ class PixelIcon internal constructor(
     fun argbPixels(): IntArray = IntArray(letters.size) { i ->
         letters[i].let { if (it == '.') 0 else colourKey.getValue(it) }
     }
+
+    /**
+     * The icon as a plain outline in [argb]: the pixels on its edge, next to a transparent one
+     * above, below or to the side, or on the icon's own edge. Everything inside is left out, so
+     * it shows the shape and none of the detail, as for a badge not earned yet.
+     */
+    fun outlinePixels(argb: Int): IntArray = IntArray(letters.size) { i ->
+        if (letters[i] == '.') return@IntArray 0
+        val x = i % size
+        val y = i / size
+        val onEdge = x == 0 || y == 0 || x == size - 1 || y == size - 1 ||
+            letters[i - 1] == '.' || letters[i + 1] == '.' || letters[i - size] == '.' || letters[i + size] == '.'
+        if (onEdge) argb else 0
+    }
 }
 
 /**

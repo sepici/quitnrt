@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
@@ -14,7 +13,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -32,12 +30,10 @@ import app.thelasthit.nrt.domain.creature.Creature
 import app.thelasthit.nrt.ui.components.Chip
 import app.thelasthit.nrt.ui.components.ChipKind
 import app.thelasthit.nrt.ui.components.FieldLabel
-import app.thelasthit.nrt.ui.game.GameArt
+import app.thelasthit.nrt.ui.game.ColourPicker
+import app.thelasthit.nrt.ui.game.CreaturePicker
+import app.thelasthit.nrt.ui.game.DemonPreview
 import app.thelasthit.nrt.ui.graphViewModel
-import app.thelasthit.nrt.ui.onboarding.CreatureTile
-import app.thelasthit.nrt.ui.onboarding.Preview
-import app.thelasthit.nrt.ui.onboarding.Tiles
-import app.thelasthit.nrt.ui.onboarding.VariantSwatch
 import app.thelasthit.nrt.ui.theme.LastHit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -45,8 +41,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** A new demon for the rematch: its name and colours, as onboarding picks them. */
-data class NewDemonDraft(val name: String = "", val variant: String = DEFAULT_VARIANT) {
+/** A new demon for the rematch: its name, creature and colours, as onboarding picks them. */
+data class NewDemonDraft(
+    val name: String = "",
+    /** One of the drawn creatures ([Creature.isDrawn]). */
+    val creature: Creature = Creature.DRAGON,
+    val variant: String = DEFAULT_VARIANT,
+) {
     val canStart: Boolean get() = name.isNotBlank()
 }
 
@@ -55,6 +56,11 @@ class NewDemonViewModel(private val graph: DataGraph) : ViewModel() {
     val draft: StateFlow<NewDemonDraft> = _draft.asStateFlow()
 
     fun name(name: String) = _draft.update { it.copy(name = name.take(MAX_NAME)) }
+
+    /** Picks a creature, if it's drawn. Its colours stay, since every creature comes in the same four. */
+    fun pickCreature(creature: Creature) {
+        if (creature.isDrawn) _draft.update { it.copy(creature = creature) }
+    }
 
     fun pickVariant(variant: String) = _draft.update { it.copy(variant = variant) }
 
@@ -69,7 +75,7 @@ class NewDemonViewModel(private val graph: DataGraph) : ViewModel() {
         viewModelScope.launch {
             runCatching { graph.programmes.startNew() }
                 .onSuccess {
-                    graph.game.restyleDemon(chosen.name, Creature.DRAGON, chosen.variant)
+                    graph.game.restyleDemon(chosen.name, chosen.creature, chosen.variant)
                     then()
                 }
                 .onFailure { starting = false }
@@ -81,7 +87,7 @@ class NewDemonViewModel(private val graph: DataGraph) : ViewModel() {
     }
 }
 
-/** "A new demon": name it and pick its colours, then a new programme starts with it. */
+/** "A new demon": name it and pick its creature and colours, then a new programme starts with it. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun NewDemonScreen(onBack: () -> Unit, onStarted: () -> Unit, viewModel: NewDemonViewModel = graphViewModel { NewDemonViewModel(it) }) {
@@ -96,7 +102,7 @@ fun NewDemonScreen(onBack: () -> Unit, onStarted: () -> Unit, viewModel: NewDemo
         },
     ) {
         PageIntro(stringResource(R.string.plan_new_demon_intro))
-        Preview(name = draft.name.trim(), variant = draft.variant)
+        DemonPreview(name = draft.name.trim(), creature = draft.creature, variant = draft.variant, modifier = Modifier.padding(top = 24.dp))
         Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 28.dp)) {
             FieldLabel(stringResource(R.string.onboarding_name))
             OutlinedTextField(
@@ -126,19 +132,17 @@ fun NewDemonScreen(onBack: () -> Unit, onStarted: () -> Unit, viewModel: NewDemo
                 }
             }
         }
-        Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 28.dp)) {
-            FieldLabel(stringResource(R.string.onboarding_creature))
-            Tiles(Creature.entries, Modifier.selectableGroup()) { creature ->
-                CreatureTile(creature, selected = creature == Creature.DRAGON, variant = draft.variant)
-            }
-            Text(stringResource(R.string.onboarding_creature_hint), style = LastHit.type.caption, color = colors.text2, modifier = Modifier.padding(top = 10.dp))
-        }
-        Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 28.dp)) {
-            FieldLabel(stringResource(R.string.onboarding_colour))
-            val variants = remember { GameArt.sheet(Creature.DRAGON).variantNames }
-            Tiles(variants, Modifier.selectableGroup()) { variant ->
-                VariantSwatch(variant, selected = variant == draft.variant, onPick = { viewModel.pickVariant(variant) })
-            }
-        }
+        CreaturePicker(
+            selected = draft.creature,
+            variant = draft.variant,
+            onPick = viewModel::pickCreature,
+            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 28.dp),
+        )
+        ColourPicker(
+            draft.creature,
+            selected = draft.variant,
+            onPick = viewModel::pickVariant,
+            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 28.dp),
+        )
     }
 }

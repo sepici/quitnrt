@@ -1,21 +1,34 @@
 package app.thelasthit.nrt.domain.creature
 
 /**
+ * The seven creatures after the dragon have their sprites, waiting for the owner to look at the
+ * sheets together (ROADMAP P4-1). Once they're signed off, this turns true, and onboarding and
+ * the lair offer all eight: nothing else needs to change.
+ */
+private const val SEVEN_SIGNED_OFF = false
+
+/**
  * The creatures a user can pick to stand for their addiction. Only drawn creatures can be
- * picked; the rest arrive as their sprites are made.
+ * picked; the rest arrive as their sprites are signed off.
  */
 enum class Creature(val key: String, val isDrawn: Boolean) {
     DRAGON("dragon", isDrawn = true),
-    IMP("imp", isDrawn = false),
-    BEAR("bear", isDrawn = false),
-    KRAKEN("kraken", isDrawn = false),
-    GOBLIN("goblin", isDrawn = false),
-    SLIME("slime", isDrawn = false),
-    WRAITH("wraith", isDrawn = false),
-    SERPENT("serpent", isDrawn = false);
+    IMP("imp", isDrawn = SEVEN_SIGNED_OFF),
+    BEAR("bear", isDrawn = SEVEN_SIGNED_OFF),
+    KRAKEN("kraken", isDrawn = SEVEN_SIGNED_OFF),
+    GOBLIN("goblin", isDrawn = SEVEN_SIGNED_OFF),
+    SLIME("slime", isDrawn = SEVEN_SIGNED_OFF),
+    WRAITH("wraith", isDrawn = SEVEN_SIGNED_OFF),
+    SERPENT("serpent", isDrawn = SEVEN_SIGNED_OFF);
 
     companion object {
         fun fromKey(key: String?): Creature = entries.firstOrNull { it.key == key } ?: DRAGON
+
+        /** The creatures that can be picked now, in the order they're offered. */
+        val drawn: List<Creature> get() = entries.filter { it.isDrawn }
+
+        /** Whether some creatures are still waiting to be drawn, so the picker says so. */
+        val someUndrawn: Boolean get() = entries.any { !it.isDrawn }
     }
 }
 

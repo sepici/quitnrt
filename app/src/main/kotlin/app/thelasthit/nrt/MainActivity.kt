@@ -6,10 +6,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import app.thelasthit.nrt.link.LogLinks
 import app.thelasthit.nrt.ui.AppRoot
 import app.thelasthit.nrt.ui.link.LinkViewModel
 import app.thelasthit.nrt.ui.theme.LastHitTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -24,6 +28,11 @@ class MainActivity : ComponentActivity() {
             LastHitTheme {
                 AppRoot()
             }
+        }
+        // Badges and gear are checked while the app is on screen: as it opens, and after each
+        // write. What came in while it was away is found when it comes back.
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) { (application as LastHitApp).graph.unlocks.follow() }
         }
     }
 

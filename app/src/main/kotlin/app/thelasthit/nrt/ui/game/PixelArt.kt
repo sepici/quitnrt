@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import app.thelasthit.nrt.domain.creature.Backdrop
 import app.thelasthit.nrt.domain.creature.Creature
+import app.thelasthit.nrt.domain.creature.PixelRim
 import app.thelasthit.nrt.domain.creature.SpriteFrame
 import app.thelasthit.nrt.domain.creature.SpriteSheet
 import kotlin.math.roundToInt
@@ -32,11 +33,31 @@ object GameArt {
     fun sheet(creature: Creature): SpriteSheet = sheets.getOrPut(creature) { SpriteSheet.bundled(creature) }
         ?: requireNotNull(sheets.getOrPut(Creature.DRAGON) { SpriteSheet.bundled(Creature.DRAGON) })
 
+    /** Frames already made into bitmaps, so an animation can swap them every frame. */
+    private val frames = mutableMapOf<List<Any?>, ImageBitmap>()
+
     fun sprite(sheet: SpriteSheet, frame: SpriteFrame, variant: String): ImageBitmap =
-        bitmap(sheet.argbPixels(frame, variant), sheet.size, sheet.size)
+        frames.getOrPut(listOf("sprite", sheet, frame, variant)) { bitmap(sheet.argbPixels(frame, variant), sheet.size, sheet.size) }
 
     fun silhouette(sheet: SpriteSheet, frame: SpriteFrame, colour: Color, eyes: Color? = null): ImageBitmap =
-        bitmap(sheet.silhouettePixels(frame, colour.toArgb(), eyes?.toArgb()), sheet.size, sheet.size)
+        frames.getOrPut(listOf("silhouette", sheet, frame, colour, eyes)) {
+            bitmap(sheet.silhouettePixels(frame, colour.toArgb(), eyes?.toArgb()), sheet.size, sheet.size)
+        }
+
+    /** The hit flash: the frame in [colour] inside its own outline (see [SpriteSheet.flashPixels]). */
+    fun flash(sheet: SpriteSheet, frame: SpriteFrame, variant: String, colour: Color): ImageBitmap =
+        frames.getOrPut(listOf("flash", sheet, frame, variant, colour)) {
+            bitmap(sheet.flashPixels(frame, colour.toArgb(), variant), sheet.size, sheet.size)
+        }
+
+    /**
+     * The frame's dark-mode rim in [colour], in whole sprite pixels, on a canvas padded by one
+     * pixel a side. Draw it with [drawRim], under the sprite.
+     */
+    fun rim(sheet: SpriteSheet, frame: SpriteFrame, colour: Color): ImageBitmap =
+        frames.getOrPut(listOf("rim", sheet, frame, colour)) {
+            bitmap(sheet.rimPixels(frame, colour.toArgb()), sheet.size + 2 * PixelRim.PAD, sheet.size + 2 * PixelRim.PAD)
+        }
 
     private fun bitmap(pixels: IntArray, width: Int, height: Int): ImageBitmap =
         Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888).asImageBitmap()
@@ -64,4 +85,9 @@ fun DrawScope.drawBackdrop(backdrop: Backdrop, image: ImageBitmap): Pair<Float, 
     val origin = Offset(0f, size.height - backdrop.height * scale)
     drawPixels(image, origin, scale)
     return scale to origin
+}
+
+/** Draws a rim from [GameArt.rim] for a sprite drawn at [at], one sprite pixel up and to the left. */
+fun DrawScope.drawRim(rim: ImageBitmap, at: Offset, scale: Float) {
+    drawPixels(rim, at - Offset(PixelRim.PAD * scale, PixelRim.PAD * scale), scale)
 }

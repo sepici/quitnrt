@@ -38,6 +38,8 @@ data class OnboardingDraft(
     val query: String = "",
     val otherCountries: Boolean = false,
     val demonName: String = "",
+    /** One of the drawn creatures ([Creature.isDrawn]). */
+    val creature: Creature = Creature.DRAGON,
     val variant: String = DEFAULT_VARIANT,
     val dayStart: LocalTime = DayBoundary.DEFAULT_DAY_START,
 ) {
@@ -127,6 +129,11 @@ class OnboardingViewModel(
 
     fun nameDemon(name: String) = draft.update { it.copy(demonName = name.take(OnboardingDraft.MAX_NAME)) }
 
+    /** Picks a creature, if it's drawn. Its colours stay, since every creature comes in the same four. */
+    fun pickCreature(creature: Creature) {
+        if (creature.isDrawn) draft.update { it.copy(creature = creature) }
+    }
+
     fun pickVariant(variant: String) = draft.update { it.copy(variant = variant) }
 
     fun moveDayStart(steps: Int) = draft.update { it.copy(dayStart = DayBoundary.step(it.dayStart, steps)) }
@@ -138,7 +145,7 @@ class OnboardingViewModel(
             graph.settings.setStoppedSmokingOn(chosen.stoppedOn)
             graph.settings.setCountry(chosen.country)
             chosen.picked.forEach { graph.products.addFromCatalogue(it) }
-            graph.settings.setDemon(chosen.demonName.trim(), Creature.DRAGON, chosen.variant)
+            graph.settings.setDemon(chosen.demonName.trim(), chosen.creature, chosen.variant)
             graph.entries.changeDayStart(chosen.dayStart)
             draft.update { it.copy(step = OnboardingStep.DONE) }
         }

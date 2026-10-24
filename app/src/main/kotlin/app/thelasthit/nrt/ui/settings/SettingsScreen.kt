@@ -163,6 +163,8 @@ fun SettingsScreen(
             )
         }
 
+        SoundSection()
+
         SectionHeading(stringResource(R.string.settings_backup))
         RowList {
             SettingsRow(

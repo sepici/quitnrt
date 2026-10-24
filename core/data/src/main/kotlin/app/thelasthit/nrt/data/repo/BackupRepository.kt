@@ -5,6 +5,7 @@ import app.thelasthit.nrt.data.db.AchievementEntity
 import app.thelasthit.nrt.data.db.AppDatabase
 import app.thelasthit.nrt.data.db.BaselineUnitEntity
 import app.thelasthit.nrt.data.db.BreathingSessionEntity
+import app.thelasthit.nrt.data.db.CREATED_AT_UNKNOWN
 import app.thelasthit.nrt.data.db.DemonEntity
 import app.thelasthit.nrt.data.db.EntryEntity
 import app.thelasthit.nrt.data.db.EntryWithTags
@@ -321,7 +322,8 @@ private fun Backup.Entry.toEntity(now: Long): EntryEntity? = runCatching {
         cravingStrength = cravingStrength,
         note = note,
         source = source,
-        createdAt = now,
+        // A backup doesn't say when an entry was written, so it isn't taken as backdated.
+        createdAt = CREATED_AT_UNKNOWN,
         updatedAt = now,
         deletedAt = null,
     )

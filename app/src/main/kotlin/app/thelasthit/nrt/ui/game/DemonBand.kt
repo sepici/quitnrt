@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -154,7 +153,7 @@ fun CreatureScene(
     Canvas(modifier) {
         val (scale, origin) = drawBackdrop(backdrop, image)
         val at = origin + Offset(backdrop.spriteX * scale, backdrop.spriteY * scale)
-        rim?.let { drawRim(it, at, scale, 1.dp.toPx()) }
+        rim?.let { drawRim(it, at, scale) }
         drawPixels(sprite, at, scale)
     }
 }
@@ -168,7 +167,7 @@ fun CreatureImage(creature: Creature, variant: String?, modifier: Modifier = Mod
     Canvas(modifier) {
         val scale = minOf(size.width, size.height) / sprite.width
         val at = Offset((size.width - sprite.width * scale) / 2, (size.height - sprite.height * scale) / 2)
-        rim?.let { drawRim(it, at, scale, 1.dp.toPx()) }
+        rim?.let { drawRim(it, at, scale) }
         drawPixels(sprite, at, scale)
     }
 }
@@ -200,16 +199,11 @@ private fun rememberCreature(creature: Creature, variant: String?, frame: Sprite
     }
 }
 
+/** The [frame]'s rim, in whole sprite pixels, or null where the backdrop needs none. */
 @Composable
 private fun rememberRim(creature: Creature, rim: Int?, frame: SpriteFrame = SpriteFrame.IDLE_1): ImageBitmap? {
     val sheet = remember(creature) { GameArt.sheet(creature) }
-    return remember(sheet, rim, frame) { rim?.let { GameArt.silhouette(sheet, frame, Color(it)) } }
-}
-
-private fun DrawScope.drawRim(rim: ImageBitmap, at: Offset, scale: Float, width: Float) {
-    for (offset in listOf(Offset(width, 0f), Offset(-width, 0f), Offset(0f, width), Offset(0f, -width))) {
-        drawPixels(rim, at + offset, scale)
-    }
+    return remember(sheet, rim, frame) { rim?.let { GameArt.rim(sheet, frame, Color(it)) } }
 }
 
 // The stage's own browns, as in the onboarding mockups.
