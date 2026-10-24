@@ -54,7 +54,7 @@ class SettleOnStartTest {
         val owner = TestOwner().apply { registry.currentState = Lifecycle.State.CREATED }
         var calls = 0
         compose.setContent {
-            CompositionLocalProvider(LocalLifecycleOwner provides owner) { SettleOnStart { calls++ } }
+            CompositionLocalProvider(LocalLifecycleOwner provides owner) { SettleOnStart(app.clock) { calls++ } }
         }
         compose.waitForIdle()
         assertEquals(0, calls)

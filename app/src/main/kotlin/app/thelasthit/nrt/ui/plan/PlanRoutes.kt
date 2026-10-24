@@ -14,7 +14,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import kotlinx.coroutines.delay
+import app.thelasthit.nrt.ui.minuteTicks
+import java.time.Clock
 
 /** The Plan tab's pages under its main one. The tab bar hides on all of them. */
 object PlanRoutes {
@@ -60,23 +61,18 @@ private fun Page(content: @Composable () -> Unit) {
  * while the app sat in the background arrives when it's looked at again (ROADMAP P3-3), rather
  * than waiting for the next dose to be logged.
  *
- * While the app stays in the foreground it runs again every minute, as the screens' clocks tick,
- * so a result that falls due with the app open comes in then too. Otherwise the Plan tab would
- * go on saying late logs still count for a week whose result was already due.
+ * While the app stays in the foreground it runs again at the start of every minute by [clock],
+ * as the screens' clocks tick ([minuteTicks]), so a result that falls due with the app open comes
+ * in as the screens move on to the new day. Otherwise the Plan tab would go on saying late logs
+ * still count for a week whose result was already due.
  */
 @Composable
-fun SettleOnStart(settle: suspend () -> Unit) {
+fun SettleOnStart(clock: Clock, settle: suspend () -> Unit) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val latest by rememberUpdatedState(settle)
-    LaunchedEffect(lifecycle) {
+    LaunchedEffect(lifecycle, clock) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-            while (true) {
-                latest()
-                delay(SETTLE_EVERY_MILLIS)
-            }
+            minuteTicks(clock).collect { latest() }
         }
     }
 }
-
-/** How often the app looks for results due while it's in the foreground. */
-private const val SETTLE_EVERY_MILLIS = 60_000L
